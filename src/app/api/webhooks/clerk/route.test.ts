@@ -80,7 +80,7 @@ vi.mock("@/lib/middleware/plan-gate", () => ({
   invalidatePlanCache: vi.fn(),
 }));
 vi.mock("@/lib/auth", () => ({
-  isPrivilegedEmail: vi.fn((email: string) => email.endsWith("@insightalpha.com")),
+  isPrivilegedEmail: vi.fn((email: string) => email.endsWith("@lyraalpha.com")),
 }));
 vi.mock("@/lib/services/credit.service", () => ({
   grantCreditsInTransaction: mockGrantCreditsInTransaction,
@@ -199,7 +199,7 @@ describe("POST /api/webhooks/clerk", () => {
 
   it("elevates admin email to ELITE plan on user.created", async () => {
     const event = makeUserEvent("user.created", {
-      email_addresses: [{ id: "ea_1", email_address: "admin@insightalpha.com" }],
+      email_addresses: [{ id: "ea_1", email_address: "admin@lyraalpha.com" }],
     });
     mockVerify.mockReturnValue(event);
     const { POST } = await import("./route");

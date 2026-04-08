@@ -1089,7 +1089,7 @@ model BlogPost {
   title           String
   description     String
   content         String
-  author          String    @default("InsightAlpha Research")
+  author          String    @default("LyraAlpha Research")
   category        String
   tags            String[]
   featured        Boolean   @default(false)

@@ -1,6 +1,6 @@
 # ETF Lookthrough Intelligence Reference
 
-This document explains how to interpret the ETF lookthrough data computed by the InsightAlpha AI platform. When an ETF has holdings data, the platform decomposes it into factor exposure, concentration metrics, behavioral profile, and constituent-level scores. Use this to deliver ETF analysis that goes beyond the headline numbers.
+This document explains how to interpret the ETF lookthrough data computed by the LyraAlpha AI platform. When an ETF has holdings data, the platform decomposes it into factor exposure, concentration metrics, behavioral profile, and constituent-level scores. Use this to deliver ETF analysis that goes beyond the headline numbers.
 
 ---
 

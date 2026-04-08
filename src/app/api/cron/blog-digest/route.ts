@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: true, sent: 0, reason: "no_new_posts" });
     }
 
-    const BASE_URL = "https://insightalpha.ai";
+    const BASE_URL = "https://lyraalpha.ai";
     const postItems = recentPosts
       .map(
         (p) => `
@@ -68,9 +68,9 @@ export async function GET(req: NextRequest) {
 
     const html = `
       <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#040816;color:#fff;padding:32px;border-radius:16px;">
-        <p style="font-size:10px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:#f59e0b;margin:0 0 8px;">InsightAlpha AI · Weekly Digest</p>
+        <p style="font-size:10px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:#f59e0b;margin:0 0 8px;">LyraAlpha AI · Weekly Digest</p>
         <h1 style="font-size:24px;font-weight:300;color:#fff;margin:0 0 8px;">What we wrote this week</h1>
-        <p style="font-size:13px;color:rgba(255,255,255,0.4);margin:0 0 24px;">${recentPosts.length} new article${recentPosts.length > 1 ? "s" : ""} from the InsightAlpha AI journal.</p>
+        <p style="font-size:13px;color:rgba(255,255,255,0.4);margin:0 0 24px;">${recentPosts.length} new article${recentPosts.length > 1 ? "s" : ""} from the LyraAlpha AI journal.</p>
         <table style="width:100%;border-collapse:collapse;">
           ${postItems}
         </table>
@@ -78,12 +78,12 @@ export async function GET(req: NextRequest) {
           <a href="${BASE_URL}/blog" style="display:inline-block;background:#f59e0b;color:#0a0a0a;font-weight:700;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding:12px 28px;border-radius:10px;text-decoration:none;">View all articles</a>
         </div>
         <p style="margin:24px 0 0;font-size:11px;color:rgba(255,255,255,0.22);text-align:center;">
-          You're receiving this because you subscribed to InsightAlpha AI blog updates.
+          You're receiving this because you subscribed to LyraAlpha AI blog updates.
           <a href="${BASE_URL}/dashboard/settings" style="color:#f59e0b;">Manage preferences</a>
         </p>
       </div>`;
 
-    const subject = `InsightAlpha AI — ${recentPosts.length} new article${recentPosts.length > 1 ? "s" : ""} this week`;
+    const subject = `LyraAlpha AI — ${recentPosts.length} new article${recentPosts.length > 1 ? "s" : ""} this week`;
     let totalSent = 0;
     let pageCount = 0;
 

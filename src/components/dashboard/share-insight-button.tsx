@@ -89,7 +89,7 @@ async function downloadImage(url: string, title: string) {
     const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = objectUrl;
-    link.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "insightalpha-share"}.png`;
+    link.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "lyraalpha-share"}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -353,7 +353,7 @@ export function ShareInsightButton({
   const shareObject = useMemo(
     () => share ?? createLegacyShareObject({
       title,
-      text: text ?? title ?? "InsightAlpha update",
+      text: text ?? title ?? "LyraAlpha update",
       url,
       clipboardText,
       label,

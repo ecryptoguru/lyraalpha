@@ -1,6 +1,6 @@
 # Sector Analytical Playbooks
 
-This document provides sector-specific analytical frameworks for the major sectors represented in the InsightAlpha AI universe. Use these playbooks to deliver sector-aware analysis — a bank and a semiconductor company require fundamentally different analytical lenses even when their engine scores are identical.
+This document provides sector-specific analytical frameworks for the major sectors represented in the LyraAlpha AI universe. Use these playbooks to deliver sector-aware analysis — a bank and a semiconductor company require fundamentally different analytical lenses even when their engine scores are identical.
 
 ---
 

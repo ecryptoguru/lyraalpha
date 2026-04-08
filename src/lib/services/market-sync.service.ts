@@ -1,7 +1,6 @@
 import { directPrisma as prisma } from "../prisma";
 import { Asset, AssetType, ScoreType, Prisma } from "@/generated/prisma/client";
 import { cleanHistory, dailyReturns } from "../engines/utils";
-import { syncCommodityPrices } from "./metals-dev.service";
 import {
   getQuotes,
   fetchAssetData,
@@ -34,8 +33,6 @@ import { classifyAsset } from "../engines/grouping";
 import { SYNC_CONFIG } from "../engines/constants";
 import { getCache, setCache } from "@/lib/redis";
 import { MacroResearchService } from "./macro-research.service";
-import { MutualFundSyncService } from "./mutual-fund-sync.service";
-import { fetchNSEQuotes, shouldSyncIndianStocks } from "./nse-india.service";
 import { AssetService } from "./asset.service";
 import { CoinGeckoService } from "./coingecko.service";
 import {
@@ -44,7 +41,6 @@ import {
   getDefaultCryptoSymbols,
   CRYPTO_DISPLAY_NAMES,
 } from "./coingecko-mapping";
-import { FinnhubSyncService } from "./finnhub-sync.service";
 import { IntelligenceEventsService } from "./intelligence-events.service";
 import {
   getHistoryConfidence,
@@ -737,80 +733,6 @@ export class MarketSyncService {
     } // end else (nonCryptoSymbols)
 
     logger.info({ duration: timer.endFormatted() }, "✅ Phase 1: Full Harvest Complete.");
-
-    // Phase 1b: Mutual Fund Sync (Regional)
-    if (region === "IN" && !harvestOptions.skipIndianMutualFunds) {
-      logger.info("📡 Phase 1b: Syncing Indian Mutual Funds via mfapi.in...");
-      await MutualFundSyncService.syncAllIndianFunds();
-    }
-  }
-
-  static async runUsMarketDataSync() {
-    await this.harvestUniverse(false, undefined, "US", {
-      excludeCrypto: true,
-      skipLegacyNews: true,
-      skipIndianMutualFunds: true,
-    });
-    await this.computeFullAnalytics(false, "US");
-  }
-
-  static async runUsStockSync() {
-    const symbols = await this.resolveUniverseByTypes("US", [AssetType.STOCK]);
-    await this.harvestUniverse(
-      false,
-      undefined,
-      "US",
-      {
-        excludeCrypto: true,
-        skipLegacyNews: true,
-        skipIndianMutualFunds: true,
-      },
-      symbols,
-    );
-  }
-
-  static async runUsEtfSync() {
-    const symbols = await this.resolveUniverseByTypes("US", [AssetType.ETF]);
-    await this.harvestUniverse(
-      false,
-      undefined,
-      "US",
-      {
-        excludeCrypto: true,
-        skipLegacyNews: true,
-        skipIndianMutualFunds: true,
-      },
-      symbols,
-    );
-  }
-
-  static async runUsCommoditySync() {
-    const symbols = await this.resolveUniverseByTypes("US", [AssetType.COMMODITY]);
-    await this.harvestUniverse(
-      false,
-      undefined,
-      "US",
-      {
-        excludeCrypto: true,
-        skipLegacyNews: true,
-        skipIndianMutualFunds: true,
-      },
-      symbols,
-    );
-  }
-
-  static async runUsEodPostProcess() {
-    await this.computeFullAnalytics(false, "US");
-  }
-
-  static async runInMarketDataSync() {
-    await this.harvestUniverse(false, undefined, "IN", {
-      excludeCrypto: true,
-      skipLegacyNews: true,
-      skipIndianMutualFunds: false,
-    });
-    await this.harvestIndianStocks();
-    await this.computeFullAnalytics(false, "IN");
   }
 
   static async runCryptoMarketSync() {
@@ -1090,194 +1012,6 @@ export class MarketSyncService {
       total: cryptoSymbols.length,
       duration: timer.endFormatted(),
     }, "✅ Phase 1-CG: CoinGecko Crypto Harvest Complete.");
-  }
-
-  /**
-   * Phase 1c: Harvest Indian Equities via NSE India API
-   * Covers Indian stocks + ETFs and refreshes prices directly from NSE where available.
-   */
-  static async harvestIndianStocks() {
-    const timer = createTimer();
-
-    if (!shouldSyncIndianStocks()) {
-      logger.info("⏭️ Outside Indian market hours — skipping NSE sync");
-      return;
-    }
-
-    logger.info("📡 Phase 1c: Harvesting Indian equities (stocks + ETFs) from NSE India...");
-
-    const indianAssets = await prisma.asset.findMany({
-      where: { region: "IN", type: { in: [AssetType.STOCK, AssetType.ETF] } },
-      select: { id: true, symbol: true, price: true, marketCap: true, metadata: true },
-    });
-
-    if (indianAssets.length === 0) {
-      logger.info("No Indian equities in DB — skipping NSE sync");
-      return;
-    }
-
-    const symbols = indianAssets.map((a) => a.symbol);
-    const nseQuotes = await fetchNSEQuotes(symbols, { delayMs: 400, batchSize: 5 });
-
-    let updated = 0;
-    let skipped = 0;
-
-    const updates: {
-      id: string;
-      symbol: string;
-      data: Prisma.AssetUpdateInput;
-    }[] = [];
-
-    const buildMetadataPatch = (
-      existing: Record<string, unknown>,
-      incoming: Record<string, unknown>,
-    ) => {
-      const patch: Record<string, unknown> = {};
-      Object.entries(incoming).forEach(([key, value]) => {
-        if (existing[key] !== value) patch[key] = value;
-      });
-      return patch;
-    };
-
-    for (const asset of indianAssets) {
-      const quote = nseQuotes.get(asset.symbol);
-      if (!quote || !quote.lastPrice || quote.lastPrice <= 0) {
-        skipped++;
-        continue;
-      }
-
-      let newMarketCap: string | undefined;
-      if (quote.marketCapAbs > 0) {
-        newMarketCap = Math.round(quote.marketCapAbs).toString();
-      } else if (quote.totalMarketCapCr > 0) {
-        newMarketCap = Math.round(quote.totalMarketCapCr * 1e7).toString();
-      }
-
-      const existingMetadata = (asset.metadata as Record<string, unknown>) || {};
-      const incomingMetadata = {
-        dayHigh: quote.dayHigh,
-        dayLow: quote.dayLow,
-        previousClose: quote.previousClose,
-        vwap: quote.vwap,
-        open: quote.open,
-        close: quote.close,
-        totalTradedVolumeLakhs: quote.totalTradedVolume,
-        totalTradedValueCr: quote.totalTradedValueCr,
-        deliveryQuantity: quote.deliveryQuantity,
-        deliveryPercent: quote.deliveryPercent,
-        totalMarketCapCr: quote.totalMarketCapCr,
-        ffmcCr: quote.ffmcCr,
-        dailyVolatility: quote.dailyVolatility,
-        annualVolatility: quote.annualVolatility,
-        impactCost: quote.impactCost,
-        securityVar: quote.securityVar,
-        symbolPe: quote.symbolPe,
-        sectorPe: quote.sectorPe,
-        isFnO: quote.isFnO,
-        isin: quote.isin,
-        faceValue: quote.faceValue,
-        issuedSize: quote.issuedSize,
-        industryMacro: quote.industryMacro,
-        industrySector: quote.industrySector,
-        industryGroup: quote.industryGroup,
-        industryBasic: quote.industryBasic,
-        niftyIndices: quote.niftyIndices,
-        nseLastSync: new Date().toISOString(),
-        dataSource: "NSE_INDIA",
-      };
-
-      const metadataPatch = buildMetadataPatch(existingMetadata, incomingMetadata);
-
-      updates.push({
-        id: asset.id,
-        symbol: asset.symbol,
-        data: {
-          price: quote.lastPrice,
-          changePercent: quote.pChange || 0,
-          lastPriceUpdate: new Date(),
-          ...(newMarketCap ? { marketCap: newMarketCap } : {}),
-          fiftyTwoWeekHigh: quote.yearHigh || undefined,
-          fiftyTwoWeekLow: quote.yearLow || undefined,
-          volume: quote.quantityTraded || undefined,
-          peRatio: (typeof quote.symbolPe === 'number' && quote.symbolPe > 0) ? quote.symbolPe : null,
-          industryPe: (typeof quote.sectorPe === 'number' && quote.sectorPe > 0) ? quote.sectorPe : null,
-          sector: quote.industrySector || undefined,
-          ...(Object.keys(metadataPatch).length > 0
-            ? {
-                metadata: {
-                  ...existingMetadata,
-                  ...metadataPatch,
-                } as Prisma.JsonObject,
-              }
-            : {}),
-          updatedAt: new Date(),
-        },
-      });
-    }
-
-    const updatedSymbols: string[] = [];
-
-    // Use $transaction for batched writes instead of individual Promise.all
-    try {
-      const txResults = await prisma.$transaction(
-        updates.map((u) =>
-          prisma.asset.update({
-            where: { id: u.id },
-            data: u.data,
-            select: { symbol: true },
-          }),
-        ),
-      );
-      updated = txResults.length;
-      txResults.forEach((r) => updatedSymbols.push(r.symbol));
-    } catch (err) {
-      logger.error({ err: sanitizeError(err) }, "Indian equity batch update transaction failed, falling back to individual updates");
-      const results = await Promise.allSettled(
-        updates.map((u) =>
-          prisma.asset.update({ where: { id: u.id }, data: u.data, select: { symbol: true } }),
-        ),
-      );
-      results.forEach((result, index) => {
-        if (result.status === "fulfilled") {
-          updatedSymbols.push(result.value.symbol);
-        } else {
-          logger.error({ err: sanitizeError(result.reason), symbol: updates[index]?.symbol }, "Failed to update Indian equity");
-        }
-      });
-      updated = updatedSymbols.length;
-    }
-
-    if (updatedSymbols.length > 0) {
-      await Promise.all(updatedSymbols.map((s: string) => AssetService.invalidateAsset(s)));
-    }
-
-    logger.info({
-      updated,
-      skipped,
-      total: indianAssets.length,
-      duration: timer.endFormatted(),
-    }, "✅ Phase 1c: Indian Equity Harvest Complete (NSE India)");
-  }
-
-  /**
-   * Primary entry point for the background sync.
-   */
-  static async fullSync(region?: string) {
-    await this.harvestUniverse(true, undefined, region);
-
-    // Phase 1c: Indian equities (stocks + ETFs) via NSE India
-    await this.harvestIndianStocks();
-
-    // Phase 1d: Sync commodity prices from Metals.Dev (INR prices for Gold, Silver, Copper)
-    await syncCommodityPrices();
-
-    await this.computeFullAnalytics(false, region);
-
-    // Phase 3: Multi-source intelligence sync (Finnhub + CryptoPanic + India RSS)
-    await FinnhubSyncService.syncAll();
-
-    // Housekeeping: prune stale data to prevent DB bloat
-    await IntelligenceEventsService.pruneStaleData();
   }
 
   /**

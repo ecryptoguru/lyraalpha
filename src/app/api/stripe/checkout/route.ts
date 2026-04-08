@@ -24,7 +24,7 @@ export async function GET(req: Request) {
     }
 
     const userContext = isAuthBypassEnabled()
-      ? { emailAddresses: [{ emailAddress: "test@insightalpha.ai" }], firstName: "Test", lastName: "User" }
+      ? { emailAddresses: [{ emailAddress: "test@lyraalpha.ai" }], firstName: "Test", lastName: "User" }
       : await currentUser();
 
     if (!userContext) {

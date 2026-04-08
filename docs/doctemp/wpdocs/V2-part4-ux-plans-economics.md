@@ -4,7 +4,7 @@
 ---
 
 ## 1. UX Principle
-InsightAlpha AI should feel sophisticated without becoming opaque.
+LyraAlpha AI should feel sophisticated without becoming opaque.
 
 The UX responsibility of the product is to translate deterministic market structure into progressively deeper, clearer, and more premium user experiences across plan tiers.
 
@@ -198,7 +198,7 @@ This future draft should present a product that is:
 - more premium in workflow design
 - more credible in Enterprise positioning
 
-That is the right next-level story for InsightAlpha AI.
+That is the right next-level story for LyraAlpha AI.
 
 ---
 

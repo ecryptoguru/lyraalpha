@@ -1,4 +1,4 @@
-# InsightAlpha — AWS Migration Guide
+# LyraAlpha — AWS Migration Guide
 
 Migrate from **Vercel + Supabase** to **AWS** using SST (Ion) + OpenNext + RDS PostgreSQL.
 
@@ -53,12 +53,12 @@ In AWS Console → RDS → Create database:
 | Multi-AZ | No (enable later at scale) |
 | Public access | No |
 | Backup retention | 7 days |
-| Database name | `insightalpha` |
+| Database name | `lyraalpha` |
 
 Or via CLI:
 ```bash
 aws rds create-db-instance \
-  --db-instance-identifier insightalpha-prod \
+  --db-instance-identifier lyraalpha-prod \
   --db-instance-class db.t3.small \
   --engine postgres \
   --engine-version 16.3 \
@@ -67,7 +67,7 @@ aws rds create-db-instance \
   --storage-type gp3 \
   --master-username postgres \
   --master-user-password "$(openssl rand -base64 24)" \
-  --db-name insightalpha \
+  --db-name lyraalpha \
   --region ap-south-1 \
   --backup-retention-period 7 \
   --enable-performance-insights \
@@ -82,7 +82,7 @@ aws rds create-db-instance \
 Your schema uses `vector(1536)` columns. Run this immediately after RDS is available:
 
 ```bash
-export RDS_URL="postgresql://postgres:PASSWORD@insightalpha.XXXX.ap-south-1.rds.amazonaws.com:5432/insightalpha?sslmode=require"
+export RDS_URL="postgresql://postgres:PASSWORD@lyraalpha.XXXX.ap-south-1.rds.amazonaws.com:5432/lyraalpha?sslmode=require"
 
 psql "$RDS_URL" -c "CREATE EXTENSION IF NOT EXISTS vector;"
 psql "$RDS_URL" -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
@@ -93,7 +93,7 @@ psql "$RDS_URL" -c "CREATE EXTENSION IF NOT EXISTS btree_gin;"
 
 ```bash
 export SUPABASE_DIRECT_URL="postgresql://postgres.gcdbpijawqhrcjwrtval:PASSWORD@aws-1-ap-south-1.pooler.supabase.com:5432/postgres"
-export RDS_URL="postgresql://postgres:PASSWORD@insightalpha.XXXX.ap-south-1.rds.amazonaws.com:5432/insightalpha?sslmode=require"
+export RDS_URL="postgresql://postgres:PASSWORD@lyraalpha.XXXX.ap-south-1.rds.amazonaws.com:5432/lyraalpha?sslmode=require"
 
 # Dry run first — counts only, no writes
 DRY_RUN=true npx tsx scripts/migrate-database.ts
@@ -135,8 +135,8 @@ npx sst bootstrap
 Run each line — replace values with your actual credentials:
 
 ```bash
-npx sst secret set DatabaseUrl      "postgresql://postgres:PASS@rds-endpoint:5432/insightalpha?sslmode=require"
-npx sst secret set DirectUrl        "postgresql://postgres:PASS@rds-endpoint:5432/insightalpha?sslmode=require"
+npx sst secret set DatabaseUrl      "postgresql://postgres:PASS@rds-endpoint:5432/lyraalpha?sslmode=require"
+npx sst secret set DirectUrl        "postgresql://postgres:PASS@rds-endpoint:5432/lyraalpha?sslmode=require"
 npx sst secret set ClerkSecretKey   "sk_live_..."
 npx sst secret set ClerkWebhookSecret "whsec_..."
 npx sst secret set StripeSecretKey  "sk_live_..."
@@ -144,7 +144,7 @@ npx sst secret set StripeWebhookSecret "whsec_..."
 npx sst secret set StripeProPriceId   "price_..."
 npx sst secret set StripeElitePriceId "price_..."
 npx sst secret set AzureOpenaiKey   "your-azure-key"
-npx sst secret set AzureOpenaiEndpoint "https://insightalpha-resource.cognitiveservices.azure.com"
+npx sst secret set AzureOpenaiEndpoint "https://lyraalpha-resource.cognitiveservices.azure.com"
 npx sst secret set OpenrouterKey    "sk-or-v1-..."
 npx sst secret set GeminiApiKey     "AIza..."
 npx sst secret set UpstashRedisRestUrl   "https://in-mouse-53951.upstash.io"
@@ -310,10 +310,10 @@ curl -X POST https://app.yourdomain.com/api/cron/cache-stats \
 ```bash
 # RDS CPU > 80%
 aws cloudwatch put-metric-alarm \
-  --alarm-name "InsightAlpha-RDS-CPU" \
+  --alarm-name "LyraAlpha-RDS-CPU" \
   --metric-name CPUUtilization \
   --namespace AWS/RDS \
-  --dimensions Name=DBInstanceIdentifier,Value=insightalpha-prod \
+  --dimensions Name=DBInstanceIdentifier,Value=lyraalpha-prod \
   --threshold 80 \
   --comparison-operator GreaterThanThreshold \
   --evaluation-periods 2 \
@@ -323,7 +323,7 @@ aws cloudwatch put-metric-alarm \
 
 # Lambda error rate
 aws cloudwatch put-metric-alarm \
-  --alarm-name "InsightAlpha-Lambda-Errors" \
+  --alarm-name "LyraAlpha-Lambda-Errors" \
   --metric-name Errors \
   --namespace AWS/Lambda \
   --threshold 10 \
@@ -334,10 +334,10 @@ aws cloudwatch put-metric-alarm \
 
 # RDS connections > 80 (t3.small max_connections ~170)
 aws cloudwatch put-metric-alarm \
-  --alarm-name "InsightAlpha-RDS-Connections" \
+  --alarm-name "LyraAlpha-RDS-Connections" \
   --metric-name DatabaseConnections \
   --namespace AWS/RDS \
-  --dimensions Name=DBInstanceIdentifier,Value=insightalpha-prod \
+  --dimensions Name=DBInstanceIdentifier,Value=lyraalpha-prod \
   --threshold 80 \
   --comparison-operator GreaterThanThreshold \
   --evaluation-periods 2 \
@@ -349,7 +349,7 @@ aws cloudwatch put-metric-alarm \
 
 ```bash
 # Remove QStash schedules (stop paying for them)
-# In Upstash console → QStash → delete all InsightAlpha schedules
+# In Upstash console → QStash → delete all LyraAlpha schedules
 
 # Downgrade Supabase to free plan (keep 1 week as backup)
 # Supabase Console → Project Settings → Billing
@@ -359,7 +359,7 @@ aws cloudwatch put-metric-alarm \
 
 # Enable RDS deletion protection
 aws rds modify-db-instance \
-  --db-instance-identifier insightalpha-prod \
+  --db-instance-identifier lyraalpha-prod \
   --deletion-protection \
   --apply-immediately
 ```
@@ -420,7 +420,7 @@ If anything goes wrong after DNS cutover:
 # 1. Install SST
 npm install sst@ion --save-dev
  
-# 2. Create RDS in AWS Console (ap-south-1, db.t3.small, gp3, db name: insightalpha)
+# 2. Create RDS in AWS Console (ap-south-1, db.t3.small, gp3, db name: lyraalpha)
  
 # 3. Enable pgvector on RDS
 psql "$RDS_URL" -c "CREATE EXTENSION IF NOT EXISTS vector;"

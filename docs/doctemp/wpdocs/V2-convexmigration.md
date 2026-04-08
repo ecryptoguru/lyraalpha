@@ -125,7 +125,7 @@ Good fit because it opens the path toward:
 ---
 
 ## Workloads That Must Stay Relational-First (Hard Technical Constraint)
-This is not just preference — it is a hard architectural constraint from Convex's document model and the nature of InsightAlpha's financial data.
+This is not just preference — it is a hard architectural constraint from Convex's document model and the nature of LyraAlpha's financial data.
 
 ### Relational-first permanently or long-term
 - **Canonical asset master data** — complex multi-table relationships (assets × scores × regimes × countries × sectors) that require SQL joins
@@ -198,7 +198,7 @@ When referencing Convex in future-facing docs:
 ---
 
 ## Summary
-The most credible Convex story for InsightAlpha AI is:
+The most credible Convex story for LyraAlpha AI is:
 - the current backend remains authoritative today
 - the future product needs more reactive and persistent application behavior
 - Convex is the intended long-term primary backend for app-state workloads

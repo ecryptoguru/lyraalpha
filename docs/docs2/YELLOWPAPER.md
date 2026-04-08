@@ -1,5 +1,7 @@
-# InsightAlpha AI — Technical Yellow Paper
+# LyraAlpha AI — Technical Yellow Paper
 ## Implementation-Aligned Specification Summary
+
+> **Fork note:** This document reflects the current LyraAlpha repository and should be read alongside `CODEBASE.md` and `docs/ENV_SETUP.md`.
 
 **Version 3.0 — Audited Against Current Code (March 2026)**
 
@@ -7,7 +9,7 @@
 
 ## 1. Purpose
 
-This document is the implementation-aligned technical specification summary for the current InsightAlpha AI codebase.
+This document is the implementation-aligned technical specification summary for the current LyraAlpha AI codebase.
 
 It does not attempt to preserve every historical design proposal. Instead, it records the stable behaviors and technical contracts that are clearly reflected in the audited implementation.
 
@@ -103,9 +105,9 @@ The platform ships a public blog system with a hybrid static + DB architecture.
 - Batches up to 1,000 subscribers in groups of 50 to respect Brevo rate limits
 
 **Email ownership boundary:**
-- InsightAlpha app owns: welcome, new-post notifications, weekly digest, re-engagement, win-back, weekly reports, billing receipts (all require Prisma user data)
+- LyraAlpha app owns: welcome, new-post notifications, weekly digest, re-engagement, win-back, weekly reports, billing receipts (all require Prisma user data)
 - AMI 2.0 agent owns: cold/warm outreach, nurture sequences, campaign copy, non-blog newsletters — using its own Brevo API key and contact lists
-- AMI never writes directly to InsightAlpha's Brevo lists; it triggers the webhook and InsightAlpha sends
+- AMI never writes directly to LyraAlpha's Brevo lists; it triggers the webhook and LyraAlpha sends
 
 ---
 
@@ -467,7 +469,7 @@ Related runtime hardening:
 | **Orchestration** | Single (all plans) — `router` and `draft_verify` removed from `TierConfig` |
 | **Embeddings** | pgvector-backed retrieval stack |
 | **Payments** | Stripe + Razorpay |
-| **Email** | Brevo (InsightAlpha: transactional + lifecycle; AMI 2.0: outbound marketing) |
+| **Email** | Brevo (LyraAlpha: transactional + lifecycle; AMI 2.0: outbound marketing) |
 | **Cron** | Upstash QStash |
 
 ---

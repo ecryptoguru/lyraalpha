@@ -261,7 +261,7 @@ export function getFyersAuthUrl(appId: string, redirectUri: string, state?: stri
     client_id: appId,
     redirect_uri: redirectUri,
     response_type: "code",
-    state: state ?? "insightalpha",
+    state: state ?? "lyraalpha",
   });
   return `https://api-t1.fyers.in/api/v3/generate-authcode?${params.toString()}`;
 }

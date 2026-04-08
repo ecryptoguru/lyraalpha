@@ -62,7 +62,7 @@ function makeDbRow(overrides: Partial<{
     description: "A test description",
     publishedAt: new Date("2026-03-15T00:00:00Z"),
     tags: ["AI", "Finance"],
-    author: "InsightAlpha Research",
+    author: "LyraAlpha Research",
     category: "AI & Technology",
     featured: false,
     heroImageUrl: null,

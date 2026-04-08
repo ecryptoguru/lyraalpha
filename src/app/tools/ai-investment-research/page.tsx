@@ -3,20 +3,20 @@ import type { Metadata } from "next";
 import { PublicToolPage } from "@/components/tools/public-tool-page";
 
 export const metadata: Metadata = {
-  title: "AI Investment Research | InsightAlpha AI — Ask Lyra, Get Grounded Analysis",
+  title: "AI Investment Research | LyraAlpha AI — Ask Lyra, Get Grounded Analysis",
   description:
-    "AI investment research powered by Lyra — InsightAlpha's regime-aware AI agent. Ask cross-asset questions, get scenario maps and second-order effects, then move into the right analytical surface. US and India markets. No hallucinated metrics.",
-  alternates: { canonical: "https://insightalpha.ai/tools/ai-investment-research" },
+    "AI investment research powered by Lyra — LyraAlpha's regime-aware AI agent. Ask cross-asset questions, get scenario maps and second-order effects, then move into the right analytical surface. US and India markets. No hallucinated metrics.",
+  alternates: { canonical: "https://lyraalpha.ai/tools/ai-investment-research" },
   openGraph: {
-    title: "AI Investment Research | InsightAlpha AI",
+    title: "AI Investment Research | LyraAlpha AI",
     description:
       "Ask Lyra a hard market question. She maps it into scenarios, identifies second-order effects, and routes you into portfolio, narratives, or asset analysis — no generic chatbot responses.",
-    url: "https://insightalpha.ai/tools/ai-investment-research",
+    url: "https://lyraalpha.ai/tools/ai-investment-research",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Investment Research | InsightAlpha AI",
+    title: "AI Investment Research | LyraAlpha AI",
     description:
       "Ask Lyra a hard market question. She maps it into scenarios, identifies second-order effects, and routes you into portfolio, narratives, or asset analysis — no generic chatbot responses.",
     images: ["/og-image.png"],
@@ -74,7 +74,7 @@ export default function AiInvestmentResearchPage() {
       ]}
       faqs={[
         {
-          question: "What is AI investment research on InsightAlpha?",
+          question: "What is AI investment research on LyraAlpha?",
           answer: "It's Lyra — a purpose-built financial AI agent that combines market question answering with system routing. The answer leads somewhere concrete: portfolio intelligence, market narratives, or asset analysis depending on what the question actually needs.",
         },
         {
@@ -83,14 +83,14 @@ export default function AiInvestmentResearchPage() {
         },
         {
           question: "What markets and asset classes does Lyra cover?",
-          answer: "US and India markets across five asset classes: equities, crypto, ETFs, mutual funds, and commodities. Most AI finance tools are US-equity-only. InsightAlpha covers both markets from the same engine.",
+          answer: "US and India markets across five asset classes: equities, crypto, ETFs, mutual funds, and commodities. Most AI finance tools are US-equity-only. LyraAlpha covers both markets from the same engine.",
         },
         {
           question: "When should I use research instead of narrative tracking?",
           answer: "Use Lyra research when the question is open-ended, scenario-heavy, or crosses multiple assets. Use the narrative tracker when you already know the market is moving and want to understand which story is driving it.",
         },
       ]}
-      seoIntro="InsightAlpha's AI investment research tool targets investors who need more than a ticker lookup or a generic AI summary. Lyra handles cross-asset scenario analysis, portfolio framing, and research that feeds forward into structured decision surfaces — not dead-end chat transcripts. This page covers queries around AI stock research, AI investment analysis, AI portfolio research tools, and regime-aware financial AI for US and India investors."
+      seoIntro="LyraAlpha's AI investment research tool targets investors who need more than a ticker lookup or a generic AI summary. Lyra handles cross-asset scenario analysis, portfolio framing, and research that feeds forward into structured decision surfaces — not dead-end chat transcripts. This page covers queries around AI stock research, AI investment analysis, AI portfolio research tools, and regime-aware financial AI for US and India investors."
       seoBullets={[
         "Use this when the question crosses multiple assets, sectors, or scenarios — not just one name.",
         "Lyra's tiered routing means simple questions are fast and cheap; complex ELITE-tier queries get full model depth with reasoning.",

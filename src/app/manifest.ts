@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "InsightAlpha AI",
-    short_name: "InsightAlpha",
+    name: "LyraAlpha AI",
+    short_name: "LyraAlpha",
     description: "Institutional-grade financial intelligence",
     start_url: "/",
     scope: "/",

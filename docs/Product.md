@@ -1,8 +1,8 @@
-# InsightAlpha AI — Product overview
+# LyraAlpha AI — Product overview
 
 > **The engines compute. The AI interprets.**
 
-InsightAlpha AI is not another finance chatbot. It is the structured intelligence layer that sits between fragmented market data and real investor decisions — built on deterministic computation, not pattern-matched guesswork.
+LyraAlpha AI is not another finance chatbot. It is the structured intelligence layer that sits between fragmented market data and real investor decisions — built on deterministic computation, not pattern-matched guesswork.
 
 Live product. Shipped workflows. US and India, simultaneously.
 
@@ -16,7 +16,7 @@ Generic AI finance tools make this worse. They put a large language model in a f
 
 The gap is not between investors and data. It is between data and judgment.
 
-That is what InsightAlpha AI is built to close.
+That is what LyraAlpha AI is built to close.
 
 ---
 
@@ -44,7 +44,7 @@ Two purpose-built agents, each with a hard domain boundary:
 
 The separation keeps market analysis and support behavior isolated, easier to govern, and easier to trust. It also keeps costs lower — Myra never runs on the full model.
 
-**Myra is now available on the public landing page** — unauthenticated visitors receive full AI-driven answers about the product, waitlist, early access, and how InsightAlpha works. No sign-in required. This is fully operational via the `/api/support/public-chat` endpoint.
+**Myra is now available on the public landing page** — unauthenticated visitors receive full AI-driven answers about the product, waitlist, early access, and how LyraAlpha works. No sign-in required. This is fully operational via the `/api/support/public-chat` endpoint.
 
 ### Layer 3 — The workflows
 
@@ -60,23 +60,23 @@ These are workflow products. Not chat with more tokens.
 
 ---
 
-## Why investors choose InsightAlpha AI over alternatives
+## Why investors choose LyraAlpha AI over alternatives
 
 **vs. screeners (Screener.in, Finviz, Stock Analysis)**
-Screeners have good data and no synthesis. Users still have to figure out what the numbers mean. InsightAlpha AI tells them — grounded in the same structured data.
+Screeners have good data and no synthesis. Users still have to figure out what the numbers mean. LyraAlpha AI tells them — grounded in the same structured data.
 
 **vs. generic AI chatbots (ChatGPT Finance, Perplexity Finance)**
-Fluent outputs, no deterministic backbone. InsightAlpha AI's model receives computed engine context before generating a single word. It cannot hallucinate a Trend score because that score was computed before the model was called.
+Fluent outputs, no deterministic backbone. LyraAlpha AI's model receives computed engine context before generating a single word. It cannot hallucinate a Trend score because that score was computed before the model was called.
 
 **vs. robo-advisors (Groww, Zerodha Coin, Betterment)**
-Portfolio automation, not analytical intelligence. A different job entirely. InsightAlpha AI sharpens judgment before decisions are made — it does not automate execution.
+Portfolio automation, not analytical intelligence. A different job entirely. LyraAlpha AI sharpens judgment before decisions are made — it does not automate execution.
 
 **vs. niche AI tools (Danelfin, Kavout)**
-US-only, narrow coverage, no premium workflow depth, no portfolio layer. InsightAlpha AI covers equities, ETFs, mutual funds, crypto, and commodities across US and India, first-class.
+US-only, narrow coverage, no premium workflow depth, no portfolio layer. LyraAlpha AI covers equities, ETFs, mutual funds, crypto, and commodities across US and India, first-class.
 
 ---
 
-## What makes InsightAlpha AI different
+## What makes LyraAlpha AI different
 
 ### Grounded intelligence, not generated analysis
 
@@ -102,11 +102,11 @@ Not adapted. Built natively for both from the start.
 - Broker connectivity for Indian brokers (Zerodha-style) and US aggregator paths
 - RBI policy context and India-specific macro regime framing
 
-India has 90M+ registered equity investors growing at 15-20% annually. Almost no premium analytical product is built natively for that market. InsightAlpha AI is.
+India has 90M+ registered equity investors growing at 15-20% annually. Almost no premium analytical product is built natively for that market. LyraAlpha AI is.
 
 ### Credit economics that scale with analytical value
 
-Flat unlimited subscriptions commoditize AI. InsightAlpha's credit model ties price to the depth of analysis:
+Flat unlimited subscriptions commoditize AI. LyraAlpha's credit model ties price to the depth of analysis:
 
 - A quick score question costs 1 credit
 - A full multi-factor analysis costs 3 credits
@@ -134,14 +134,14 @@ In financial AI, trust is the product. Most competitors have none of this in pro
 
 ### AMI 2.0 content pipeline — agent-automated distribution
 
-InsightAlpha AI ships a public blog powered by an external AMI 2.0 marketing agent system.
+LyraAlpha AI ships a public blog powered by an external AMI 2.0 marketing agent system.
 
 - **Blog system** at `/blog`: category pages, RSS 2.0 feed, OG hero images, reading progress bar, share cards via the IntelligenceShare system, and contextual CTAs (waitlist for logged-out, Ask Lyra for logged-in)
 - **HMAC-verified webhook bridge** (`/api/webhooks/ami`): AMI 2.0 publishes, updates, and archives posts via a shared-secret HMAC-SHA256 endpoint. Posts are Zod-validated, upserted into the `BlogPost` Prisma model, ISR-revalidated across all affected routes, and subscriber notifications fire asynchronously via Brevo
 - **Weekly blog digest**: QStash-scheduled every Monday at 10:00 UTC. Batched delivery to `blogSubscribed: true` users. Zero incremental editorial cost once the pipeline is running
-- **Enforced email boundary**: InsightAlpha owns transactional and lifecycle emails — welcome, notifications, digest, re-engagement, weekly reports, billing. AMI 2.0 owns outbound marketing — cold/warm outreach, nurture sequences, campaign copy — using its own Brevo API key. The boundary is a system-level contract, not a convention
+- **Enforced email boundary**: LyraAlpha owns transactional and lifecycle emails — welcome, notifications, digest, re-engagement, weekly reports, billing. AMI 2.0 owns outbound marketing — cold/warm outreach, nurture sequences, campaign copy — using its own Brevo API key. The boundary is a system-level contract, not a convention
 
-Most products treat content distribution as an afterthought. InsightAlpha AI ships it as infrastructure.
+Most products treat content distribution as an afterthought. LyraAlpha AI ships it as infrastructure.
 
 ### AI stack fully consolidated on GPT-5.4
 
@@ -271,13 +271,13 @@ None of that is replicable by swapping models or copying prompts.
 
 ### What Myra does
 
-Myra is InsightAlpha AI's platform support agent. She handles product guidance, plan and credit questions, feature navigation, troubleshooting, and redirects market-analysis questions to Lyra.
+Myra is LyraAlpha AI's platform support agent. She handles product guidance, plan and credit questions, feature navigation, troubleshooting, and redirects market-analysis questions to Lyra.
 
 ### Where Myra lives
 
 Myra operates across the entire user journey:
 
-- **Public landing page** — fully operational for unauthenticated visitors. The public Myra widget answers questions about the product, waitlist, early access, and how InsightAlpha works — before any sign-in. Runs on GPT-5.4-nano via the same Azure OpenAI provider as Lyra.
+- **Public landing page** — fully operational for unauthenticated visitors. The public Myra widget answers questions about the product, waitlist, early access, and how LyraAlpha works — before any sign-in. Runs on GPT-5.4-nano via the same Azure OpenAI provider as Lyra.
 - **Authenticated dashboard** — the Myra chat panel (`LiveChatWidget`) renders in the bottom-right corner of the dashboard, outside the main scroll container so its fixed positioning anchors correctly to the viewport at all times.
 
 ### What makes Myra efficient
@@ -325,7 +325,7 @@ Hot-patchable from `/admin/ai-limits` without a code deploy.
 
 India has 90M+ registered equity investors, growing 15-20% annually, with almost no premium analytical product built natively for it. The US has 160M+ brokerage account holders where premium tool ARPU of $150-600/year is well established.
 
-AI trust is splitting. Users who tried shallow wrappers and found them unreliable are actively looking for something grounded. That is the exact moment InsightAlpha AI is positioned for.
+AI trust is splitting. Users who tried shallow wrappers and found them unreliable are actively looking for something grounded. That is the exact moment LyraAlpha AI is positioned for.
 
 - TAM: $50B+ global retail fintech SaaS and AI investing tools
 - SAM: $8-12B (self-directed US and India investors paying for analytical tools)
@@ -348,13 +348,13 @@ AI trust is splitting. Users who tried shallow wrappers and found them unreliabl
 
 ## The stack
 
-Next.js 16 App Router with React 19, streaming-first with no blocking response paths. GPT-5.4 exclusively via Azure OpenAI Responses API with nano/mini/full routing for Lyra and nano for Myra — Gemini, OpenRouter, and Groq fully removed. Vercel AI SDK. PostgreSQL and Prisma for the credit ledger, asset universe, and `BlogPost` model. Upstash Redis for caching, daily token counters, and alerting windows. Upstash QStash for cron scheduling (weekly digest, re-engagement, reports, credit reset, trial expiry). Clerk for auth and plan metadata. Stripe and Razorpay for US and India payment rails. Brevo for all email delivery (transactional + lifecycle owned by InsightAlpha; outbound marketing owned by AMI 2.0 via its own API key). Vitest and Playwright for testing.
+Next.js 16 App Router with React 19, streaming-first with no blocking response paths. GPT-5.4 exclusively via Azure OpenAI Responses API with nano/mini/full routing for Lyra and nano for Myra — Gemini, OpenRouter, and Groq fully removed. Vercel AI SDK. PostgreSQL and Prisma for the credit ledger, asset universe, and `BlogPost` model. Upstash Redis for caching, daily token counters, and alerting windows. Upstash QStash for cron scheduling (weekly digest, re-engagement, reports, credit reset, trial expiry). Clerk for auth and plan metadata. Stripe and Razorpay for US and India payment rails. Brevo for all email delivery (transactional + lifecycle owned by LyraAlpha; outbound marketing owned by AMI 2.0 via its own API key). Vitest and Playwright for testing.
 
 ---
 
 ## In one sentence
 
-For investors: InsightAlpha AI is a live, revenue-generating financial intelligence product with a defensible architecture, dual-market coverage, and a commercial model that improves margin as engagement deepens.
+For investors: LyraAlpha AI is a live, revenue-generating financial intelligence product with a defensible architecture, dual-market coverage, and a commercial model that improves margin as engagement deepens.
 
 For users: Ask Lyra anything about your portfolio or the markets. She will tell you what it means — backed by computation, not a confident guess. Ask Myra anything about the platform — from the landing page before you sign in, to every support question after.
 
@@ -362,5 +362,5 @@ For engineers: The model interprets what deterministic engines already computed.
 
 ---
 
-*InsightAlpha AI — Financial Intelligence, Not Financial Noise*
+*LyraAlpha AI — Financial Intelligence, Not Financial Noise*
 *Version 2.0 · March 2026*

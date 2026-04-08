@@ -1,4 +1,4 @@
-# InsightAlpha 90-Day Launch Marketing Pack
+# LyraAlpha 90-Day Launch Marketing Pack
 
 This folder contains the step-by-step launch plan for reaching 10,000 users in 90 days.
 

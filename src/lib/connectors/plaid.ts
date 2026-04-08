@@ -277,7 +277,7 @@ export async function createPlaidLinkToken(userId: string): Promise<string> {
     headers: plaidHeaders(),
     body: JSON.stringify({
       user: { client_user_id: userId },
-      client_name: "InsightAlpha",
+      client_name: "LyraAlpha",
       products: ["investments"],
       country_codes: ["US"],
       language: "en",

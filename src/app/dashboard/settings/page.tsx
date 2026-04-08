@@ -1050,7 +1050,7 @@ export default function SettingsPage() {
                   <div>
                     <p className="font-medium">Payment method</p>
                     <p className="text-muted-foreground mt-0.5">Managed securely by {subscription.provider === "STRIPE" ? "Stripe" : "Razorpay"}</p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">(InsightAlpha AI does not store your card details)</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">(LyraAlpha AI does not store your card details)</p>
                   </div>
                 </div>
               </>

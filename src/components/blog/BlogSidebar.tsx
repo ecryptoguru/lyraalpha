@@ -44,7 +44,7 @@ async function TrendingWidget() {
     <div className="rounded-2xl border border-white/8 bg-white/[0.022] p-5">
       <p className="flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.32em] text-white/30">
         <TrendingUp className="h-3 w-3" />
-        Trending on InsightAlpha
+        Trending on LyraAlpha
       </p>
       <ul className="mt-3 space-y-2">
         {queries.map((q) => (

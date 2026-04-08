@@ -1,6 +1,6 @@
-# InsightAlpha AI — Pitch Deck Outline
+# LyraAlpha AI — Pitch Deck Outline
 
-**Objective:** Position InsightAlpha AI as a live, category-defining financial intelligence product with real product depth, credible AI economics, a clear growth model, and a compelling path from consumer SaaS to high-value workflow monetization in India and the US.
+**Objective:** Position LyraAlpha AI as a live, category-defining financial intelligence product with real product depth, credible AI economics, a clear growth model, and a compelling path from consumer SaaS to high-value workflow monetization in India and the US.
 
 **Tone:** Confident, specific, evidence-led. No vague AI hype. Every claim grounded in shipped product behavior or verified market data.
 
@@ -8,9 +8,9 @@
 
 ## Slide 1: Title
 
-- **Headline:** InsightAlpha AI — Financial Intelligence, Not Financial Noise
+- **Headline:** LyraAlpha AI — Financial Intelligence, Not Financial Noise
 - **Sub-headline:** The engines compute. The AI interprets.
-- **Visual hook:** Side-by-side contrast — a wall of fragmented market data vs. a clean, scored, regime-aware InsightAlpha asset analysis
+- **Visual hook:** Side-by-side contrast — a wall of fragmented market data vs. a clean, scored, regime-aware LyraAlpha asset analysis
 - **Tagline:** Structured market intelligence for the self-directed investor
 
 ---
@@ -42,13 +42,13 @@
 
 > **The engines compute. The AI interprets.**
 
-This architectural principle separates InsightAlpha AI from every generic LLM wrapper in the space. Computation first. Interpretation second. That order matters.
+This architectural principle separates LyraAlpha AI from every generic LLM wrapper in the space. Computation first. Interpretation second. That order matters.
 
 ---
 
 ## Slide 4: The Solution
 
-**InsightAlpha AI — three layers working together:**
+**LyraAlpha AI — three layers working together:**
 
 **Engine Layer** (deterministic computation)
 - Trend, Momentum, Volatility, Liquidity, Trust, Sentiment
@@ -187,7 +187,7 @@ Starter (free) → Pro ($14.99/₹1,499) → Elite ($39.99/₹3,999) → Enterpr
 
 ### Positioning Matrix
 
-| | Data-only (screeners) | Generic AI chat | InsightAlpha AI |
+| | Data-only (screeners) | Generic AI chat | LyraAlpha AI |
 |---|---|---|---|
 | **Grounded data** | ✓ | ✗ | ✓ |
 | **AI synthesis** | ✗ | ✓ | ✓ |
@@ -196,14 +196,14 @@ Starter (free) → Pro ($14.99/₹1,499) → Elite ($39.99/₹3,999) → Enterpr
 | **India + US native** | Rarely | No | ✓ |
 | **Cost-disciplined AI** | N/A | No | ✓ |
 
-### Why InsightAlpha AI Wins
+### Why LyraAlpha AI Wins
 
 - **Screeners** (Screener.in, Finviz): strong data, zero synthesis. No AI interpretation layer.
 - **Generic AI chatbots** (ChatGPT Finance mode, Perplexity Finance): fluent, ungrounded, no deterministic backbone.
 - **Robo-advisors** (Groww, Zerodha Coin, Betterment): portfolio automation, not intelligence tools. Different job-to-be-done.
 - **Niche AI tools** (Danelfin, Kavout): narrow, US-only, no premium workflow depth, no India coverage.
 
-InsightAlpha AI is the only product combining deterministic engine context, dual-agent AI interpretation, premium workflow depth, and dual-market (India + US) coverage.
+LyraAlpha AI is the only product combining deterministic engine context, dual-agent AI interpretation, premium workflow depth, and dual-market (India + US) coverage.
 
 ---
 

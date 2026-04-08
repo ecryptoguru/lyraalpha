@@ -432,7 +432,7 @@ export function HeroWebGL() {
 
               {/* Sub copy */}
               <p className="max-w-2xl border-l-2 border-teal-400/50 pl-5 font-mono text-sm leading-8 text-white/75 sm:text-base">
-                InsightAlpha AI is the only financial intelligence platform that grounds every AI
+                LyraAlpha AI is the only financial intelligence platform that grounds every AI
                 response in deterministic engine computation — so Lyra interprets what the engines
                 already computed, and never invents a metric it should have measured. End to End deep 
                 agentic AI integration.

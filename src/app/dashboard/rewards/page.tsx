@@ -139,9 +139,9 @@ function RewardsPageInner() {
 
   const currentTier = TIERS.find(t => t.name === tierName) ?? TIERS[0];
   const rewardShare = buildRewardShareObject({
-    title: `${tierName} level momentum on InsightAlpha`,
+    title: `${tierName} level momentum on LyraAlpha`,
     href: "/dashboard/rewards?tab=xp",
-    takeaway: `I have reached Level ${userLevel} with ${userXP.toLocaleString()} XP and a ${currentTier.multiplier}x XP multiplier on InsightAlpha.`,
+    takeaway: `I have reached Level ${userLevel} with ${userXP.toLocaleString()} XP and a ${currentTier.multiplier}x XP multiplier on LyraAlpha.`,
     context: `Rewards turn consistent research, learning and discovery into credits you can reinvest into portfolio reads, compare systems and shock simulations.`,
     scoreValue: `${userLevel}`,
   });
@@ -180,7 +180,7 @@ function RewardsPageInner() {
         <div className="rounded-4xl border border-white/10 bg-card/70 p-6 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl sm:p-8">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
             <Sparkles className="h-3 w-3" />
-            InsightAlpha AI · Credits & XP
+            LyraAlpha AI · Credits & XP
           </div>
           <h1 className="mt-5 text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl md:leading-[0.92]">
             Your

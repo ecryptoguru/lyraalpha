@@ -12,7 +12,7 @@ regionOnly: "IN"
 
 ## Key Concept
 
-When you switch InsightAlpha AI to the **India (IN)** region, you enter a unique market structure governed by different dynamics, liquidity profiles, and macroeconomic drivers than the US markets.
+When you switch LyraAlpha AI to the **India (IN)** region, you enter a unique market structure governed by different dynamics, liquidity profiles, and macroeconomic drivers than the US markets.
 
 Understanding the mechanics of the National Stock Exchange (NSE), the Bombay Stock Exchange (BSE), and the Nifty 50 is crucial for applying our intelligence engines effectively in the Indian context.
 
@@ -21,16 +21,16 @@ Understanding the mechanics of the National Stock Exchange (NSE), the Bombay Sto
 India has two primary exchanges where the vast majority of trading occurs:
 
 1. **NSE (National Stock Exchange)**: The younger, larger, and significantly more liquid exchange. It is the primary venue for institutional trading and derivatives (F&O).
-   - *InsightAlpha AI uses the `.NS` suffix for all NSE-listed assets (e.g., `RELIANCE.NS`, `TCS.NS`).*
+   - *LyraAlpha AI uses the `.NS` suffix for all NSE-listed assets (e.g., `RELIANCE.NS`, `TCS.NS`).*
 2. **BSE (Bombay Stock Exchange)**: Asia's oldest exchange. It lists thousands of small and micro-cap companies that are not available on the NSE, but trading volume is generally lower.
-   - *InsightAlpha AI uses the `.BO` suffix for BSE-listed assets (e.g., `BOMDYEING.BO`).*
+   - *LyraAlpha AI uses the `.BO` suffix for BSE-listed assets (e.g., `BOMDYEING.BO`).*
 
 ## The Benchmarks
 
 - **Nifty 50**: The flagship index of the NSE, tracking the 50 largest and most liquid Indian companies. It is the definitive barometer of the Indian equity market (analogous to the S&P 500 in the US).
 - **Sensex**: The benchmark index of the BSE, tracking 30 established companies. While historically significant, the Nifty 50 is the preferred institutional benchmark for derivatives and tracking.
 
-InsightAlpha AI uses the **Nifty 50** to calculate relative strength, beta, and market regime conditions for all IN-region assets.
+LyraAlpha AI uses the **Nifty 50** to calculate relative strength, beta, and market regime conditions for all IN-region assets.
 
 ## India-Specific Market Dynamics
 
@@ -42,7 +42,7 @@ The Indian market possesses structural characteristics that affect Signal Streng
 
 ## Quick Check
 
-- [x] InsightAlpha AI uses the `.NS` suffix to denote assets traded on the National Stock Exchange (NSE). | Correct — and `.BO` for the Bombay Stock Exchange.
-- [ ] The BSE Sensex is the primary benchmark used by InsightAlpha AI for calculating relative strength in India. | No — the platform uses the Nifty 50 as the definitive institutional benchmark.
+- [x] LyraAlpha AI uses the `.NS` suffix to denote assets traded on the National Stock Exchange (NSE). | Correct — and `.BO` for the Bombay Stock Exchange.
+- [ ] The BSE Sensex is the primary benchmark used by LyraAlpha AI for calculating relative strength in India. | No — the platform uses the Nifty 50 as the definitive institutional benchmark.
 - [x] Massive inflows from domestic retail investors (SIPs) have created structural support for Indian equities, sometimes decoupling them from global trends. | Yes — domestic liquidity is a massive driver of the Indian market regime.
 - [ ] Indian stocks can trade up or down 50% in a single day without any restrictions. | No — the exchanges employ strict daily price bands (circuit breakers) that halt trading during extreme moves.

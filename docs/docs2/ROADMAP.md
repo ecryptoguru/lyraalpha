@@ -1,13 +1,13 @@
-# InsightAlpha AI — 1-Year Vision Roadmap
+# LyraAlpha AI — 1-Year Vision Roadmap
 ### March 2026 → March 2027
 
-> This document is a long-horizon product and technology vision roadmap for InsightAlpha AI. It is organized into four quarterly phases and covers the five strategic pillars requested by leadership, plus additional high-conviction feature bets drawn from competitive analysis, user experience gaps, and emerging fintech AI trends.
+> This document is a long-horizon product and technology vision roadmap for LyraAlpha AI. It is organized into four quarterly phases and covers the five strategic pillars requested by leadership, plus additional high-conviction feature bets drawn from competitive analysis, user experience gaps, and emerging fintech AI trends.
 
 ---
 
 ## Strategic North Star
 
-Transform InsightAlpha AI from a **score-driven intelligence dashboard** into the **world's most capable multi-asset AI research platform** — where deep research agents, institutional-grade reports, and real-time discovery combine into a single cohesive intelligence layer for every type of investor.
+Transform LyraAlpha AI from a **score-driven intelligence dashboard** into the **world's most capable multi-asset AI research platform** — where deep research agents, institutional-grade reports, and real-time discovery combine into a single cohesive intelligence layer for every type of investor.
 
 **Three headline outcomes by March 2027:**
 1. **Report-native Lyra** — users get fast, grounded market analysis and structured report delivery from the dashboard
@@ -52,7 +52,7 @@ Transform InsightAlpha AI from a **score-driven intelligence dashboard** into th
 
 ### 1.2 REPORT-ENGINE — Daily Market Briefing (Phase 1)
 
-**Vision:** Every morning, InsightAlpha AI publishes a personalized, AI-generated daily market briefing for each user based on their watchlist, portfolio holdings, and tracked sectors. Think Bloomberg Intelligence Brief meets personalized fintech AI.
+**Vision:** Every morning, LyraAlpha AI publishes a personalized, AI-generated daily market briefing for each user based on their watchlist, portfolio holdings, and tracked sectors. Think Bloomberg Intelligence Brief meets personalized fintech AI.
 
 **Architecture:**
 - **Cron trigger:** `src/app/api/cron/reports/daily/route.ts` — fires at market open (09:30 EST / 09:15 IST depending on user region)
@@ -96,7 +96,7 @@ Extend existing `ScoreVelocityBadge` and drift alert logic into a **push notific
 
 ### 2.1 TYRA — Deep Research AI Agent (Claude-Powered)
 
-**Vision:** TYRA (Total Yield Research Agent) is InsightAlpha AI's second major AI intelligence layer, distinct from Lyra in purpose and architecture. Where Lyra is a conversational real-time analyst, **TYRA is an asynchronous deep research agent** that takes complex research mandates and returns comprehensive, citation-backed institutional-grade research documents in 15–60 minutes.
+**Vision:** TYRA (Total Yield Research Agent) is LyraAlpha AI's second major AI intelligence layer, distinct from Lyra in purpose and architecture. Where Lyra is a conversational real-time analyst, **TYRA is an asynchronous deep research agent** that takes complex research mandates and returns comprehensive, citation-backed institutional-grade research documents in 15–60 minutes.
 
 **Powered by:** Anthropic Claude Sonnet 4.6 (`claude-sonnet-4-6`) via Anthropic API — chosen for its 200K context window, multi-step tool use, extended thinking mode, and superior long-form structured writing.
 
@@ -115,7 +115,7 @@ User Research Brief
   │                                            │
   │  Agent B: Technical Research               │
   │   → Price history, regime, score signals   │
-  │   → Uses InsightAlpha's own engine output  │
+  │   → Uses LyraAlpha's own engine output  │
   │                                            │
   │  Agent C: Macro & Sector Intelligence      │
   │   → Regime context, cross-sector signals   │
@@ -127,13 +127,13 @@ User Research Brief
   │                                            │
   │  Agent E: Competitive Landscape            │
   │   → Peer comparison, sector rank           │
-  │   → InsightAlpha Compare engine output     │
+  │   → LyraAlpha Compare engine output     │
   └────────────────────────────────────────────┘
        ↓
 [TYRA Synthesis Layer] — claude-sonnet-4-6
   Combines all agent outputs into final report
        ↓
-[InsightAlpha Fact-Check Gate]
+[LyraAlpha Fact-Check Gate]
   Validates claims against known engine data
        ↓
 Final Research Document (Markdown + structured JSON)
@@ -374,13 +374,13 @@ Upgrade the current watchlist into an active intelligence layer:
 - **Research Sharing:** TYRA reports and Lyra conversations can be published as shareable links (anonymized or attributed)
 - **Team Workspaces (Enterprise):** Shared research library, shared watchlists, team-level briefings, role-based access (Analyst / Portfolio Manager / Observer)
 - **Insight Feed (Optional Public Layer):** Curated public TYRA research notes from opted-in users, ranked by quality score (not likes) — anti-noise algorithm
-- **Expert Analyst Network:** Verified analysts can publish research on InsightAlpha AI; users can follow analysts whose research they respect
+- **Expert Analyst Network:** Verified analysts can publish research on LyraAlpha AI; users can follow analysts whose research they respect
 
 ---
 
-### 4.2 InsightAlpha API + Developer Platform
+### 4.2 LyraAlpha API + Developer Platform
 
-Open InsightAlpha's intelligence layer to third-party builders:
+Open LyraAlpha's intelligence layer to third-party builders:
 - **Public REST API:** Asset scores, regime classifications, sector DRS, price data, portfolio health
 - **Webhook Subscriptions:** Asset regime flip, score velocity threshold, DRS burst events
 - **TYRA API Access:** Programmatic research job submission and retrieval
@@ -449,7 +449,7 @@ Every score (DRS, Trend, Momentum, Quality) gets a natural-language explainabili
 
 ### B. Earnings Intelligence Center
 A dedicated surface around earnings events:
-- Pre-earnings: historical beat/miss record, implied move from options, analyst estimate vs. InsightAlpha quality score
+- Pre-earnings: historical beat/miss record, implied move from options, analyst estimate vs. LyraAlpha quality score
 - Earnings day: live score recalculation as numbers drop, Lyra instant analysis within 5 minutes of report
 - Post-earnings: guidance revision impact on sector peers
 
@@ -477,8 +477,8 @@ Build a persistent cross-session knowledge graph where Lyra tracks:
 ### F. Institutional Research Digest Integration
 Aggregate and summarize publicly available institutional research:
 - Goldman Sachs, Morgan Stanley, JPMorgan public research summaries
-- Automatically cross-referenced with InsightAlpha's own score signals
-- "Research Consensus" tag: when multiple institutional views align with InsightAlpha score signal
+- Automatically cross-referenced with LyraAlpha's own score signals
+- "Research Consensus" tag: when multiple institutional views align with LyraAlpha score signal
 
 ### G. AI-Powered Screener Builder
 Replace current discovery filters with a natural language screener:
@@ -487,7 +487,7 @@ Replace current discovery filters with a natural language screener:
 - Results saved as a named screener
 - Screeners can be scheduled to re-run weekly and alert on new entries/exits
 
-### H. InsightAlpha Academy
+### H. LyraAlpha Academy
 Embedded educational layer integrated into the product:
 - Lyra teaches concepts in context: when a user asks "what is a DRS?", Lyra teaches it AND shows the user's own assets sorted by DRS
 - Short interactive modules (5-minute reads) covering: regime investing, momentum, quality factors, portfolio construction
@@ -558,7 +558,7 @@ The following items were completed as pre-roadmap infrastructure hardening befor
 |------|-----------|--------|-----------|
 | Claude API rate limits on TYRA under load | Medium | High | Job queue with backpressure, per-user job throttling |
 | Report delivery latency exceeds UX threshold on mobile | Medium | High | Sentence-level streaming, progressive delivery, push-first UX |
-| TYRA research accuracy / hallucinations | High | High | Fact-check gate against InsightAlpha engine data, citation requirement |
+| TYRA research accuracy / hallucinations | High | High | Fact-check gate against LyraAlpha engine data, citation requirement |
 | Regulatory risk on financial information | Low | Critical | All outputs tagged as informational, not advice; legal review before launch |
 | Data licensing for options/institutional flow | High | Medium | Phased rollout, start with free/public sources |
 | Multi-agent orchestration cost blowout | Medium | High | Per-job credit cost (50 credits), hard token ceilings per agent |
@@ -577,4 +577,4 @@ When any feature in this roadmap ships:
 
 ---
 
-*Last updated: March 2026 | Version: 1.0 | Owner: InsightAlpha AI Product & Engineering*
+*Last updated: March 2026 | Version: 1.0 | Owner: LyraAlpha AI Product & Engineering*

@@ -1,6 +1,6 @@
 Below is a **research-backed list of the 50 highest-traffic Google search keywords used by Indian retail investors**. These are grouped by intent and approximate monthly search demand in India (ranges based on common SEO tools like Ahrefs/Semrush trends).
 
-These keywords are extremely valuable for **InsightAlpha AI** because they can drive **large organic traffic if you build tools and pages around them**.
+These keywords are extremely valuable for **LyraAlpha AI** because they can drive **large organic traffic if you build tools and pages around them**.
 
 ## How to use this keyword map
 
@@ -53,7 +53,7 @@ These are extremely valuable for discovery tools.
 
 # 3️⃣ Portfolio & Analysis Keywords
 
-These are perfect for **InsightAlpha features**.
+These are perfect for **LyraAlpha features**.
 
 | Keyword                      | Monthly Searches |
 | ---------------------------- | ---------------- |
@@ -124,7 +124,7 @@ These are **high-growth keywords** where competition is still relatively low.
 
 ---
 
-# The Most Valuable Keywords for InsightAlpha
+# The Most Valuable Keywords for LyraAlpha
 
 If you want **fast SEO growth**, focus on these 10:
 
@@ -141,7 +141,7 @@ technical analysis
 stock market prediction
 ```
 
-These align directly with InsightAlpha’s features.
+These align directly with LyraAlpha’s features.
 
 ---
 
@@ -165,7 +165,7 @@ Tool pages rank much faster in search.
 
 # Real Traffic Potential
 
-If InsightAlpha ranks in top 3 for these keywords:
+If LyraAlpha ranks in top 3 for these keywords:
 
 ```
 stock analysis

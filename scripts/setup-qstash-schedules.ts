@@ -13,7 +13,7 @@
  *
  * Required env vars:
  *   QSTASH_TOKEN     — from Upstash QStash console (Settings → API Keys)
- *   DEPLOYMENT_URL   — your Vercel production URL, e.g. https://multiasset-ai.vercel.app
+ *   DEPLOYMENT_URL   — your Vercel production URL, e.g. https://lyraalpha.vercel.app
  */
 
 import { Client } from "@upstash/qstash";
@@ -40,32 +40,15 @@ type ScheduleEntry = {
 
 // ─── Cron Schedule Strategy ──────────────────────────────────────────────────
 //
-// Two independent EOD pipelines — each runs AFTER its market closes:
-//
-//   IN pipeline  → NSE/BSE closes 10:00 UTC → fires 10:30 UTC (Mon–Fri)
-//                  Steps: IN market sync → IN briefing → warm IN narratives
-//
-//   US pipeline  → NYSE/NASDAQ closes 21:00 UTC → fires 21:30 UTC (Mon–Fri)
-//                  Steps: US market sync → US briefing → warm US narratives
-//
-// Crypto runs every 4h (24/7 market). News every 6h to stay fresh across both sessions.
-// full-sync runs Saturday only as a weekly recovery/backfill pass.
-// portfolio-health runs 22:00 UTC (30min after US briefing is ready).
-//
+// Remaining schedules cover crypto sync, crypto/news refresh, daily briefing,
+// portfolio/support housekeeping, and user retention jobs.
 // All times UTC. retries defaults to 3 (QStash default).
 // ─────────────────────────────────────────────────────────────────────────────
 const SCHEDULES: ScheduleEntry[] = [
-  { path: "/api/cron/in-eod-sync",        cron: "30 10 * * 1-5", retries: 3 },
-  { path: "/api/cron/in-eod-postprocess", cron: "45 10 * * 1-5", retries: 3 },
-  { path: "/api/cron/us-eod-stocks-sync",      cron: "30 21 * * 1-5", retries: 3 },
-  { path: "/api/cron/us-eod-etfs-sync",        cron: "35 21 * * 1-5", retries: 3 },
-  { path: "/api/cron/us-eod-commodities-sync", cron: "40 21 * * 1-5", retries: 3 },
   { path: "/api/cron/us-eod-crypto-sync",      cron: "45 21 * * 1-5", retries: 3 },
-  { path: "/api/cron/us-eod-postprocess",      cron: "0 22 * * 1-5",  retries: 3 },
   { path: "/api/cron/crypto-sync",        cron: "0 */8 * * *",   retries: 3 },
   { path: "/api/cron/news-sync",          cron: "0 */6 * * *",   retries: 3 },
-  { path: "/api/cron/full-sync",          cron: "0 6 * * 6",     retries: 2 },
-  { path: "/api/cron/mf-holdings-sync",   cron: "0 6 1 * *",     retries: 3 },
+  { path: "/api/cron/daily-briefing",     cron: "0 7 * * *",     retries: 3 },
   { path: "/api/cron/trending-questions", cron: "0 11 * * *",    retries: 3 },
   { path: "/api/cron/reengagement",       cron: "0 9 * * *",     retries: 2 },
   { path: "/api/cron/support-retention",  cron: "30 3 * * *",    retries: 2 },

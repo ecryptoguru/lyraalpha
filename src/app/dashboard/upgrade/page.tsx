@@ -212,7 +212,7 @@ function getPricingFaqs(proPriceLabel: string, elitePriceLabel: string) {
   {
     question: "When is Enterprise available?",
     answer:
-      "Enterprise is handled as a custom commercial plan. Teams can contact enterprise@insightalpha.ai to discuss pilot access, pricing, and dedicated infrastructure.",
+      "Enterprise is handled as a custom commercial plan. Teams can contact enterprise@lyraalpha.ai to discuss pilot access, pricing, and dedicated infrastructure.",
   },
   // Credit System FAQs
   {
@@ -370,7 +370,7 @@ export default function UpgradePage() {
   const eliteIsCurrent = plan === "ELITE" || plan === "ENTERPRISE";
   const proIsCurrent = plan === "PRO";
   const starterIsCurrent = plan === "STARTER";
-  const contactEmail = "enterprise@insightalpha.ai";
+  const contactEmail = "enterprise@lyraalpha.ai";
 
   return (
     <div className="relative pb-24 p-3 sm:p-4 md:p-6">

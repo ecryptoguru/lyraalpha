@@ -5,19 +5,19 @@ import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 
 export const metadata: Metadata = {
-  title: "Contact & Support | InsightAlpha AI",
+  title: "Contact & Support | LyraAlpha AI",
   description:
-    "Reach InsightAlpha AI support for account access, billing, onboarding, or product questions. Include your account email for faster resolution.",
-  alternates: { canonical: "https://insightalpha.ai/contact" },
+    "Reach LyraAlpha AI support for account access, billing, onboarding, or product questions. Include your account email for faster resolution.",
+  alternates: { canonical: "https://lyraalpha.ai/contact" },
   openGraph: {
-    title: "Contact & Support | InsightAlpha AI",
-    description: "Reach InsightAlpha AI support for account access, billing, onboarding, or product questions.",
-    url: "https://insightalpha.ai/contact",
+    title: "Contact & Support | LyraAlpha AI",
+    description: "Reach LyraAlpha AI support for account access, billing, onboarding, or product questions.",
+    url: "https://lyraalpha.ai/contact",
   },
   twitter: {
     card: "summary",
-    title: "Contact & Support | InsightAlpha AI",
-    description: "Reach InsightAlpha AI support for account access, billing, onboarding, or product questions.",
+    title: "Contact & Support | LyraAlpha AI",
+    description: "Reach LyraAlpha AI support for account access, billing, onboarding, or product questions.",
   },
 };
 
@@ -45,7 +45,7 @@ export default function ContactPage() {
                 <div className="border-t border-slate-200 bg-slate-50/75 p-8 dark:border-white/8 dark:bg-white/3 lg:border-l lg:border-t-0 sm:p-10">
                   <div className="rounded-[1.8rem] border border-slate-200 bg-white/92 p-5 dark:border-white/8 dark:bg-white/3">
                     <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-slate-400 dark:text-white/38">Primary channel</p>
-                    <p className="mt-3 text-xl font-bold tracking-tight text-slate-900 dark:text-white">support@insightalpha.ai</p>
+                    <p className="mt-3 text-xl font-bold tracking-tight text-slate-900 dark:text-white">support@lyraalpha.ai</p>
                     <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-white/56">
                       Best for account issues, system access questions, billing support, and product feedback.
                     </p>

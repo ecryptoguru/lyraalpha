@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     if (!customerId) {
       const customer = await getStripe().customers.create({
-        email: user?.email || "unknown@insightalpha.ai",
+        email: user?.email || "unknown@lyraalpha.ai",
         metadata: { userId },
       });
       customerId = customer.id;

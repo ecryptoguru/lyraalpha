@@ -1,4 +1,4 @@
-Below is the Cookie Policy (Standalone, Plain-English, DPDP-Aligned) – v1 for InsightAlpha AI / LYRA.
+Below is the Cookie Policy (Standalone, Plain-English, DPDP-Aligned) – v1 for LyraAlpha AI / LYRA.
 This document is:
 •	User-friendly and transparent
 •	Aligned with India’s DPDP Act, 2023
@@ -6,7 +6,7 @@ This document is:
 •	Safe to publish as /cookie-policy
  
 Cookie Policy
-InsightAlpha AI & LYRA
+LyraAlpha AI & LYRA
 Last updated: [Insert Date]
  
 1. What Are Cookies?
@@ -15,7 +15,7 @@ They help the platform function correctly, remember preferences, and improve rel
 Cookies do not give us access to your device or personal files.
  
 2. Why We Use Cookies
-InsightAlpha AI uses cookies and similar technologies only where necessary to:
+LyraAlpha AI uses cookies and similar technologies only where necessary to:
 •	Keep you securely logged in
 •	Ensure core features work correctly
 •	Remember basic preferences
@@ -53,7 +53,7 @@ These cookies:
 Where required, consent is requested before enabling them.
  
 4. Cookies We Do NOT Use
-To be explicit, InsightAlpha AI does not use:
+To be explicit, LyraAlpha AI does not use:
 •	Third-party advertising cookies
 •	Cross-site tracking cookies
 •	Retargeting or marketing pixels
@@ -106,6 +106,6 @@ We believe cookies should:
 •	Serve a clear purpose
 •	Respect user privacy
 •	Be easy to understand and control
-At InsightAlpha AI, cookies exist to support the experience, not to exploit attention.
+At LyraAlpha AI, cookies exist to support the experience, not to exploit attention.
  
 

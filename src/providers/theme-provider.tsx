@@ -9,8 +9,8 @@ function ThemePersistence() {
   React.useEffect(() => {
     if (!theme) return;
 
-    window.localStorage.setItem("insightalpha-theme", theme);
-    document.cookie = `insightalpha-theme=${theme}; path=/; max-age=31536000; samesite=lax`;
+    window.localStorage.setItem("lyraalpha-theme", theme);
+    document.cookie = `lyraalpha-theme=${theme}; path=/; max-age=31536000; samesite=lax`;
   }, [theme]);
 
   return null;

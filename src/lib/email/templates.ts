@@ -8,10 +8,10 @@ export function buildWelcomeEmail({ firstName }: WelcomeEmailInput) {
   const safeName = firstName?.trim() || "there";
 
   return {
-    subject: "Welcome to InsightAlpha AI — your onboarding starts now",
+    subject: "Welcome to LyraAlpha AI — your onboarding starts now",
     text: `Hi ${safeName},
 
-Welcome to InsightAlpha AI.
+Welcome to LyraAlpha AI.
 
 Start here:
 1) Complete onboarding wizard
@@ -20,10 +20,10 @@ Start here:
 
 Open dashboard: ${APP_URL}/dashboard
 
-- Team InsightAlpha AI`,
+- Team LyraAlpha AI`,
     html: `
       <div style="font-family: Inter, Arial, sans-serif; color: #111827; line-height: 1.6;">
-        <h2 style="margin-bottom: 8px;">Welcome to InsightAlpha AI, ${safeName}.</h2>
+        <h2 style="margin-bottom: 8px;">Welcome to LyraAlpha AI, ${safeName}.</h2>
         <p style="margin-top: 0;">Institutional-grade intelligence with retail clarity.</p>
         <ol>
           <li>Complete your onboarding wizard</li>
@@ -64,7 +64,7 @@ Your credits are waiting. Come see what's changed.
 
 Open dashboard: ${APP_URL}/dashboard
 
-- Team InsightAlpha AI`,
+- Team LyraAlpha AI`,
     html: `
       <div style="font-family: Inter, Arial, sans-serif; color: #111827; line-height: 1.6;">
         <h2 style="margin-bottom: 8px;">Your portfolio is moving, ${safeName}.</h2>
@@ -110,7 +110,7 @@ Your credits expire at the end of the month.
 
 Open dashboard: ${APP_URL}/dashboard
 
-- Team InsightAlpha AI`,
+- Team LyraAlpha AI`,
     html: `
       <div style="font-family: Inter, Arial, sans-serif; color: #111827; line-height: 1.6;">
         <h2 style="margin-bottom: 8px;">You have ${creditsRemaining} credits waiting, ${safeName}.</h2>
@@ -158,7 +158,7 @@ Come back and see what's new:
 
 Claim your bonus: ${APP_URL}/dashboard
 
-- Team InsightAlpha AI`,
+- Team LyraAlpha AI`,
     html: `
       <div style="font-family: Inter, Arial, sans-serif; color: #111827; line-height: 1.6;">
         <h2 style="margin-bottom: 8px;">We miss you, ${safeName}.</h2>
@@ -207,7 +207,7 @@ Your referral link: ${referralLink}
 
 Share it with anyone interested in smarter investing.
 
-- Team InsightAlpha AI`,
+- Team LyraAlpha AI`,
     html: `
       <div style="font-family: Inter, Arial, sans-serif; color: #111827; line-height: 1.6;">
         <h2 style="margin-bottom: 8px;">Running low on credits, ${safeName}?</h2>
@@ -253,7 +253,7 @@ It only takes 2 minutes. Your first insight is waiting.
 
 Start now: ${APP_URL}/dashboard
 
-- Team InsightAlpha AI`,
+- Team LyraAlpha AI`,
     html: `
       <div style="font-family: Inter, Arial, sans-serif; color: #111827; line-height: 1.6;">
         <h2 style="margin-bottom: 8px;">You're ${remaining} steps away, ${safeName}.</h2>

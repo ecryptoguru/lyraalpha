@@ -112,7 +112,7 @@ Examples:
 
 ### Mid-funnel
 
-Show why InsightAlpha is useful.
+Show why LyraAlpha is useful.
 
 Examples:
 - How to build a smarter watchlist
@@ -125,8 +125,8 @@ Examples:
 Help users choose and act.
 
 Examples:
-- InsightAlpha vs traditional market research tools
-- InsightAlpha alternatives
+- LyraAlpha vs traditional market research tools
+- LyraAlpha alternatives
 - Best AI tools for stock research
 - Why investors choose a market briefing workflow
 
@@ -137,7 +137,7 @@ Examples:
 1. What Is Market Regime Analysis and Why It Matters for Investors
 2. How to Spot Portfolio Fragility Before It Becomes a Drawdown
 3. The Best Way to Build a Smarter Watchlist in 2026
-4. InsightAlpha vs Traditional Market Research Tools: What’s Different?
+4. LyraAlpha vs Traditional Market Research Tools: What’s Different?
 
 **Why these matter:**
 
@@ -151,7 +151,7 @@ Examples:
 5. What AI Can Actually Do for Market Research
 6. Why Diversification Alone Does Not Eliminate Portfolio Risk
 7. How to Read Momentum, Volatility, and Trend Together
-8. How InsightAlpha’s Daily Briefing Helps You See the Market Faster
+8. How LyraAlpha’s Daily Briefing Helps You See the Market Faster
 
 **Why these matter:**
 
@@ -179,7 +179,7 @@ Examples:
 13. Best AI Tools for Stock Research: A Fintech Buyer’s Guide
 14. How to Build an Investing Workflow Around Daily Market Briefings
 15. Why Same-Sector Movers Matter More Than Random Price Action
-16. InsightAlpha for Active Investors: Use Cases That Save Time
+16. LyraAlpha for Active Investors: Use Cases That Save Time
 
 **Why these matter:**
 
@@ -207,7 +207,7 @@ Examples:
 21. How to Track Regime Shifts Without Reading 50 Tabs a Day
 22. How to Build a Better Financial Intelligence Workflow
 23. The Anatomy of a Useful AI Briefing for Investors
-24. InsightAlpha Alternatives: What to Compare Before You Choose
+24. LyraAlpha Alternatives: What to Compare Before You Choose
 
 **Why these matter:**
 
@@ -235,7 +235,7 @@ Examples:
 29. What Makes a Good Market Intelligence Platform in 2026
 30. Why Finance Teams Need Better Context, Not More Data
 31. How to Evaluate Fintech SaaS Tools for Signal Quality
-32. InsightAlpha for Long-Term Investors: What It Helps You See
+32. LyraAlpha for Long-Term Investors: What It Helps You See
 
 **Why these matter:**
 
@@ -249,7 +249,7 @@ Examples:
 33. Why Reducing Friction Matters in Fintech Product Adoption
 34. How to Think About Market Risk When Volatility Rises
 35. The Best Fintech Content Marketing Plays for 2026
-36. How InsightAlpha Helps Users Move From Data to Action
+36. How LyraAlpha Helps Users Move From Data to Action
 
 **Why these matter:**
 
@@ -277,7 +277,7 @@ Examples:
 41. How to Build a Fintech Referral Loop That Actually Converts
 42. Why Trust Is the Real Currency in Financial SaaS
 43. How to Turn One Market Insight Into a Full Content Campaign
-44. InsightAlpha for Analysts: Faster Ways to Sense Market Change
+44. LyraAlpha for Analysts: Faster Ways to Sense Market Change
 
 **Why these matter:**
 
@@ -288,9 +288,9 @@ Examples:
 
 ### Week 12
 
-45. The Complete Guide to Smarter Market Research With InsightAlpha
+45. The Complete Guide to Smarter Market Research With LyraAlpha
 46. How to Build a Portfolio Intelligence Habit in 15 Minutes a Day
-47. What We Learned From Launching InsightAlpha
+47. What We Learned From Launching LyraAlpha
 48. Why Market Intelligence Products Win on Clarity, Not Complexity
 
 **Why these matter:**
@@ -320,7 +320,7 @@ Use examples, tables, lists, or diagrams.
 
 ### 5. Product connection
 
-Explain how InsightAlpha helps solve or simplify the problem.
+Explain how LyraAlpha helps solve or simplify the problem.
 
 ### 6. CTA
 

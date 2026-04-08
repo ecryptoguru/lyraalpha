@@ -21,7 +21,7 @@ Portfolio Normalization Engine
          ↓
 Unified Portfolio Schema  (src/lib/types/broker.ts)
          ↓
-InsightAlpha Intelligence Engines
+LyraAlpha Intelligence Engines
  ├── Health engine        (portfolio-health.ts)
  ├── Fragility engine     (portfolio-fragility.ts)
  ├── Monte Carlo engine   (portfolio-monte-carlo.ts)

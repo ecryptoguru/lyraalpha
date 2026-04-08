@@ -41,10 +41,10 @@ describe("buildMyraVoiceInstructions — structure", () => {
     expect(build({})).toContain("PLATFORM_FACTS_STUB");
   });
 
-  it("states that Myra answers only about InsightAlpha", () => {
+  it("states that Myra answers only about LyraAlpha", () => {
     const result = build({});
-    expect(result).toContain("Stay strictly focused on InsightAlpha AI");
-    expect(result).toContain("Answer only about InsightAlpha's product, features, plans, credits, onboarding, support, and workflows");
+    expect(result).toContain("Stay strictly focused on LyraAlpha AI");
+    expect(result).toContain("Answer only about LyraAlpha's product, features, plans, credits, onboarding, support, and workflows");
   });
 
   it("includes the USER section", () => {
@@ -186,9 +186,9 @@ describe("buildMyraVoiceInstructions — guardrails", () => {
     expect(result).toContain("Lyra Intel is built for exactly that");
   });
 
-  it("includes the outside-InsightAlpha redirect rule", () => {
+  it("includes the outside-LyraAlpha redirect rule", () => {
     const result = build({});
-    expect(result).toContain("outside InsightAlpha");
+    expect(result).toContain("outside LyraAlpha");
     expect(result).toContain("outside Myra's scope");
   });
 

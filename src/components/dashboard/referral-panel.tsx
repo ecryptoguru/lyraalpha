@@ -66,13 +66,13 @@ export function ReferralPanel() {
   if (!data) return null;
 
   const referralShare = buildReferralShareObject({
-    title: "Give a friend an InsightAlpha head start",
+    title: "Give a friend an LyraAlpha head start",
     href: "/",
     referralHref: data.referralLink,
     takeaway: "Share the product naturally first, then switch on invite mode when you want your personal referral link attached.",
     context: "Friends get 50 credits when they sign up. You get 75 credits after they start using the product.",
-    inviteTakeaway: "Use my InsightAlpha link to start with 50 credits and explore the platform faster.",
-    inviteContext: "Once you begin using InsightAlpha, I receive 75 credits. It is a simple way to unlock more portfolio reads, compare systems and shock simulations.",
+    inviteTakeaway: "Use my LyraAlpha link to start with 50 credits and explore the platform faster.",
+    inviteContext: "Once you begin using LyraAlpha, I receive 75 credits. It is a simple way to unlock more portfolio reads, compare systems and shock simulations.",
     scoreValue: "+75 / +50 credits",
   });
 

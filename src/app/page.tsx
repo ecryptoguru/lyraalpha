@@ -13,18 +13,18 @@ import { Footer } from "@/components/layout/Footer";
 import { Navbar } from "@/components/layout/Navbar";
 
 export const metadata: Metadata = {
-  title: "InsightAlpha AI | The AI that computes before it speaks",
+  title: "LyraAlpha AI | The AI that computes before it speaks",
   description:
     "The only financial intelligence platform that grounds every AI response in deterministic engine computation. Lyra interprets what the engines computed — never invents. US & India. 5 asset classes. Join the early access waitlist.",
   openGraph: {
-    title: "InsightAlpha AI | The AI that computes before it speaks",
+    title: "LyraAlpha AI | The AI that computes before it speaks",
     description:
       "Stop guessing. Start knowing. AI-grounded financial intelligence for US & India investors across equities, crypto, ETFs, mutual funds, and commodities. Early access waitlist open.",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "InsightAlpha AI | The AI that computes before it speaks",
+    title: "LyraAlpha AI | The AI that computes before it speaks",
     description:
       "Stop guessing. Start knowing. AI-grounded financial intelligence for US & India investors across equities, crypto, ETFs, mutual funds, and commodities. Early access waitlist open.",
     images: ["/og-image.png"],
@@ -34,9 +34,9 @@ export const metadata: Metadata = {
 const ORG_SCHEMA = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "InsightAlpha AI",
-  url: "https://insightalpha.ai",
-  logo: "https://insightalpha.ai/logo.png",
+  name: "LyraAlpha AI",
+  url: "https://lyraalpha.ai",
+  logo: "https://lyraalpha.ai/logo.png",
   description:
     "AI-grounded financial intelligence platform for US and India markets. Deterministic engine computation with AI interpretation across equities, crypto, ETFs, mutual funds, and commodities.",
   sameAs: [] as string[],
@@ -45,11 +45,11 @@ const ORG_SCHEMA = {
 const WEBSITE_SCHEMA = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "InsightAlpha AI",
-  url: "https://insightalpha.ai",
+  name: "LyraAlpha AI",
+  url: "https://lyraalpha.ai",
   potentialAction: {
     "@type": "SearchAction",
-    target: "https://insightalpha.ai/blog?q={search_term_string}",
+    target: "https://lyraalpha.ai/blog?q={search_term_string}",
     "query-input": "required name=search_term_string",
   },
 };
@@ -57,7 +57,7 @@ const WEBSITE_SCHEMA = {
 const APP_SCHEMA = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "InsightAlpha AI",
+  name: "LyraAlpha AI",
   applicationCategory: "FinanceApplication",
   operatingSystem: "Web",
   offers: {

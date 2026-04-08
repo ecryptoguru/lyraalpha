@@ -1,4 +1,4 @@
-// AWS CDK Infrastructure Stack for InsightAlpha
+// AWS CDK Infrastructure Stack for LyraAlpha
 // Usage: npx cdk deploy after configuring AWS credentials
 
 import * as cdk from 'aws-cdk-lib';
@@ -11,7 +11,7 @@ import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
-export class InsightAlphaStack extends cdk.Stack {
+export class LyraAlphaStack extends cdk.Stack {
   public readonly dbEndpoint: string;
   public readonly cacheEndpoint: string;
   public readonly vpc: ec2.Vpc;
@@ -20,7 +20,7 @@ export class InsightAlphaStack extends cdk.Stack {
     super(scope, id, props);
 
     // Create VPC for all resources
-    this.vpc = new ec2.Vpc(this, 'InsightAlphaVPC', {
+    this.vpc = new ec2.Vpc(this, 'LyraAlphaVPC', {
       maxAzs: 2,
       natGateways: 1,
       subnetConfiguration: [
@@ -53,7 +53,7 @@ export class InsightAlphaStack extends cdk.Stack {
 
     // Database credentials secret
     const dbSecret = new secrets.Secret(this, 'DBSecret', {
-      secretName: 'insightalpha-db-credentials',
+      secretName: 'lyraalpha-db-credentials',
       generateSecretString: {
         secretStringTemplate: JSON.stringify({ username: 'postgres' }),
         generateStringKey: 'password',
@@ -75,7 +75,7 @@ export class InsightAlphaStack extends cdk.Stack {
       vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
       securityGroups: [dbSecurityGroup],
       credentials: rds.Credentials.fromSecret(dbSecret),
-      databaseName: 'insightalpha',
+      databaseName: 'lyraalpha',
       allocatedStorage: 20,
       maxAllocatedStorage: 100,
       storageType: rds.StorageType.GP2,
@@ -105,13 +105,13 @@ export class InsightAlphaStack extends cdk.Stack {
     const cacheSubnetGroup = new elasticache.CfnSubnetGroup(this, 'CacheSubnetGroup', {
       description: 'Subnet group for ElastiCache',
       subnetIds: this.vpc.privateSubnets.map(subnet => subnet.subnetId),
-      cacheSubnetGroupName: 'insightalpha-cache-subnets',
+      cacheSubnetGroupName: 'lyraalpha-cache-subnets',
     });
 
     // ElastiCache Serverless Redis
     const cache = new elasticache.CfnServerlessCache(this, 'RedisCache', {
       engine: 'redis',
-      serverlessCacheName: 'insightalpha-cache',
+      serverlessCacheName: 'lyraalpha-cache',
       majorEngineVersion: '7',
       securityGroupIds: [cacheSecurityGroup.securityGroupId],
       subnetIds: cacheSubnetGroup.subnetIds,

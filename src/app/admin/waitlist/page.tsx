@@ -22,9 +22,9 @@ interface WaitlistUser {
 export default function AdminWaitlistPage() {
   const { data, error, isLoading, mutate } = useAdminWaitlist();
   const [selected, setSelected] = useState<string[]>([]);
-  const [subject, setSubject] = useState("InsightAlpha AI pre-launch update");
-  const [htmlContent, setHtmlContent] = useState("<p>Thanks for joining the InsightAlpha AI waitlist.</p>");
-  const [textContent, setTextContent] = useState("Thanks for joining the InsightAlpha AI waitlist.");
+  const [subject, setSubject] = useState("LyraAlpha AI pre-launch update");
+  const [htmlContent, setHtmlContent] = useState("<p>Thanks for joining the LyraAlpha AI waitlist.</p>");
+  const [textContent, setTextContent] = useState("Thanks for joining the LyraAlpha AI waitlist.");
   const [isSending, setIsSending] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 

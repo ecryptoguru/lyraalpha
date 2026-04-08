@@ -6,13 +6,13 @@
 ---
 
 ## Executive Summary
-InsightAlpha AI is a financial-intelligence platform built around a durable architectural rule:
+LyraAlpha AI is a financial-intelligence platform built around a durable architectural rule:
 
 **the engines compute, the AI interprets.**
 
 That principle remains the foundation of the product today, and it also defines the next chapter of the platform.
 
-In its current implementation, InsightAlpha AI combines deterministic scoring, regime-aware framing, plan-aware AI routing on GPT-5.4 (nano / mini / full), and a dual-agent product surface across equities, ETFs, mutual funds, crypto, and commodities. The next phase evolves the product into a more reactive, persistent, and premium intelligence system — with **Convex** as the long-term primary app-state backend and deeper premium workflow design as the primary value lever.
+In its current implementation, LyraAlpha AI combines deterministic scoring, regime-aware framing, plan-aware AI routing on GPT-5.4 (nano / mini / full), and a dual-agent product surface across equities, ETFs, mutual funds, crypto, and commodities. The next phase evolves the product into a more reactive, persistent, and premium intelligence system — with **Convex** as the long-term primary app-state backend and deeper premium workflow design as the primary value lever.
 
 This document is intentionally written in two layers:
 - **implementation-aligned truth** about the current platform
@@ -23,7 +23,7 @@ This document is intentionally written in two layers:
 ## Core Product Thesis
 Retail investors do not mainly suffer from a shortage of information. They suffer from a shortage of interpretive structure.
 
-InsightAlpha AI addresses that gap through:
+LyraAlpha AI addresses that gap through:
 - deterministic score engines
 - market-regime framing
 - compatibility and signal layers
@@ -64,7 +64,7 @@ This separation remains a strategic advantage because it improves governance, re
 ---
 
 ## The Next Chapter
-The next stage of InsightAlpha AI is not a departure from the current architecture. It is an expansion of it.
+The next stage of LyraAlpha AI is not a departure from the current architecture. It is an expansion of it.
 
 ### Future-State Thesis
 The platform should evolve into:
@@ -98,7 +98,7 @@ That matters because the product increasingly benefits from:
 The value is not backend novelty. The value is a more responsive product with less glue code and a stronger real-time user experience.
 
 ### 3. Premium Workflow Maturity
-The moat of InsightAlpha AI is not a single model name. It comes from the combination of:
+The moat of LyraAlpha AI is not a single model name. It comes from the combination of:
 - deterministic computation
 - constrained interpretation
 - disciplined routing
@@ -159,7 +159,7 @@ That should continue in the future-state narrative. As the product becomes more 
 ---
 
 ## Why This Story Holds
-InsightAlpha AI is strongest when described as a structured intelligence system with a credible path forward:
+LyraAlpha AI is strongest when described as a structured intelligence system with a credible path forward:
 - deterministic engines first
 - AI interpretation second
 - premium workflows as the value amplifier

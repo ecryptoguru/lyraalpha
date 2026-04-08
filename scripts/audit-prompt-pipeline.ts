@@ -260,7 +260,7 @@ const PROMPT_MATRIX: PromptTestCase[] = [
     plan: "ELITE",
     tier: "SIMPLE",
     family: "educational",
-    query: "How do credits work on InsightAlpha?",
+    query: "How do credits work on LyraAlpha?",
     context: { assetType: "GLOBAL" },
     optimizationTest: "EDU_CACHE",
   },

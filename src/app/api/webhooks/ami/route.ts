@@ -32,7 +32,7 @@ const BlogPostPublishedSchema = z.object({
       .url()
       .refine((u) => u.startsWith("https://"), { message: "heroImageUrl must be an HTTPS URL" })
       .optional(),
-    author: z.string().default("InsightAlpha Research"),
+    author: z.string().default("LyraAlpha Research"),
     featured: z.boolean().default(false),
     sourceAgent: z.string().optional(),
   }),
@@ -62,19 +62,19 @@ async function* streamSubscriberEmails(): AsyncGenerator<string[]> {
 
 async function notifyBlogSubscribers(title: string, description: string, slug: string) {
   try {
-    const url = `https://insightalpha.ai/blog/${slug}`;
+    const url = `https://lyraalpha.ai/blog/${slug}`;
     const safeTitle = escHtml(title);
     const safeDesc = escHtml(description);
     const html = `
       <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#040816;color:#fff;padding:32px;border-radius:16px;">
-        <p style="font-size:10px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:#f59e0b;margin:0 0 16px;">InsightAlpha AI · New Article</p>
+        <p style="font-size:10px;font-weight:700;letter-spacing:0.3em;text-transform:uppercase;color:#f59e0b;margin:0 0 16px;">LyraAlpha AI · New Article</p>
         <h1 style="font-size:22px;font-weight:300;line-height:1.4;color:#fff;margin:0 0 12px;">${safeTitle}</h1>
         <p style="font-size:14px;line-height:1.7;color:rgba(255,255,255,0.55);margin:0 0 24px;">${safeDesc}</p>
         <a href="${url}" style="display:inline-block;background:#f59e0b;color:#0a0a0a;font-weight:700;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding:12px 24px;border-radius:10px;text-decoration:none;">Read Article</a>
-        <p style="margin:24px 0 0;font-size:11px;color:rgba(255,255,255,0.25);">You're receiving this because you subscribed to InsightAlpha AI blog updates. <a href="https://insightalpha.ai/dashboard/settings" style="color:#f59e0b;">Manage preferences</a></p>
+        <p style="margin:24px 0 0;font-size:11px;color:rgba(255,255,255,0.25);">You're receiving this because you subscribed to LyraAlpha AI blog updates. <a href="https://lyraalpha.ai/dashboard/settings" style="color:#f59e0b;">Manage preferences</a></p>
       </div>
     `;
-    const subject = `New on InsightAlpha AI: ${title}`;
+    const subject = `New on LyraAlpha AI: ${title}`;
     let totalSent = 0;
 
     for await (const pageEmails of streamSubscriberEmails()) {

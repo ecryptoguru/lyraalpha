@@ -63,7 +63,7 @@ import { POST, DELETE } from "../route";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function makeReq(): NextRequest {
-  return new Request("https://insightalpha.ai/api/admin/blog/post-id-1/feature", {
+  return new Request("https://lyraalpha.ai/api/admin/blog/post-id-1/feature", {
     method: "POST",
   }) as unknown as NextRequest;
 }

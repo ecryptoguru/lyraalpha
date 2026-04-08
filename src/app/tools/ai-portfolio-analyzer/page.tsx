@@ -3,20 +3,20 @@ import type { Metadata } from "next";
 import { PublicToolPage } from "@/components/tools/public-tool-page";
 
 export const metadata: Metadata = {
-  title: "AI Portfolio Analyzer | InsightAlpha AI — Health Score, Fragility & Rebalance Signals",
+  title: "AI Portfolio Analyzer | LyraAlpha AI — Health Score, Fragility & Rebalance Signals",
   description:
     "AI portfolio analyzer that surfaces concentration risk, hidden overlap, and fragility before you rebalance. Powered by deterministic portfolio health engines and Lyra AI. US and India markets. Connect your holdings and get a scored diagnostic in seconds.",
-  alternates: { canonical: "https://insightalpha.ai/tools/ai-portfolio-analyzer" },
+  alternates: { canonical: "https://lyraalpha.ai/tools/ai-portfolio-analyzer" },
   openGraph: {
-    title: "AI Portfolio Analyzer | InsightAlpha AI",
+    title: "AI Portfolio Analyzer | LyraAlpha AI",
     description:
       "Find the one portfolio issue that actually matters before you rebalance — concentration, hidden overlap, or fragility. Health score, Monte Carlo simulation, and AI-generated rebalance signals.",
-    url: "https://insightalpha.ai/tools/ai-portfolio-analyzer",
+    url: "https://lyraalpha.ai/tools/ai-portfolio-analyzer",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Portfolio Analyzer | InsightAlpha AI",
+    title: "AI Portfolio Analyzer | LyraAlpha AI",
     description:
       "Find the one portfolio issue that actually matters before you rebalance — concentration, hidden overlap, or fragility. Health score, Monte Carlo simulation, and AI-generated rebalance signals.",
     images: ["/og-image.png"],
@@ -92,14 +92,14 @@ export default function AiPortfolioAnalyzerPage() {
         },
         {
           question: "Does this work for Indian portfolios?",
-          answer: "Yes. InsightAlpha covers both US and India markets. Indian equity portfolios, mutual funds, and multi-asset mixes are all supported in the portfolio intelligence system.",
+          answer: "Yes. LyraAlpha covers both US and India markets. Indian equity portfolios, mutual funds, and multi-asset mixes are all supported in the portfolio intelligence system.",
         },
         {
           question: "What should I do after the portfolio summary?",
           answer: "The most common paths are Shock Simulator for downside scenario context, Market Narratives for regime framing, or Lyra research when you need the diagnostic translated into a concrete rebalance plan.",
         },
       ]}
-      seoIntro="InsightAlpha's AI portfolio analyzer covers queries around portfolio risk analysis, concentration risk checker, ETF overlap detection, portfolio health scoring, and AI rebalance tools. The difference from a generic portfolio tracker is the analytical engine underneath — six deterministic signals computed first, Lyra interpreting second. This page covers both US and India investor use cases across equities, ETFs, mutual funds, and multi-asset portfolios."
+      seoIntro="LyraAlpha's AI portfolio analyzer covers queries around portfolio risk analysis, concentration risk checker, ETF overlap detection, portfolio health scoring, and AI rebalance tools. The difference from a generic portfolio tracker is the analytical engine underneath — six deterministic signals computed first, Lyra interpreting second. This page covers both US and India investor use cases across equities, ETFs, mutual funds, and multi-asset portfolios."
       seoBullets={[
         "Use this when you already hold multiple positions and want to know the most important issue before making changes — not a list of every metric.",
         "The health score, fragility index, and Monte Carlo simulation are all computed by deterministic engines. Lyra interprets the output, she doesn't produce it.",

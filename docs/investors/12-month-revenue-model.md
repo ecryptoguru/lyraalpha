@@ -1,8 +1,8 @@
-# InsightAlpha AI — 12-Month Revenue Model
+# LyraAlpha AI — 12-Month Revenue Model
 
 ## Purpose
 
-This document provides a directional 12-month revenue framework for InsightAlpha AI based on the current product ladder, live runtime behavior, and the company's premium-workflow strategy.
+This document provides a directional 12-month revenue framework for LyraAlpha AI based on the current product ladder, live runtime behavior, and the company's premium-workflow strategy.
 
 It is designed to communicate how the business can scale **credibly**, not to manufacture false precision. Every assumption is grounded in live product behavior, not hopeful projections.
 
@@ -223,7 +223,7 @@ These targets assume model costs continue declining along the GPT-5.4 pricing cu
 
 ### SEO / GEO and Blog Strategy
 
-InsightAlpha AI's content architecture targets three high-intent page types:
+LyraAlpha AI's content architecture targets three high-intent page types:
 - **Tool pages** — "stock screener India", "compare stocks India/US"
 - **Answer pages** — "what is a good momentum score", "how to stress test a portfolio"
 - **Comparison pages** — "Nifty 50 vs S&P 500 correlation", "gold vs equity in a rate shock"
@@ -254,7 +254,7 @@ These convert at 3–5x the rate of generic blog content and build a durable org
 
 Investors are increasingly skeptical of AI revenue projections because most lack structural grounding.
 
-InsightAlpha AI's model is credible because:
+LyraAlpha AI's model is credible because:
 
 1. **Credits make usage visible.** Starter exhausts credits → Pro conversion trigger is built into the product, not just marketing.
 2. **Workflow gates make upgrade value obvious.** Compare Assets and Shock Simulator are behind an Elite gate — upgrade moment is clear and earned, not artificial.
@@ -267,7 +267,7 @@ InsightAlpha AI's model is credible because:
 
 ## 10. Bottom Line
 
-InsightAlpha AI's revenue story is a conversion ladder grounded in product structure:
+LyraAlpha AI's revenue story is a conversion ladder grounded in product structure:
 
 - free acquisition with built-in upgrade pressure
 - recurring Pro revenue with strong LTV:CAC

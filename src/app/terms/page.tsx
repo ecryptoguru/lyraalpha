@@ -4,14 +4,14 @@ import { Navbar } from "@/components/layout/Navbar";
 import { TERMS_DOCUMENT } from "@/lib/legal-documents";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | InsightAlpha AI",
+  title: "Terms of Service | LyraAlpha AI",
   description:
-    "InsightAlpha AI terms of service — governing use of our financial intelligence platform, AI features, and all associated services.",
-  alternates: { canonical: "https://insightalpha.ai/terms" },
+    "LyraAlpha AI terms of service — governing use of our financial intelligence platform, AI features, and all associated services.",
+  alternates: { canonical: "https://lyraalpha.ai/terms" },
   openGraph: {
-    title: "Terms of Service | InsightAlpha AI",
-    description: "Terms governing use of InsightAlpha AI’s financial intelligence platform and services.",
-    url: "https://insightalpha.ai/terms",
+    title: "Terms of Service | LyraAlpha AI",
+    description: "Terms governing use of LyraAlpha AI’s financial intelligence platform and services.",
+    url: "https://lyraalpha.ai/terms",
   },
   robots: { index: false },
 };

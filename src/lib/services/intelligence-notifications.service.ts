@@ -116,7 +116,7 @@ function buildEmailHtml(event: IntelligenceNotificationEvent) {
   return {
     subject: event.emailSubject ?? event.title,
     text: `${event.title}\n\n${event.body}\n\nOpen: ${href}`,
-    html: `<div style="font-family: Inter, Arial, sans-serif; color: #111827; line-height: 1.6;"><p style="font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#f59e0b;">${event.type.replace(/_/g, " ")}</p><h2 style="margin:8px 0;">${event.title}</h2><p>${event.body}</p><a href="${href}" style="display:inline-block; margin-top:12px; background:#f59e0b; color:#111827; text-decoration:none; padding:10px 16px; border-radius:8px; font-weight:700;">Open in InsightAlpha AI</a></div>`,
+    html: `<div style="font-family: Inter, Arial, sans-serif; color: #111827; line-height: 1.6;"><p style="font-size:12px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:#f59e0b;">${event.type.replace(/_/g, " ")}</p><h2 style="margin:8px 0;">${event.title}</h2><p>${event.body}</p><a href="${href}" style="display:inline-block; margin-top:12px; background:#f59e0b; color:#111827; text-decoration:none; padding:10px 16px; border-radius:8px; font-weight:700;">Open in LyraAlpha AI</a></div>`,
   };
 }
 

@@ -1,7 +1,7 @@
 {
-  "name": "insightalpha-infrastructure",
+  "name": "lyraalpha-infrastructure",
   "version": "1.0.0",
-  "description": "AWS CDK Infrastructure for InsightAlpha",
+  "description": "AWS CDK Infrastructure for LyraAlpha",
   "private": true,
   "scripts": {
     "build": "tsc",

@@ -197,7 +197,7 @@ export function StockCard({ data, inclusionReason }: StockCardProps) {
                           </div>
                         ) : (
                           inclusionReason ||
-                          "Structural business alignment identified by InsightAlpha AI intelligence engine."
+                          "Structural business alignment identified by LyraAlpha AI intelligence engine."
                         )}
                       </div>
                     </div>

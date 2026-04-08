@@ -6,16 +6,16 @@ import { Region } from "@/lib/context/RegionContext";
 import { getDashboardViewer } from "@/lib/server/dashboard-viewer";
 
 export const metadata: Metadata = {
-  title: "Dashboard | InsightAlpha AI",
+  title: "Dashboard | LyraAlpha AI",
   description: "Institutional Assessment Console",
   openGraph: {
-    title: "Dashboard | InsightAlpha AI",
+    title: "Dashboard | LyraAlpha AI",
     description: "Institutional Assessment Console",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dashboard | InsightAlpha AI",
+    title: "Dashboard | LyraAlpha AI",
     description: "Institutional Assessment Console",
     images: ["/og-image.png"],
   },

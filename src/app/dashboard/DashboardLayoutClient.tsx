@@ -156,7 +156,7 @@ function DashboardLayoutInner({
                     ? breadcrumbSegments[breadcrumbSegments.length - 1].label
                     : pathname === "/dashboard"
                       ? "Dashboard"
-                      : "InsightAlpha AI"}
+                      : "LyraAlpha AI"}
                 </span>
               </div>
             </div>

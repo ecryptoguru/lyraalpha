@@ -228,7 +228,7 @@ export function PublicToolPage({
                         Area
                       </th>
                       <th className="px-5 py-3.5 text-left font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-amber-300/70">
-                        InsightAlpha
+                        LyraAlpha
                       </th>
                       <th className="px-5 py-3.5 text-left font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-white/38">
                         {comparisonAlternativeLabel}
@@ -345,7 +345,7 @@ export function PublicToolPage({
                       Ready to stop guessing?
                     </h2>
                     <p className="mt-2 max-w-lg text-sm leading-7 text-white/55">
-                      InsightAlpha computes before it speaks. Every AI response is grounded in deterministic engine output — no hallucinated metrics, no invented structure.
+                      LyraAlpha computes before it speaks. Every AI response is grounded in deterministic engine output — no hallucinated metrics, no invented structure.
                     </p>
                   </div>
                   <Link

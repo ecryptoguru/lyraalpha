@@ -23,7 +23,7 @@ function imageEnclosureMime(url: string): string {
 
 export async function GET() {
   const posts = await getAllPosts();
-  const BASE_URL = "https://insightalpha.ai";
+  const BASE_URL = "https://lyraalpha.ai";
 
   const items = posts
     .map((post) => {
@@ -41,7 +41,7 @@ export async function GET() {
       <guid isPermaLink="true">${url}</guid>
       <description>${description}</description>
       <pubDate>${pubDate}</pubDate>
-      <author>contact@insightalpha.ai (${author})</author>
+      <author>contact@lyraalpha.ai (${author})</author>
       <category>${category}</category>
       ${post.tags.map((t) => `<category>${escXml(t)}</category>`).join("\n      ")}
       ${post.heroImageUrl ? `<enclosure url="${escXml(post.heroImageUrl)}" type="${imageEnclosureMime(post.heroImageUrl)}" length="0" />` : ""}
@@ -52,7 +52,7 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>InsightAlpha AI — Market Intelligence Blog</title>
+    <title>LyraAlpha AI — Market Intelligence Blog</title>
     <link>${BASE_URL}/blog</link>
     <description>Deep dives on AI-grounded financial analysis, market regimes, deterministic scoring, and intelligent investing across US and India markets.</description>
     <language>en-US</language>
@@ -60,7 +60,7 @@ export async function GET() {
     <atom:link href="${BASE_URL}/blog/feed.xml" rel="self" type="application/rss+xml" />
     <image>
       <url>${BASE_URL}/logo.png</url>
-      <title>InsightAlpha AI</title>
+      <title>LyraAlpha AI</title>
       <link>${BASE_URL}</link>
     </image>
     ${items}

@@ -1,4 +1,4 @@
-# InsightAlpha AI — Use of Funds
+# LyraAlpha AI — Use of Funds
 
 ## Purpose
 
@@ -78,7 +78,7 @@ Strong product quality does not compound without a strong distribution engine. T
 
 ### Why This Matters
 
-InsightAlpha AI is a data-intensive product. Reliability and freshness are product quality signals, not just technical requirements. A stale briefing or a slow premium workflow harms conversion.
+LyraAlpha AI is a data-intensive product. Reliability and freshness are product quality signals, not just technical requirements. A stale briefing or a slow premium workflow harms conversion.
 
 ### Specific Uses
 
@@ -226,7 +226,7 @@ Capital goes toward reinforcement and acceleration, not exploration.
 
 ## 7. Investor Takeaway
 
-InsightAlpha AI already has the core ingredients investors want to see:
+LyraAlpha AI already has the core ingredients investors want to see:
 
 - ✓ Live product with premium workflows shipped
 - ✓ Clear monetization ladder with visible upgrade triggers

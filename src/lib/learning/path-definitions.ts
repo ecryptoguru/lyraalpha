@@ -14,7 +14,7 @@ export const LEARNING_PATHS: LearningPathDefinition[] = [
   {
     id: "score-literacy",
     title: "Score Literacy",
-    description: "Master the six core scores — Trend, Momentum, Volatility, Liquidity, Sentiment, Trust — that power every InsightAlpha analysis.",
+    description: "Master the six core scores — Trend, Momentum, Volatility, Liquidity, Sentiment, Trust — that power every LyraAlpha analysis.",
     iconKey: "star",
     modules: [
       "what-is-trend-score",

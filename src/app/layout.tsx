@@ -26,7 +26,7 @@ export const viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
-  title: "InsightAlpha AI | Institutional-Grade Financial Intelligence",
+  title: "LyraAlpha AI | Institutional-Grade Financial Intelligence",
   description: "Decode market signals with AI that understands context. Real-time analysis for Equities, Crypto and Commodities with Institutional Grade Retail Clarity.",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -35,13 +35,13 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "InsightAlpha AI",
+    title: "LyraAlpha AI",
   },
   openGraph: {
-    title: "InsightAlpha AI | Institutional-Grade Financial Intelligence",
+    title: "LyraAlpha AI | Institutional-Grade Financial Intelligence",
     description: "Institutional-grade financial intelligence for every investor.",
-    url: "https://insightalpha.ai",
-    siteName: "InsightAlpha AI",
+    url: "https://lyraalpha.ai",
+    siteName: "LyraAlpha AI",
     images: [
       {
         url: "/og-image.png",
@@ -54,14 +54,14 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "InsightAlpha AI | Institutional-Grade Financial Intelligence",
+    title: "LyraAlpha AI | Institutional-Grade Financial Intelligence",
     description: "Institutional-grade financial intelligence for every investor.",
     images: ["/og-image.png"],
   },
   alternates: {
     types: {
       "application/rss+xml": [
-        { url: "https://insightalpha.ai/blog/feed.xml", title: "InsightAlpha AI Blog" },
+        { url: "https://lyraalpha.ai/blog/feed.xml", title: "LyraAlpha AI Blog" },
       ],
     },
   },
@@ -81,7 +81,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
-                var storageKey = 'insightalpha-theme';
+                var storageKey = 'lyraalpha-theme';
                 var cookieMatch = document.cookie.match(new RegExp('(?:^|; )' + storageKey + '=([^;]+)'));
                 var cookieTheme = cookieMatch ? decodeURIComponent(cookieMatch[1]) : null;
                 var storedTheme = null;
@@ -136,7 +136,7 @@ export default function RootLayout({
             attribute="class"
             defaultTheme="dark"
             enableSystem={false}
-            storageKey="insightalpha-theme"
+            storageKey="lyraalpha-theme"
             disableTransitionOnChange
           >
             {children}

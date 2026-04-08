@@ -17,7 +17,7 @@ However, the old adage applies: **"Insiders sell for many reasons (taxes, divers
 
 ## What to Look For
 
-InsightAlpha AI tracks insider activity and calculates the **Management Sentiment Percentile Rank (MSPR)**. This score (0-100) measures how bullish or bearish the executive team's recent trading activity is compared to historical norms and sector peers.
+LyraAlpha AI tracks insider activity and calculates the **Management Sentiment Percentile Rank (MSPR)**. This score (0-100) measures how bullish or bearish the executive team's recent trading activity is compared to historical norms and sector peers.
 
 1. **Open Market Buys**: The strongest signal. A CEO buying $1M of stock on the open market (not just receiving stock options) is putting their own cash on the line. 
 2. **Cluster Buying**: When multiple executives (e.g., the CEO, CFO, and two Directors) all buy stock in the same week. This is an extremely high-conviction signal that the internal data looks fantastic.

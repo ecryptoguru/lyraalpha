@@ -1,6 +1,6 @@
 Below is a **research-based list of the 50 highest-traffic Google search keywords used by U.S. retail investors**. These come from aggregated SEO data patterns (Ahrefs/Semrush/Google trends ranges).
 
-For **InsightAlpha AI**, these keywords are extremely important because U.S. investors generate **much higher SaaS revenue per user** than most markets.
+For **LyraAlpha AI**, these keywords are extremely important because U.S. investors generate **much higher SaaS revenue per user** than most markets.
 
 ## How to use this keyword map
 
@@ -55,7 +55,7 @@ These are **intent-driven investors**.
 
 # 3️⃣ Portfolio & Analysis Keywords
 
-These are ideal for InsightAlpha’s **portfolio intelligence** features.
+These are ideal for LyraAlpha’s **portfolio intelligence** features.
 
 | Keyword                      | Monthly Searches |
 | ---------------------------- | ---------------- |
@@ -126,11 +126,11 @@ These keywords are rapidly growing.
 | AI trading bot        | 50k+             |
 | AI portfolio analysis | 15k+             |
 
-These are **perfect positioning keywords** for InsightAlpha.
+These are **perfect positioning keywords** for LyraAlpha.
 
 ---
 
-# Most Valuable Keywords for InsightAlpha
+# Most Valuable Keywords for LyraAlpha
 
 These have the **best combination of traffic + monetization**.
 
@@ -151,7 +151,7 @@ Ranking for these could bring **hundreds of thousands of monthly visitors**.
 
 ---
 
-# SEO Opportunity for InsightAlpha
+# SEO Opportunity for LyraAlpha
 
 Instead of blog posts, build **AI-powered tools** targeting these keywords:
 
@@ -171,7 +171,7 @@ Tools rank much faster in Google than articles.
 
 # Potential Traffic Opportunity
 
-If InsightAlpha ranks for:
+If LyraAlpha ranks for:
 
 * stock analysis
 * portfolio tracker

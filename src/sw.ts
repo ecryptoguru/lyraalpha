@@ -88,7 +88,7 @@ self.addEventListener("push", (e: Event) => {
   event.waitUntil(
     // @ts-expect-error - registration not available on basic WorkerGlobalScope
     (self.registration as ServiceWorkerRegistration)
-      .showNotification(data.title ?? "InsightAlpha AI", {
+      .showNotification(data.title ?? "LyraAlpha AI", {
         body: data.body ?? "",
         icon: data.icon ?? "/logo.png",
         badge: "/logo.png",

@@ -3,20 +3,20 @@ import type { Metadata } from "next";
 import { PublicToolPage } from "@/components/tools/public-tool-page";
 
 export const metadata: Metadata = {
-  title: "Market Narrative Tracker | InsightAlpha AI — Regime Analysis & Sector Rotation",
+  title: "Market Narrative Tracker | LyraAlpha AI — Regime Analysis & Sector Rotation",
   description:
-    "Track the dominant market narrative in real time. InsightAlpha's narrative engine identifies regime shifts, sector rotation, and the market stories that are strengthening or fading — so you react to what's actually driving prices, not the loudest headline.",
-  alternates: { canonical: "https://insightalpha.ai/tools/market-narrative-tracker" },
+    "Track the dominant market narrative in real time. LyraAlpha's narrative engine identifies regime shifts, sector rotation, and the market stories that are strengthening or fading — so you react to what's actually driving prices, not the loudest headline.",
+  alternates: { canonical: "https://lyraalpha.ai/tools/market-narrative-tracker" },
   openGraph: {
-    title: "Market Narrative Tracker | InsightAlpha AI",
+    title: "Market Narrative Tracker | LyraAlpha AI",
     description:
       "Find the market story behind the moves — not the moves themselves. Regime classification, sector rotation signals, and narrative strength tracking for US and India markets.",
-    url: "https://insightalpha.ai/tools/market-narrative-tracker",
+    url: "https://lyraalpha.ai/tools/market-narrative-tracker",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Market Narrative Tracker | InsightAlpha AI",
+    title: "Market Narrative Tracker | LyraAlpha AI",
     description:
       "Find the market story behind the moves — not the moves themselves. Regime classification, sector rotation signals, and narrative strength tracking for US and India markets.",
     images: ["/og-image.png"],
@@ -88,7 +88,7 @@ export default function MarketNarrativeTrackerPage() {
         },
         {
           question: "Does this cover Indian market narratives?",
-          answer: "Yes. InsightAlpha tracks market narratives for both US and India markets. India-specific narratives — RBI policy, FII flow dynamics, rupee regime, domestic vs export sector rotations — are tracked alongside US macro narratives.",
+          answer: "Yes. LyraAlpha tracks market narratives for both US and India markets. India-specific narratives — RBI policy, FII flow dynamics, rupee regime, domestic vs export sector rotations — are tracked alongside US macro narratives.",
         },
         {
           question: "When should I use this instead of stock analysis?",
@@ -99,7 +99,7 @@ export default function MarketNarrativeTrackerPage() {
           answer: "Once a narrative is identified, the natural next step is checking whether your portfolio is already concentrated in that story or exposed to its risk. The system routes directly into portfolio intelligence for that check.",
         },
       ]}
-      seoIntro="InsightAlpha's market narrative tracker targets investors searching for market regime analysis, sector rotation tracker, narrative-driven investing tools, and AI market intelligence for US and India markets. The difference from a standard news feed or sector heat map is the regime classification engine underneath — it tells you what story is structurally driving prices, not just what moved today. This page covers both US macro narratives and India-specific market drivers."
+      seoIntro="LyraAlpha's market narrative tracker targets investors searching for market regime analysis, sector rotation tracker, narrative-driven investing tools, and AI market intelligence for US and India markets. The difference from a standard news feed or sector heat map is the regime classification engine underneath — it tells you what story is structurally driving prices, not just what moved today. This page covers both US macro narratives and India-specific market drivers."
       seoBullets={[
         "Use this when the question is about the market as a system — what story is driving it, whether that story is strengthening, and where the next rotation is building.",
         "Narrative strength scoring tells you whether to lean into the current trend or position for the next regime shift.",

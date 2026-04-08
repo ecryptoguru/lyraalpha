@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { MarketSyncService } from "@/lib/services/market-sync.service";
-import { FinnhubSyncService } from "@/lib/services/finnhub-sync.service";
 import { createLogger } from "@/lib/logger";
 import { withCronAuthAndLogging } from "@/lib/middleware/cron-auth";
 
@@ -22,7 +21,6 @@ export async function POST(request: Request) {
     { logger, job: "crypto-sync" },
     async () => {
       await MarketSyncService.runCryptoMarketSync();
-      await FinnhubSyncService.syncCryptoOnly();
       return NextResponse.json({
         success: true,
         message: "Crypto market + news sync completed",

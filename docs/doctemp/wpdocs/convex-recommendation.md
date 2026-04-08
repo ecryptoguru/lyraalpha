@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-Convex is technically sound, genuinely differentiated, and well-suited to a subset of InsightAlpha AI's workloads. However, **implementing it now is not the right decision.** The current product priority — AI quality, latency, and premium workflow depth — does not depend on real-time reactive state. The migration effort would be substantial, the risk is non-trivial, and the user-visible benefit of Phase 1 Convex work is low compared to other roadmap items.
+Convex is technically sound, genuinely differentiated, and well-suited to a subset of LyraAlpha AI's workloads. However, **implementing it now is not the right decision.** The current product priority — AI quality, latency, and premium workflow depth — does not depend on real-time reactive state. The migration effort would be substantial, the risk is non-trivial, and the user-visible benefit of Phase 1 Convex work is low compared to other roadmap items.
 
 **Recommendation: Keep as a 6–12 month horizon item. Begin a lean Phase 1 probe (Myra chat session state) only after premium workflow maturity and V2 platform hardening are complete.**
 
@@ -85,8 +85,8 @@ Unlike Firebase, there is a viable self-hosting exit if vendor costs or lock-in 
 
 ## 3. Real Constraints and Risks
 
-### 3.1 Not a SQL Engine — Critical for InsightAlpha
-InsightAlpha AI's core data model is deeply relational:
+### 3.1 Not a SQL Engine — Critical for LyraAlpha
+LyraAlpha AI's core data model is deeply relational:
 - Assets × scores × regimes × countries × sectors require multi-table joins
 - Admin analytics dashboard runs aggregation queries across millions of rows
 - `AIRequestLog` requires structured SQL for cost/usage analytics
@@ -119,7 +119,7 @@ Convex is working on an Enterprise plan with SOC 2, SSO, and auditing. These are
 
 ---
 
-## 4. InsightAlpha-Specific Workload Analysis
+## 4. LyraAlpha-Specific Workload Analysis
 
 ### ✅ Strong Convex Fit
 
@@ -186,7 +186,7 @@ Convex is working on an Enterprise plan with SOC 2, SSO, and auditing. These are
 
 4. **The 100ms limit and no-SQL constraint are permanent.** The core financial data model (assets, scores, regimes, price history, admin analytics) can never move to Convex. This means Postgres + Prisma is a permanent part of the architecture regardless of how far the Convex migration goes.
 
-5. **Compliance gaps.** InsightAlpha serves Indian and US users. Convex's SOC 2 and GDPR controls are still maturing. The Professional plan gives limited data residency control.
+5. **Compliance gaps.** LyraAlpha serves Indian and US users. Convex's SOC 2 and GDPR controls are still maturing. The Professional plan gives limited data residency control.
 
 #### When to start
 
@@ -219,7 +219,7 @@ Why this is the right first target:
 ### Investment Framing
 
 For the startup program application (when ready), the pitch is:
-- InsightAlpha AI is a TypeScript-native fintech platform on Next.js
+- LyraAlpha AI is a TypeScript-native fintech platform on Next.js
 - Current backend: Postgres + Prisma + Redis
 - Convex adoption path: reactive app-state layer (chat, notifications, saved workflow state)
 - Not replacing financial data systems — adding a reactive UX layer on top
@@ -282,4 +282,4 @@ When referencing Convex in docs:
 
 ---
 
-*Document prepared from deep research: Convex.dev FAQ, official limits documentation, architecture deep-dives, competitive analysis (Convex vs Supabase 2025), production use case analysis, and InsightAlpha codebase audit.*
+*Document prepared from deep research: Convex.dev FAQ, official limits documentation, architecture deep-dives, competitive analysis (Convex vs Supabase 2025), production use case analysis, and LyraAlpha codebase audit.*

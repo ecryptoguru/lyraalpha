@@ -1,5 +1,7 @@
-# InsightAlpha AI — Technical Whitepaper
+# LyraAlpha AI — Technical Whitepaper
 ## Implementation-Aligned Edition
+
+> **Fork note:** This document reflects the current LyraAlpha repository and should be read alongside `CODEBASE.md` and `docs/ENV_SETUP.md`.
 
 **Version 2.0 — Audited Against Current Code (March 2026)**
 
@@ -7,7 +9,7 @@
 
 ## 1. Executive Summary
 
-InsightAlpha AI is a financial intelligence platform built to help users understand markets more clearly, act more consistently, and think more structurally.
+LyraAlpha AI is a financial intelligence platform built to help users understand markets more clearly, act more consistently, and think more structurally.
 
 The platform is built around one core principle:
 
@@ -18,7 +20,7 @@ That principle matters because most market products make one of two mistakes:
 - they overwhelm users with disconnected raw data
 - or they ask an AI model to sound smart without grounding it in a stable analytical system
 
-InsightAlpha AI takes a different approach. It computes structured signals first, then uses AI to explain what those signals mean, how they fit together, and why they matter in context.
+LyraAlpha AI takes a different approach. It computes structured signals first, then uses AI to explain what those signals mean, how they fit together, and why they matter in context.
 
 At a practical level, the product combines:
 
@@ -39,7 +41,7 @@ The result is not just an AI chatbot with financial vocabulary. It is a structur
 
 ---
 
-## 2. The Problem InsightAlpha AI Solves
+## 2. The Problem LyraAlpha AI Solves
 
 Modern investors already have access to more data than they can reasonably process. Price charts, fundamentals, headlines, factor screens, analyst opinions, and macro commentary are everywhere.
 
@@ -52,7 +54,7 @@ Most users struggle with:
 - interpreting conflicting signals without falling back on noise or narrative bias
 - applying institutional-style reasoning without institutional infrastructure
 
-InsightAlpha AI is designed to close that gap.
+LyraAlpha AI is designed to close that gap.
 
 Instead of treating AI as the primary source of truth, the platform treats AI as an interpretation layer sitting on top of structured computation. That design improves reliability, makes outputs easier to govern, and gives the user a more consistent analytical experience.
 
@@ -60,7 +62,7 @@ Instead of treating AI as the primary source of truth, the platform treats AI as
 
 ## 3. Product Architecture in Plain Language
 
-InsightAlpha AI can be understood as three layers working together.
+LyraAlpha AI can be understood as three layers working together.
 
 ### 3.1 The Engine Layer
 
@@ -112,7 +114,7 @@ This is where computation, interpretation, and UX meet.
 
 ### 3.4 Premium Workflow Depth
 
-InsightAlpha AI's premium layer is not just "longer answers." It is a deeper workflow system.
+LyraAlpha AI's premium layer is not just "longer answers." It is a deeper workflow system.
 
 The **Shock Simulator** is the clearest example:
 
@@ -152,7 +154,7 @@ The blog layer uses a hybrid static + DB architecture:
 
 #### AMI 2.0 Webhook Bridge
 
-The `/api/webhooks/ami` route is the integration point between InsightAlpha and the external AMI 2.0 marketing agent:
+The `/api/webhooks/ami` route is the integration point between LyraAlpha and the external AMI 2.0 marketing agent:
 
 - Payloads verified with HMAC-SHA256 using `AMI_WEBHOOK_SECRET`
 - Supported events: `blog_post.published`, `blog_post.updated`, `blog_post.archived`
@@ -163,13 +165,13 @@ The `/api/webhooks/ami` route is the integration point between InsightAlpha and 
 
 All email delivery uses Brevo. Ownership is split clearly:
 
-- **InsightAlpha app owns** transactional and lifecycle emails: welcome, blog notifications, weekly digest (every Monday via QStash), re-engagement, win-back, weekly intelligence report, billing receipts
+- **LyraAlpha app owns** transactional and lifecycle emails: welcome, blog notifications, weekly digest (every Monday via QStash), re-engagement, win-back, weekly intelligence report, billing receipts
 - **AMI 2.0 agent owns** outbound marketing emails: cold/warm outreach, waitlist nurture sequences, campaign copy, newsletter broadcasts — using its own Brevo API key and contact lists
-- AMI never calls InsightAlpha's Brevo API directly; if it needs to reach opted-in InsightAlpha subscribers, it triggers the webhook and InsightAlpha does the send
+- AMI never calls LyraAlpha's Brevo API directly; if it needs to reach opted-in LyraAlpha subscribers, it triggers the webhook and LyraAlpha does the send
 
 ### 3.7 Broker-Connected Portfolio Intelligence
 
-InsightAlpha AI treats broker connectivity as part of the structured data layer.
+LyraAlpha AI treats broker connectivity as part of the structured data layer.
 
 The portfolio layer ingests normalized snapshots from Indian and US brokers, then feeds the same intelligence engines used elsewhere in the product:
 
@@ -191,7 +193,7 @@ Refresh behavior is intentionally low-noise:
 
 ## 4. Plan-Aware Intelligence Design
 
-InsightAlpha AI does not treat every question the same. It scales analytical depth, runtime cost, and model choice by plan and by query complexity.
+LyraAlpha AI does not treat every question the same. It scales analytical depth, runtime cost, and model choice by plan and by query complexity.
 
 ### 4.1 Current Lyra Routing
 
@@ -279,7 +281,7 @@ Daily token caps and alert thresholds are hot-patchable from `/admin/ai-limits` 
 | **Orchestration** | Single mode (all plans) |
 | **Web / Live Research** | Selective live augmentation for freshness-sensitive paths |
 | **Payments** | Stripe + Razorpay |
-| **Email** | Brevo (transactional + lifecycle: InsightAlpha; outbound marketing: AMI 2.0) |
+| **Email** | Brevo (transactional + lifecycle: LyraAlpha; outbound marketing: AMI 2.0) |
 | **Cron Scheduling** | Upstash QStash |
 | **Testing** | Vitest + Playwright |
 
@@ -294,7 +296,7 @@ Implementation notes:
 
 ## 6. Region-Aware Product Design
 
-InsightAlpha AI is explicitly region-aware across the US and India. That affects:
+LyraAlpha AI is explicitly region-aware across the US and India. That affects:
 
 - asset search and discovery
 - listing and filtering behavior
@@ -325,7 +327,7 @@ Myra covers public prelaunch waitlist/access questions on the landing page (unau
 
 ## 8. Safety and Governance
 
-InsightAlpha AI is designed as an analytical product, not a recommendation engine.
+LyraAlpha AI is designed as an analytical product, not a recommendation engine.
 
 Key safeguards include:
 
@@ -390,7 +392,7 @@ Custom packaging for the highest-intensity use cases. Mirrors Elite routing with
 
 ## 11. Why This Architecture Matters
 
-InsightAlpha AI's advantage is not just that it uses AI.
+LyraAlpha AI's advantage is not just that it uses AI.
 
 Its advantage is the combination of:
 
@@ -411,7 +413,7 @@ The product's edge comes from architecture, not just model choice.
 
 ## 12. Conclusion
 
-InsightAlpha AI is best understood as a structured financial intelligence system.
+LyraAlpha AI is best understood as a structured financial intelligence system.
 
 It is built to help users move from scattered information to disciplined interpretation.
 
@@ -425,5 +427,5 @@ This whitepaper follows audited implementation behavior while remaining readable
 
 If routing, orchestration modes, credits, premium tooling, workflow naming, or core runtime assumptions change in code, this document should be updated to match the implemented system.
 
-*InsightAlpha AI — Financial Intelligence, Not Financial Noise*
+*LyraAlpha AI — Financial Intelligence, Not Financial Noise*
 *Version 2.0 · March 2026*

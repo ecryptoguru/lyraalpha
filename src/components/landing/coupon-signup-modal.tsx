@@ -160,7 +160,7 @@ function CouponForm({ coupon, setCoupon, isValidating, error, onContinue, onKeyD
           Enter your access code
         </DialogTitle>
         <DialogDescription className="mt-2 text-sm leading-7 text-white/45">
-          InsightAlpha AI is currently invite-only. You need a valid access code
+          LyraAlpha AI is currently invite-only. You need a valid access code
           to create an account.
         </DialogDescription>
       </DialogHeader>

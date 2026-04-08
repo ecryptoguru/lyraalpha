@@ -1,8 +1,8 @@
-# InsightAlpha AI — Support Knowledge Base
+# LyraAlpha AI — Support Knowledge Base
 
-## About InsightAlpha AI
+## About LyraAlpha AI
 
-InsightAlpha AI is an institutional-grade financial intelligence platform for retail investors. It provides AI-powered market analysis, asset scoring, regime detection, and portfolio intelligence across US and Indian markets — stocks, ETFs, crypto, mutual funds, and commodities.
+LyraAlpha AI is an institutional-grade financial intelligence platform for retail investors. It provides AI-powered market analysis, asset scoring, regime detection, and portfolio intelligence across US and Indian markets — stocks, ETFs, crypto, mutual funds, and commodities.
 
 The platform is NOT a trading platform. It does not execute trades, manage portfolios, or provide personalised financial advice. It is an intelligence and research tool.
 

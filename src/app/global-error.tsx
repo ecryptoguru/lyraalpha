@@ -23,9 +23,9 @@ export default function GlobalError({
   return (
     <html lang="en">
       <head>
-        <title>Critical Error | InsightAlpha AI</title>
+        <title>Critical Error | LyraAlpha AI</title>
         <meta name="description" content="A critical error occurred. Please refresh or return home." />
-        <meta property="og:title" content="Critical Error | InsightAlpha AI" />
+        <meta property="og:title" content="Critical Error | LyraAlpha AI" />
         <meta property="og:description" content="A critical error occurred. Please refresh or return home." />
         <meta property="og:type" content="website" />
       </head>

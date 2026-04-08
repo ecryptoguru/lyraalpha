@@ -350,7 +350,7 @@ function PanelCompetitive() {
             <div className="rounded-xl border border-teal-400/25 bg-teal-400/6 px-4 py-3">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-teal-400" />
-                <span className="text-sm font-bold text-teal-400">InsightAlpha AI</span>
+                <span className="text-sm font-bold text-teal-400">LyraAlpha AI</span>
               </div>
               <p className="mt-1 pl-5 font-mono text-[10px] leading-5 text-white/55">
                 Deterministic computation + Grounded AI + Premium Workflows across US & India natively.

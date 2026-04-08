@@ -1,4 +1,4 @@
-# InsightAlpha — Fully Optimised AWS + UX Plan
+# LyraAlpha — Fully Optimised AWS + UX Plan
 
 UX is the primary focus. Every AWS decision below is made in service of user experience —
 faster loads, zero cold starts on AI chat, edge-cached market data, instant dashboard.
@@ -149,7 +149,7 @@ Mumbai region code. On AWS/SST this hint has no effect; Lambda runs in `ap-south
 
 ## Complete Optimised `sst.config.ts` — What's in It
 
-Already implemented (`/Users/defiankit/Desktop/multiasset_ai/sst.config.ts`):
+Already implemented (`/Users/defiankit/Desktop/lyraalpha/sst.config.ts`):
 
 | Setting | Value | Reason |
 |---------|-------|--------|
@@ -199,7 +199,7 @@ aws cloudwatch put-metric-alarm \
   --alarm-name "RDS-Connections-High" \
   --metric-name "DatabaseConnections" \
   --namespace "AWS/RDS" \
-  --dimensions Name=DBInstanceIdentifier,Value=insightalpha-prod \
+  --dimensions Name=DBInstanceIdentifier,Value=lyraalpha-prod \
   --threshold 120 \
   --comparison-operator GreaterThanThreshold \
   --evaluation-periods 2 \

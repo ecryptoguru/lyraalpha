@@ -11,7 +11,7 @@ isEliteOnly: true
 
 ## Key Concept
 
-When deciding between two assets (e.g., AAPL vs MSFT, or BTC vs ETH), looking at price charts is insufficient. **Comparative Asset Analysis** places assets side-by-side and evaluates them across every engine in the InsightAlpha AI ecosystem simultaneously.
+When deciding between two assets (e.g., AAPL vs MSFT, or BTC vs ETH), looking at price charts is insufficient. **Comparative Asset Analysis** places assets side-by-side and evaluates them across every engine in the LyraAlpha AI ecosystem simultaneously.
 
 It reveals the *structural differences* driving performance.
 

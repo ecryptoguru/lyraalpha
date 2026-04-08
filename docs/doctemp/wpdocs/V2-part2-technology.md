@@ -6,7 +6,7 @@
 ---
 
 ## Architecture Principle
-InsightAlpha AI should be described as a system built on:
+LyraAlpha AI should be described as a system built on:
 - deterministic financial computation
 - retrieval and context layering
 - plan-aware AI routing

@@ -1,4 +1,4 @@
-# InsightAlpha Product Marketing Knowledgebase
+# LyraAlpha Product Marketing Knowledgebase
 
 **Source docs:** `docs/docs2/WHITEPAPER.md`, `docs/docs2/LYRA-MYRA.md`, `docs/docs2/YELLOWPAPER.md`
 
@@ -6,13 +6,13 @@
 
 ## 1. Purpose
 
-This document is the master product-marketing knowledgebase for InsightAlpha.
+This document is the master product-marketing knowledgebase for LyraAlpha.
 
 Use it to keep messaging, launches, content, sales pages, partner outreach, and social posts aligned with the actual product architecture and current audited behavior.
 
 It should answer four questions:
 
-- What is InsightAlpha?
+- What is LyraAlpha?
 - Who is it for?
 - Why is it different?
 - What can we safely claim about it?
@@ -23,15 +23,15 @@ This file is written for marketing execution, but it stays grounded in product t
 
 ## 2. Core product narrative
 
-InsightAlpha is a financial intelligence platform that helps users understand markets more clearly, act more consistently, and think more structurally.
+LyraAlpha is a financial intelligence platform that helps users understand markets more clearly, act more consistently, and think more structurally.
 
 The central product idea is:
 
 > **The engines compute. The AI interprets.**
 
-That means InsightAlpha is not a generic chatbot wrapped around market data. It is a structured intelligence system that combines deterministic signals with AI interpretation.
+That means LyraAlpha is not a generic chatbot wrapped around market data. It is a structured intelligence system that combines deterministic signals with AI interpretation.
 
-### What InsightAlpha does
+### What LyraAlpha does
 
 - Computes market intelligence from structured signals
 - Explains what the signals mean in plain language
@@ -39,7 +39,7 @@ That means InsightAlpha is not a generic chatbot wrapped around market data. It 
 - Supports portfolio intelligence and premium analytical workflows
 - Separates market-analysis behavior from support behavior
 
-### What InsightAlpha is not
+### What LyraAlpha is not
 
 - Not a brokerage
 - Not a personalized financial advisor
@@ -52,7 +52,7 @@ That means InsightAlpha is not a generic chatbot wrapped around market data. It 
 
 ### 3.1 Structured intelligence
 
-InsightAlpha’s foundation is deterministic market computation.
+LyraAlpha’s foundation is deterministic market computation.
 
 The product works with structured signals such as:
 
@@ -80,11 +80,11 @@ This matters because most market products either:
 - overwhelm users with raw data, or
 - let AI sound smart without grounding it in stable analysis
 
-InsightAlpha’s value is that it interprets after computation.
+LyraAlpha’s value is that it interprets after computation.
 
 ### 3.3 Dual-agent separation
 
-InsightAlpha uses two distinct AI roles:
+LyraAlpha uses two distinct AI roles:
 
 - **Lyra** for market intelligence
 - **Myra** for support and navigation
@@ -93,7 +93,7 @@ This separation is intentional and should be preserved in all marketing.
 
 ### 3.4 Premium workflows
 
-InsightAlpha is not only about shorter answers.
+LyraAlpha is not only about shorter answers.
 
 The premium value comes from workflows like:
 
@@ -155,7 +155,7 @@ Do not merge them in the brand story.
 
 ### 5.1 Primary users
 
-InsightAlpha is best suited for:
+LyraAlpha is best suited for:
 
 - active retail investors
 - serious self-directed investors
@@ -165,7 +165,7 @@ InsightAlpha is best suited for:
 
 ### 5.2 Region-aware audiences
 
-InsightAlpha is region-aware across:
+LyraAlpha is region-aware across:
 
 - **US** markets
 - **India** markets
@@ -205,7 +205,7 @@ It signals:
 
 Most products try to make one assistant do everything.
 
-InsightAlpha separates:
+LyraAlpha separates:
 
 - analysis
 - support
@@ -214,7 +214,7 @@ That makes the system easier to understand and easier to trust.
 
 ### 6.3 Region-aware intelligence
 
-InsightAlpha is built for both India and US usage.
+LyraAlpha is built for both India and US usage.
 
 That is important because regional context changes:
 
@@ -307,7 +307,7 @@ Marketing themes:
 
 ### 7.6 Discovery and search
 
-InsightAlpha should be marketed as a discovery engine as well as an analyst.
+LyraAlpha should be marketed as a discovery engine as well as an analyst.
 
 Marketing themes:
 
@@ -332,7 +332,7 @@ Myra should be positioned as the helpful guide for:
 
 ### Pillar 1: Clarity over noise
 
-InsightAlpha helps users move from scattered data to structured interpretation.
+LyraAlpha helps users move from scattered data to structured interpretation.
 
 ### Pillar 2: Computation first, interpretation second
 
@@ -340,7 +340,7 @@ The product is grounded in engine outputs before AI language is applied.
 
 ### Pillar 3: Market intelligence, not generic AI
 
-InsightAlpha is domain-specific and context-aware.
+LyraAlpha is domain-specific and context-aware.
 
 ### Pillar 4: Two-agent design
 
@@ -393,7 +393,7 @@ The product supports deeper analytical use cases, not just basic chat.
 
 ## 10. Trust and proof hierarchy
 
-When marketing InsightAlpha, use proof in this order:
+When marketing LyraAlpha, use proof in this order:
 
 1. Product behavior
 2. Structured outputs
@@ -441,7 +441,7 @@ Use this product story to power:
 
 ## 12. SEO / GEO positioning
 
-InsightAlpha should rank and be cited around concepts like:
+LyraAlpha should rank and be cited around concepts like:
 
 - stock analysis
 - portfolio tracker
@@ -473,15 +473,15 @@ Use blog posts for:
 
 ## 13. FAQ
 
-### What is InsightAlpha?
+### What is LyraAlpha?
 
-InsightAlpha is a financial intelligence platform that uses deterministic signals and AI interpretation to help users understand markets and portfolios more clearly.
+LyraAlpha is a financial intelligence platform that uses deterministic signals and AI interpretation to help users understand markets and portfolios more clearly.
 
-### Is InsightAlpha a brokerage?
+### Is LyraAlpha a brokerage?
 
 No. It is an analytical platform, not a brokerage.
 
-### Is InsightAlpha financial advice?
+### Is LyraAlpha financial advice?
 
 No. It is designed for interpretation and support, not personalized financial advice.
 
@@ -497,7 +497,7 @@ Myra handles product support, onboarding, plans, and navigation.
 
 Because analysis and support are different jobs and should be handled separately.
 
-### What makes InsightAlpha different?
+### What makes LyraAlpha different?
 
 It computes structured signals first and uses AI to interpret them, rather than relying on a generic chatbot model.
 
@@ -536,7 +536,7 @@ Do not add claims that are not supported by the source docs.
 
 ## 16. Final brand statement
 
-InsightAlpha is a structured financial intelligence platform for users who want clearer market reasoning, better portfolio context, and a more disciplined way to interpret what the market is doing.
+LyraAlpha is a structured financial intelligence platform for users who want clearer market reasoning, better portfolio context, and a more disciplined way to interpret what the market is doing.
 
 It is differentiated by its computation-first architecture, its dual-agent design, and its region-aware market intelligence.
 
@@ -546,7 +546,7 @@ It is differentiated by its computation-first architecture, its dual-agent desig
 
 Keep these facts current in every launch, sales, and product-marketing asset:
 
-- InsightAlpha is a multi-asset intelligence platform, not a generic AI wrapper.
+- LyraAlpha is a multi-asset intelligence platform, not a generic AI wrapper.
 - The two AI surfaces are intentionally separated: Lyra for analysis, Myra for support.
 - The product is region-aware across US and India.
 - Premium workflows matter as much as the core dashboard.
@@ -642,7 +642,7 @@ These are the main surfaces that should appear in homepage copy, launch messagin
 
 ### Marketing guardrails
 
-- Do not describe InsightAlpha as a brokerage.
+- Do not describe LyraAlpha as a brokerage.
 - Do not describe it as personalized financial advice.
 - Do not claim guaranteed outcomes or stock-picking certainty.
 - Do not blur Lyra and Myra into one assistant story.
@@ -677,11 +677,11 @@ Marketing copy should never outrank the product docs.
 
 ### Core positioning statement
 
-InsightAlpha is a structured financial intelligence platform that helps self-directed investors understand markets, compare assets, and make better-informed decisions through computed signals and AI interpretation.
+LyraAlpha is a structured financial intelligence platform that helps self-directed investors understand markets, compare assets, and make better-informed decisions through computed signals and AI interpretation.
 
 ### Short elevator pitch
 
-InsightAlpha turns market data into structured reasoning. The engines compute. Lyra interprets. Myra supports.
+LyraAlpha turns market data into structured reasoning. The engines compute. Lyra interprets. Myra supports.
 
 ### Category framing
 
@@ -702,7 +702,7 @@ Use category language that makes the product easy to place:
 
 ### Positioning rule
 
-If a sentence does not explain why InsightAlpha is more disciplined, more useful, or more trustworthy than a generic AI assistant, do not use it.
+If a sentence does not explain why LyraAlpha is more disciplined, more useful, or more trustworthy than a generic AI assistant, do not use it.
 
 ---
 
@@ -718,7 +718,7 @@ What they want:
 
 What to say:
 
-- InsightAlpha helps you understand what matters without drowning in charts and jargon.
+- LyraAlpha helps you understand what matters without drowning in charts and jargon.
 
 Best proof:
 
@@ -736,7 +736,7 @@ What they want:
 
 What to say:
 
-- InsightAlpha gives you structured market reasoning so you can compare assets and track risk more consistently.
+- LyraAlpha gives you structured market reasoning so you can compare assets and track risk more consistently.
 
 Best proof:
 
@@ -754,7 +754,7 @@ What they want:
 
 What to say:
 
-- InsightAlpha is built for users who want more than a chat response — they want analytical workflows.
+- LyraAlpha is built for users who want more than a chat response — they want analytical workflows.
 
 Best proof:
 
@@ -772,7 +772,7 @@ What they want:
 
 What to say:
 
-- InsightAlpha is grounded in computed signals and separated agent roles, which makes the experience easier to trust.
+- LyraAlpha is grounded in computed signals and separated agent roles, which makes the experience easier to trust.
 
 Best proof:
 
@@ -849,7 +849,7 @@ Do not cross-post lazily. Adapt the idea to the platform’s native format and e
 
 ### North Star metric
 
-Choose the primary North Star as **activated users who return to use InsightAlpha meaningfully**.
+Choose the primary North Star as **activated users who return to use LyraAlpha meaningfully**.
 
 That is better than raw signups because the product only creates value when users experience the intelligence layer.
 
@@ -857,7 +857,7 @@ That is better than raw signups because the product only creates value when user
 
 #### Acquisition
 
-How people find InsightAlpha:
+How people find LyraAlpha:
 
 - SEO
 - social
@@ -978,7 +978,7 @@ Use the lightest CTA that still moves the user forward:
 
 #### “Is this just another AI chatbot?”
 
-Response: No. InsightAlpha computes structured signals first and uses AI to interpret them.
+Response: No. LyraAlpha computes structured signals first and uses AI to interpret them.
 
 #### “How is this different from a brokerage?”
 

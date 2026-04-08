@@ -1,4 +1,4 @@
-To drive **mass organic traffic**, **InsightAlpha AI** should build **SEO pages that answer real investor questions and provide tools**, not just articles.
+To drive **mass organic traffic**, **LyraAlpha AI** should build **SEO pages that answer real investor questions and provide tools**, not just articles.
 
 The best strategy is to build **three types of pages**:
 
@@ -121,7 +121,7 @@ These pages target searches like **“stock analysis”** and **“fundamental a
 
 # 4. Market Intelligence Pages (15 Pages)
 
-These pages turn InsightAlpha into a **market intelligence hub**.
+These pages turn LyraAlpha into a **market intelligence hub**.
 
 46. AI Market Intelligence Dashboard
 47. Market Narrative Tracker
@@ -218,7 +218,7 @@ This creates **massive SEO coverage**.
 
 # Potential Traffic Opportunity
 
-If InsightAlpha ranks in the top results for:
+If LyraAlpha ranks in the top results for:
 
 * stock analysis
 * portfolio tracker

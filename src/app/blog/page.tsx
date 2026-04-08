@@ -7,22 +7,22 @@ import { Footer } from "@/components/layout/Footer";
 import { getAllPosts, getAllTags, getAllCategories, formatDate } from "@/lib/blog/posts";
 
 export const metadata: Metadata = {
-  title: "Blog | InsightAlpha AI — Market Intelligence & Financial Analysis",
+  title: "Blog | LyraAlpha AI — Market Intelligence & Financial Analysis",
   description:
     "Deep dives on AI-grounded financial analysis, market regimes, deterministic scoring, and intelligent investing across US and India markets.",
   alternates: {
-    canonical: "https://insightalpha.ai/blog",
+    canonical: "https://lyraalpha.ai/blog",
   },
   openGraph: {
-    title: "Blog | InsightAlpha AI",
+    title: "Blog | LyraAlpha AI",
     description:
       "Deep dives on AI-grounded financial analysis, market regimes, deterministic scoring, and intelligent investing across US and India markets.",
-    url: "https://insightalpha.ai/blog",
+    url: "https://lyraalpha.ai/blog",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blog | InsightAlpha AI",
+    title: "Blog | LyraAlpha AI",
     description:
       "Deep dives on AI-grounded financial analysis, market regimes, deterministic scoring, and intelligent investing.",
   },
@@ -54,7 +54,7 @@ export default async function BlogPage() {
 
           <div className="container relative mx-auto max-w-7xl px-0">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-amber-400/70">
-              InsightAlpha AI · Journal
+              LyraAlpha AI · Journal
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-extralight leading-tight tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
               Intelligence,{" "}

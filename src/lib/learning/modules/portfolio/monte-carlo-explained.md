@@ -17,7 +17,7 @@ Crucially: It is **not** a price prediction. It is a probabilistic risk-assessme
 
 ## The RS-MGBM Engine
 
-InsightAlpha AI uses an advanced mathematical model called **Regime-Switching Multivariate Geometric Brownian Motion (RS-MGBM)**. 
+LyraAlpha AI uses an advanced mathematical model called **Regime-Switching Multivariate Geometric Brownian Motion (RS-MGBM)**. 
 
 While traditional Monte Carlo simulations assume the market behaves the same way every day (constant volatility and drift), the RS-MGBM engine knows that markets have *regimes* (bull markets, bear markets, panics, transitions). 
 
@@ -42,5 +42,5 @@ The simulation calculates your **95% VaR**. If your 12-month 95% VaR is -18%, it
 
 - [x] A Monte Carlo simulation runs thousands of possible futures to show the probability of different outcomes. | Correct — it generates a distribution of possibilities, not a single prediction.
 - [ ] The median path on the fan chart tells you exactly what your portfolio will be worth in 12 months. | No — it is a probability, not a guarantee.
-- [x] InsightAlpha AI's simulation models the risk of the market regime changing (e.g., from Bull to Bear). | Yes — the Regime-Switching (RS) component actively models these shifts.
+- [x] LyraAlpha AI's simulation models the risk of the market regime changing (e.g., from Bull to Bear). | Yes — the Regime-Switching (RS) component actively models these shifts.
 - [ ] A 95% VaR of -10% means you are guaranteed to never lose more than 10%. | No — it means there is a 5% probability you will lose *more* than 10% in extreme scenarios.

@@ -1,6 +1,6 @@
 # Risk Frameworks & Analytical Reference
 
-This document provides risk assessment frameworks, metric interpretation guidance, and asset-type-specific risk profiles for the InsightAlpha AI platform. Use this to deliver risk-aware analysis grounded in established institutional methodology.
+This document provides risk assessment frameworks, metric interpretation guidance, and asset-type-specific risk profiles for the LyraAlpha AI platform. Use this to deliver risk-aware analysis grounded in established institutional methodology.
 
 ---
 
@@ -11,7 +11,7 @@ Measures risk-adjusted return: how much excess return per unit of total risk.
 - **Formula**: (Portfolio Return - Risk-Free Rate) / Standard Deviation of Portfolio Returns
 - **Interpretation**: >1 is acceptable, >2 is strong, >3 is exceptional. Most mutual funds target 0.5-1.5.
 - **Limitation**: Penalizes upside volatility equally with downside. An asset that occasionally spikes upward gets the same penalty as one that crashes — use Sortino Ratio for asymmetric returns.
-- **Platform context**: When comparing assets on InsightAlpha AI, a high Trend score + low Volatility score combination implies a favorable risk-adjusted profile (Sharpe-like).
+- **Platform context**: When comparing assets on LyraAlpha AI, a high Trend score + low Volatility score combination implies a favorable risk-adjusted profile (Sharpe-like).
 
 ### Sortino Ratio
 Like Sharpe but only penalizes downside volatility.

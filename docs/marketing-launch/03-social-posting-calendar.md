@@ -144,7 +144,7 @@ Teach the audience how to think about market signals.
 
 ### 2. Product utility
 
-Show how InsightAlpha reduces friction or improves decision-making.
+Show how LyraAlpha reduces friction or improves decision-making.
 
 ### 3. Trust and credibility
 
@@ -160,7 +160,7 @@ Show real progress, real usage, and real learning.
 
 - Post founder intro and product positioning
 - Share 2 short market insights daily on X
-- Publish 2 LinkedIn posts on why InsightAlpha exists
+- Publish 2 LinkedIn posts on why LyraAlpha exists
 - Comment daily in fintech and investing communities
 - Share 1 build-in-public update per week
 - align the first social posts to the highest-priority India and US keyword clusters so the market message and SEO roadmap stay consistent
@@ -206,7 +206,7 @@ Show real progress, real usage, and real learning.
 - A portfolio risk lesson in 150 words
 - A daily briefing snippet
 - A comparison of noise vs signal
-- A founder lesson from building InsightAlpha
+- A founder lesson from building LyraAlpha
 - A quick product screenshot with one sentence of context
 - A useful framework in plain language
 - A post that predicts what the next 24 hours may matter for
@@ -217,11 +217,11 @@ Show real progress, real usage, and real learning.
 - What makes a good market briefing
 - How to think about portfolio fragility
 - Why AI is changing financial workflows
-- What we’re learning while launching InsightAlpha
+- What we’re learning while launching LyraAlpha
 - A carousel breaking down one useful framework
 - A post about trust, credibility, and product adoption
 - A post about why better context beats more data
-- A brief founder story about the problem InsightAlpha solves
+- A brief founder story about the problem LyraAlpha solves
 - A post explaining the difference between an alert and a signal
 
 ## Posting cadence template by week
@@ -290,7 +290,7 @@ Show real progress, real usage, and real learning.
 
 - “We kept seeing the same problem, so we built ___.”
 - “A better way to think about ___.”
-- “What we learned while building InsightAlpha.”
+- “What we learned while building LyraAlpha.”
 - “Why this matters for investors and fintech teams.”
 - “The most useful framework I’ve seen for ___.”
 

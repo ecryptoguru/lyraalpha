@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This playbook customizes the 90-day InsightAlpha launch plan for two different regional growth motions:
+This playbook customizes the 90-day LyraAlpha launch plan for two different regional growth motions:
 
 - **India-first** — optimize for Indian retail investors, finance communities, local credibility, and regional partnerships
 - **US-first** — optimize for US retail investors, fintech audiences, broader AI-search visibility, and market-research credibility
@@ -376,9 +376,9 @@ Choose a **hybrid** only if you can run two different message tracks without dil
 
 ---
 
-## 6) Practical recommendation for InsightAlpha
+## 6) Practical recommendation for LyraAlpha
 
-For InsightAlpha, the strongest default is:
+For LyraAlpha, the strongest default is:
 
 - **India-first for launch momentum and community proof**
 - **US-first for long-term SEO/GEO compounding and category authority**

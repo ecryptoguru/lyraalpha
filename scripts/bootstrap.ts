@@ -5,9 +5,9 @@
  * Run this ONCE when initializing a new environment or after a DB reset.
  * 
  * Steps:
- *   1. Seed DB (sectors, themes, asset definitions, Indian assets, trending questions)
- *   2. Full data harvest from ALL sources (Yahoo Finance, NSE India, MFAPI) with force=true
- *   3. Full engine computation for ALL assets with force=true
+ *   1. Seed DB (sectors, themes, asset definitions, trending questions)
+ *   2. Full crypto data harvest from CoinGecko with force=true
+ *   3. Full crypto engine computation with force=true
  * 
  * Usage:
  *   npx tsx scripts/bootstrap.ts
@@ -17,9 +17,7 @@
  * 
  * Duration: ~10-15 minutes for 669 assets
  * 
- * For incremental updates (scheduler), use the cron endpoints instead:
- *   POST /api/cron/full-sync      — Every 6h (US + global)
- *   POST /api/cron/india-sync     — During IST market hours (IN stocks)
+ * For incremental updates (scheduler), use the crypto cron endpoints instead.
  */
 
 import { execSync } from "child_process";
@@ -64,39 +62,15 @@ async function main() {
   }
   logger.info({ assetCount }, "Asset universe verified");
 
-  // ─── Phase 2: Full Data Harvest ───
-  logger.info("📡 Phase 2: Full data harvest from all sources (force=true)...");
+  // ─── Phase 2: Full Crypto Harvest ───
+  logger.info("📡 Phase 2: Full crypto data harvest (force=true)...");
+  await MarketSyncService.runCryptoMarketSync();
+  logger.info("✅ Phase 2: Crypto harvest complete.");
 
-  if (!region || region === "US") {
-    logger.info("📡 Phase 2a: Harvesting US/Global assets from Yahoo Finance...");
-    await MarketSyncService.harvestUniverse(true, undefined, "US");
-    logger.info("✅ Phase 2a: US/Global harvest complete.");
-  }
-
-  if (!region || region === "IN") {
-    logger.info("📡 Phase 2b: Harvesting Indian Mutual Funds from MFAPI...");
-    await MarketSyncService.harvestUniverse(true, undefined, "IN");
-    logger.info("✅ Phase 2b: Indian MF harvest complete.");
-
-    logger.info("📡 Phase 2c: Harvesting Indian Stocks from NSE India...");
-    await MarketSyncService.harvestIndianStocks();
-    logger.info("✅ Phase 2c: Indian stock harvest complete.");
-  }
-
-  // ─── Phase 3: Full Engine Computation ───
-  logger.info("⚙️  Phase 3: Running full engine computation (force=true)...");
-
-  if (!region || region === "US") {
-    logger.info("⚙️  Phase 3a: Computing US analytics...");
-    await MarketSyncService.computeFullAnalytics(true, "US");
-    logger.info("✅ Phase 3a: US computation complete.");
-  }
-
-  if (!region || region === "IN") {
-    logger.info("⚙️  Phase 3b: Computing IN analytics...");
-    await MarketSyncService.computeFullAnalytics(true, "IN");
-    logger.info("✅ Phase 3b: IN computation complete.");
-  }
+  // ─── Phase 3: Full Crypto Engine Computation ───
+  logger.info("⚙️  Phase 3: Running crypto engine computation (force=true)...");
+  await MarketSyncService.computeFullAnalytics(true, undefined);
+  logger.info("✅ Phase 3: Crypto computation complete.");
 
   // ─── Phase 4: Verification ───
   logger.info("🔍 Phase 4: Verification...");

@@ -40,7 +40,7 @@ export function Footer() {
             {/* Brand */}
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.36em] text-amber-200/65">
-                InsightAlpha AI
+                LyraAlpha AI
               </p>
               <h3 className="mt-3 text-xl font-bold tracking-[-0.05em] text-white sm:text-2xl">
                 Built for disciplined investors.
@@ -115,7 +115,7 @@ export function Footer() {
         </div>
 
         <div className="mt-6 flex flex-col items-start justify-between gap-3 border-t border-white/8 pt-5 text-sm text-white/40 sm:flex-row sm:items-center">
-          <p className="text-white/40">&copy; {new Date().getFullYear()} InsightAlpha AI. All rights reserved.</p>
+          <p className="text-white/40">&copy; {new Date().getFullYear()} LyraAlpha AI. All rights reserved.</p>
           <FooterLegalLinks />
         </div>
       </div>

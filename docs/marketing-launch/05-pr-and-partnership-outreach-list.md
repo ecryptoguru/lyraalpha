@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build trust, distribution, and third-party credibility for InsightAlpha.
+Build trust, distribution, and third-party credibility for LyraAlpha.
 
 This document is meant to turn outreach into a repeatable growth channel, not a one-off manual task. Every outreach motion should create one of these outcomes:
 
@@ -17,7 +17,7 @@ The strongest outreach assets should be based on the same keyword clusters that 
 
 ## Outreach philosophy
 
-InsightAlpha is a fintech SaaS product. That means trust matters as much as distribution.
+LyraAlpha is a fintech SaaS product. That means trust matters as much as distribution.
 
 The best outreach is:
 
@@ -362,7 +362,7 @@ Use follow-up to:
 
 > Hi [Name] — I’m reaching out because your audience may find this useful.
 >
-> We built InsightAlpha, a financial intelligence product focused on market regime clarity, portfolio risk, and daily briefing workflows.
+> We built LyraAlpha, a financial intelligence product focused on market regime clarity, portfolio risk, and daily briefing workflows.
 >
 > We recently published [specific data / insight / report]. I think it could be a fit for your audience because it explains [specific reason].
 >
@@ -375,7 +375,7 @@ Use follow-up to:
 
 > Hi [Name] — I like how you explain [topic] in a practical way.
 >
-> We’re building InsightAlpha and we think your audience would benefit from a short, data-backed angle on [topic].
+> We’re building LyraAlpha and we think your audience would benefit from a short, data-backed angle on [topic].
 >
 > I can send:
 >

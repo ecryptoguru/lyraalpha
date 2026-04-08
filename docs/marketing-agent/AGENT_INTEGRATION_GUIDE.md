@@ -1,12 +1,12 @@
-# AMI 2.0 → InsightAlpha Integration Guide
+# AMI 2.0 → LyraAlpha Integration Guide
 
-> **For the AMI 2.0 agent team.** This document specifies exactly what changes are required in the Convex codebase to publish blog posts directly to the InsightAlpha app.
+> **For the AMI 2.0 agent team.** This document specifies exactly what changes are required in the Convex codebase to publish blog posts directly to the LyraAlpha app.
 
 ---
 
 ## Overview
 
-The InsightAlpha app now accepts blog posts via a secure HMAC-signed webhook. When a `blog_post` content piece transitions to `published` status in AMI 2.0, a Convex action sends the content to InsightAlpha, which:
+The LyraAlpha app now accepts blog posts via a secure HMAC-signed webhook. When a `blog_post` content piece transitions to `published` status in AMI 2.0, a Convex action sends the content to LyraAlpha, which:
 
 1. Upserts the post in the Supabase `BlogPost` table
 2. Triggers ISR revalidation of `/blog`, `/blog/[slug]`, `/blog/category/[cat]`, and `/`
@@ -19,18 +19,18 @@ The InsightAlpha app now accepts blog posts via a secure HMAC-signed webhook. Wh
 
 ```bash
 # In your Convex project dashboard → Settings → Environment Variables
-INSIGHTALPHA_WEBHOOK_URL=https://insightalpha.ai/api/webhooks/ami
-AMI_WEBHOOK_SECRET=<shared-secret>   # Must match the value in InsightAlpha's .env
+INSIGHTALPHA_WEBHOOK_URL=https://lyraalpha.ai/api/webhooks/ami
+AMI_WEBHOOK_SECRET=<shared-secret>   # Must match the value in LyraAlpha's .env
 ```
 
 > Generate the shared secret with: `openssl rand -hex 32`
-> Add the same value to InsightAlpha's environment as `AMI_WEBHOOK_SECRET`.
+> Add the same value to LyraAlpha's environment as `AMI_WEBHOOK_SECRET`.
 
 ---
 
 ## 2. Webhook Endpoint Specification
 
-**URL:** `POST https://insightalpha.ai/api/webhooks/ami`
+**URL:** `POST https://lyraalpha.ai/api/webhooks/ami`
 
 **Security:** HMAC-SHA256 signature over the raw request body.
 
@@ -80,14 +80,14 @@ interface BlogPostPublishedPayload {
     keywords: string[];        // SEO keywords, e.g. ["ai finance", "llm hallucination"]
     metaDescription?: string;  // Max 160 chars — for SEO meta tag. Falls back to description.
     heroImageUrl?: string;     // Absolute HTTPS URL. Used as OG image. From Creative Studio.
-    author?: string;           // Defaults to "InsightAlpha Research"
+    author?: string;           // Defaults to "LyraAlpha Research"
     featured?: boolean;        // Default false. Only one post should be featured at a time.
     sourceAgent?: string;      // e.g. "Long-Form Writer", "SEO Engine"
   };
 }
 ```
 
-**Validation rules enforced by InsightAlpha:**
+**Validation rules enforced by LyraAlpha:**
 - `slug` must match `/^[a-z0-9-]+$/` — no spaces, underscores, or uppercase
 - `content` must be ≥ 100 characters
 - `heroImageUrl` must be a valid HTTPS URL if provided
@@ -130,7 +130,7 @@ function generateSlug(title: string): string {
     .slice(0, 200);
 }
 
-export const publishToInsightAlpha = internalAction({
+export const publishToLyraAlpha = internalAction({
   args: {
     contentId: v.id("contentPieces"),
     title: v.string(),
@@ -168,7 +168,7 @@ export const publishToInsightAlpha = internalAction({
         keywords: args.keywords ?? [],
         metaDescription: args.metaDescription,
         heroImageUrl: args.heroImageUrl,
-        author: args.author ?? "InsightAlpha Research",
+        author: args.author ?? "LyraAlpha Research",
         featured: args.featured ?? false,
         sourceAgent: args.sourceAgent,
       },
@@ -188,7 +188,7 @@ export const publishToInsightAlpha = internalAction({
 
     if (!response.ok) {
       const text = await response.text().catch(() => "");
-      throw new Error(`InsightAlpha webhook failed: ${response.status} ${text}`);
+      throw new Error(`LyraAlpha webhook failed: ${response.status} ${text}`);
     }
 
     const result = (await response.json()) as { success: boolean; slug: string };
@@ -217,7 +217,7 @@ import { internal } from "./_generated/api";
 
 // After updating status to "published":
 if (contentPiece.type === "blog_post") {
-  await ctx.scheduler.runAfter(0, internal.agents.publishing.publishToInsightAlpha, {
+  await ctx.scheduler.runAfter(0, internal.agents.publishing.publishToLyraAlpha, {
     contentId: contentPiece._id,
     title: contentPiece.title,
     description: contentPiece.summary ?? contentPiece.description,
@@ -279,7 +279,7 @@ Paragraph text here. Use **bold** for emphasis on key terms.
 
 ## 6. Event Types
 
-| Event | When to send | Effect on InsightAlpha |
+| Event | When to send | Effect on LyraAlpha |
 |-------|-------------|----------------------|
 | `blog_post.published` | First publish of a new post | Upserts post, ISR revalidation, Brevo notifications sent |
 | `blog_post.updated` | Content edited after publish | Upserts post, ISR revalidation, no new Brevo notification |
@@ -290,26 +290,26 @@ Paragraph text here. Use **bold** for emphasis on key terms.
 ## 7. Error Handling & Retry Strategy
 
 ```typescript
-// Recommended retry wrapper for publishToInsightAlpha:
+// Recommended retry wrapper for publishToLyraAlpha:
 const MAX_RETRIES = 3;
 const RETRY_DELAYS_MS = [2000, 5000, 15000];
 
 async function publishWithRetry(ctx, args, attempt = 0): Promise<{ slug: string }> {
   try {
-    return await ctx.runAction(internal.agents.publishing.publishToInsightAlpha, args);
+    return await ctx.runAction(internal.agents.publishing.publishToLyraAlpha, args);
   } catch (err) {
     if (attempt < MAX_RETRIES) {
       await new Promise((r) => setTimeout(r, RETRY_DELAYS_MS[attempt]));
       return publishWithRetry(ctx, args, attempt + 1);
     }
     // Log failure — do not block content approval flow
-    console.error("publishToInsightAlpha failed after retries:", err);
+    console.error("publishToLyraAlpha failed after retries:", err);
     return { slug: "" };
   }
 }
 ```
 
-**Idempotency:** The InsightAlpha webhook uses `slug` as the unique key (upsert). Duplicate events for the same slug are safe — they will update the existing post.
+**Idempotency:** The LyraAlpha webhook uses `slug` as the unique key (upsert). Duplicate events for the same slug are safe — they will update the existing post.
 
 **Do not block the approval flow:** Wrap the action call in `ctx.scheduler.runAfter(0, ...)` so a webhook failure does not prevent the content piece from being marked as published in Convex.
 
@@ -317,23 +317,23 @@ async function publishWithRetry(ctx, args, attempt = 0): Promise<{ slug: string 
 
 ## 8. Testing the Integration Locally
 
-1. Start InsightAlpha locally: `npm run dev` (runs on `localhost:3000`)
+1. Start LyraAlpha locally: `npm run dev` (runs on `localhost:3000`)
 2. Set Convex env vars to point to localhost:
    ```bash
    INSIGHTALPHA_WEBHOOK_URL=http://localhost:3000/api/webhooks/ami
    AMI_WEBHOOK_SECRET=test-secret-do-not-use-in-production
    ```
-3. Set the same secret in InsightAlpha's `.env.local`:
+3. Set the same secret in LyraAlpha's `.env.local`:
    ```bash
    AMI_WEBHOOK_SECRET=test-secret-do-not-use-in-production
    ```
 4. Trigger the action manually via Convex dashboard or a test mutation
-5. Verify in InsightAlpha logs and at `localhost:3000/blog`
+5. Verify in LyraAlpha logs and at `localhost:3000/blog`
 
 **Test payload for manual curl testing:**
 ```bash
 SECRET="test-secret-do-not-use-in-production"
-BODY='{"event":"blog_post.published","data":{"contentId":"test123","title":"Test Blog Post from AMI","slug":"test-blog-post-from-ami","description":"A test post to verify the webhook integration is working correctly.","content":"## Introduction\n\nThis is a test post generated to verify the AMI to InsightAlpha webhook bridge.\n\n---\n\n## Section Two\n\nMore content here to satisfy the minimum length requirement for blog posts. The integration should upsert this into the BlogPost table and trigger ISR revalidation.","category":"AI & Technology","tags":["AI","Testing"],"keywords":["ami integration test"],"author":"AMI Test Agent","featured":false,"sourceAgent":"Test Runner"}}'
+BODY='{"event":"blog_post.published","data":{"contentId":"test123","title":"Test Blog Post from AMI","slug":"test-blog-post-from-ami","description":"A test post to verify the webhook integration is working correctly.","content":"## Introduction\n\nThis is a test post generated to verify the AMI to LyraAlpha webhook bridge.\n\n---\n\n## Section Two\n\nMore content here to satisfy the minimum length requirement for blog posts. The integration should upsert this into the BlogPost table and trigger ISR revalidation.","category":"AI & Technology","tags":["AI","Testing"],"keywords":["ami integration test"],"author":"AMI Test Agent","featured":false,"sourceAgent":"Test Runner"}}'
 SIG=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "$SECRET" | awk '{print $2}')
 curl -X POST http://localhost:3000/api/webhooks/ami \
   -H "Content-Type: application/json" \
@@ -349,7 +349,7 @@ Expected response: `{"success":true,"slug":"test-blog-post-from-ami","event":"bl
 
 This project uses Brevo for all email delivery. Ownership is split cleanly:
 
-### InsightAlpha App (this codebase) owns:
+### LyraAlpha App (this codebase) owns:
 | Email | Trigger | Route |
 |-------|---------|-------|
 | Welcome email | User signs up via Clerk | `/api/webhooks/clerk` |
@@ -363,7 +363,7 @@ This project uses Brevo for all email delivery. Ownership is split cleanly:
 | Credit / billing receipts | Stripe checkout | `/api/stripe/...` |
 | Support / Myra responses | User initiates chat | Inline in chat routes |
 
-**Rule:** Any email that requires access to Prisma user data, billing state, or session context is owned by InsightAlpha.
+**Rule:** Any email that requires access to Prisma user data, billing state, or session context is owned by LyraAlpha.
 
 ### AMI 2.0 Marketing Agent owns:
 | Email | Trigger |
@@ -375,18 +375,18 @@ This project uses Brevo for all email delivery. Ownership is split cleanly:
 | Newsletter broadcast (non-blog) | AMI editorial calendar |
 | Influencer / partner outreach | Partnership agent |
 
-**Rule:** Any email that is outbound marketing, prospect-facing, or part of a campaign sequence is owned by AMI. AMI has its own Brevo API key and contact lists — it does NOT share the InsightAlpha app's `BREVO_API_KEY`.
+**Rule:** Any email that is outbound marketing, prospect-facing, or part of a campaign sequence is owned by AMI. AMI has its own Brevo API key and contact lists — it does NOT share the LyraAlpha app's `BREVO_API_KEY`.
 
 ### The boundary in practice
-- Blog subscriber notifications (people who opted in via InsightAlpha) → **InsightAlpha sends** (it has the subscriber list in Prisma)
+- Blog subscriber notifications (people who opted in via LyraAlpha) → **LyraAlpha sends** (it has the subscriber list in Prisma)
 - Cold/warm prospect nurture → **AMI sends** (it owns the ICP pipeline in Convex)
-- If AMI wants to send to InsightAlpha's subscriber list → AMI triggers the InsightAlpha webhook; InsightAlpha does the actual send
+- If AMI wants to send to LyraAlpha's subscriber list → AMI triggers the LyraAlpha webhook; LyraAlpha does the actual send
 
 ---
 
 ## 10. Future Event Types (Reserved)
 
-These are planned but not yet implemented on the InsightAlpha side. Do not send them yet.
+These are planned but not yet implemented on the LyraAlpha side. Do not send them yet.
 
 | Event | Purpose |
 |-------|---------|
@@ -398,7 +398,7 @@ These are planned but not yet implemented on the InsightAlpha side. Do not send 
 
 ---
 
-## 11. InsightAlpha Files Changed (Reference)
+## 11. LyraAlpha Files Changed (Reference)
 
 | File | What changed |
 |------|-------------|
@@ -418,4 +418,4 @@ These are planned but not yet implemented on the InsightAlpha side. Do not send 
 
 ---
 
-*Last updated: March 2026 · InsightAlpha Engineering*
+*Last updated: March 2026 · LyraAlpha Engineering*

@@ -1,13 +1,13 @@
-# InsightAlpha AI — Technical Moat & Unit Economics Memo
+# LyraAlpha AI — Technical Moat & Unit Economics Memo
 
 **Prepared for:** Early-stage and angel investors
-**Subject:** Why InsightAlpha AI is more defensible, more trustworthy, and more economically disciplined than a generic finance chatbot — and how that translates to durable margin
+**Subject:** Why LyraAlpha AI is more defensible, more trustworthy, and more economically disciplined than a generic finance chatbot — and how that translates to durable margin
 
 ---
 
 ## 1. Core Thesis
 
-InsightAlpha AI's moat does not come from attaching a large language model to a finance interface.
+LyraAlpha AI's moat does not come from attaching a large language model to a finance interface.
 
 Its edge comes from combining:
 - **deterministic analytical engines** that compute market context before the model speaks
@@ -101,14 +101,14 @@ India and US are treated as first-class markets — not adapted from a US-only p
 
 ### Layer 6: AMI 2.0 Content and Distribution Pipeline
 
-InsightAlpha AI has shipped a full content distribution system powered by the AMI 2.0 external marketing agent:
+LyraAlpha AI has shipped a full content distribution system powered by the AMI 2.0 external marketing agent:
 
 - **Public blog** at `/blog` with category pages, RSS feed, OG share cards, and reading progress — structured for SEO/GEO discovery
-- **HMAC-verified webhook bridge** (`/api/webhooks/ami`): AMI 2.0 publishes posts to InsightAlpha via a shared-secret HMAC-SHA256 endpoint; posts are upserted, ISR-revalidated, and subscriber notifications fire automatically
+- **HMAC-verified webhook bridge** (`/api/webhooks/ami`): AMI 2.0 publishes posts to LyraAlpha via a shared-secret HMAC-SHA256 endpoint; posts are upserted, ISR-revalidated, and subscriber notifications fire automatically
 - **Weekly blog digest** cron (every Monday via QStash): opted-in users receive curated content — a recurring retention touchpoint with near-zero marginal cost
-- **Enforced email boundary**: InsightAlpha owns transactional/lifecycle email (digest, notifications, reports); AMI 2.0 owns outbound marketing (outreach, nurture) via its own Brevo API key — the boundary is system-level, not convention
+- **Enforced email boundary**: LyraAlpha owns transactional/lifecycle email (digest, notifications, reports); AMI 2.0 owns outbound marketing (outreach, nurture) via its own Brevo API key — the boundary is system-level, not convention
 
-**Why this matters for the moat:** Most early-stage SaaS products treat content and distribution as an afterthought bolted on later. InsightAlpha AI has shipped an agent-automated content pipeline that compounds SEO authority, subscriber engagement, and brand presence from day one — with a clean architectural boundary that prevents cross-contamination between marketing and product email infrastructure.
+**Why this matters for the moat:** Most early-stage SaaS products treat content and distribution as an afterthought bolted on later. LyraAlpha AI has shipped an agent-automated content pipeline that compounds SEO authority, subscriber engagement, and brand presence from day one — with a clean architectural boundary that prevents cross-contamination between marketing and product email infrastructure.
 
 ---
 
@@ -244,7 +244,7 @@ At scale, Enterprise accounts contribute meaningfully to ARR with lower acquisit
 
 ## 8. Bottom Line
 
-InsightAlpha AI's technical and economic advantage is architectural discipline:
+LyraAlpha AI's technical and economic advantage is architectural discipline:
 
 - deterministic engines reduce hallucination surface and improve trust
 - dual-agent design cuts per-interaction cost and improves governance

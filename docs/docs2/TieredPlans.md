@@ -1,6 +1,8 @@
-# InsightAlpha AI — Tiered Plans & Feature Matrix
+# LyraAlpha AI — Tiered Plans & Feature Matrix
 
-This document describes the currently implemented plan behavior for InsightAlpha AI. Where earlier product concepts differed, this file follows the stable code path and active runtime behavior.
+> **Fork note:** This document reflects the current LyraAlpha repository and should be read alongside `CODEBASE.md` and `docs/ENV_SETUP.md`.
+
+This document describes the currently implemented plan behavior for LyraAlpha AI. Where earlier product concepts differed, this file follows the stable code path and active runtime behavior.
 
 > **Last reviewed:** March 2026. Reflects all updates through the current release cycle including Myra public chat, dashboard UI fixes, and AI stack consolidation to GPT-5.4 exclusively.
 
@@ -151,7 +153,7 @@ Caps are configurable by admins via `/admin/ai-limits` without a code deploy. Ca
 
 **Taste the framework.**
 
-Starter is designed to let users understand how InsightAlpha AI thinks: score interpretation, regime-aware analysis, and concise educational guidance. Uses GPT-5.4-nano for SIMPLE/MODERATE and GPT-5.4-mini for COMPLEX in single-call streaming mode. It is intentionally narrower in monthly capacity and premium workflow access, but it still reflects the same engine-first analytical philosophy.
+Starter is designed to let users understand how LyraAlpha AI thinks: score interpretation, regime-aware analysis, and concise educational guidance. Uses GPT-5.4-nano for SIMPLE/MODERATE and GPT-5.4-mini for COMPLEX in single-call streaming mode. It is intentionally narrower in monthly capacity and premium workflow access, but it still reflects the same engine-first analytical philosophy.
 
 ### PRO
 

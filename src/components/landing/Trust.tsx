@@ -73,10 +73,10 @@ export function Trust() {
                   <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-amber-400/6 to-transparent" />
                   <p className="relative font-mono text-sm leading-7 text-white/60 italic">
                     &ldquo;The gap is not between investors and data. It is between data and the analytical
-                    layer that turns signals into a decision. That layer is what InsightAlpha builds.”
+                    layer that turns signals into a decision. That layer is what LyraAlpha builds.”
                   </p>
                   <p className="mt-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-amber-400/60">
-                    InsightAlpha AI · Core Thesis
+                    LyraAlpha AI · Core Thesis
                   </p>
                 </div>
               </div>

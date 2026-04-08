@@ -4,10 +4,8 @@ import type { QuoteSummaryModules } from "yahoo-finance2/modules/quoteSummary";
 
 import { OHLCV } from "./engines/types";
 import { prisma } from "./prisma";
-import { AssetType } from "@/generated/prisma/client";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
-import { MutualFundSyncService } from "./services/mutual-fund-sync.service";
 import { CoinGeckoService } from "./services/coingecko.service";
 import { isCryptoSymbol, symbolToCoingeckoId } from "./services/coingecko-mapping";
 
@@ -254,28 +252,6 @@ export async function fetchAssetData(
           return [];
         }
       }
-    }
-
-    // INTERCEPT: Indian Mutual Funds
-    // If it's an Indian Mutual Fund, we delegate to the specialized service
-    if (asset && asset.type === AssetType.MUTUAL_FUND && asset.region === "IN") {
-        // Use the already-fetched asset record — no need for another DB round-trip
-        await MutualFundSyncService.syncFund(asset as Parameters<typeof MutualFundSyncService.syncFund>[0]);
-        
-        // Return data from DB
-        const historyData = await prisma.priceHistory.findMany({
-            where: { assetId: asset.id },
-            orderBy: { date: 'asc' }
-        });
-
-        return historyData.map(h => ({
-            date: h.date.toISOString(),
-            open: h.open,
-            high: h.high,
-            low: h.low,
-            close: h.close,
-            volume: h.volume
-        }));
     }
 
     // INTERCEPT: Cryptocurrencies — use CoinGecko instead of Yahoo Finance

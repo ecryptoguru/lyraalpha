@@ -99,7 +99,7 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- homepage hero should answer: what is InsightAlpha, who is it for, and why now
+- homepage hero should answer: what is LyraAlpha, who is it for, and why now
 - the CTA should be visible above the fold and repeated near proof sections
 - add a simple trust layer: founder bio, product claims, and a short explanation of the engine/AI split
 - create a reusable content brief template for all future blog posts
@@ -421,7 +421,7 @@ The final month should maximize:
 ### Key deliverables
 
 - run a launch recap campaign
-- recycle top content into a “best of InsightAlpha” series
+- recycle top content into a “best of LyraAlpha” series
 - push referrals and email reactivation
 - review the 90-day funnel and define the next growth sprint
 

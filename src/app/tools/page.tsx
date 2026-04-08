@@ -54,20 +54,20 @@ const tools = [
 ] as const;
 
 export const metadata: Metadata = {
-  title: "Investor Tools | InsightAlpha AI — Portfolio, Research & Market Intelligence",
+  title: "Investor Tools | LyraAlpha AI — Portfolio, Research & Market Intelligence",
   description:
     "Free investor tools built on deterministic engine computation. Portfolio health scoring, AI investment research, market narrative tracking, and stock analysis for US and India markets. No guesswork — every AI response is grounded in computed signals.",
-  alternates: { canonical: "https://insightalpha.ai/tools" },
+  alternates: { canonical: "https://lyraalpha.ai/tools" },
   openGraph: {
-    title: "Investor Tools | InsightAlpha AI",
+    title: "Investor Tools | LyraAlpha AI",
     description:
       "Portfolio intelligence, market narrative tracking, AI research, and stock analysis — grounded in deterministic computation, not generic AI guesswork.",
-    url: "https://insightalpha.ai/tools",
+    url: "https://lyraalpha.ai/tools",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Investor Tools | InsightAlpha AI",
+    title: "Investor Tools | LyraAlpha AI",
     description:
       "Portfolio intelligence, market narrative tracking, AI research, and stock analysis — grounded in deterministic computation, not generic AI guesswork.",
     images: ["/og-image.png"],
@@ -103,7 +103,7 @@ export default function ToolsPage() {
                 <div className="p-8 sm:p-12">
                   <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/8 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-amber-300">
                     <Sparkles className="h-3 w-3 text-amber-400" />
-                    InsightAlpha AI · Investor tools
+                    LyraAlpha AI · Investor tools
                   </span>
                   <h1 className="mt-6 max-w-2xl text-4xl font-bold tracking-[-0.055em] text-white sm:text-5xl lg:text-6xl">
                     Start from the question you actually have.

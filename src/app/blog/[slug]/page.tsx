@@ -26,13 +26,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlugAsync(slug);
   if (!post) return {};
 
-  const url = `https://insightalpha.ai/blog/${post.slug}`;
+  const url = `https://lyraalpha.ai/blog/${post.slug}`;
   const ogImages = post.heroImageUrl
     ? [{ url: post.heroImageUrl, width: 1200, height: 630, alt: post.title }]
-    : [{ url: "https://insightalpha.ai/og-default.png", width: 1200, height: 630, alt: "InsightAlpha AI" }];
+    : [{ url: "https://lyraalpha.ai/og-default.png", width: 1200, height: 630, alt: "LyraAlpha AI" }];
 
   return {
-    title: `${post.title} | InsightAlpha AI Blog`,
+    title: `${post.title} | LyraAlpha AI Blog`,
     description: post.metaDescription ?? post.description,
     keywords: post.keywords ?? post.tags,
     alternates: { canonical: url },
@@ -64,22 +64,22 @@ function JsonLd({ post }: { post: NonNullable<Awaited<ReturnType<typeof getPostB
     author: {
       "@type": "Organization",
       name: post.author,
-      url: "https://insightalpha.ai",
+      url: "https://lyraalpha.ai",
     },
     publisher: {
       "@type": "Organization",
-      name: "InsightAlpha AI",
-      url: "https://insightalpha.ai",
+      name: "LyraAlpha AI",
+      url: "https://lyraalpha.ai",
       logo: {
         "@type": "ImageObject",
-        url: "https://insightalpha.ai/logo.png",
+        url: "https://lyraalpha.ai/logo.png",
       },
     },
     datePublished: post.date,
     dateModified: post.date,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://insightalpha.ai/blog/${post.slug}`,
+      "@id": `https://lyraalpha.ai/blog/${post.slug}`,
     },
     keywords: (post.keywords ?? post.tags).join(", "),
     ...(post.heroImageUrl ? { image: post.heroImageUrl } : {}),
@@ -278,7 +278,7 @@ export default async function BlogPostPage({ params }: Props) {
             <div className="absolute inset-0 bg-linear-to-t from-[#040816] via-[#040816]/40 to-transparent" />
             <div className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-full border border-white/10 bg-black/50 px-3 py-1.5 backdrop-blur-sm">
               <span className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-white/60">
-                InsightAlpha AI
+                LyraAlpha AI
               </span>
             </div>
           </div>

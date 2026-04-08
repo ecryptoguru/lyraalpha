@@ -14,7 +14,7 @@ US Portfolio Input
          ↓
 Unified Portfolio Normalization Engine
          ↓
-InsightAlpha Intelligence Layer
+LyraAlpha Intelligence Layer
 ```
 
 ### Why this split works

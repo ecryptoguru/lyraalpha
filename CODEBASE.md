@@ -1,10 +1,10 @@
-# CODEBASE.md — InsightAlpha AI (AI/Agent Reference)
+# CODEBASE.md — LyraAlpha AI (AI/Agent Reference)
 
-This document is written for AI coding agents (Cursor/Windsurf/Copilot/etc.) so they can quickly build an accurate mental model of the repository and safely continue development.
+This document is written for AI coding agents (Cursor/Windsurf/Copilot/etc.) so they can quickly build an accurate mental model of the LyraAlpha repository and safely continue development.
 
 ## 1) What this app is
 
-**InsightAlpha AI** is a Next.js (App Router) web application that provides:
+**LyraAlpha AI** is a Next.js (App Router) web application that provides:
 
 - A **multi-asset discovery + intelligence dashboard** (US + India)
 - **Asset pages** with computed analytics/scores and AI summaries
@@ -120,8 +120,10 @@ Notes:
 - `src/` — main application code
 - `prisma/` — Prisma schema + migrations + seed
 - `docs/` — product + roadmap docs
+- `docs/ENV_SETUP.md` — service-by-service environment setup guide for the LyraAlpha fork
 - `e2e/` — Playwright tests
 - `scripts/` — data sync, init, ops utilities
+- `.env.example` — sanitized environment template for local and deployment setup
 
 ### 4.2 `src/app` map (authoritative feature locations)
 
@@ -429,7 +431,7 @@ Primary service logic lives in:
 - `src/lib/services/market-sync.service.ts`
 - `src/lib/services/daily-briefing.service.ts`
 - `src/lib/services/market-narratives.service.ts`
-- `src/lib/services/finnhub-sync.service.ts`
+- `src/lib/services/cryptopanic.service.ts`
 
 Important invariants:
 
@@ -597,7 +599,7 @@ Use the npm scripts (avoids Prisma CLI version drift):
 
 ## 12) Environment variables (non-exhaustive)
 
-This repo reads many environment variables. The most important ones to know when debugging:
+This repo reads many environment variables. The most important ones to know when debugging are listed here, and the full service-by-service checklist lives in `docs/ENV_SETUP.md`. Use `.env.example` as the sanitized starting point for new environments.
 
 - **App**: `NEXT_PUBLIC_APP_URL`, `VERCEL_ENV`, `NODE_ENV`
 - **Email**: `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME`, `BREVO_ONBOARDING_LIST_ID`, `BREVO_BLOG_LIST_ID`
@@ -616,9 +618,9 @@ Do not commit secrets. Prefer Vercel env vars or `.env` locally.
 
 All email delivery uses Brevo. Ownership is split at the system boundary:
 
-- **InsightAlpha app sends**: welcome, blog-post notifications, weekly digest (QStash Monday), re-engagement, win-back, weekly intelligence reports, billing receipts — anything that requires Prisma user data
-- **AMI 2.0 agent sends**: cold/warm outreach, waitlist nurture, campaign copy, non-blog newsletters — using its own Brevo API key and contact lists, never InsightAlpha's
-- If AMI needs to reach InsightAlpha's opted-in subscribers, it triggers `/api/webhooks/ami` and InsightAlpha sends the email
+- **LyraAlpha app sends**: welcome, blog-post notifications, weekly digest (QStash Monday), re-engagement, win-back, weekly intelligence reports, billing receipts — anything that requires Prisma user data
+- **AMI 2.0 agent sends**: cold/warm outreach, waitlist nurture, campaign copy, non-blog newsletters — using its own Brevo API key and contact lists, never LyraAlpha's
+- If AMI needs to reach LyraAlpha's opted-in subscribers, it triggers `/api/webhooks/ami` and LyraAlpha sends the email
 
 See `docs/marketing-agent/AGENT_INTEGRATION_GUIDE.md` §9 for the full ownership table.
 

@@ -85,7 +85,7 @@ export async function upsertBrevoContact(payload: BrevoContactPayload): Promise<
 
 export async function sendBrevoEmail(payload: BrevoEmailPayload): Promise<boolean> {
   const senderEmail = process.env.BREVO_SENDER_EMAIL;
-  const senderName = process.env.BREVO_SENDER_NAME || "InsightAlpha AI";
+  const senderName = process.env.BREVO_SENDER_NAME || "LyraAlpha AI";
 
   if (!senderEmail) {
     logger.warn("BREVO_SENDER_EMAIL not configured, skipping email send");

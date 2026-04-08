@@ -3,20 +3,20 @@ import type { Metadata } from "next";
 import { PublicToolPage } from "@/components/tools/public-tool-page";
 
 export const metadata: Metadata = {
-  title: "AI Stock Analysis | InsightAlpha AI — DSE Scores, Regime Fit & Asset Intelligence",
+  title: "AI Stock Analysis | LyraAlpha AI — DSE Scores, Regime Fit & Asset Intelligence",
   description:
-    "AI stock analysis powered by InsightAlpha's deterministic scoring engines. Get trend score, volatility regime, momentum, and sentiment signals computed first — then Lyra interprets the setup, risks, and what deserves attention next. US and India markets.",
-  alternates: { canonical: "https://insightalpha.ai/tools/ai-stock-analysis" },
+    "AI stock analysis powered by LyraAlpha's deterministic scoring engines. Get trend score, volatility regime, momentum, and sentiment signals computed first — then Lyra interprets the setup, risks, and what deserves attention next. US and India markets.",
+  alternates: { canonical: "https://lyraalpha.ai/tools/ai-stock-analysis" },
   openGraph: {
-    title: "AI Stock Analysis | InsightAlpha AI",
+    title: "AI Stock Analysis | LyraAlpha AI",
     description:
       "DSE scores, regime fit, momentum, and sentiment — computed deterministically, interpreted by Lyra. Drop a ticker and get a structured read on setup, risk, and next steps. US and India markets.",
-    url: "https://insightalpha.ai/tools/ai-stock-analysis",
+    url: "https://lyraalpha.ai/tools/ai-stock-analysis",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AI Stock Analysis | InsightAlpha AI",
+    title: "AI Stock Analysis | LyraAlpha AI",
     description:
       "DSE scores, regime fit, momentum, and sentiment — computed deterministically, interpreted by Lyra. Drop a ticker and get a structured read on setup, risk, and next steps.",
     images: ["/og-image.png"],
@@ -30,7 +30,7 @@ export default function AiStockAnalysisPage() {
       title="One ticker. A structured read on setup, risk, and what to check next."
       description="Drop any stock, ETF, crypto, or mutual fund. The engines compute six deterministic signals — trend score, volatility regime, momentum, ARCS, sentiment, and valuation context. Lyra interprets the output into a clear setup brief with the key risk and the right next step."
       systemLabel="Asset intelligence system"
-      systemSummary="The asset surface runs InsightAlpha's DSE scoring stack on a single name: trend (0–100), volatility regime classification, momentum signals, ARCS risk-adjusted score, market sentiment, and valuation context. Every score is computed before Lyra speaks. She tells you what the numbers mean for your decision, not what the numbers are."
+      systemSummary="The asset surface runs LyraAlpha's DSE scoring stack on a single name: trend (0–100), volatility regime classification, momentum signals, ARCS risk-adjusted score, market sentiment, and valuation context. Every score is computed before Lyra speaks. She tells you what the numbers mean for your decision, not what the numbers are."
       paths={[
         { label: "Get the DSE brief", detail: "Six scores computed in seconds — trend, volatility, momentum, sentiment, ARCS, and valuation context. The quick read tells you where the setup sits and what matters most about it right now." },
         { label: "Understand the risk", detail: "Lyra identifies the primary risk — whether it's regime-driven, valuation-driven, or company-specific — and separates what's noise from what deserves attention." },
@@ -80,7 +80,7 @@ export default function AiStockAnalysisPage() {
       faqs={[
         {
           question: "What are DSE scores?",
-          answer: "DSE stands for Deterministic Scoring Engine. InsightAlpha's engines compute six structured signals for each asset: trend score (0–100), volatility regime (low/medium/high), momentum, ARCS (risk-adjusted composite score), market sentiment, and valuation context. These are computed deterministically — not estimated by an AI — before Lyra interprets them.",
+          answer: "DSE stands for Deterministic Scoring Engine. LyraAlpha's engines compute six structured signals for each asset: trend score (0–100), volatility regime (low/medium/high), momentum, ARCS (risk-adjusted composite score), market sentiment, and valuation context. These are computed deterministically — not estimated by an AI — before Lyra interprets them.",
         },
         {
           question: "What assets does the analysis cover?",
@@ -99,7 +99,7 @@ export default function AiStockAnalysisPage() {
           answer: "ARCS is the risk-adjusted composite score — it combines trend, momentum, and volatility into a single number that accounts for the risk taken to achieve the trend. A high trend score with high volatility gets penalized relative to the same trend score in a low-volatility regime.",
         },
       ]}
-      seoIntro="InsightAlpha's AI stock analysis tool targets investors searching for AI stock analysis, stock research tools, ticker analysis, DSE scoring, and structured stock decision support for US and India markets. The core difference from a screener is the deterministic scoring engine underneath — six signals computed first, Lyra interpreting second. This page covers equities, ETFs, crypto, and mutual funds across both markets."
+      seoIntro="LyraAlpha's AI stock analysis tool targets investors searching for AI stock analysis, stock research tools, ticker analysis, DSE scoring, and structured stock decision support for US and India markets. The core difference from a screener is the deterministic scoring engine underneath — six signals computed first, Lyra interpreting second. This page covers equities, ETFs, crypto, and mutual funds across both markets."
       seoBullets={[
         "Use this when you have a specific name and want a scored, structured read — not just price data and a P/E ratio.",
         "Every score is computed by deterministic engines. Lyra interprets the output, she doesn't generate it from training data alone.",

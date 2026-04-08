@@ -1,17 +1,17 @@
 # Terms of Service
 
-**InsightAlpha AI and LYRA**  
+**LyraAlpha AI and LYRA**  
 **Last updated:** February 14, 2026
 
 ## 1. Acceptance of Terms
 
-By accessing or using InsightAlpha AI, you agree to these Terms of Service.
+By accessing or using LyraAlpha AI, you agree to these Terms of Service.
 
 If you do not agree, you must discontinue use of the platform.
 
 ## 2. Service Description
 
-InsightAlpha AI provides financial analytics, explainability tooling, and AI-assisted interpretation across supported asset classes.
+LyraAlpha AI provides financial analytics, explainability tooling, and AI-assisted interpretation across supported asset classes.
 
 The platform is informational and educational in nature.
 
@@ -55,7 +55,7 @@ We are not responsible for outages, inaccuracies, latency, or changes originatin
 
 ## 9. Limitation of Liability
 
-To the maximum extent permitted by law, InsightAlpha AI is not liable for indirect, incidental, consequential, trading, or investment losses arising from platform use.
+To the maximum extent permitted by law, LyraAlpha AI is not liable for indirect, incidental, consequential, trading, or investment losses arising from platform use.
 
 Use of the platform is at your own risk.
 

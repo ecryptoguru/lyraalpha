@@ -204,6 +204,6 @@ export async function activateReferral(refereeId: string): Promise<{ success: bo
   }
 }
 
-export function getReferralLink(referrerCode: string, baseUrl: string = "https://insightalpha.ai"): string {
+export function getReferralLink(referrerCode: string, baseUrl: string = "https://lyraalpha.ai"): string {
   return `${baseUrl}/ref/${referrerCode}`;
 }

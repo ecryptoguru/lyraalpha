@@ -1,4 +1,6 @@
-# InsightAlpha AI — Credit, Referral, and Reward System
+# LyraAlpha AI — Credit, Referral, and Reward System
+
+> **Fork note:** This document reflects the current LyraAlpha repository and should be read alongside `CODEBASE.md` and `docs/ENV_SETUP.md`.
 
 This document reflects the currently implemented credit and referral behavior in the codebase plus the parts of the broader rewards vision that are already visible in runtime surfaces.
 
@@ -6,7 +8,7 @@ This document reflects the currently implemented credit and referral behavior in
 
 ## 1. Core Principle
 
-InsightAlpha AI uses a credit-based access model for Lyra usage.
+LyraAlpha AI uses a credit-based access model for Lyra usage.
 
 - **Credits** are the operational currency used for AI analysis.
 - **Monthly plan resets** replenish credits according to plan tier.
@@ -251,7 +253,7 @@ Credit-adjacent cron jobs that run on QStash schedules:
 | `/api/cron/blog-digest` | `0 10 * * 1` | Weekly digest email — no credit cost to users |
 | `/api/cron/reengagement` | `0 9 * * *` | Re-engagement / win-back — no credit cost |
 
-Blog-related email notifications (new post, weekly digest) are sent by InsightAlpha via Brevo and do **not** consume user credits. The AMI 2.0 marketing agent triggers these flows via the webhook bridge; InsightAlpha owns the send.
+Blog-related email notifications (new post, weekly digest) are sent by LyraAlpha via Brevo and do **not** consume user credits. The AMI 2.0 marketing agent triggers these flows via the webhook bridge; LyraAlpha owns the send.
 
 > **Last reviewed:** March 2026. Credit amounts, referral rewards, and query pricing are unchanged. Myra public chat added as a zero-credit surface. Daily token caps added as secondary backstop.
 

@@ -55,7 +55,7 @@ const _staticPosts: Omit<BlogPost, "readingTime">[] = [
       "Generic LLMs confidently invent metrics that were never computed. Here's exactly why that happens and what a deterministic-first architecture actually solves.",
     date: "2026-03-20",
     tags: ["AI", "Financial Intelligence", "LLMs", "Architecture"],
-    author: "InsightAlpha Research",
+    author: "LyraAlpha Research",
     category: "AI & Technology",
     featured: true,
     content: `
@@ -81,7 +81,7 @@ Language models are trained to predict plausible next tokens. In financial analy
 
 ## The Fix: Compute First, Interpret Second
 
-InsightAlpha's architecture enforces a strict two-phase pipeline:
+LyraAlpha's architecture enforces a strict two-phase pipeline:
 
 **Phase 1 — The Deterministic Engine** computes six structured signals before any AI model is invoked: Trend, Momentum, Volatility, Liquidity, Trust (earnings quality + insider activity), and Sentiment. The Market Regime is also computed — macro-level, sector-level, and asset-level.
 
@@ -116,7 +116,7 @@ That's what we built. That's why we built it that way.
       "The same asset can be a strong buy and a clear avoid depending on the regime it's in. Most tools ignore regime entirely. Here's why that's a critical gap.",
     date: "2026-03-15",
     tags: ["Market Regime", "Analytics", "Portfolio", "Risk"],
-    author: "InsightAlpha Research",
+    author: "LyraAlpha Research",
     category: "Market Intelligence",
     featured: true,
     content: `
@@ -142,7 +142,7 @@ This leads to classic errors:
 
 ---
 
-## How InsightAlpha Computes Regime
+## How LyraAlpha Computes Regime
 
 Our deterministic engine computes regime at three levels simultaneously:
 
@@ -158,7 +158,7 @@ These three levels interact. An asset can be in a local uptrend (asset regime: b
 
 ## What This Means in Practice
 
-When you open any asset in InsightAlpha:
+When you open any asset in LyraAlpha:
 
 1. The regime context is already computed before you ask a question
 2. Lyra's analysis positions every signal within the regime frame
@@ -170,17 +170,17 @@ Regime awareness is not a feature. It's the foundation of sound analysis.
 
 ## Conclusion
 
-Regime changes everything. A risk-on bullish signal is worth acting on. The same signal in a fragility regime deserves much more caution. Most tools can't tell the difference. InsightAlpha's architecture is built so that every response always reflects both.
+Regime changes everything. A risk-on bullish signal is worth acting on. The same signal in a fragility regime deserves much more caution. Most tools can't tell the difference. LyraAlpha's architecture is built so that every response always reflects both.
     `.trim(),
   },
   {
     slug: "india-vs-us-investing-two-markets-one-analytical-system",
     title: "Investing Across India and the US: Two Markets, One Analytical System",
     description:
-      "Most platforms force you to choose. InsightAlpha is built natively for both NSE/BSE and NYSE/NASDAQ — with separate data pipelines, regime framing, and currency context.",
+      "Most platforms force you to choose. LyraAlpha is built natively for both NSE/BSE and NYSE/NASDAQ — with separate data pipelines, regime framing, and currency context.",
     date: "2026-03-10",
     tags: ["India", "US Markets", "Multi-Market", "NSE", "NYSE"],
-    author: "InsightAlpha Research",
+    author: "LyraAlpha Research",
     category: "Markets",
     featured: true,
     content: `
@@ -200,7 +200,7 @@ India has 90M+ registered equity investors. The US has 160M+ brokerage accounts.
 
 **Market-specific regime framing.** India's macro regime is driven by RBI posture, GST data, FII flows, and domestic consumption signals. The US macro regime reflects Fed posture, yield curve, credit spreads, and global risk appetite. A single regime label does not transfer cleanly between markets.
 
-**Market-specific mutual funds.** India has one of the world's largest mutual fund ecosystems. 100% of India's mutual fund universe is covered in InsightAlpha. US mutual funds and ETFs are covered to a comparable level.
+**Market-specific mutual funds.** India has one of the world's largest mutual fund ecosystems. 100% of India's mutual fund universe is covered in LyraAlpha. US mutual funds and ETFs are covered to a comparable level.
 
 ---
 
@@ -212,7 +212,7 @@ If you hold HDFC Bank, Infosys, and NVIDIA in the same portfolio — your analyt
 - The US macro regime affecting NVIDIA
 - How FII flows and USD/INR dynamics create cross-market correlation between your Indian and US positions
 
-InsightAlpha's Portfolio Intelligence workflow reads your full portfolio as a system — across both markets simultaneously — and frames risk, regime alignment, and fragility across the complete picture.
+LyraAlpha's Portfolio Intelligence workflow reads your full portfolio as a system — across both markets simultaneously — and frames risk, regime alignment, and fragility across the complete picture.
 
 ---
 

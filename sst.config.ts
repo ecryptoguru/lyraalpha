@@ -3,7 +3,7 @@
 export default $config({
   app(input) {
     return {
-      name: "insightalpha",
+      name: "lyraalpha",
       removal: input?.stage === "production" ? "retain" : "remove",
       protect: ["production"].includes(input?.stage),
       home: "aws",
@@ -39,7 +39,7 @@ export default $config({
     const deepgramApiKey      = new sst.Secret("DeepgramApiKey");
     const voiceSessionSecret  = new sst.Secret("VoiceSessionSecret");
 
-    new sst.aws.Nextjs("InsightAlpha", {
+    new sst.aws.Nextjs("LyraAlpha", {
       // ── Secrets injected as env vars ──────────────────────────────────────
       link: [
         databaseUrl,

@@ -54,7 +54,7 @@ import { GET } from "../route";
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function makeReq(): NextRequest {
-  return new Request("https://insightalpha.ai/api/cron/blog-digest", {
+  return new Request("https://lyraalpha.ai/api/cron/blog-digest", {
     method: "GET",
   }) as unknown as NextRequest;
 }

@@ -75,73 +75,73 @@ const KIND_META: Record<IntelligenceShareKind, {
 }> = {
   shock: {
     xEmoji: "🔴",
-    xHashtags: "#PortfolioRisk #StressTest #InsightAlpha",
+    xHashtags: "#PortfolioRisk #StressTest #LyraAlpha",
     linkedInHook: "Most investors find out their portfolio was fragile after the crash. I ran a simulation before it happened.",
-    linkedInHashtags: "#RiskManagement #PortfolioStrategy #MarketIntelligence #InsightAlpha",
+    linkedInHashtags: "#RiskManagement #PortfolioStrategy #MarketIntelligence #LyraAlpha",
     redditPrefix: "Stress-tested my portfolio",
   },
   narrative: {
     xEmoji: "📖",
-    xHashtags: "#MarketNarrative #MacroView #InsightAlpha",
+    xHashtags: "#MarketNarrative #MacroView #LyraAlpha",
     linkedInHook: "The narrative driving this market just shifted. Here's what changed and why it matters right now.",
-    linkedInHashtags: "#MarketAnalysis #MacroStrategy #Investing #InsightAlpha",
+    linkedInHashtags: "#MarketAnalysis #MacroStrategy #Investing #LyraAlpha",
     redditPrefix: "Market narrative shift",
   },
   compare: {
     xEmoji: "⚖️",
-    xHashtags: "#AssetComparison #CryptoAnalysis #InsightAlpha",
+    xHashtags: "#AssetComparison #CryptoAnalysis #LyraAlpha",
     linkedInHook: "Side-by-side analysis of two assets most people treat interchangeably — the gap is bigger than you think.",
-    linkedInHashtags: "#InvestmentResearch #AssetAllocation #CryptoStrategy #InsightAlpha",
+    linkedInHashtags: "#InvestmentResearch #AssetAllocation #CryptoStrategy #LyraAlpha",
     redditPrefix: "Compared two assets",
   },
   reward: {
     xEmoji: "🏆",
-    xHashtags: "#InsightAlpha #Milestone",
-    linkedInHook: "Consistency compounds. Hit another milestone today on InsightAlpha.",
-    linkedInHashtags: "#Milestone #FinancialEducation #InsightAlpha",
+    xHashtags: "#LyraAlpha #Milestone",
+    linkedInHook: "Consistency compounds. Hit another milestone today on LyraAlpha.",
+    linkedInHashtags: "#Milestone #FinancialEducation #LyraAlpha",
     redditPrefix: "Just hit a milestone",
   },
   referral: {
     xEmoji: "🚀",
-    xHashtags: "#InsightAlpha #FinTech",
+    xHashtags: "#LyraAlpha #FinTech",
     linkedInHook: "I've been using this tool to cut through market noise. Worth sharing.",
-    linkedInHashtags: "#FinTech #MarketIntelligence #InsightAlpha",
+    linkedInHashtags: "#FinTech #MarketIntelligence #LyraAlpha",
     redditPrefix: "Tool I've been using for market context",
   },
   portfolio: {
     xEmoji: "📊",
-    xHashtags: "#PortfolioAnalysis #RiskManagement #InsightAlpha",
+    xHashtags: "#PortfolioAnalysis #RiskManagement #LyraAlpha",
     linkedInHook: "Ran an AI-powered portfolio check. The signals were more useful than I expected.",
-    linkedInHashtags: "#Portfolio #RiskManagement #InvestmentStrategy #InsightAlpha",
+    linkedInHashtags: "#Portfolio #RiskManagement #InvestmentStrategy #LyraAlpha",
     redditPrefix: "Portfolio intelligence report",
   },
   asset: {
     xEmoji: "🔍",
-    xHashtags: "#CryptoResearch #AssetAnalysis #InsightAlpha",
+    xHashtags: "#CryptoResearch #AssetAnalysis #LyraAlpha",
     linkedInHook: "Deep-diving an asset most people underestimate. The setup is more interesting than the price action shows.",
-    linkedInHashtags: "#CryptoAnalysis #AssetResearch #TradingInsights #InsightAlpha",
+    linkedInHashtags: "#CryptoAnalysis #AssetResearch #TradingInsights #LyraAlpha",
     redditPrefix: "Asset setup check",
   },
   discovery: {
     xEmoji: "🌐",
-    xHashtags: "#MarketDiscovery #Altcoins #InsightAlpha",
+    xHashtags: "#MarketDiscovery #Altcoins #LyraAlpha",
     linkedInHook: "Surfacing signals before they become obvious. This is what early-stage market intelligence looks like.",
-    linkedInHashtags: "#MarketOpportunity #EarlySignals #InvestmentResearch #InsightAlpha",
+    linkedInHashtags: "#MarketOpportunity #EarlySignals #InvestmentResearch #LyraAlpha",
     redditPrefix: "Discovery signal",
   },
   weekly_report: {
     xEmoji: "📅",
-    xHashtags: "#WeeklyMarkets #MarketSummary #InsightAlpha",
+    xHashtags: "#WeeklyMarkets #MarketSummary #LyraAlpha",
     linkedInHook: "What moved this week, why it moved, and where to look next — condensed into one AI-powered weekly read.",
-    linkedInHashtags: "#WeeklyMarkets #MacroAnalysis #InvestmentStrategy #InsightAlpha",
+    linkedInHashtags: "#WeeklyMarkets #MacroAnalysis #InvestmentStrategy #LyraAlpha",
     redditPrefix: "Weekly market intelligence",
   },
   generic: {
     xEmoji: "💡",
-    xHashtags: "#MarketIntelligence #InsightAlpha",
+    xHashtags: "#MarketIntelligence #LyraAlpha",
     linkedInHook: "Cutting through the noise with AI-powered market intelligence.",
-    linkedInHashtags: "#MarketIntelligence #FinTech #InsightAlpha",
-    redditPrefix: "InsightAlpha insight",
+    linkedInHashtags: "#MarketIntelligence #FinTech #LyraAlpha",
+    redditPrefix: "LyraAlpha insight",
   },
 };
 
@@ -340,13 +340,13 @@ export function createLegacyShareObject(input: {
   clipboardText?: string;
   label?: string;
 }): IntelligenceShareObject {
-  const title = input.title ?? "InsightAlpha update";
+  const title = input.title ?? "LyraAlpha update";
   const takeaway = input.text;
 
   return createShareObject({
     kind: "generic",
     mode: "insight",
-    eyebrow: "InsightAlpha AI",
+    eyebrow: "LyraAlpha AI",
     title,
     takeaway,
     context: input.clipboardText ?? input.text,
@@ -494,7 +494,7 @@ export function buildReferralShareObject(input: {
   return createShareObject({
     kind: "referral",
     mode: "invite",
-    eyebrow: "InsightAlpha referral",
+    eyebrow: "LyraAlpha referral",
     title: input.title,
     takeaway: input.takeaway,
     context: input.context,
@@ -502,7 +502,7 @@ export function buildReferralShareObject(input: {
     scoreValue: input.scoreValue,
     href: input.href,
     inviteHref: input.referralHref,
-    inviteEyebrow: "InsightAlpha invite",
+    inviteEyebrow: "LyraAlpha invite",
     inviteTakeaway: input.inviteTakeaway,
     inviteContext: input.inviteContext,
     inviteClipboardText: [

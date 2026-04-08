@@ -54,13 +54,13 @@ describe("intelligence-share", () => {
     const share = createShareObject({
       kind: "referral",
       mode: "invite",
-      title: "Invite your friends to InsightAlpha",
-      eyebrow: "InsightAlpha referral",
+      title: "Invite your friends to LyraAlpha",
+      eyebrow: "LyraAlpha referral",
       takeaway: "Share the product naturally.",
       context: "Only turn invite mode on when you want your referral link included.",
       href: "/",
       inviteHref: "/signup?ref=abc123",
-      inviteEyebrow: "InsightAlpha invite",
+      inviteEyebrow: "LyraAlpha invite",
       inviteTakeaway: "Get started with my referral link.",
       inviteContext: "You will get bonus credits when you activate a paid plan.",
     });

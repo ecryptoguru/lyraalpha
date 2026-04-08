@@ -21,7 +21,7 @@ This matters because the strongest product roadmap is one that scales without lo
 
 ## Investor Thesis
 
-InsightAlpha AI is strongest when described as:
+LyraAlpha AI is strongest when described as:
 
 - a deterministic financial-intelligence platform with structured engine outputs
 - with disciplined AI routing across GPT-5.4 nano / mini / full tiers
@@ -195,7 +195,7 @@ This is more defensible than promising unlimited intelligence or relying on mode
 
 ## Conclusion
 
-The strongest roadmap story for InsightAlpha AI stays close to implementation truth while clearly signaling the next phase:
+The strongest roadmap story for LyraAlpha AI stays close to implementation truth while clearly signaling the next phase:
 
 - deterministic engines first, AI interpretation second
 - GPT-5.4 across all plans with orchestration as the quality differentiator

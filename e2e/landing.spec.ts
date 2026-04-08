@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test";
 
 test("landing page loads with workflow-led funnel content", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/InsightAlpha AI/);
+  await expect(page).toHaveTitle(/LyraAlpha AI/);
 
-  await expect(page.getByRole("link", { name: /InsightAlpha AI/i }).first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByRole("link", { name: /LyraAlpha AI/i }).first()).toBeVisible({ timeout: 15000 });
   await expect(page.getByRole("button", { name: /Join Waitlist/i }).first()).toBeVisible({ timeout: 10000 });
   await expect(page.getByRole("group", { name: /Theme preference/i }).first()).toBeVisible({ timeout: 10000 });
 

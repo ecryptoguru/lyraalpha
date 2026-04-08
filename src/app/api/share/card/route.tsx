@@ -14,7 +14,7 @@ function clamp(value: string, max: number): string {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const eyebrow = readParam(searchParams.get("eyebrow"), "InsightAlpha AI");
+  const eyebrow = readParam(searchParams.get("eyebrow"), "LyraAlpha AI");
   const title = clamp(readParam(searchParams.get("title"), "Institutional-grade market intelligence"), 72);
   const takeaway = clamp(readParam(searchParams.get("takeaway"), "See what changed, why it matters and where to look next."), 110);
   const context = clamp(readParam(searchParams.get("context"), "Make your insight legible outside the app."), 130);
@@ -164,12 +164,12 @@ export async function GET(request: Request) {
             }}
           >
             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <span style={{ color: "#FBBF24", fontSize: 18, fontWeight: 700 }}>InsightAlpha AI</span>
+              <span style={{ color: "#FBBF24", fontSize: 18, fontWeight: 700 }}>LyraAlpha AI</span>
               <span style={{ color: "#64748B", fontSize: 16, fontWeight: 400 }}>
                 Retail clarity for institutional-grade market context
               </span>
             </div>
-            <span style={{ color: "#CBD5E1", fontSize: 18, fontWeight: 700 }}>insightalpha.ai</span>
+            <span style={{ color: "#CBD5E1", fontSize: 18, fontWeight: 700 }}>lyraalpha.ai</span>
           </div>
         </div>
       </div>

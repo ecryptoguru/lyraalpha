@@ -11,7 +11,7 @@ interface ChatMessage {
 }
 
 const QUICK_REPLIES = [
-  "What is InsightAlpha AI?",
+  "What is LyraAlpha AI?",
   "How do I join the waitlist?",
   "What do waitlisted users get?",
   "What assets are covered?",
@@ -180,7 +180,7 @@ export function PublicMyraPanel({
                 </div>
                 <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Ask before launch.</p>
                 <p className="px-4 text-sm font-medium leading-relaxed text-slate-500 dark:text-white/52">
-                  I can explain how the waitlist works, what early access includes, which assets are covered and how InsightAlpha works before public launch.
+                  I can explain how the waitlist works, what early access includes, which assets are covered and how LyraAlpha works before public launch.
                 </p>
               </div>
               <div className="grid grid-cols-1 gap-2.5">

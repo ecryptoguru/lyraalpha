@@ -6,7 +6,7 @@
 ---
 
 ## Role Separation
-InsightAlpha AI uses a dual-agent model because the platform has two distinct product responsibilities.
+LyraAlpha AI uses a dual-agent model because the platform has two distinct product responsibilities.
 
 ### Lyra
 Lyra is the market-intelligence agent. She handles:
@@ -180,7 +180,7 @@ In the future-state narrative, this governance posture should be framed as a pro
 ---
 
 ## Strategic Summary
-The dual-agent architecture remains one of InsightAlpha AI’s clearest differentiators.
+The dual-agent architecture remains one of LyraAlpha AI’s clearest differentiators.
 
 Its future shape should be:
 - **Lyra** becoming a stronger premium analytical surface built around GPT-5.4 for flagship synthesis

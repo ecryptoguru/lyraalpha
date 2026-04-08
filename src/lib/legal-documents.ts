@@ -14,13 +14,13 @@ export interface LegalDocument {
 
 export const PRIVACY_DOCUMENT: LegalDocument = {
   title: "Privacy Policy",
-  subtitle: "InsightAlpha AI and LYRA",
+  subtitle: "LyraAlpha AI and LYRA",
   updatedAt: "February 14, 2026",
   sections: [
     {
       title: "1. Scope",
       body: [
-        "This Privacy Policy applies to the InsightAlpha AI website, dashboard, and LYRA features used on free and paid plans.",
+        "This Privacy Policy applies to the LyraAlpha AI website, dashboard, and LYRA features used on free and paid plans.",
         "By using the platform, you acknowledge the data practices described below.",
       ],
     },
@@ -110,20 +110,20 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
 
 export const TERMS_DOCUMENT: LegalDocument = {
   title: "Terms of Service",
-  subtitle: "InsightAlpha AI and LYRA",
+  subtitle: "LyraAlpha AI and LYRA",
   updatedAt: "February 14, 2026",
   sections: [
     {
       title: "1. Acceptance of Terms",
       body: [
-        "By accessing or using InsightAlpha AI, you agree to these Terms of Service.",
+        "By accessing or using LyraAlpha AI, you agree to these Terms of Service.",
         "If you do not agree, you must stop using the platform.",
       ],
     },
     {
       title: "2. Service Description",
       body: [
-        "InsightAlpha AI provides market analytics, explainability tooling, and AI-assisted interpretation across supported asset classes.",
+        "LyraAlpha AI provides market analytics, explainability tooling, and AI-assisted interpretation across supported asset classes.",
         "The platform is informational and educational in nature.",
       ],
     },
@@ -172,7 +172,7 @@ export const TERMS_DOCUMENT: LegalDocument = {
     {
       title: "9. Limitation of Liability",
       body: [
-        "To the maximum extent permitted by law, InsightAlpha AI is not liable for indirect, incidental, consequential, trading, or investment losses arising from use of the platform.",
+        "To the maximum extent permitted by law, LyraAlpha AI is not liable for indirect, incidental, consequential, trading, or investment losses arising from use of the platform.",
         "Use of the platform is at your own risk.",
       ],
     },

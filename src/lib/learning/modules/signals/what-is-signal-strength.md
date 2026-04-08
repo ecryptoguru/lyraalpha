@@ -11,7 +11,7 @@ isEliteOnly: false
 
 ## Key Concept
 
-**Signal Strength** is the core analytical output of InsightAlpha AI. It distills millions of data points across price action, fundamentals, network activity, and market regimes into a single, unified score (0-100) and directional label. 
+**Signal Strength** is the core analytical output of LyraAlpha AI. It distills millions of data points across price action, fundamentals, network activity, and market regimes into a single, unified score (0-100) and directional label. 
 
 It is *not* a price prediction. It is a measurement of **current systemic conviction** behind an asset's price movement.
 

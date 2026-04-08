@@ -9,7 +9,7 @@
  *
  * Usage:
  *   export SUPABASE_DIRECT_URL="postgresql://postgres.xxx:PASSWORD@aws-1-ap-south-1.pooler.supabase.com:5432/postgres"
- *   export RDS_URL="postgresql://postgres:PASSWORD@insightalpha.xxx.ap-south-1.rds.amazonaws.com:5432/insightalpha?sslmode=require"
+ *   export RDS_URL="postgresql://postgres:PASSWORD@lyraalpha.xxx.ap-south-1.rds.amazonaws.com:5432/lyraalpha?sslmode=require"
  *
  *   # Dry run first (counts only, no writes):
  *   DRY_RUN=true npx tsx scripts/migrate-database.ts
@@ -236,7 +236,7 @@ async function main() {
     console.error("  RDS_URL              — AWS RDS endpoint");
     console.error("\nExample:");
     console.error('  export SUPABASE_DIRECT_URL="postgresql://postgres.xxx:PASS@host:5432/postgres"');
-    console.error('  export RDS_URL="postgresql://postgres:PASS@rds.endpoint:5432/insightalpha?sslmode=require"');
+    console.error('  export RDS_URL="postgresql://postgres:PASS@rds.endpoint:5432/lyraalpha?sslmode=require"');
     process.exit(1);
   }
 

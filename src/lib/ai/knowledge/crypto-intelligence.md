@@ -1,6 +1,6 @@
 # Crypto Intelligence Engine Reference
 
-This document explains how to interpret the proprietary Crypto Intelligence scores computed by the InsightAlpha AI platform. These scores appear in context tags like [CRYPTO_NETWORK_ACTIVITY], [CRYPTO_HOLDER_STABILITY], [CRYPTO_LIQUIDITY_RISK], [CRYPTO_STRUCTURAL_RISK], and [CRYPTO_ENHANCED_TRUST]. Use this to deliver crypto analysis grounded in platform-specific data.
+This document explains how to interpret the proprietary Crypto Intelligence scores computed by the LyraAlpha AI platform. These scores appear in context tags like [CRYPTO_NETWORK_ACTIVITY], [CRYPTO_HOLDER_STABILITY], [CRYPTO_LIQUIDITY_RISK], [CRYPTO_STRUCTURAL_RISK], and [CRYPTO_ENHANCED_TRUST]. Use this to deliver crypto analysis grounded in platform-specific data.
 
 ---
 

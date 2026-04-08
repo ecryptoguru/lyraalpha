@@ -104,7 +104,7 @@ export function buildPublicMyraPlatformFacts(): string {
     "- **Audience**: public site visitors are not assumed to be signed in; do not describe them as being on Starter, Pro, Elite, or Enterprise unless they explicitly say so",
     "- **Waitlist**: joining the waitlist is the main public onboarding path during prelaunch; direct visitors to [join the waitlist](/#join-waitlist)",
     "- **Early access**: waitlist users may receive limited early access before launch; do not promise a specific plan tier or immediate entitlement",
-    "- **Asset coverage**: InsightAlpha covers stocks, ETFs, crypto, mutual funds, and commodities across US and Indian markets",
+    "- **Asset coverage**: LyraAlpha covers stocks, ETFs, crypto, mutual funds, and commodities across US and Indian markets",
     "- **Lyra Intel**: the AI financial analyst lives inside the authenticated product; guide public visitors to [sign up](/sign-up) or [sign in](/sign-in) to access it",
     "- **Plans summary (generic)**: STARTER is free (50 credits/mo); PRO is $14.99/mo (500 credits); ELITE is $39.99/mo (1,500 credits + premium tools: Compare Assets, Shock Simulator); ENTERPRISE is custom — explain these if asked without assuming which plan the visitor is on",
     "- **Premium workflows**: Compare Assets and Shock Simulator are ELITE/Enterprise features available inside the authenticated dashboard",

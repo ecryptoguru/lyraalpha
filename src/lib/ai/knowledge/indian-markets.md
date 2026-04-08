@@ -1,6 +1,6 @@
 # Indian Market Intelligence Reference
 
-This document provides India-specific market structure, regulatory context, and sector dynamics for the 191 Indian stocks, 105 Indian mutual funds, 6 Indian ETFs, and 2 Indian commodities in the InsightAlpha AI universe (304 IN assets total). Use this to deliver India-aware analysis instead of generic global frameworks.
+This document provides India-specific market structure, regulatory context, and sector dynamics for the 191 Indian stocks, 105 Indian mutual funds, 6 Indian ETFs, and 2 Indian commodities in the LyraAlpha AI universe (304 IN assets total). Use this to deliver India-aware analysis instead of generic global frameworks.
 
 ---
 

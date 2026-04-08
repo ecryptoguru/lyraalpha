@@ -1,4 +1,4 @@
-# Total Assets — InsightAlpha AI Database
+# Total Assets — LyraAlpha AI Database
 
 > Last Updated: Feb 19, 2026 | Total: 669 assets
 

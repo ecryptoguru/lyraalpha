@@ -33,22 +33,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (posts.length === 0) return {};
 
   const categoryName = posts[0].category;
-  const url = `https://insightalpha.ai/blog/category/${category}`;
+  const url = `https://lyraalpha.ai/blog/category/${category}`;
 
   return {
-    title: `${categoryName} | InsightAlpha AI Blog`,
-    description: `Articles on ${categoryName} — AI-grounded financial analysis, market regimes, and intelligent investing from InsightAlpha AI.`,
+    title: `${categoryName} | LyraAlpha AI Blog`,
+    description: `Articles on ${categoryName} — AI-grounded financial analysis, market regimes, and intelligent investing from LyraAlpha AI.`,
     alternates: { canonical: url },
     openGraph: {
-      title: `${categoryName} | InsightAlpha AI`,
-      description: `Articles on ${categoryName} from InsightAlpha AI.`,
+      title: `${categoryName} | LyraAlpha AI`,
+      description: `Articles on ${categoryName} from LyraAlpha AI.`,
       url,
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${categoryName} | InsightAlpha AI`,
-      description: `Articles on ${categoryName} from InsightAlpha AI.`,
+      title: `${categoryName} | LyraAlpha AI`,
+      description: `Articles on ${categoryName} from LyraAlpha AI.`,
     },
   };
 }
@@ -86,7 +86,7 @@ export default async function CategoryPage({ params }: Props) {
             </Link>
 
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-amber-400/70">
-              InsightAlpha AI · Category
+              LyraAlpha AI · Category
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-extralight leading-tight tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
               {categoryName}

@@ -13,7 +13,7 @@ export function Navbar() {
         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3 dark:border-white/10 dark:bg-white/3">
           <Image
             src="/logo.png"
-            alt="InsightAlpha AI Logo"
+            alt="LyraAlpha AI Logo"
             fill
             sizes="40px"
             className="object-contain p-1.5"
@@ -23,7 +23,7 @@ export function Navbar() {
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className="truncate text-sm font-bold tracking-tight text-slate-900 sm:text-base dark:text-white">
-              InsightAlpha AI
+              LyraAlpha AI
             </span>
             <span className="hidden rounded-full border border-amber-300/30 bg-amber-50 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.24em] text-amber-600 sm:inline-flex dark:border-amber-300/18 dark:bg-amber-300/8 dark:text-amber-100/75">
               Pre-launch

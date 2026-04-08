@@ -88,7 +88,7 @@ const SECRET = "test-webhook-secret";
 function buildRequest(payload: unknown, secret = SECRET): NextRequest {
   const body = JSON.stringify(payload);
   const sig = createHmac("sha256", secret).update(body).digest("hex");
-  return new Request("https://insightalpha.ai/api/webhooks/ami", {
+  return new Request("https://lyraalpha.ai/api/webhooks/ami", {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -111,7 +111,7 @@ const PUBLISHED_PAYLOAD = {
     keywords: ["ai", "finance"],
     metaDescription: "Short meta description.",
     heroImageUrl: "https://cdn.example.com/img.webp",
-    author: "InsightAlpha Research",
+    author: "LyraAlpha Research",
     featured: false,
     sourceAgent: "ami-2.0",
   },
@@ -169,7 +169,7 @@ describe("signature verification", () => {
 
 describe("payload validation", () => {
   it("returns 400 for invalid JSON body", async () => {
-    const req = new Request("https://insightalpha.ai/api/webhooks/ami", {
+    const req = new Request("https://lyraalpha.ai/api/webhooks/ami", {
       method: "POST",
       headers: { "x-ami-signature": "sig" },
       body: "not-json{{{",

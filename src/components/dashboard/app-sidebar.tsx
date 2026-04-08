@@ -146,7 +146,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="flex aspect-square size-8 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-secondary/10 border border-primary/25 shadow-[0_0_15px_rgba(245,158,11,0.2)] text-foreground dark:text-white">
                   <Image 
                     src="/logo.png" 
-                    alt="InsightAlpha AI" 
+                    alt="LyraAlpha AI" 
                     width={32} 
                     height={32} 
                     className="w-full h-full object-contain p-0.5"
@@ -155,7 +155,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden ml-2">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate font-bold text-base tracking-tight text-foreground dark:bg-linear-to-r dark:from-white dark:to-white/60 dark:bg-clip-text dark:text-transparent">
-                      InsightAlpha AI
+                      LyraAlpha AI
                     </span>
                     <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.14em] text-primary">
                       Beta

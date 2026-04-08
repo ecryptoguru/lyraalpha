@@ -1,6 +1,6 @@
-# InsightAlpha AI: Platform Intelligence Reference
+# LyraAlpha AI: Platform Intelligence Reference
 
-This document defines how the InsightAlpha AI platform works — its scoring engines, regime detection, compatibility logic, and Signal Strength system. Use this to explain platform-specific concepts to users accurately.
+This document defines how the LyraAlpha AI platform works — its scoring engines, regime detection, compatibility logic, and Signal Strength system. Use this to explain platform-specific concepts to users accurately.
 
 ---
 

@@ -1,12 +1,14 @@
-# Lyra & Myra — InsightAlpha AI Dual-Agent Architecture
+# Lyra & Myra — LyraAlpha AI Dual-Agent Architecture
 
-This document describes the audited, code-aligned behavior of InsightAlpha AI's two AI agents: **Lyra** for market intelligence and **Myra** for platform support.
+> **Fork note:** This document reflects the current LyraAlpha repository and should be read alongside `CODEBASE.md` and `docs/ENV_SETUP.md`.
+
+This document describes the audited, code-aligned behavior of LyraAlpha AI's two AI agents: **Lyra** for market intelligence and **Myra** for platform support.
 
 ---
 
 ## 1. Why Two Agents Exist
 
-InsightAlpha AI uses two distinct AI surfaces because the product has two distinct problem domains:
+LyraAlpha AI uses two distinct AI surfaces because the product has two distinct problem domains:
 
 - **Lyra** handles market interpretation, score explanation, regime-aware analysis, and premium analytical workflows.
 - **Myra** handles platform support, billing/help flows, feature explanations, navigation help, and safe redirection when a question belongs with Lyra.
@@ -178,7 +180,7 @@ This means Lyra is not guessing the scenario narrative from scratch. She is inte
 
 ### 3.1 Role
 
-Myra is InsightAlpha AI's platform support agent.
+Myra is LyraAlpha AI's platform support agent.
 
 She is responsible for:
 
@@ -349,5 +351,5 @@ None of that is replicable by swapping models or copying prompts.
 
 ---
 
-*InsightAlpha AI — Financial Intelligence, Not Financial Noise*
+*LyraAlpha AI — Financial Intelligence, Not Financial Noise*
 *Version 2.0 · March 2026*

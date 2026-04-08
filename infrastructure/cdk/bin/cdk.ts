@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { InsightAlphaStack } from './lib/insightalpha-stack';
+import { LyraAlphaStack } from './lib/lyraalpha-stack';
 
 const app = new cdk.App();
-new InsightAlphaStack(app, 'InsightAlphaStack', {
+new LyraAlphaStack(app, 'LyraAlphaStack', {
   env: {
     account: process.env.CDK_DEFAULT_ACCOUNT,
     region: process.env.CDK_DEFAULT_REGION || 'us-east-1',
   },
   tags: {
-    Project: 'InsightAlpha',
+    Project: 'LyraAlpha',
     Environment: 'production',
   },
 });

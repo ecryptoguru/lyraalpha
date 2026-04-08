@@ -4,14 +4,14 @@ import { Navbar } from "@/components/layout/Navbar";
 import { PRIVACY_DOCUMENT } from "@/lib/legal-documents";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | InsightAlpha AI",
+  title: "Privacy Policy | LyraAlpha AI",
   description:
-    "InsightAlpha AI privacy policy — how we collect, use, and protect your data across our financial intelligence platform.",
-  alternates: { canonical: "https://insightalpha.ai/privacy" },
+    "LyraAlpha AI privacy policy — how we collect, use, and protect your data across our financial intelligence platform.",
+  alternates: { canonical: "https://lyraalpha.ai/privacy" },
   openGraph: {
-    title: "Privacy Policy | InsightAlpha AI",
-    description: "How InsightAlpha AI collects, uses, and protects your data.",
-    url: "https://insightalpha.ai/privacy",
+    title: "Privacy Policy | LyraAlpha AI",
+    description: "How LyraAlpha AI collects, uses, and protects your data.",
+    url: "https://lyraalpha.ai/privacy",
   },
   robots: { index: false },
 };

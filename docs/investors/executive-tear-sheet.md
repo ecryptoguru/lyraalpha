@@ -1,8 +1,8 @@
-# InsightAlpha AI — Executive Tear Sheet
+# LyraAlpha AI — Executive Tear Sheet
 
 ## Company Snapshot
 
-**InsightAlpha AI** is building the structured financial intelligence layer that retail investors in India and the US have never had — not more data, not another chatbot, but a system that turns fragmented market signals into consistent, institutional-quality reasoning at consumer scale.
+**LyraAlpha AI** is building the structured financial intelligence layer that retail investors in India and the US have never had — not more data, not another chatbot, but a system that turns fragmented market signals into consistent, institutional-quality reasoning at consumer scale.
 
 - **Category:** Financial intelligence / AI-native investing software
 - **Markets:** US + India — equities, ETFs, mutual funds, crypto, commodities
@@ -26,13 +26,13 @@ The result is a market where:
 - trust in AI-generated financial commentary is low and getting lower
 - the gap between raw information and actionable intelligence is widening
 
-That gap is exactly where InsightAlpha AI is positioned.
+That gap is exactly where LyraAlpha AI is positioned.
 
 ---
 
 ## The Solution
 
-InsightAlpha AI is built around one architectural rule:
+LyraAlpha AI is built around one architectural rule:
 
 > **The engines compute. The AI interprets.**
 
@@ -52,7 +52,7 @@ Premium workflows turn single interactions into repeatable product experiences: 
 
 ### Why This Beats Prompt Wrappers
 
-A generic LLM wrapper invents its analytical frame on every call. InsightAlpha AI's model receives a structured context the engines already computed. That means:
+A generic LLM wrapper invents its analytical frame on every call. LyraAlpha AI's model receives a structured context the engines already computed. That means:
 - more consistent outputs
 - lower hallucination surface
 - clearer governance
@@ -106,12 +106,12 @@ Multi-asset cross-sector synthesis for up to 4 assets simultaneously. Lyra synth
 Score velocity badges, portfolio regime-alignment visualization, watchlist drift alerting, discovery-feed signal-cluster detection, same-sector movers with compatibility context, briefing staleness indicators, holdings P&L heatmap with DSE score chips.
 
 ### Blog and AMI 2.0 Content Pipeline (Shipped)
-InsightAlpha AI now ships a public blog with a hybrid static + DB architecture, fed by an external AMI 2.0 marketing agent system:
+LyraAlpha AI now ships a public blog with a hybrid static + DB architecture, fed by an external AMI 2.0 marketing agent system:
 
 - **Blog system:** public-facing at `/blog` with category pages, RSS feed, OG hero images, and reading progress. Built for SEO/GEO discovery from day one.
-- **AMI 2.0 webhook bridge:** the external AMI 2.0 agent publishes posts to InsightAlpha via an HMAC-verified webhook. Posts are upserted, ISR-revalidated, and subscriber notifications are fired automatically.
+- **AMI 2.0 webhook bridge:** the external AMI 2.0 agent publishes posts to LyraAlpha via an HMAC-verified webhook. Posts are upserted, ISR-revalidated, and subscriber notifications are fired automatically.
 - **Weekly blog digest:** every Monday at 10:00 UTC, opted-in users receive a curated digest of recent posts via Brevo — a zero-marginal-cost retention touchpoint.
-- **Email ownership split:** InsightAlpha owns transactional and lifecycle emails (notifications, digest, re-engagement, reports); AMI 2.0 owns outbound marketing (cold/warm outreach, nurture sequences) using its own Brevo API key. The boundary is enforced at the system level, not just by convention.
+- **Email ownership split:** LyraAlpha owns transactional and lifecycle emails (notifications, digest, re-engagement, reports); AMI 2.0 owns outbound marketing (cold/warm outreach, nurture sequences) using its own Brevo API key. The boundary is enforced at the system level, not just by convention.
 
 ---
 
@@ -197,9 +197,9 @@ Starter (free) → Pro (recurring) → Elite (premium workflows) → Enterprise 
 
 ## Competitive Positioning
 
-### Why InsightAlpha AI Wins
+### Why LyraAlpha AI Wins
 
-| Dimension | Generic AI Finance Chat | Traditional Screeners | InsightAlpha AI |
+| Dimension | Generic AI Finance Chat | Traditional Screeners | LyraAlpha AI |
 |---|---|---|---|
 | **Data grounding** | Model-improvised | Strong data, no AI | Engine-computed + AI interpreted |
 | **Trust** | Low (hallucination risk) | High (data only) | High (structured context first) |
@@ -261,15 +261,15 @@ Capital accelerates distribution and execution — not product reinvention.
 
 Near-term priority: deepen the premium analytical surface, drive Starter → Pro → Elite conversion, and build the distribution engine required to reach 10,000+ paying users.
 
-Medium-term: position InsightAlpha AI as the default structured intelligence layer for self-directed investors in India and the US — the product that sits between raw market data and real investment reasoning.
+Medium-term: position LyraAlpha AI as the default structured intelligence layer for self-directed investors in India and the US — the product that sits between raw market data and real investment reasoning.
 
-Long-term: the winning product in this category will not be the one with the most data feeds. It will be the one that makes analytical judgment consistently accessible. That is what InsightAlpha AI is building.
+Long-term: the winning product in this category will not be the one with the most data feeds. It will be the one that makes analytical judgment consistently accessible. That is what LyraAlpha AI is building.
 
 ---
 
 ## Bottom Line
 
-InsightAlpha AI is not another investing chatbot.
+LyraAlpha AI is not another investing chatbot.
 
 It is a structured financial intelligence product with a defensible architecture, live premium workflows, a clear monetization ladder, and a growing market that is actively moving away from generic AI noise toward grounded, trustworthy analytical tools.
 

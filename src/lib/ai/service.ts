@@ -482,7 +482,7 @@ export async function generateLyraStream(
   // Pure greetings ("hi", "thanks", "ok") return a canned response — zero LLM cost, instant response.
   if (isTrivial) {
     logger.info({ query }, "Trivial query — returning canned response");
-    const cannedResponse = `Hey! I'm Lyra from InsightAlpha AI. I analyze stocks, ETFs, crypto, mutual funds, and macro markets with proprietary scoring engines.\n\n**What would you like to explore?**\n\n1. **Analyze an asset** — any stock, ETF, crypto, or mutual fund by ticker\n2. **Market overview** — current regime, sector rotation, top movers\n3. **Compare assets** — how two assets stack up against each other\n4. **Understand a metric** — what does "Sharpe ratio" or "volatility score" mean?\n5. **Portfolio view** — how is your portfolio positioned in the current regime?\n\nJust ask!`;
+    const cannedResponse = `Hey! I'm Lyra from LyraAlpha AI. I analyze stocks, ETFs, crypto, mutual funds, and macro markets with proprietary scoring engines.\n\n**What would you like to explore?**\n\n1. **Analyze an asset** — any stock, ETF, crypto, or mutual fund by ticker\n2. **Market overview** — current regime, sector rotation, top movers\n3. **Compare assets** — how two assets stack up against each other\n4. **Understand a metric** — what does "Sharpe ratio" or "volatility score" mean?\n5. **Portfolio view** — how is your portfolio positioned in the current regime?\n\nJust ask!`;
     return {
       result: { textStream: singleChunkStream(cannedResponse) },
       sources: [],

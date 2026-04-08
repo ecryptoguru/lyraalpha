@@ -57,7 +57,7 @@
 - Region-specific Stripe price IDs if used
 
 ### AMI 2.0 Marketing Agent Bridge
-- `AMI_WEBHOOK_SECRET` — shared HMAC-SHA256 secret between InsightAlpha and AMI 2.0; must match the value set in Convex env vars
+- `AMI_WEBHOOK_SECRET` — shared HMAC-SHA256 secret between LyraAlpha and AMI 2.0; must match the value set in Convex env vars
 
 ### Notifications / Email
 - `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
@@ -108,8 +108,8 @@
 - Verify one cron route can be invoked with the expected auth method.
 - Verify live support chat still works when Supabase realtime env vars are present.
 - Verify push subscription flow only appears when VAPID public key is configured.
-- After any schedule change, re-run: `QSTASH_TOKEN=xxx DEPLOYMENT_URL=https://insightalpha.ai npx tsx scripts/setup-qstash-schedules.ts`
-- Verify `AMI_WEBHOOK_SECRET` is set in both InsightAlpha Vercel env vars AND AMI 2.0 Convex env vars with the same value.
+- After any schedule change, re-run: `QSTASH_TOKEN=xxx DEPLOYMENT_URL=https://lyraalpha.ai npx tsx scripts/setup-qstash-schedules.ts`
+- Verify `AMI_WEBHOOK_SECRET` is set in both LyraAlpha Vercel env vars AND AMI 2.0 Convex env vars with the same value.
 
 ## Advisory follow-up
 - `UX Audit` and `SEO Check` now pass in the master checklist after source-level and audit-script follow-up.

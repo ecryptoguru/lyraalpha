@@ -1,11 +1,11 @@
 # Privacy Policy
 
-**InsightAlpha AI and LYRA**  
+**LyraAlpha AI and LYRA**  
 **Last updated:** February 14, 2026
 
 ## 1. Scope
 
-This Privacy Policy applies to the InsightAlpha AI website, dashboard, and LYRA features on free and paid plans.
+This Privacy Policy applies to the LyraAlpha AI website, dashboard, and LYRA features on free and paid plans.
 
 By using the platform, you acknowledge the data practices described in this policy.
 

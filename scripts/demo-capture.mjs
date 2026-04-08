@@ -58,7 +58,7 @@ const scenes = [
   {
     name: "intro",
     path: "/",
-    waitFor: { text: /InsightAlpha AI/i },
+    waitFor: { text: /LyraAlpha AI/i },
     holdMs: 1600,
     action: async (page) => {
       await smoothMouse(page, 220, 190);

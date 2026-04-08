@@ -139,7 +139,7 @@ Use evening for optimization and learning:
 - Draft FAQ schema content
 - Add author and trust signals to site copy
 - Prepare internal linking plan
-- Create a simple “why trust InsightAlpha” section
+- Create a simple “why trust LyraAlpha” section
 - Map the first 10 India/US keyword targets into blog, tool, comparison, or answer-page formats
 
 ### Day 4
@@ -632,7 +632,7 @@ Use evening for optimization and learning:
 ### Day 55
 
 - Publish a post on AI + finance workflows
-- Highlight InsightAlpha as a decision-support layer
+- Highlight LyraAlpha as a decision-support layer
 - Add one more conversion CTA to the article
 - Review signup conversion by source
 - Refine ad targeting if running retargeting

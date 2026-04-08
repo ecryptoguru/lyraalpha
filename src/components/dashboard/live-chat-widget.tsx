@@ -609,7 +609,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
                 </motion.div>
                 <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Hi! I am Myra.</p>
                 <p className="px-4 text-sm font-medium leading-relaxed text-slate-500 dark:text-white/52">
-                  I&apos;m Lyra&apos;s companion for platform support. I can help you navigate InsightAlpha AI and answer your questions.
+                  I&apos;m Lyra&apos;s companion for platform support. I can help you navigate LyraAlpha AI and answer your questions.
                 </p>
                 <p className="pt-1 text-sm font-medium text-amber-600 dark:text-amber-300">
                   How may I help you today?
