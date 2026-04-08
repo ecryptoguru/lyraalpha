@@ -1,0 +1,78 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="lyraiqEdge" x1="96" y1="88" x2="426" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8A7CFF"/>
+      <stop offset="0.55" stop-color="#5B5FFF"/>
+      <stop offset="1" stop-color="#00D4FF"/>
+    </linearGradient>
+    <radialGradient id="lyraiqNode" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) rotate(90) scale(22)">
+      <stop stop-color="#E7EBFF"/>
+      <stop offset="1" stop-color="#9BDFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="lyraiqGlow" x="-50%" y="-50%" width="200%" height="200%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <path d="M126 258C126 176 193 110 275 110C338 110 393 149 417 207" stroke="url(#lyraiqEdge)" stroke-opacity="0.5" stroke-width="2" stroke-linecap="round"/>
+  <path d="M96 286C117 364 188 420 270 420C346 420 412 373 436 304" stroke="url(#lyraiqEdge)" stroke-opacity="0.44" stroke-width="2" stroke-linecap="round"/>
+  <path d="M142 138V344H336" stroke="url(#lyraiqEdge)" stroke-opacity="0.28" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g stroke="url(#lyraiqEdge)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M108 286L172 214L256 256L336 188L404 228"/>
+    <path d="M172 214L188 130"/>
+    <path d="M256 256L256 376"/>
+    <path d="M336 188L392 132"/>
+    <path d="M336 188L348 322"/>
+    <path d="M256 376L348 322L420 304"/>
+    <path d="M172 214L108 286"/>
+    <path d="M188 130L392 132"/>
+  </g>
+
+  <g filter="url(#lyraiqGlow)">
+    <g transform="translate(108 286)">
+      <circle r="15" fill="url(#lyraiqNode)"/>
+      <circle r="5" fill="#EAF0FF"/>
+    </g>
+    <g transform="translate(172 214)">
+      <circle r="13" fill="url(#lyraiqNode)"/>
+      <circle r="4" fill="#EAF0FF"/>
+    </g>
+    <g transform="translate(188 130)">
+      <circle r="12" fill="url(#lyraiqNode)"/>
+      <circle r="4" fill="#DDE4FF"/>
+    </g>
+    <g transform="translate(256 256)">
+      <circle r="18" fill="url(#lyraiqNode)"/>
+      <circle r="6" fill="#F2F6FF"/>
+    </g>
+    <g transform="translate(256 376)">
+      <circle r="13" fill="url(#lyraiqNode)"/>
+      <circle r="4" fill="#DFE6FF"/>
+    </g>
+    <g transform="translate(336 188)">
+      <circle r="14" fill="url(#lyraiqNode)"/>
+      <circle r="5" fill="#ECF2FF"/>
+    </g>
+    <g transform="translate(348 322)">
+      <circle r="13" fill="url(#lyraiqNode)"/>
+      <circle r="4" fill="#DDE8FF"/>
+    </g>
+    <g transform="translate(392 132)">
+      <circle r="12" fill="url(#lyraiqNode)"/>
+      <circle r="4" fill="#D4F7FF"/>
+    </g>
+    <g transform="translate(404 228)">
+      <circle r="12" fill="url(#lyraiqNode)"/>
+      <circle r="4" fill="#D2EEFF"/>
+    </g>
+    <g transform="translate(420 304)">
+      <circle r="11" fill="url(#lyraiqNode)"/>
+      <circle r="4" fill="#CFF3FF"/>
+    </g>
+  </g>
+</svg>

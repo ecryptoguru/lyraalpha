@@ -1,0 +1,1109 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EmbeddingStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+model AIRequestLog {
+  id                    String                 @id @default(cuid())
+  userId                String
+  promptId              String?
+  inputQuery            String
+  outputResponse        String
+  tokensUsed            Int
+  complexity            String? // SIMPLE, MODERATE, COMPLEX
+  inputTokens           Int?
+  outputTokens          Int?
+  cachedInputTokens     Int?
+  reasoningTokens       Int?
+  model                 String?
+  wasFallback           Boolean                @default(false)
+  inputCost             Float?
+  outputCost            Float?
+  cachedInputCost       Float?
+  totalCost             Float?
+  safetyFlag            Boolean?
+  embedding             Unsupported("vector")?
+  embeddingStatus       EmbeddingStatus        @default(PENDING)
+  embeddingAttempts     Int                    @default(0)
+  lastEmbeddingError    String?
+  embeddedAt            DateTime?
+  embeddingProcessingAt DateTime?
+  embeddingTextHash     String?
+  createdAt             DateTime               @default(now())
+  User                  User                   @relation(fields: [userId], references: [id])
+  prompt                PromptDefinition?      @relation(fields: [promptId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([promptId])
+  @@index([embeddingStatus, createdAt(sort: Asc)])
+}
+
+model Asset {
+  id                      String               @id @default(cuid())
+  symbol                  String               @unique
+  name                    String
+  type                    AssetType
+  coingeckoId             String?
+  sector                  String?
+  exchange                String?
+  description             String?
+  marketCap               String?
+  peRatio                 Float?
+  volume                  Float?
+  avgVolume               Float?
+  dividendYield           Float?
+  industryPe              Float?
+  oneYearChange           Float?
+  roe                     Float?
+  roce                    Float?
+  technicalRating         String?
+  analystRating           String?
+  price                   Float?
+  changePercent           Float?
+  lastPriceUpdate         DateTime?
+  factorData              Json?
+  correlationData         Json?
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  eps                     Float?
+  fiftyTwoWeekHigh        Float?
+  fiftyTwoWeekLow         Float?
+  metadata                Json?
+  pegRatio                Float?
+  priceToBook             Float?
+  shortRatio              Float?
+  assetGroup              String?
+  avgLiquidityScore       Float?
+  avgMomentumScore        Float?
+  avgSentimentScore       Float?
+  avgTrendScore           Float?
+  avgTrustScore           Float?
+  avgVolatilityScore      Float?
+  bookValue               Float?
+  category                String?
+  compatibilityLabel      String?
+  compatibilityScore      Float?
+  currency                String?              @default("USD")
+  expenseRatio            Float?
+  forwardPe               Float?
+  fundHouse               String?
+  heldPercentInsiders     Float?
+  heldPercentInstitutions Float?
+  morningstarRating       String?
+  nav                     Float?
+  openInterest            Float?
+  operatingMargins        Float?
+  priceToSales            Float?
+  profitMargins           Float?
+  region                  String?              @default("US")
+  revenueGrowth           Float?
+  schemeType              String?
+  scoreDynamics           Json?
+  performanceData         Json?
+  correlationRegime       Json?
+  factorAlignment         Json?
+  eventAdjustedScores     Json?
+  signalStrength          Json?
+  financials              Json?
+  topHoldings             Json?
+  etfLookthrough          Json?
+  mfLookthrough           Json?
+  commodityIntelligence   Json? // { regimeProfile: {}, seasonality: {}, correlations: {}, structuralContext: {} }
+  cryptoIntelligence      Json? // { networkActivity: {}, holderStability: {}, liquidityRisk: {}, structuralRisk: {}, enhancedTrust: {} }
+  fundPerformanceHistory  Json?
+  scenarioData            Json? // { bullCase: {}, baseCase: {}, bearCase: {}, var5: number, es5: number, fragility: number }
+  industry                String?
+  yield                   Float?
+  scores                  AssetScore[]         @relation("AssetScores")
+  evidence                Evidence[]           @relation("AssetEvidence")
+  institutionalEvents     InstitutionalEvent[] @relation("AssetEvents")
+  marketRegimes           MarketRegime[]
+  priceHistory            PriceHistory[]       @relation("PriceHistory")
+  stockSectors            StockSector[]        @relation("StockSectors")
+  discoveryFeedItems      DiscoveryFeedItem[]  @relation("AssetDiscovery")
+  watchlistItems          WatchlistItem[]
+  portfolioHoldings       PortfolioHolding[]
+  lyraAnalyses            LyraAnalysis[]
+
+  @@index([assetGroup, compatibilityScore(sort: Desc)])
+  @@index([lastPriceUpdate])
+  @@index([type, compatibilityScore(sort: Desc)])
+  @@index([region, type, lastPriceUpdate])
+  @@index([region, lastPriceUpdate])
+  @@index([region, changePercent(sort: Desc)])
+  @@index([coingeckoId])
+}
+
+model AssetScore {
+  id          String    @id @default(cuid())
+  assetId     String
+  type        ScoreType
+  value       Float
+  context     String?
+  description String?
+  direction   String?
+  date        DateTime  @default(now())
+  dynamics    Json?
+  asset       Asset     @relation("AssetScores", fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId, type, date(sort: Desc)])
+  @@index([date(sort: Desc)])
+  @@index([type, date(sort: Desc), value])
+}
+
+model Evidence {
+  id             String   @id @default(cuid())
+  assetId        String
+  sourceUrl      String
+  sourceName     String?
+  summary        String?
+  publishedAt    DateTime
+  sentimentScore Float?
+  createdAt      DateTime @default(now())
+  asset          Asset    @relation("AssetEvidence", fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId])
+}
+
+model EvidenceReference {
+  id            String             @id @default(cuid())
+  stockSectorId String
+  sourceType    EvidenceSourceType
+  title         String
+  url           String?
+  excerpt       String?
+  createdAt     DateTime           @default(now())
+  StockSector   StockSector        @relation(fields: [stockSectorId], references: [id])
+
+  @@index([stockSectorId])
+}
+
+model InstitutionalEvent {
+  id          String   @id @default(cuid())
+  assetId     String
+  type        String
+  title       String
+  description String?
+  severity    String
+  date        DateTime @default(now())
+  metadata    Json?
+  asset       Asset    @relation("AssetEvents", fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([assetId, date])
+  @@index([type, date(sort: Desc)])
+}
+
+model KnowledgeDoc {
+  id        String                 @id @default(cuid())
+  content   String
+  metadata  Json?
+  embedding Unsupported("vector")?
+  createdAt DateTime               @default(now())
+}
+
+model PromptDefinition {
+  id            String         @id @default(cuid())
+  version       String         @unique
+  systemPrompt  String
+  safetyPrompt  String?
+  isActive      Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  aiRequestLogs AIRequestLog[]
+}
+
+model QuestionSource {
+  id            String       @id @default(cuid())
+  title         String
+  url           String
+  description   String?
+  favicon       String?
+  publishedDate DateTime?
+  createdAt     DateTime     @default(now())
+  chatSources   ChatSource[]
+
+  @@index([url])
+}
+
+model ChatSource {
+  id        String         @id @default(cuid())
+  messageId String
+  sourceId  String
+  order     Int            @default(0)
+  source    QuestionSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([messageId])
+  @@index([sourceId])
+}
+
+model LyraAnalysis {
+  id        String   @id @default(cuid())
+  date      DateTime @default(now())
+  title     String
+  content   String
+  type      String   @default("daily_brief")
+  metadata  Json?
+  createdAt DateTime @default(now())
+  assetId   String?
+  asset     Asset?   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([date(sort: Desc)])
+}
+
+model LyraFeedback {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answerId        String // Stable hash of the response content, ensures one vote per answer
+  vote            Int // 1 = thumbs up, -1 = thumbs down
+  query           String // The user's question
+  responseSnippet String? // First 250 chars of Lyra's answer
+  symbol          String? // Asset context if applicable
+  queryTier       String? // SIMPLE, MODERATE, COMPLEX
+  model           String? // Which model served the response
+  createdAt       DateTime @default(now())
+
+  @@unique([userId, answerId]) // Exactly one vote per user per answer
+  @@index([vote, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+}
+
+model MarketRegime {
+  id                 String   @id @default(cuid())
+  date               DateTime @default(now())
+  state              String
+  breadthScore       Float?
+  vixValue           Float?
+  context            String?
+  correlationMetrics Json?
+  assetId            String?
+  region             String   @default("US")
+  asset              Asset?   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([date, region])
+  @@index([assetId])
+}
+
+model MultiHorizonRegime {
+  id                    String   @id @default(cuid())
+  date                  DateTime @default(now())
+  current               Json
+  shortTerm             Json
+  mediumTerm            Json
+  longTerm              Json
+  transitionProbability Float
+  transitionDirection   String
+  leadingIndicators     Json
+  region                String   @default("US")
+
+  @@unique([date, region])
+  @@index([date(sort: Desc)])
+}
+
+model HistoricalAnalog {
+  id              String                       @id @default(cuid())
+  region          String                       @default("US")
+  windowStart     DateTime
+  windowEnd       DateTime
+  regimeState     String
+  breadthScore    Float
+  volatilityLevel Float
+  crossSectorCorr Float
+  avgTrend        Float
+  avgMomentum     Float
+  avgVolatility   Float
+  avgSentiment    Float
+  fwdReturn5d     Float?
+  fwdReturn20d    Float?
+  fwdReturn60d    Float?
+  maxDrawdown20d  Float?
+  recoveryDays    Int?
+  topSectors      Json?
+  embedding       Unsupported("vector(1536)")?
+  createdAt       DateTime                     @default(now())
+
+  @@index([region, windowEnd(sort: Desc)])
+  @@index([region])
+}
+
+model PriceHistory {
+  id      String   @id @default(cuid())
+  assetId String
+  date    DateTime
+  open    Float
+  high    Float
+  low     Float
+  close   Float
+  volume  Float
+  asset   Asset    @relation("PriceHistory", fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, date])
+}
+
+model Sector {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  name          String
+  description   String?
+  rationale     String?
+  drivers       String?
+  isPremium     Boolean        @default(true)
+  displayOrder  Int?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  sectorRegimes SectorRegime[]
+  stockSectors  StockSector[]
+
+  @@index([name])
+}
+
+model SectorRegime {
+  id                String   @id @default(cuid())
+  sectorId          String
+  date              DateTime @default(now())
+  regime            String
+  regimeScore       Float
+  participationRate Float
+  relativeStrength  Float
+  rotationMomentum  Float
+  leadershipScore   Float
+  context           String?
+  sector            Sector   @relation(fields: [sectorId], references: [id])
+
+  @@unique([sectorId, date])
+  @@index([date(sort: Desc)])
+  @@index([sectorId, date(sort: Desc)])
+}
+
+model StockSector {
+  id                String              @id @default(cuid())
+  assetId           String
+  sectorId          String
+  inclusionType     InclusionType
+  inclusionReason   String?
+  relevanceScore    Float               @default(0)
+  freshnessScore    Float               @default(0)
+  strengthScore     Float               @default(0)
+  densityScore      Float               @default(0)
+  behaviorScore     Float               @default(0)
+  eligibilityScore  Float               @default(0)
+  confidence        Float               @default(100)
+  isActive          Boolean             @default(true)
+  firstIncludedAt   DateTime            @default(now())
+  lastValidatedAt   DateTime?
+  decayAfterDays    Int?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  EvidenceReference EvidenceReference[]
+  asset             Asset               @relation("StockSectors", fields: [assetId], references: [id], onDelete: Cascade)
+  sector            Sector              @relation(fields: [sectorId], references: [id])
+
+  @@unique([assetId, sectorId])
+  @@index([assetId])
+  @@index([sectorId, isActive, eligibilityScore(sort: Desc)])
+}
+
+model TrendingQuestion {
+  id           String   @id @default(cuid())
+  question     String
+  category     String
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  clickCount   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+
+  @@index([category])
+  @@index([isActive, displayOrder])
+}
+
+model User {
+  id                   String                @id
+  email                String                @unique
+  plan                 PlanTier              @default(STARTER)
+  trialEndsAt          DateTime?
+  stripeCustomerId     String?               @unique
+  razorpayCustomerId   String?               @unique
+  credits              Int                   @default(50) // Current credit balance
+  monthlyCreditsBalance Int                  @default(50)
+  bonusCreditsBalance  Int                   @default(0)
+  purchasedCreditsBalance Int                @default(0)
+  totalCreditsEarned   Int                   @default(50) // Lifetime credits earned (for loyalty)
+  totalCreditsSpent    Int                   @default(0) // Lifetime credits spent
+  points               Int                   @default(0) // Loyalty points balance
+  totalPointsEarned    Int                   @default(0) // Lifetime points earned
+  totalPointsSpent     Int                   @default(0) // Lifetime points spent
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime
+  preferences          UserPreference?
+  AIRequestLog         AIRequestLog[]
+  progress             UserProgress?
+  badges               UserBadge[]
+  xpTransactions       XPTransaction[]
+  learningCompletions  LearningCompletion[]
+  subscriptions        Subscription[]
+  paymentEvents        PaymentEvent[]
+  watchlistItems       WatchlistItem[]
+  sessions             UserSession[]
+  activityEvents       UserActivityEvent[]
+  creditTransactions   CreditTransaction[]
+  creditLots           CreditLot[]
+  referralsMade        Referral[]            @relation("Referrer")
+  referralsReceived    Referral[]            @relation("Referee")
+  pointTransactions    PointTransaction[]
+  supportConversations SupportConversation[]
+  billingAuditLogs     BillingAuditLog[]
+  xpRedemptions        XPRedemption[]
+  portfolios           Portfolio[]
+  notifications        Notification[]
+  lyraFeedback         LyraFeedback[]
+  memoryNotes          UserMemoryNote[]
+}
+
+model UserMemoryNote {
+  id        String   @id @default(cuid())
+  userId    String
+  source    String   // "lyra" | "myra"
+  scope     String   // "global" | "session"
+  text      String   // single sentence, max 150 chars
+  keywords  String[]
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, source, scope, text])
+  @@index([userId, source, scope])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String
+  symbol    String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, read])
+}
+
+model UserSession {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceInfo     String?
+  ipAddress      String?
+  startedAt      DateTime  @default(now())
+  lastActivityAt DateTime  @default(now())
+  endedAt        DateTime?
+  isActive       Boolean   @default(true)
+
+  @@index([userId])
+  @@index([startedAt])
+  @@index([lastActivityAt])
+}
+
+model UserActivityEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String?
+  eventType String // page_view, click, scroll, search, ai_request, etc.
+  path      String? // page path
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([sessionId])
+}
+
+model Subscription {
+  id                 String             @id @default(cuid())
+  userId             String
+  provider           PaymentProvider
+  providerSubId      String             @unique
+  status             SubscriptionStatus @default(ACTIVE)
+  plan               PlanTier           @default(PRO)
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean            @default(false)
+  metadata           Json?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([providerSubId])
+  @@index([status])
+}
+
+model PaymentEvent {
+  id          String          @id @default(cuid())
+  provider    PaymentProvider
+  eventId     String          @unique
+  eventType   String
+  userId      String?
+  status      String          @default("processed")
+  payload     Json
+  processedAt DateTime        @default(now())
+  user        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([eventId])
+  @@index([userId])
+  @@index([processedAt])
+}
+
+model UserPreference {
+  id                       String              @id @default(cuid())
+  userId                   String              @unique
+  preferredRegion          UserPreferredRegion @default(US)
+  experienceLevel          UserExperienceLevel @default(BEGINNER)
+  dashboardMode            String              @default("simple")
+  interests                UserInterest[]      @default([])
+  onboardingCompleted      Boolean             @default(false)
+  onboardingCompletedAt    DateTime?
+  onboardingStep           Int                 @default(0) // 0-5, tracks progress
+  onboardingSkipped        Boolean             @default(false)
+  tourCompleted            Boolean             @default(false)
+  blogSubscribed           Boolean             @default(true)
+  emailNotifications       Boolean             @default(true)
+  pushNotifications        Boolean             @default(false)
+  pushSubscriptionJson     String?
+  newsAlerts               Boolean             @default(true)
+  morningIntelligence      Boolean             @default(true)
+  portfolioAlerts          Boolean             @default(true)
+  opportunityAlerts        Boolean             @default(true)
+  narrativeAlerts          Boolean             @default(true)
+  shockWarnings            Boolean             @default(true)
+  weeklyReports            Boolean             @default(true)
+  welcomeEmailSentAt       DateTime?
+  reengagementNudge1SentAt DateTime?
+  reengagementNudge2SentAt DateTime?
+  winbackEmailSentAt       DateTime?
+  createdAt                DateTime            @default(now())
+  updatedAt                DateTime            @updatedAt
+  user                     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([onboardingCompleted])
+  @@index([blogSubscribed])
+}
+
+model CreditTransaction {
+  id          String                @id @default(cuid())
+  userId      String
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Int
+  type        CreditTransactionType
+  description String?
+  referenceId String?
+  expiresAt   DateTime?
+  createdAt   DateTime              @default(now())
+  creditLots  CreditLot[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, type, createdAt(sort: Desc)])
+  @@index([expiresAt])
+  @@index([createdAt(sort: Desc)])
+}
+
+model CreditLot {
+  id                  String             @id @default(cuid())
+  userId              String
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactionId       String?
+  transaction         CreditTransaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  bucket              CreditLotBucket
+  originalAmount      Int
+  remainingAmount     Int
+  expiresAt           DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@index([userId, bucket, expiresAt])
+  @@index([userId, remainingAmount])
+  @@index([transactionId])
+}
+
+model CreditPackage {
+  id            String   @id @default(cuid())
+  name          String // e.g., "Starter Pack", "Pro Pack", "Elite Pack"
+  credits       Int // Base credits in the pack
+  bonusCredits  Int      @default(0) // Bonus credits (e.g., 20% extra)
+  priceInr      Int // Price in paise (e.g., 99900 = ₹999)
+  priceUsd      Float // Price in USD
+  stripePriceId String? // Stripe Price ID for one-time payment checkout
+  isPopular     Boolean  @default(false) // Highlighted in UI
+  isActive      Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum ReferralStatus {
+  PENDING // Referee signed up but hasn't used credits yet
+  ACTIVATED // Referee used 10+ credits, referrer gets bonus
+  COMPLETED // Both parties have received their rewards
+}
+
+model Referral {
+  id                     String         @id @default(cuid())
+  referrerId             String // User who referred
+  referrer               User           @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  refereeId              String // User who was referred
+  referee                User           @relation("Referee", fields: [refereeId], references: [id], onDelete: Cascade)
+  status                 ReferralStatus @default(PENDING)
+  referrerCreditsAwarded Boolean        @default(false) // Did referrer get their credits?
+  refereeCreditsAwarded  Boolean        @default(false) // Did referee get their credits?
+  createdAt              DateTime       @default(now())
+  activatedAt            DateTime? // When referee used 10+ credits
+
+  @@unique([referrerId, refereeId]) // One referral per pair
+  @@index([referrerId])
+  @@index([refereeId])
+}
+
+enum PointSource {
+  DAILY_LOGIN
+  LYRA_QUERY
+  LEARNING_COMPLETE
+  QUIZ_PASS
+  WATCHLIST_ADD
+  DISCOVERY_CLICK
+  SHARE_ANALYSIS
+  REFERRAL
+  FIRST_PURCHASE
+}
+
+enum PointRedemptionType {
+  CREDITS_10
+  CREDITS_25
+  PRO_TRIAL_7D
+  ELITE_TRIAL_7D
+}
+
+model PointTransaction {
+  id          String               @id @default(cuid())
+  userId      String
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Int // Positive = earned, Negative = spent
+  source      PointSource? // Where points came from
+  redemption  PointRedemptionType? // What they redeemed for
+  description String
+  createdAt   DateTime             @default(now())
+
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+}
+
+model UserProgress {
+  id             String    @id @default(cuid())
+  userId         String    @unique
+  totalXp        Int       @default(0)
+  level          Int       @default(1)
+  streak         Int       @default(0)
+  lastActiveDate DateTime?
+  weeklyXp       Int       @default(0)
+  weeklyResetAt  DateTime?
+  xpMultiplier   Float     @default(1.0) // cached multiplier for current tier, updated on level-up
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([level(sort: Desc)])
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeSlug String
+  earnedAt  DateTime @default(now())
+  metadata  Json?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeSlug])
+  @@index([userId])
+}
+
+model XPTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Int
+  action    String
+  context   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, action, createdAt(sort: Desc)])
+}
+
+// XP redemption — users can redeem these multiple times.
+model XPRedemption {
+  id             String           @id @default(cuid())
+  userId         String
+  type           XPRedemptionType
+  xpCost         Int
+  creditsGranted Int              @default(0)
+  description    String
+  createdAt      DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+enum XPRedemptionType {
+  PRO_TRIAL_7D_WITH_CREDITS // 500 XP → PRO 7-day trial + 50 credits
+  ELITE_TRIAL_7D_WITH_CREDITS // 750 XP → ELITE 7-day trial + 75 credits
+}
+
+model LearningCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  moduleSlug  String
+  completedAt DateTime @default(now())
+  score       Float?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moduleSlug])
+  @@index([userId])
+}
+
+model DiscoveryFeedItem {
+  id                String    @id @default(cuid())
+  assetId           String
+  symbol            String
+  assetName         String
+  assetType         AssetType
+  drs               Float
+  archetype         String
+  headline          String
+  context           String
+  inflections       Json?
+  scores            Json?
+  price             Float?
+  changePercent     Float?
+  currency          String?
+  isEliteOnly       Boolean   @default(false)
+  isSuppressed      Boolean   @default(false)
+  suppressionReason String?
+  generation        Int       @default(0)
+  computedAt        DateTime  @default(now())
+  expiresAt         DateTime
+  asset             Asset     @relation("AssetDiscovery", fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@index([computedAt(sort: Desc)])
+  @@index([assetType, drs(sort: Desc)])
+  @@index([isSuppressed, drs(sort: Desc)])
+  @@index([isSuppressed, assetType, drs(sort: Desc), computedAt(sort: Desc)])
+  @@index([assetId])
+  @@index([generation])
+}
+
+model WatchlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  assetId   String
+  symbol    String
+  region    String   @default("US")
+  note      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  asset     Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, assetId])
+  @@index([userId, region])
+  @@index([assetId])
+}
+
+enum AssetType {
+  STOCK
+  ETF
+  CRYPTO
+  COMMODITY
+  MUTUAL_FUND
+  IPO
+}
+
+enum EvidenceSourceType {
+  ANNUAL_REPORT
+  INVESTOR_PRESENTATION
+  PRESS_RELEASE
+  EXCHANGE_FILING
+  NEWS_ARTICLE
+  MANAGEMENT_COMMENTARY
+}
+
+enum InclusionType {
+  CORE_BUSINESS
+  EVENT_DRIVEN
+  STRUCTURAL_STRENGTH
+  STRATEGIC_ALIGNMENT
+  NARRATIVE_SIGNAL
+}
+
+enum PlanTier {
+  STARTER
+  PRO
+  ELITE
+  ENTERPRISE
+}
+
+enum ScoreType {
+  TREND
+  MOMENTUM
+  VOLATILITY
+  SENTIMENT
+  LIQUIDITY
+  TRUST
+  PORTFOLIO_HEALTH
+}
+
+enum PaymentProvider {
+  STRIPE
+  RAZORPAY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  TRIALING
+}
+
+enum UserPreferredRegion {
+  US
+  IN
+  BOTH
+}
+
+enum UserExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum UserInterest {
+  STOCKS
+  ETF
+  CRYPTO
+  MUTUAL_FUNDS
+  COMMODITIES
+}
+
+enum CreditTransactionType {
+  PURCHASE
+  REFERRAL_BONUS
+  REFERRAL_REDEEMED
+  SUBSCRIPTION_MONTHLY
+  BONUS
+  SPENT
+  ADJUSTMENT
+}
+
+enum CreditLotBucket {
+  MONTHLY
+  BONUS
+  PURCHASED
+}
+
+enum SupportStatus {
+  OPEN
+  PENDING
+  RESOLVED
+  CLOSED
+}
+
+enum SupportSenderRole {
+  USER
+  AGENT
+}
+
+model SupportConversation {
+  id          String           @id @default(cuid())
+  userId      String
+  status      SupportStatus    @default(OPEN)
+  subject     String?
+  plan        PlanTier
+  userContext Json? // { currentPage, lastAsset, credits, recentQuery }
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  closedAt    DateTime?
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages    SupportMessage[]
+
+  @@index([userId])
+  @@index([status, createdAt(sort: Desc)])
+}
+
+model SupportMessage {
+  id             String              @id @default(cuid())
+  conversationId String
+  senderId       String // userId or "AGENT" or "AI_ASSISTANT"
+  senderRole     SupportSenderRole
+  content        String
+  readAt         DateTime?
+  createdAt      DateTime            @default(now())
+  conversation   SupportConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt(sort: Asc)])
+}
+
+/// Isolated vector store for the support AI agent.
+/// Completely separate from KnowledgeDoc (Lyra's RAG store).
+model SupportKnowledgeDoc {
+  id        String                       @id
+  content   String
+  metadata  Json                         @default("{}")
+  embedding Unsupported("vector(1536)")?
+  createdAt DateTime                     @default(now())
+  updatedAt DateTime                     @updatedAt
+
+  @@index([id])
+}
+
+model BillingAuditLog {
+  id             String   @id @default(cuid())
+  userId         String
+  stripeEventId  String?
+  stripeObjectId String?
+  eventType      String
+  previousState  String?
+  newState       String
+  amount         Int?
+  currency       String?
+  timestamp      DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, timestamp(sort: Desc)])
+  @@index([stripeEventId])
+}
+
+model Portfolio {
+  id              String                    @id @default(cuid())
+  userId          String
+  name            String
+  description     String?
+  isDefault       Boolean                   @default(false)
+  region          String?
+  currency        String                    @default("USD")
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  user            User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holdings        PortfolioHolding[]
+  healthSnapshots PortfolioHealthSnapshot[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@index([userId, region, updatedAt(sort: Desc)])
+}
+
+model PromoCode {
+  id           String    @id @default(cuid())
+  code         String    @unique
+  durationDays Int       @default(15)
+  bonusCredits Int       @default(50)
+  maxUses      Int?
+  usedCount    Int       @default(0)
+  isActive     Boolean   @default(true)
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([code])
+}
+
+model WaitlistUser {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  firstName        String?
+  lastName         String?
+  source           String   @default("landing_page")
+  status           String   @default("WAITLISTED")
+  notes            String?
+  couponAccess     Boolean  @default(false)
+  brevoSyncedAt    DateTime?
+  lastEmailedAt    DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
+  @@index([couponAccess])
+}
+
+model PortfolioHolding {
+  id          String    @id @default(cuid())
+  portfolioId String
+  assetId     String
+  symbol      String
+  quantity    Float
+  avgPrice    Float
+  currency    String    @default("USD")
+  addedAt     DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  asset       Asset     @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([portfolioId, assetId])
+  @@index([portfolioId])
+  @@index([assetId])
+}
+
+model PortfolioHealthSnapshot {
+  id                   String    @id @default(cuid())
+  portfolioId          String
+  date                 DateTime  @default(now())
+  healthScore          Float
+  diversificationScore Float
+  concentrationScore   Float
+  volatilityScore      Float
+  correlationScore     Float
+  qualityScore         Float
+  fragilityScore       Float?
+  riskMetrics          Json?
+  regime               String?
+  portfolio            Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId, date(sort: Desc)])
+}
+
+model BlogPost {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  description     String
+  content         String
+  author          String    @default("InsightAlpha Research")
+  category        String
+  tags            String[]
+  featured        Boolean   @default(false)
+  status          String    @default("published")
+  publishedAt     DateTime  @default(now())
+  metaDescription String?
+  keywords        String[]
+  heroImageUrl    String?
+  sourceAgent     String?
+  sourceContentId String?   @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([slug])
+  @@index([category])
+}

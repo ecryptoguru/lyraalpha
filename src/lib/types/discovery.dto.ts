@@ -1,0 +1,72 @@
+import { InclusionType, EvidenceSourceType } from "@/generated/prisma/client";
+import { MarketContextSnapshot } from "@/lib/engines/market-regime";
+
+export interface EvidenceReferenceDTO {
+  sourceType: EvidenceSourceType;
+  title: string;
+  url: string | null;
+  excerpt: string | null;
+}
+
+export interface StockMappingDTO {
+  symbol: string;
+  name: string;
+  inclusionType: InclusionType;
+  inclusionReason: string | null;
+  assetId: string;
+  type: string; // EQUITY, CRYPTO, COMMODITY, etc.
+  currency: string; // USD, INR, etc.
+  metadata?: Record<string, unknown> | null;
+
+  // Scoring
+  scores: {
+    relevance: number;
+    freshness: number;
+    strength: number;
+    density: number;
+    behavior: number;
+    eligibility: number;
+  };
+
+  // Metrics
+  metrics: {
+    marketCap: string | null;
+    peRatio: number | null;
+    oneYearChange: number | null;
+    technicalRating: string | null;
+    analystRating: string | null;
+  };
+
+  evidence: EvidenceReferenceDTO[];
+  confidence: number;
+  lastValidatedAt: string | null; // ISO string
+
+  // Institutional Signals (Optional, injected during sync)
+  signals?: {
+    trend: number;
+    momentum: number;
+    volatility: number;
+    liquidity: number;
+    sentiment: number;
+    trust: number;
+  };
+}
+
+export interface DiscoverySectorDTO {
+  slug: string;
+  name: string;
+  description: string | null;
+  rationale: string | null;
+  drivers: string | null;
+  sectorId: string;
+
+  // Market context for the sector
+  marketContext?: MarketContextSnapshot;
+
+  tiers: {
+    Strong: StockMappingDTO[];
+    Moderate: StockMappingDTO[];
+    Emerging: StockMappingDTO[];
+    Peripheral: StockMappingDTO[];
+  };
+}

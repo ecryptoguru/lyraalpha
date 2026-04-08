@@ -1,0 +1,33 @@
+import { NextRequest } from "next/server";
+import { auth } from "@/lib/auth";
+import { consumeCredits } from "@/lib/services/credit.service";
+import { createLogger } from "@/lib/logger";
+import { sanitizeError } from "@/lib/logger/utils";
+import { apiSuccess, apiError } from "@/lib/api-response";
+
+const logger = createLogger({ service: "explore-credits-api" });
+
+export async function POST(req: NextRequest) {
+  try {
+    const { userId } = await auth();
+    if (!userId) return apiError("Unauthorized", 401);
+
+    const body = await req.json();
+    const { action, symbol, id } = body as { action: "ASSET" | "SECTOR"; symbol?: string; id?: string };
+
+    if (!action) {
+      return apiError("Action required", 400);
+    }
+
+    const description = action === "ASSET" 
+      ? `Asset exploration: ${symbol || "unknown"}` 
+      : `Sector exploration: ${id || "unknown"}`;
+
+    // [CREDIT_UPDATE] Deduct 1 credit for exploration
+    const { success, remaining } = await consumeCredits(userId, 1, description);
+    return apiSuccess({ success, remaining });
+  } catch (err) {
+    logger.error({ err: sanitizeError(err) }, "Explore credits API failed");
+    return apiError("Internal error", 500);
+  }
+}

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /sign-in/
+Disallow: /sign-up/
+
+Sitemap: https://insightalpha.ai/sitemap.xml

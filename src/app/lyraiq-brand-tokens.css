@@ -1,0 +1,20 @@
+:root {
+  --lyra-space-blue: #0b0f1a;
+  --lyra-electric-indigo: #5b5fff;
+  --lyra-neural-purple: #8a7cff;
+  --lyra-signal-cyan: #00d4ff;
+
+  --lyra-glow-gradient: linear-gradient(120deg, #8a7cff 0%, #5b5fff 52%, #00d4ff 100%);
+
+  --lyra-font-heading: "Satoshi", "Space Grotesk", "Inter", "DM Sans", Arial, sans-serif;
+  --lyra-font-body: "Inter", "DM Sans", Arial, sans-serif;
+
+  --lyra-motion-slow: 900ms;
+  --lyra-motion-ease: ease-in-out;
+}
+
+.lyra-glass-surface {
+  background: linear-gradient(135deg, rgba(138, 124, 255, 0.18), rgba(0, 212, 255, 0.08));
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}

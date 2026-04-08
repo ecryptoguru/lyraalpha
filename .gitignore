@@ -1,0 +1,75 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+node_modules
+
+# prisma generated client
+src/generated
+
+# generated test/audit output
+/audit-results/
+/playwright-report/
+/test-results/
+/e2e/visual-snapshots.spec.ts-snapshots/
+**/__pycache__/
+
+# runtime logs
+cron.log
+*.log
+
+# one-off root-level utility scripts (not part of app source)
+combine_whitepaper.py
+fix_settings.py
+fix_settings.ts
+parse_docs.py
+patch2.ts
+read_docx.py
+read_full.py
+test_coverage.ts
+test_parse.ts
+manual-seed-knowledge.ts
+full_payment_docs.txt
+
+# documentation (internal only)
+
+/demo-output/
+
+/update/

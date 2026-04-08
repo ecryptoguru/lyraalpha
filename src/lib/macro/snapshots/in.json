@@ -1,0 +1,46 @@
+{
+  "region": "IN",
+  "updatedAt": "2025-03-24",
+  "indicators": [
+    {
+      "id": "gdp",
+      "label": "GDP Growth",
+      "value": "6.4%",
+      "direction": "down",
+      "context": "Q3 FY25 YoY",
+      "updatedAt": "2025-03-24"
+    },
+    {
+      "id": "cpi",
+      "label": "Inflation (CPI)",
+      "value": "4.3%",
+      "direction": "down",
+      "context": "Feb 2025 YoY",
+      "updatedAt": "2025-03-24"
+    },
+    {
+      "id": "rbi",
+      "label": "RBI Repo Rate",
+      "value": "6.25%",
+      "direction": "down",
+      "context": "Cut Feb 2025",
+      "updatedAt": "2025-03-24"
+    },
+    {
+      "id": "unemployment",
+      "label": "Unemployment",
+      "value": "7.8%",
+      "direction": "flat",
+      "context": "Feb 2025 urban",
+      "updatedAt": "2025-03-24"
+    },
+    {
+      "id": "trade",
+      "label": "Trade Balance",
+      "value": "-$23B",
+      "direction": "up",
+      "context": "Feb 2025 deficit narrowed",
+      "updatedAt": "2025-03-24"
+    }
+  ]
+}

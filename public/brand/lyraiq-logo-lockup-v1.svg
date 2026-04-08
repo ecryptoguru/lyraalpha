@@ -1,0 +1,77 @@
+<svg width="1400" height="320" viewBox="0 0 1400 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="lockupEdge" x1="52" y1="44" x2="290" y2="278" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8A7CFF"/>
+      <stop offset="0.52" stop-color="#5B5FFF"/>
+      <stop offset="1" stop-color="#00D4FF"/>
+    </linearGradient>
+    <radialGradient id="lockupNode" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) rotate(90) scale(14)">
+      <stop stop-color="#EDF1FF"/>
+      <stop offset="1" stop-color="#98E4FF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lockupWord" x1="370" y1="40" x2="1330" y2="254" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F2F5FF"/>
+      <stop offset="0.5" stop-color="#C5CEFF"/>
+      <stop offset="1" stop-color="#8BE7FF"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M74 161C74 99 125 50 187 50C234 50 276 79 294 123" stroke="url(#lockupEdge)" stroke-opacity="0.5" stroke-width="2" stroke-linecap="round"/>
+  <path d="M52 182C68 241 122 283 184 283C241 283 292 247 309 194" stroke="url(#lockupEdge)" stroke-opacity="0.44" stroke-width="2" stroke-linecap="round"/>
+  <path d="M86 71V224H234" stroke="url(#lockupEdge)" stroke-opacity="0.28" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g stroke="url(#lockupEdge)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M60 182L107 128L168 160L226 109L274 138"/>
+    <path d="M107 128L119 67"/>
+    <path d="M168 160L168 247"/>
+    <path d="M226 109L266 68"/>
+    <path d="M226 109L234 208"/>
+    <path d="M168 247L234 208L286 194"/>
+    <path d="M119 67L266 68"/>
+  </g>
+
+  <g>
+    <g transform="translate(60 182)">
+      <circle r="9" fill="url(#lockupNode)"/>
+      <circle r="3.2" fill="#EAF0FF"/>
+    </g>
+    <g transform="translate(107 128)">
+      <circle r="8" fill="url(#lockupNode)"/>
+      <circle r="3" fill="#EAF0FF"/>
+    </g>
+    <g transform="translate(119 67)">
+      <circle r="8" fill="url(#lockupNode)"/>
+      <circle r="3" fill="#DDE4FF"/>
+    </g>
+    <g transform="translate(168 160)">
+      <circle r="11" fill="url(#lockupNode)"/>
+      <circle r="4" fill="#F2F6FF"/>
+    </g>
+    <g transform="translate(168 247)">
+      <circle r="8" fill="url(#lockupNode)"/>
+      <circle r="3" fill="#DFE6FF"/>
+    </g>
+    <g transform="translate(226 109)">
+      <circle r="9" fill="url(#lockupNode)"/>
+      <circle r="3" fill="#ECF2FF"/>
+    </g>
+    <g transform="translate(234 208)">
+      <circle r="8" fill="url(#lockupNode)"/>
+      <circle r="3" fill="#DDE8FF"/>
+    </g>
+    <g transform="translate(266 68)">
+      <circle r="8" fill="url(#lockupNode)"/>
+      <circle r="3" fill="#D4F7FF"/>
+    </g>
+    <g transform="translate(274 138)">
+      <circle r="7" fill="url(#lockupNode)"/>
+      <circle r="2.8" fill="#D2EEFF"/>
+    </g>
+    <g transform="translate(286 194)">
+      <circle r="7" fill="url(#lockupNode)"/>
+      <circle r="2.8" fill="#CFF3FF"/>
+    </g>
+  </g>
+
+  <text x="370" y="208" fill="url(#lockupWord)" font-family="Satoshi, Space Grotesk, Inter, DM Sans, Arial, sans-serif" font-size="146" font-weight="700" letter-spacing="14">LYRAIQ</text>
+</svg>
