@@ -121,9 +121,9 @@ In addition to monthly credits, a per-user, per-UTC-day token ceiling acts as a 
 | **STARTER** | 50,000 |
 | **PRO** | 200,000 |
 | **ELITE** | 500,000 |
-| **ENTERPRISE** | Uncapped (governed by contract) |
+| **ENTERPRISE** | 2,000,000 tokens/day (~$500/day; env-configurable via `ENTERPRISE_DAILY_TOKEN_CAP`) |
 
-Caps are configurable by admins via `/admin/ai-limits` without a code deploy. Caps reset at midnight UTC.
+The cap check applies to **all plans including ENTERPRISE**. Caps are configurable by admins via `/admin/ai-limits` without a code deploy. Caps reset at midnight UTC.
 
 ---
 
@@ -171,7 +171,7 @@ Elite activates the platform's premium workflows (Compare Assets, Shock Simulato
 
 **Operational scale.**
 
-Enterprise mirrors Elite's routing pattern with the largest token budgets (COMPLEX: 3,500 tokens), custom commercial packaging, and organization-specific operational ceilings.
+Enterprise mirrors Elite's routing pattern with the largest token budgets (COMPLEX: 3,500 tokens), custom commercial packaging, and organization-specific operational ceilings. Daily token cap: 2,000,000 tokens (~$500/day), env-configurable via `ENTERPRISE_DAILY_TOKEN_CAP`.
 
 ---
 
@@ -197,13 +197,17 @@ Security/implementation notes:
 
 The following runtime behaviors are active across all plans:
 
+- **Full conversation injection scan** — all messages in conversation history are checked for injection patterns, not just the last
+- **User memory injection scan** — stored memory chunks are filtered for injection patterns before context assembly
+- **Multi-asset mode plan gating** — multi-asset inference is gated behind plan checks; STARTER and PRO users are not silently upgraded
 - **Post-retrieval injection scan** — RAG chunks matching prompt-injection patterns are filtered before reaching the LLM
 - **Low-grounding confidence warning** — avg similarity < 0.45 on MODERATE/COMPLEX emits a `warn` log
 - **LLM nano fallback** — primary model failure gracefully degrades to `lyra-nano` at 1200-token budget
-- **Proactive alerting** — `src/lib/ai/alerting.ts` monitors daily cost, fallback rate, RAG zero-result rate, output validation failures, and web search outages
+- **Proactive alerting** — `src/lib/ai/alerting.ts` monitors daily cost, fallback rate, RAG zero-result rate, output validation failures, and web search outages; web search alert fires at 2 consecutive failures (before circuit opens at 3)
 - **Admin AI Limits UI** — admins can override daily token caps and alert thresholds live from `/admin/ai-limits`
 - **Myra response caching** — normalized query hash, 4h TTL (logged-in) / 8h TTL (public)
 - **Compression result caching** — context SHA-256 keyed, 2h TTL
+- **Conversation log idempotency** — `storeConversationLog` uses a 10-second Redis dedup window to prevent duplicate entries from retries
 
 ---
 

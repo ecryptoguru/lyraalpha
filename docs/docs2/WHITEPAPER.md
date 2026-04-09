@@ -229,6 +229,15 @@ This allows the system to:
 
 ### 4.5 AI Security & Observability Hardening
 
+**Full conversation injection scan (SEC-0)**
+All messages in the conversation history are scanned for injection patterns via `checkPromptInjection` before the Lyra pipeline proceeds — not just the last user message.
+
+**User memory injection scan (SEC-0b)**
+Every memory chunk returned by `retrieveUserMemory()` is filtered against `INJECTION_PATTERNS` before being added to context. Chunks matching patterns are dropped with a structured `warn` log. Defends against stored-memory poisoning.
+
+**Multi-asset mode plan gating (SEC-0c)**
+Multi-asset mode is gated behind plan checks. STARTER and PRO users cannot be silently upgraded to multi-asset inference, preventing cost leaks.
+
 **Post-retrieval injection scan (SEC-1)**
 Every RAG chunk returned by `searchKnowledge` is scanned against `INJECTION_PATTERNS` before being passed to the LLM. Chunks matching injection patterns are silently dropped with a structured `warn` log (`event: "rag_injection_filtered"`).
 
@@ -263,6 +272,7 @@ Daily token caps and alert thresholds are hot-patchable from `/admin/ai-limits` 
 - history compression only for COMPLEX tier queries with histories exceeding 3000 chars using GPT-5.4-nano with `textVerbosity: "low"` and 700-token ceiling
 - Myra response caching — normalized query hashing with 4h TTL (logged-in) and 8h TTL (public)
 - compression result caching — Redis-keyed on context hash, 2h TTL
+- conversation log idempotency — `storeConversationLog` uses a 10-second Redis dedup window to prevent duplicate entries from retries or concurrent requests
 
 ---
 
@@ -368,9 +378,9 @@ Key safeguards include:
 | **STARTER** | 50,000 |
 | **PRO** | 200,000 |
 | **ELITE** | 500,000 |
-| **ENTERPRISE** | Uncapped (governed by contract) |
+| **ENTERPRISE** | 2,000,000 tokens/day (~$500/day; env-configurable via `ENTERPRISE_DAILY_TOKEN_CAP`) |
 
-Daily caps are hot-patchable from `/admin/ai-limits` without a code deploy.
+The cap check applies to **all plans including ENTERPRISE**. Daily caps are hot-patchable from `/admin/ai-limits` without a code deploy.
 
 ---
 
@@ -386,7 +396,7 @@ A stronger daily-use analytical plan with a meaningfully larger usage envelope a
 The flagship premium intelligence tier. Activates Compare Assets, Shock Simulator, web search augmentation, and cross-sector context. Uses GPT-5.4-full direct single stream for COMPLEX.
 
 ### ENTERPRISE
-Custom packaging for the highest-intensity use cases. Mirrors Elite routing with the largest token budgets (COMPLEX: 3,500 tokens) and highest operational ceilings.
+Custom packaging for the highest-intensity use cases. Mirrors Elite routing with the largest token budgets (COMPLEX: 3,500 tokens), highest operational ceilings, and a finite daily token cap of 2,000,000 tokens (~$500/day, env-configurable).
 
 ---
 

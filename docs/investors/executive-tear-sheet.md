@@ -156,11 +156,15 @@ This architecture keeps inference costs structurally disciplined: lightweight qu
 
 Before Q1 2026 feature work, the AI runtime was hardened with production-safety additions that strengthen the product moat:
 
+- **Full conversation injection scan** — all messages in a session are checked for injection patterns, not just the last; defends against multi-turn injection attacks
+- **User memory injection scan** — stored memory chunks are filtered before context assembly; defends against stored-memory poisoning
+- **Multi-asset mode plan gating** — multi-asset inference gated behind plan checks; no silent cost escalation on lower-tier plans
 - **Post-retrieval injection scan** — every RAG chunk filtered for prompt-injection patterns before reaching the LLM; defends against poisoned knowledge-base attacks
 - **Low-grounding confidence logging** — avg retrieval similarity < 0.45 on MODERATE/COMPLEX emits a structured warning; flags confabulation risk before it reaches users
 - **LLM nano fallback** — primary model failure automatically degrades to nano before surfacing any error; eliminates a class of 500s from infrastructure variability
-- **Proactive alerting** — 5-channel observability system (daily cost, fallback rate, RAG zero-result rate, output validation failures, web search outage) with Slack/Discord webhook delivery
+- **Proactive alerting** — 5-channel observability system (daily cost, fallback rate, RAG zero-result rate, output validation failures, web search outage) with Slack/Discord webhook delivery; web search alert fires at 2 failures before circuit opens at 3
 - **Admin AI Limits UI** — daily token caps and alert thresholds hot-patchable from the admin panel without a code deploy
+- **Conversation log idempotency** — 10-second Redis dedup window prevents duplicate entries from retries or concurrent requests
 
 ---
 

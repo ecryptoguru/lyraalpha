@@ -54,13 +54,13 @@ const logger = createLogger({ service: "lyra-ai" });
 // ─── Daily token spend caps (per-user, per-UTC-day) ─────────────────────
 // Protects against runaway API cost from: infinite loop clients, compromised tokens,
 // unusually large context requests, or prompt-injection that forces long completions.
-// ENTERPRISE is uncapped — custom SLA. Credits system is the primary STARTER/PRO control;
-// this is a secondary backstop at the infrastructure layer.
+// ENTERPRISE has a high but finite cap as a hard backstop — custom SLA still applies.
+// Credits system is the primary STARTER/PRO control; this is a secondary backstop.
 export const DAILY_TOKEN_CAPS_DEFAULTS: Record<string, number> = {
   STARTER:    50_000,   // ~100 SIMPLE queries at typical token counts
   PRO:       200_000,   // ~200 MODERATE queries
   ELITE:     500_000,   // ~250 COMPLEX queries
-  ENTERPRISE: Infinity, // no cap — governed by contract
+  ENTERPRISE: Number(process.env.ENTERPRISE_DAILY_TOKEN_CAP ?? 2_000_000), // ~$500/day hard ceiling
 };
 
 const DAILY_TOKEN_CAPS_REDIS_KEY = "lyra:admin:daily_token_caps";
@@ -171,7 +171,7 @@ async function getAvailableAssetSymbols(): Promise<string[]> {
     }
     
     logger.error("Using emergency hardcoded fallback — asset list may be incomplete");
-    return ["SPY", "QQQ", "IWM", "DIA", "VOO", "VTI", "BTC-USD", "ETH-USD", "GLD", "SLV", "TLT", "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA"];
+    return ["BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "USDT-USD", "USDC-USD", "XRP-USD", "ADA-USD", "DOGE-USD", "DOT-USD"];
   }
 }
 
@@ -355,11 +355,15 @@ export async function generateLyraStream(
   logger.debug({ query }, "Extracted query from message");
 
   // 1. Guardrail Check
-  // Apply guardrails to ANY message role to prevent API injection attacks
-  const { isValid, reason } = validateInput(query);
-  if (!isValid) {
-    logger.warn({ reason }, "Guardrail violation");
-    throw new Error(reason || "Safety Violation");
+  // Apply guardrails to ALL messages (not just last) to prevent API injection attacks via conversation history
+  for (const msg of messages) {
+    const msgContent = typeof msg.content === "string" ? msg.content : "";
+    if (!msgContent) continue;
+    const { isValid, reason } = validateInput(msgContent);
+    if (!isValid) {
+      logger.warn({ reason, role: msg.role }, "Guardrail violation in conversation history");
+      throw new Error(reason || "Safety Violation");
+    }
   }
 
   // 1.1 Classify Query Complexity + resolve user plan → select tier config
@@ -394,7 +398,8 @@ export async function generateLyraStream(
   // Compare and Stress Test require cross-asset synthesis depth equivalent to
   // Elite COMPLEX: RAG, web search, cross-sector, and GPT with low reasoning.
   // Override tierConfig (but keep userPlan for prompt identity / governance).
-  if (isMultiAssetMode) {
+  // Gated to PRO+ to prevent STARTER users from triggering Elite-level spend.
+  if (isMultiAssetMode && userPlan !== "STARTER") {
     const userMaxTokens = tierConfig.maxTokens;
     tierConfig = {
       ...getTierConfig("ELITE", "COMPLEX"),
@@ -404,6 +409,8 @@ export async function generateLyraStream(
       maxTokens: userMaxTokens,
     };
     logger.info({ chatMode: context.chatMode, maxTokens: userMaxTokens }, "Multi-asset mode: tierConfig upgraded to ELITE COMPLEX specs, token ceiling preserved");
+  } else if (isMultiAssetMode && userPlan === "STARTER") {
+    logger.info({ chatMode: context.chatMode, userPlan }, "Multi-asset mode requested by STARTER user — using standard tier config (upgrade required for Elite features)");
   }
 
   logger.info({ tier, userPlan, chatMode: context.chatMode ?? "default", maxTokens: tierConfig.maxTokens, reasoningEffort: tierConfig.reasoningEffort }, "Query classified");
@@ -419,6 +426,7 @@ export async function generateLyraStream(
     : [];
   let resolvedSymbol = context.symbol || "GLOBAL";
   let resolvedAssetType = (context.assetType || "GLOBAL") as string;
+  let resolvedRegion: string | undefined = context.region as string | undefined;
   if (!isTrivial && resolvedSymbol === "GLOBAL" && mentionedFromQuery.length > 0 && tier !== "SIMPLE") {
     resolvedSymbol = mentionedFromQuery[0];
     logger.info({ resolvedSymbol, from: "auto-detect" }, "Resolved asset from user message");
@@ -433,8 +441,8 @@ export async function generateLyraStream(
       if (shortQueryAsset.assetType) {
         resolvedAssetType = shortQueryAsset.assetType;
       }
-      if (shortQueryAsset.region && !(context as Record<string, unknown>).region) {
-        (context as Record<string, unknown>).region = shortQueryAsset.region;
+      if (shortQueryAsset.region && !context.region) {
+        resolvedRegion = shortQueryAsset.region;
       }
       logger.info({ resolvedSymbol, resolvedAssetType, from: "short-query-db-lookup" }, "Resolved asset from short natural-language query");
     }
@@ -482,7 +490,7 @@ export async function generateLyraStream(
   // Pure greetings ("hi", "thanks", "ok") return a canned response — zero LLM cost, instant response.
   if (isTrivial) {
     logger.info({ query }, "Trivial query — returning canned response");
-    const cannedResponse = `Hey! I'm Lyra from LyraAlpha AI. I analyze stocks, ETFs, crypto, mutual funds, and macro markets with proprietary scoring engines.\n\n**What would you like to explore?**\n\n1. **Analyze an asset** — any stock, ETF, crypto, or mutual fund by ticker\n2. **Market overview** — current regime, sector rotation, top movers\n3. **Compare assets** — how two assets stack up against each other\n4. **Understand a metric** — what does "Sharpe ratio" or "volatility score" mean?\n5. **Portfolio view** — how is your portfolio positioned in the current regime?\n\nJust ask!`;
+    const cannedResponse = `Hey! I'm Lyra from LyraAlpha AI. I analyze crypto assets and digital markets with proprietary on-chain scoring engines.\n\n**What would you like to explore?**\n\n1. **Analyze a crypto asset** — any token or coin by ticker (BTC, ETH, SOL...)\n2. **Market overview** — current regime, sector rotation, top movers\n3. **Compare assets** — how two tokens stack up against each other\n4. **Understand a metric** — what does "TVL", "FDV", or "on-chain momentum" mean?\n5. **Portfolio view** — how is your crypto portfolio positioned in the current regime?\n\nJust ask!`;
     return {
       result: { textStream: singleChunkStream(cannedResponse) },
       sources: [],
@@ -535,8 +543,8 @@ export async function generateLyraStream(
 
   // 1.1 Daily token spend cap — secondary cost backstop at infrastructure layer.
   // Credits are the primary control; this catches runaway API usage that slips past credits.
-  // Skip for ENTERPRISE (governed by contract) and test environments.
-  if (userPlan !== "ENTERPRISE" && process.env.SKIP_CREDITS !== "true") {
+  // ENTERPRISE has a finite cap (env-configurable) so the check applies to all plans.
+  if (process.env.SKIP_CREDITS !== "true") {
     const effectiveCaps = await getEffectiveDailyTokenCaps();
     const cap = effectiveCaps[userPlan] ?? effectiveCaps.PRO;
     if (isFinite(cap)) {
@@ -695,19 +703,18 @@ export async function generateLyraStream(
 
     // Task 1: RAG Retrieval (conditional based on tier)
     // Reduce chunk count for SIMPLE to save ~1500-2000 input tokens
-    const ragTopK = tier === "SIMPLE"
-      ? 2
-      : responseMode === "compare"
-        ? 2
-        : responseMode === "stress-test"
-          ? 3
-          : tier === "MODERATE" && resolvedSymbol !== "GLOBAL"
-            ? (userPlan === "ELITE" || userPlan === "ENTERPRISE")
-              ? 5
-              : userPlan === "PRO"
-                ? 4
-                : 3
-            : 3;
+    function resolveRagTopK(): number {
+      if (tier === "SIMPLE") return 2;
+      if (responseMode === "compare") return 2;
+      if (responseMode === "stress-test") return 3;
+      if (tier === "MODERATE" && resolvedSymbol !== "GLOBAL") {
+        if (userPlan === "ELITE" || userPlan === "ENTERPRISE") return 5;
+        if (userPlan === "PRO") return 4;
+        return 3;
+      }
+      return 3;
+    }
+    const ragTopK = resolveRagTopK();
     const RAG_TIMEOUT_MS = responseMode === "compare" ? 2500
       : tier === "SIMPLE" ? 2000
       : tier === "MODERATE" ? 3500
@@ -1036,6 +1043,9 @@ logRetrievalMetric({
       enrichedContext.assetType = resolvedAssetType;
     }
   }
+  if (resolvedRegion && !enrichedContext.region) {
+    enrichedContext.region = resolvedRegion;
+  }
   const mentionedSymbols = extractMentionedSymbols(messages as Array<{ role: string; content: string | unknown }>);
 
   // Analyze behavioral patterns from conversation history (MODERATE/COMPLEX only).
@@ -1324,13 +1334,16 @@ logRetrievalMetric({
         const usageAny = usage as Record<string, unknown>;
         const cachedTokens = (usageAny.cachedInputTokens as number) ?? 0;
         const reasoningTokens = (usageAny.reasoningTokens as number) ?? 0;
+        const inputTokens = usage.inputTokens ?? 0;
+        const outputTokens = usage.outputTokens ?? 0;
+        const tokensUsed = usage.totalTokens ?? (inputTokens + outputTokens);
         const durationMs = timer.end();
         const tokenReport = {
-          tokens: usage.totalTokens,
-          inputTokens: usage.inputTokens,
-          outputTokens: usage.outputTokens,
+          tokens: tokensUsed,
+          inputTokens,
+          outputTokens,
           cachedTokens,
-          noCacheTokens: (usage.inputTokens ?? 0) - cachedTokens,
+          noCacheTokens: inputTokens - cachedTokens,
           reasoningTokens,
           tier,
           reasoningEffort: gptReasoningEffort,
@@ -1345,9 +1358,7 @@ logRetrievalMetric({
         recordLatencyViolation(exceededBudget, durationMs, tier).catch(() => {});
 
         // Increment daily token counter (fire-and-forget — never blocks response path)
-        if (userPlan !== "ENTERPRISE") {
-          incrementDailyTokens(userId, usage.totalTokens ?? (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)).catch(() => {});
-        }
+        incrementDailyTokens(userId, usage.totalTokens ?? (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)).catch(() => {});
 
         try {
           logModelRouting({
@@ -1356,7 +1367,7 @@ logRetrievalMetric({
             tokens: usage.totalTokens ?? ((usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)),
             wasFallback: false,
             duration: tokenReport.duration,
-            durationMs: timer.end(),
+            durationMs,
           });
         } catch (e) {
           logger.warn({ err: sanitizeError(e) }, "Failed to log GPT routing");
@@ -1383,9 +1394,6 @@ logRetrievalMetric({
           emitCacheEvent({ modelFamily: "gpt", operation: "write", outcome: "success" });
         }
 
-        const inputTokens = usage.inputTokens ?? 0;
-        const outputTokens = usage.outputTokens ?? 0;
-        const tokensUsed = usage.totalTokens ?? (inputTokens + outputTokens);
         const costBreakdown = calculateLLMCost({
           model: effectiveDeployment,
           inputTokens,
@@ -1488,12 +1496,10 @@ logRetrievalMetric({
           const exceededBudget = durationMs > latencyBudgetMs;
           recordLatencyViolation(exceededBudget, durationMs, tier).catch(() => {});
 
-          if (userPlan !== "ENTERPRISE") {
-            incrementDailyTokens(userId, usage.totalTokens ?? 0).catch(() => {});
-          }
+          incrementDailyTokens(userId, usage.totalTokens ?? 0).catch(() => {});
           if (text) {
             storeConversationLog(userId, query, text, nanoDeployment,
-              { tokensUsed: usage.totalTokens ?? 0 }, tier, messages.length, false,
+              { tokensUsed: usage.totalTokens ?? 0 }, tier, messages.length, true,
             ).catch((e: unknown) => logger.error({ err: sanitizeError(e) }, "Fallback log failed"));
           }
         },
@@ -1512,6 +1518,6 @@ logRetrievalMetric({
     throw outerError;
   } finally {
     // B1: Release in-flight lock — fires on ALL exit paths including pre-LLM throws
-    setCache(inFlightKey, "", 1).catch(() => {});
+    redis.del(inFlightKey).catch(() => {});
   }
 }

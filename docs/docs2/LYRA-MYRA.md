@@ -118,7 +118,7 @@ At a high level, the Lyra runtime path is:
 
 1. request enters the Lyra chat API
 2. user plan is resolved (with in-process plan cache)
-3. daily token cap is checked against Redis counter (hot-patchable via `/admin/ai-limits`)
+3. daily token cap is checked against Redis counter for **all plans** (hot-patchable via `/admin/ai-limits`)
 4. query complexity is classified
 5. safety / governance checks run
 6. context is assembled (RAG, memory, price data, cross-sector, web search in parallel)
@@ -303,7 +303,7 @@ Myra's redirect behavior is one of the most important pieces of the support laye
 | STARTER | 50,000 |
 | PRO | 200,000 |
 | ELITE | 500,000 |
-| ENTERPRISE | Uncapped (governed by contract) |
+| ENTERPRISE | 2,000,000 tokens/day (~$500/day; env-configurable via `ENTERPRISE_DAILY_TOKEN_CAP`) |
 
 ---
 
@@ -314,7 +314,7 @@ Myra's redirect behavior is one of the most important pieces of the support laye
 | STARTER | Score literacy, educational framing, lightweight regime context |
 | PRO | Full retail analysis, portfolio intelligence, full model on complex queries |
 | ELITE | Cross-asset synthesis, Compare Assets, Shock Simulator, live research augmentation |
-| ENTERPRISE | Highest token budgets, uncapped daily usage, custom deployment |
+| ENTERPRISE | Highest token budgets, largest daily token ceiling (2M tokens, env-configurable), custom deployment |
 
 ---
 
@@ -322,11 +322,15 @@ Myra's redirect behavior is one of the most important pieces of the support laye
 
 | What | How |
 |---|---|
+| Full conversation injection scan | All messages in conversation history scanned for injection patterns — not just the last |
+| User memory injection scan | Stored memory chunks filtered for injection patterns before context assembly |
+| Multi-asset mode plan gating | Multi-asset inference gated behind plan checks — no silent upgrades on lower tiers |
 | RAG injection scanning | Every knowledge-base chunk checked for prompt-injection patterns before Lyra sees it |
 | Low-grounding confidence warning | Avg similarity < 0.45 on MODERATE/COMPLEX triggers structured log warning |
 | LLM nano fallback | Primary model failure degrades to nano at 1200-token budget — no hard errors |
 | 5-channel alerting | Watches daily cost, fallback rate, RAG zero-result rate, output validation failures, web search availability |
-| Atomic daily token caps | Redis-based per-user daily ceiling, hot-patchable without a deploy |
+| Atomic daily token caps | Redis-based per-user daily ceiling applies to all plans including ENTERPRISE; hot-patchable without a deploy |
+| Conversation log idempotency | 10-second Redis dedup window prevents duplicate log entries from retries |
 | Prompt prefix caching | Static system prompt memoized — reduces per-request token cost at scale |
 | History compression | Long conversation context compressed by nano before the full model call |
 | Myra response caching | Normalized query hash, 4h / 8h TTL — avoids redundant support LLM calls |

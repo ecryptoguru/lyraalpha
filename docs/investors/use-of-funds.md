@@ -137,7 +137,7 @@ The product is live — but the premium layer has significant depth left to buil
 - SLA-grade reliability and support infrastructure for Enterprise customers
 
 **AI Runtime Hardening (Foundation already shipped — ongoing)**
-- Post-retrieval injection scanning, LLM nano fallback, 5-channel proactive alerting, and admin hot-patch controls already live as of March 2026
+- Post-retrieval injection scanning, full conversation injection scanning, user memory injection scanning, multi-asset mode plan gating, conversation log idempotency, LLM nano fallback, 5-channel proactive alerting (web search alert at 2 failures), ENTERPRISE finite daily cap (2M tokens, env-configurable) — all live as of March 2026
 - Continued prompt contract refinement (`<output_contract>`, `<verbosity_controls>`)
 - Cache coverage expansion (Myra response cache, compression cache, educational cache)
 - Query classifier improvement for edge cases (technical-indicator language, multi-ticker parsing)
@@ -230,8 +230,8 @@ LyraAlpha AI already has the core ingredients investors want to see:
 
 - ✓ Live product with premium workflows shipped
 - ✓ Clear monetization ladder with visible upgrade triggers
-- ✓ Controllable AI economics (credit governance, single-call routing, plan-aware model roles, daily token caps)
-- ✓ Production AI safety: post-retrieval injection scanning, LLM fallback, proactive observability alerting — all shipped, not planned
+- ✓ Controllable AI economics (credit governance, single-call routing, plan-aware model roles, daily token caps for all plans including ENTERPRISE)
+- ✓ Production AI safety: full conversation + memory injection scanning, post-retrieval scanning, multi-asset gating, ENTERPRISE finite cap, LLM fallback, proactive alerting, conversation log idempotency — all shipped, not planned
 - ✓ Dual-market coverage (India + US) with first-class regional intelligence
 - ✓ Referral program live in production
 - ✓ Enterprise positioning established (custom packaging, not just self-serve)

@@ -15,7 +15,7 @@ const SIMPLE_ABSOLUTE = [
   /^(?:what is|explain|tell me about)\s+(?:the\s+)?(?:arcs|dse|signal strength|market regime)\b/i,
   /^(?:what(?:'s| is)|can you explain)\s+the\s+difference\s+between\s+(?:the\s+)?(?:momentum|trend|volatility|liquidity|trust|sentiment)\s+score\s+and\s+(?:the\s+)?(?:momentum|trend|volatility|liquidity|trust|sentiment)\s+score\b/i,
   // 4. Bare concept definitions (long but covers many educational queries)
-  /^(?:what(?:'s| is)|explain|define|how does)\s+(?:a |an |the )?(?:momentum|trend|volatility|liquidity|diversification|rebalancing|hedging|leverage|short selling|dollar cost averaging|compound interest|dividend|yield|spread|basis|arbitrage|alpha|beta|gamma|delta|theta|vega|drawdown|sharpe|sortino|calmar|correlation|covariance|standard deviation|variance|skewness|kurtosis|p\/e|pe|eps|ebitda|free cash flow|market cap|float|short interest|put call ratio|open interest|implied volatility|vix|fear greed|sentiment|breadth|advance decline|relative strength|momentum|mean reversion|reversion|carry|factor|regime|cycle|rotation|sector|asset class|etf|mutual fund|index fund|bond|equity|commodity|currency|crypto|blockchain|defi|nft|staking|yield farming)\??$/i,
+  /^(?:what(?:'s| is)|explain|define|how does)\s+(?:a |an |the )?(?:momentum|trend|volatility|liquidity|diversification|rebalancing|hedging|leverage|short selling|dollar cost averaging|compound interest|yield|spread|basis|arbitrage|alpha|beta|drawdown|sharpe|sortino|calmar|correlation|covariance|standard deviation|variance|skewness|kurtosis|market cap|float|short interest|put call ratio|open interest|implied volatility|vix|fear greed|sentiment|breadth|relative strength|momentum|mean reversion|reversion|carry|factor|regime|cycle|rotation|sector|asset class|crypto|blockchain|defi|nft|staking|yield farming|layer1|layer2|l1|l2|tokenomics|fdv|tvl|on.chain|onchain|gas fee|smart contract|validator|consensus|slippage|liquidity pool|amm|dex|cex|bridge|oracle)\??$/i,
   // 5. Platform-specific score/concept queries
   /^(?:what|how) (?:is|does|are|do) (?:a |an |the )?(?:sharpe|sortino|alpha|beta|pe ratio|rsi|macd|moving average|bollinger|volatility score|trend score|momentum score|liquidity score|trust score|sentiment score|dse|arcs|signal strength|regime|market regime)/i,
   /^(?:explain|define)\s+(?:the\s+)?(?:sharpe|sortino|alpha|beta|pe ratio|rsi|macd|moving average|bollinger|volatility|trend|momentum|liquidity|trust|sentiment|dse|arcs|signal strength|regime|market regime)/i,
@@ -139,8 +139,8 @@ function hasStandaloneLowercaseAssetIntent(text: string): boolean {
 }
 
 const ASSET_NAME_PATTERNS = [
-  /\b(?:bitcoin|ethereum|solana|nvidia|tesla|apple|microsoft|amazon|google|meta|gold|silver|copper|oil|crude|natural gas)\b/i,
-  /\b(?:stock|stocks|shares?|etf|etfs|mutual fund|mutual funds|crypto|cryptocurrency|coin|token|commodity|commodities)\b/i,
+  /\b(?:bitcoin|ethereum|solana|bnb|ripple|cardano|avalanche|polkadot|chainlink|uniswap|aave|compound|maker|curve)\b/i,
+  /\b(?:crypto|cryptocurrency|coin|token|defi|nft|layer1|layer2|l1|l2|altcoin|stablecoin|meme.?coin)\b/i,
 ];
 
 function hasAssetSpecificIntent(text: string): boolean {

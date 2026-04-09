@@ -127,7 +127,7 @@ This creates a predictable cost envelope per query tier. The product cannot acci
 ### Efficiency Controls Active in Production
 
 | Mechanism | Effect |
-|---|---|
+|---|——-|
 | Trivial-query short-circuiting | Filler messages never hit the model — zero LLM cost |
 | Educational cache paths | Repeated educational queries served from cache |
 | Prompt prefix caching | Static system prompt is memoized — reduces per-request token cost |
@@ -141,6 +141,11 @@ This creates a predictable cost envelope per query tier. The product cannot acci
 | `textVerbosity: "high"` on analysis | Maximum analytical depth on Lyra paths |
 | `textVerbosity: "low"` on compression | Dense bullet output — compressor actually compresses rather than rephrasing |
 | Blog ISR (1h) | RSS feed and blog routes use ISR revalidation — no DB hit on most blog page loads |
+| Full conversation injection scan | All messages scanned for injection patterns — not just the last; multi-turn attacks blocked |
+| User memory injection scan | Stored memory chunks filtered before context assembly — stored-memory poisoning blocked |
+| Multi-asset mode plan gating | Multi-asset inference gated behind plan checks — no silent cost escalation on lower tiers |
+| Conversation log idempotency | 10-second Redis dedup window prevents duplicate entries from retries |
+| ENTERPRISE daily cap | 2,000,000 tokens/day hard ceiling (env-configurable); cap check applies to all plans |
 
 ### Result
 

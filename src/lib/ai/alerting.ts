@@ -12,8 +12,8 @@ const THRESHOLDS = {
   dailyCostUsd: Number(process.env.AI_ALERT_DAILY_COST_USD ?? 50),
   // RAG zero-result rate: alert when % of requests returning 0 RAG chunks exceeds threshold (15-min window)
   ragZeroResultRatePct: Number(process.env.AI_ALERT_RAG_ZERO_RESULT_PCT ?? 10),
-  // Web search: alert after this many consecutive failures (mirrors circuit breaker warn threshold)
-  webSearchConsecutiveFailures: Number(process.env.AI_ALERT_WEB_SEARCH_FAILURES ?? 3),
+  // Web search: alert after this many consecutive failures (set to 2, circuit breaker at 3)
+  webSearchConsecutiveFailures: Number(process.env.AI_ALERT_WEB_SEARCH_FAILURES ?? 2),
   // Output validation: alert when % of responses failing section checks exceeds threshold (15-min window)
   outputValidationFailureRatePct: Number(process.env.AI_ALERT_VALIDATION_FAILURE_PCT ?? 30),
   // Fallback rate: alert when % of requests using nano fallback exceeds threshold

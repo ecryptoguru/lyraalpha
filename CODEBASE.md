@@ -230,6 +230,15 @@ Key API surfaces:
 ### Post-retrieval injection scan (SEC-1)
 `src/lib/ai/rag.ts` — after `searchKnowledge` returns chunks, every chunk is filtered against `INJECTION_PATTERNS` (imported from `guardrails.ts`). Chunks matching injection patterns are silently dropped with a `warn` log (`event: "rag_injection_filtered"`). Defends against poisoned knowledge-base entries.
 
+### Full conversation injection scan (SEC-2)
+`src/lib/ai/service.ts` — **all messages** in the conversation history are scanned for injection patterns, not just the last user message. Each message content (string or array parts) is checked via `checkPromptInjection` before the pipeline proceeds.
+
+### User memory injection scan (SEC-3)
+`src/lib/ai/rag.ts` — `retrieveUserMemory()` filters each returned memory chunk against `INJECTION_PATTERNS` before adding it to the context. Memory chunks matching injection patterns are dropped with a `warn` log. Defends against stored-memory poisoning attacks.
+
+### Multi-asset mode plan gating (SEC-4)
+`src/lib/ai/service.ts` — multi-asset mode upgrades (triggered when a query references multiple symbols) are gated behind plan checks. STARTER and PRO users cannot be silently upgraded to multi-asset mode; the gate prevents cost leaks from unintended multi-asset inference on lower-tier plans.
+
 ### RAG low-grounding confidence log (RAG-1)
 `src/lib/ai/rag.ts` — after injection scan, if `tier !== "SIMPLE"` and avg similarity < 0.45, a `warn` log is emitted (`event: "rag_low_grounding"`). Flags potential confabulation risk when retrieved chunks are marginally above threshold.
 
@@ -239,7 +248,7 @@ Key API surfaces:
 ### Alerting module (OBS-1)
 `src/lib/ai/alerting.ts` — module-level alert emitters:
 - `alertIfDailyCostExceeded(totalCostUsd)` — called from `service.ts` primary `onFinish`
-- `alertIfWebSearchOutage(consecutiveFailures)` — called from `search.ts` circuit breaker
+- `alertIfWebSearchOutage(consecutiveFailures)` — called from `search.ts` circuit breaker; alert threshold is **2 consecutive failures** (fires before the circuit breaker opens at 3)
 - `recordRagResult(hadResults)` — called from `rag.ts` `retrieveInstitutionalKnowledge`
 - `recordValidationResult(passed)` — called from `output-validation.ts` `logValidationResult`
 - `recordFallbackResult(wasFallback)` — called from `service.ts` both primary and fallback `onFinish`
@@ -248,6 +257,8 @@ All sliding-window counters use a 15-min Redis hash key. Webhook delivery requir
 
 ### Admin AI Limits UI (COST-3)
 Daily token caps and alert thresholds are now hot-patchable via `/admin/ai-limits`. Redis keys: `lyra:admin:daily_token_caps` (hmap) and `lyra:admin:alert_thresholds` (hmap). `getEffectiveDailyTokenCaps()` in `service.ts` merges defaults with Redis overrides on every cap-check.
+
+**ENTERPRISE daily token cap:** ENTERPRISE now has a finite hard ceiling of **2,000,000 tokens/day** (~$500/day), configurable via the `ENTERPRISE_DAILY_TOKEN_CAP` env var. The cap check applies to **all plans** including ENTERPRISE — the previous `userPlan !== "ENTERPRISE"` guard has been removed. Token usage is also incremented for ENTERPRISE users on every request path.
 
 ### Dead orchestration code removed (COST-4)
 `OrchestrationMode` type and `orchestrationMode` field removed from `config.ts`. `TierConfig` no longer carries an orchestration mode field — all routing is implicitly `single`.
@@ -542,12 +553,16 @@ Persona injection note:
 ### 9.5 Safety / governance
 
 - Prompt includes governance rules (no trade advice, hygiene rules, tag hiding, etc.)
-- Explicit prompt-injection awareness via `INJECTION_PATTERNS` in `src/lib/ai/guardrails.ts`
+- **Full conversation injection scan**: `INJECTION_PATTERNS` from `guardrails.ts` is checked against **all messages** in the conversation history, not just the last message
+- **User memory injection scan**: every memory chunk returned by `retrieveUserMemory()` is filtered against `INJECTION_PATTERNS` before being added to context (defends against stored-memory poisoning)
+- **Multi-asset mode plan gating**: multi-asset mode is gated behind plan checks — STARTER and PRO users cannot be silently upgraded to multi-asset inference
 - Per-tier tool allowlist via `getAllowedTools()` — replaces raw `aiTools`
 
 ### 9.6 AI request logging
 
 - `AIRequestLog` stores requests, token usage, costs, embeddings state.
+- `storeConversationLog` in `src/lib/ai/rag.ts` uses an **idempotency key** (keyed on `userId + query + timestamp` with a 10-second dedup window in Redis) to prevent duplicate conversation log entries from retries or concurrent requests.
+- Output validation (follow-up count check, required section presence) is active for **all tiers** including SIMPLE.
 
 ## 10) Testing & verification
 
@@ -609,6 +624,7 @@ This repo reads many environment variables. The most important ones to know when
 - **Rate limit / bypass flags**: `SKIP_AUTH`, `SKIP_RATE_LIMIT`, `E2E_BYPASS`
 - **Plan cache**: `PLAN_CACHE_ENABLED`, `LYRA_AUDIT_PLAN`
 - **AI alerting**: `AI_ALERT_WEBHOOK_URL` (Slack/Discord webhook for 5-channel AI observability alerts)
+- **ENTERPRISE token cap**: `ENTERPRISE_DAILY_TOKEN_CAP` (daily token ceiling for ENTERPRISE users; defaults to 2,000,000 tokens ≈ $500/day)
 - **Myra**: `AZURE_OPENAI_DEPLOYMENT_MYRA`
 - **Vercel env sync helper**: `.vercel-env-push.sh` now defaults to `production`, accepts an explicit scope, skips hosted-unsafe local-only variables, and uses newline-safe piping when pushing secrets.
 

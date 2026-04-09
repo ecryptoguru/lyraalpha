@@ -40,8 +40,8 @@ const ASSET_MODERATE_SECTIONS = [
   "## The Risk Vector",
   "## Business & Growth",
   "## Valuation Insight",
-  // NOTE: "## Performance Context" is STOCK-only in proFormatFull — omitted to avoid
-  // false-positive missing-section warnings for CRYPTO/ETF/COMMODITY MODERATE queries.
+  // NOTE: "## Performance Context" is omitted for CRYPTO-only MODERATE queries
+  // to avoid false-positive missing-section warnings.
 ];
 const ASSET_COMPLEX_SECTIONS = [
   "## Bottom Line",
@@ -146,18 +146,16 @@ export function validateOutput(
     (section) => !textLower.includes(section.toLowerCase()),
   );
 
-  // Count follow-up questions (only for MODERATE+ non-SIMPLE tiers)
+  // Count follow-up questions (all tiers require exactly 3)
   let followUpCount = 0;
-  if (tier !== "SIMPLE") {
-    const followUpIdx = textLower.indexOf(FOLLOW_UP_HEADER.toLowerCase());
-    if (followUpIdx !== -1) {
-      // R6: Slice to 400 chars max after the header — prevents overcounting if the model
-      // produces additional content (e.g. a disclaimer note) after the follow-up questions.
-      // 400 chars safely fits 3 questions × ~100 chars each plus header padding.
-      const afterFollowUp = text.slice(followUpIdx + FOLLOW_UP_HEADER.length, followUpIdx + FOLLOW_UP_HEADER.length + 400);
-      // Count lines that start with a number (1. 2. 3.)
-      followUpCount = (afterFollowUp.match(/^\s*\d+[.)]/gm) || []).length;
-    }
+  const followUpIdx = textLower.indexOf(FOLLOW_UP_HEADER.toLowerCase());
+  if (followUpIdx !== -1) {
+    // R6: Slice to 400 chars max after the header — prevents overcounting if the model
+    // produces additional content (e.g. a disclaimer note) after the follow-up questions.
+    // 400 chars safely fits 3 questions × ~100 chars each plus header padding.
+    const afterFollowUp = text.slice(followUpIdx + FOLLOW_UP_HEADER.length, followUpIdx + FOLLOW_UP_HEADER.length + 400);
+    // Count lines that start with a number (1. 2. 3.)
+    followUpCount = (afterFollowUp.match(/^\s*\d+[.)]/gm) || []).length;
   }
 
   const valid = missingSections.length === 0;
@@ -187,8 +185,8 @@ export function logValidationResult(result: OutputValidationResult): void {
     );
   }
 
-  // Follow-up count check — only for MODERATE+ where we expect exactly 3
-  if (result.tier !== "SIMPLE" && result.followUpCount > 0 && result.followUpCount !== EXPECTED_FOLLOW_UP_COUNT) {
+  // Follow-up count check — all tiers require exactly 3
+  if (result.followUpCount > 0 && result.followUpCount !== EXPECTED_FOLLOW_UP_COUNT) {
     logger.warn(
       {
         event: "output_validation_followup_count",

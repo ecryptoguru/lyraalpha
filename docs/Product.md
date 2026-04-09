@@ -124,11 +124,15 @@ These are not settings. They are architecture.
 
 ### Production AI safety — already shipped
 
+- **All messages in a conversation** are scanned for prompt-injection patterns, not just the last message
 - Every RAG knowledge-base chunk is scanned for prompt-injection patterns before Lyra sees it
+- **User memory chunks** are also scanned for injection patterns before being added to context
+- **Multi-asset mode is gated** behind plan checks to prevent silent cost escalation on lower-tier plans
 - Primary model failure degrades automatically to nano before any error reaches users
 - Five alerting channels watch daily cost, fallback rate, RAG zero-result rate, output validation failures, and web search availability
 - Daily token caps and alert thresholds are editable live from the admin panel
 - Myra responses are cached (normalized query hash, 4h/8h TTL) to reduce redundant LLM calls on repetitive support questions
+- **Conversation log idempotency**: duplicate log entries are prevented via a 10-second Redis dedup window on store operations
 
 In financial AI, trust is the product. Most competitors have none of this in production.
 
@@ -232,7 +236,7 @@ On recency-sensitive queries, Lyra pulls live web research to complement RAG-ret
 | STARTER | Score literacy, educational framing, lightweight regime context |
 | PRO | Full retail analysis, portfolio intelligence, full model on complex queries |
 | ELITE | Cross-asset synthesis, Compare Assets, Shock Simulator, live research augmentation |
-| ENTERPRISE | Highest token budgets, uncapped daily usage, custom deployment |
+| ENTERPRISE | Highest token budgets, largest daily token ceiling (2M tokens, env-configurable), custom deployment |
 
 Every plan gets real Lyra intelligence. Higher plans get more context depth, more workflow access, and the full model on complex queries.
 
@@ -242,11 +246,15 @@ Every plan gets real Lyra intelligence. Higher plans get more context depth, mor
 
 | What it does | Why it matters |
 |---|---|
+| Full conversation injection scan | Every message in the conversation history is checked for injection patterns — not just the last |
+| User memory injection scan | Stored memory chunks are filtered for injection patterns before being added to context |
+| Multi-asset mode plan gating | Multi-asset inference is gated behind plan checks — no silent upgrades on lower tiers |
 | RAG injection scanning | Every knowledge-base chunk is checked for prompt-injection patterns before Lyra sees it |
 | Low-grounding confidence warning | Average retrieval similarity below 0.45 triggers a structured log warning before any hallucination risk reaches users |
 | LLM nano fallback | Primary model failure degrades to nano at a 1200-token budget — no hard errors from infrastructure variability |
 | 5-channel alerting | Watches daily cost, fallback rate, RAG zero-result rate, output validation failures, and web search availability continuously |
-| Atomic daily token caps | Redis-based per-user daily ceiling, hot-patchable without a deploy |
+| Atomic daily token caps | Redis-based per-user daily ceiling applies to all plans including ENTERPRISE; hot-patchable without a deploy |
+| Conversation log idempotency | 10-second Redis dedup window prevents duplicate log entries from retries or concurrent requests |
 | Prompt prefix caching | Static system prompt memoized — reduces per-request token cost at scale |
 | History compression | Long conversation context is compressed by nano before the full model call, without adding visible latency |
 | Compression result caching | Redis-keyed on context SHA-256, 2h TTL — avoids redundant nano preflight calls on identical context |
@@ -315,9 +323,9 @@ The heavier the analysis, the more it costs. That aligns price with the product'
 | STARTER | 50,000 tokens |
 | PRO | 200,000 tokens |
 | ELITE | 500,000 tokens |
-| ENTERPRISE | Uncapped (governed by contract) |
+| ENTERPRISE | 2,000,000 tokens (~$500/day; env-configurable via `ENTERPRISE_DAILY_TOKEN_CAP`) |
 
-Hot-patchable from `/admin/ai-limits` without a code deploy.
+The cap check applies to **all plans including ENTERPRISE**. Hot-patchable from `/admin/ai-limits` without a code deploy.
 
 ---
 

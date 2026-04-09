@@ -327,9 +327,9 @@ A per-user, per-UTC-day token ceiling protects against runaway API spend.
 | **STARTER** | 50,000 |
 | **PRO** | 200,000 |
 | **ELITE** | 500,000 |
-| **ENTERPRISE** | Uncapped (governed by contract) |
+| **ENTERPRISE** | 2,000,000 tokens/day (~$500/day; env-configurable via `ENTERPRISE_DAILY_TOKEN_CAP`) |
 
-Caps are hot-patchable by admins via `/admin/ai-limits` (Redis key: `lyra:admin:daily_token_caps`) without a code deploy. Reset at midnight UTC.
+The cap check applies to **all plans including ENTERPRISE**. Caps are hot-patchable by admins via `/admin/ai-limits` (Redis key: `lyra:admin:daily_token_caps`) without a code deploy. Reset at midnight UTC.
 
 ---
 
@@ -357,11 +357,21 @@ Implementation-aligned behavior:
 
 ### 8.2 Post-Retrieval Security
 
-**Injection scan:** Every chunk returned by `searchKnowledge` is filtered against `INJECTION_PATTERNS` before being passed to the model. Chunks matching role-hijacking or instruction-override patterns are dropped with a structured `warn` log (`event: "rag_injection_filtered"`). `INJECTION_PATTERNS` is exported from `src/lib/ai/guardrails.ts`.
+**Full conversation injection scan:** All messages in the conversation history are scanned via `checkPromptInjection` before the Lyra pipeline proceeds — not just the last user message.
+
+**User memory injection scan:** Every memory chunk returned by `retrieveUserMemory()` is filtered against `INJECTION_PATTERNS` before being added to context. Chunks matching injection patterns are dropped with a `warn` log. Defends against stored-memory poisoning attacks.
+
+**Multi-asset mode plan gating:** Multi-asset mode upgrades are gated behind plan checks. STARTER and PRO users are not silently upgraded to multi-asset inference, preventing unintended cost escalation.
+
+**RAG injection scan:** Every chunk returned by `searchKnowledge` is filtered against `INJECTION_PATTERNS` before being passed to the model. Chunks matching role-hijacking or instruction-override patterns are dropped with a structured `warn` log (`event: "rag_injection_filtered"`). `INJECTION_PATTERNS` is exported from `src/lib/ai/guardrails.ts`.
 
 **Low-grounding warning:** After the injection scan, if tier is MODERATE or COMPLEX and average chunk similarity < 0.45, a `warn` log is emitted (`event: "rag_low_grounding"`). This flags potential confabulation risk.
 
 **RAG result recording:** `recordRagResult(hadResults)` is called from `retrieveInstitutionalKnowledge` and feeds the zero-result rate alert window in `alerting.ts`.
+
+**Conversation log idempotency:** `storeConversationLog` uses an idempotency key (keyed on `userId + query + timestamp`) with a 10-second Redis dedup window to prevent duplicate log entries from retries or concurrent requests.
+
+**Web search alert threshold:** `alertIfWebSearchOutage` fires at **2 consecutive failures** — one below the circuit-breaker threshold of 3 — to provide early warning before the circuit opens.
 
 ### 8.3 Myra Retrieval
 
@@ -484,7 +494,7 @@ Related runtime hardening:
 | **Low-grounding log** | Avg similarity < 0.45 on MODERATE/COMPLEX → `warn` emitted |
 | **Admin limits UI** | `/admin/ai-limits` — hot-patch daily token caps and alert thresholds via Redis |
 | **Validation recording** | Output validation failures fed to alerting sliding window |
-| **Web search alerting** | Circuit breaker failure count wired to `alertIfWebSearchOutage` |
+| **Web search alerting** | Alert fires at 2 consecutive failures (before circuit opens at 3) |
 | **Myra response cache** | Normalized hash, 4h TTL logged-in / 8h TTL public |
 | **Compression cache** | Context SHA-256 keyed, 2h TTL — avoids redundant nano preflight calls |
 

@@ -55,7 +55,7 @@ All plans use `single` mode — one direct streaming call. `router` and `draft_v
 | **Elite** | mini · single | mini · single | full · single |
 | **Enterprise** | mini · single | mini · single | full · single |
 
-**Cost protection (shipped March 2026):** A secondary per-user daily token cap acts as a backstop against runaway spend from compromised tokens or loop clients. Caps are hot-patchable by admins without a deploy. Combined with query classification and credit gating, the AI cost envelope is structurally controlled at three independent layers.
+**Cost protection (shipped March 2026):** A secondary per-user daily token cap acts as a backstop against runaway spend from compromised tokens or loop clients. The cap applies to **all plans including ENTERPRISE** (2,000,000 tokens/day ~$500/day ceiling, env-configurable). Caps are hot-patchable by admins without a deploy. Combined with query classification and credit gating, the AI cost envelope is structurally controlled at three independent layers.
 
 ---
 
@@ -258,7 +258,7 @@ LyraAlpha AI's model is credible because:
 
 1. **Credits make usage visible.** Starter exhausts credits → Pro conversion trigger is built into the product, not just marketing.
 2. **Workflow gates make upgrade value obvious.** Compare Assets and Shock Simulator are behind an Elite gate — upgrade moment is clear and earned, not artificial.
-3. **Cost discipline is architectural.** Single-call routing with plan-aware model roles means margin does not collapse at scale.
+3. **Cost discipline is architectural.** Single-call routing with plan-aware model roles means margin does not collapse at scale. All plans including ENTERPRISE have finite daily token ceilings.
 4. **Referral mechanics are live.** Not a roadmap item — the program is implemented and adding signups today.
 5. **Both India and US markets are open.** Dual pricing (USD + INR) means the product can compound across two large, fast-growing retail investor bases simultaneously.
 6. **Blog distribution pipeline is live.** AMI 2.0 powers agent-automated publishing to `/blog` via a secure webhook bridge. Weekly Monday digest to opted-in subscribers is a recurring retention touchpoint with near-zero marginal cost — not a planned content strategy, a shipped infrastructure.

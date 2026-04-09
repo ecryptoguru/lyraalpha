@@ -143,7 +143,7 @@ Show:
 - Promo-code trial system operational (ELITE15 / ELITE30)
 - Referral program live: 50 credits referee / 75 credits referrer
 - **Public blog + AMI 2.0 content pipeline (March 2026):** agent-driven blog live at `/blog` with category pages, RSS feed, and OG share cards; HMAC-verified webhook bridge to AMI 2.0 for automated publishing; weekly Monday digest to opted-in subscribers
-- **AI runtime hardened (March 2026):** post-retrieval injection scanning, LLM nano fallback, 5-channel proactive alerting, admin hot-patch controls for daily token caps — all in production
+- **AI runtime hardened (March 2026):** full conversation + memory injection scanning, post-retrieval injection scanning, multi-asset mode plan gating, conversation log idempotency, LLM nano fallback, 5-channel proactive alerting (web search alert at 2 failures), ENTERPRISE finite daily cap (2M tokens) — all in production
 
 *[Insert live user count, active sessions, or revenue figures as available]*
 
@@ -218,7 +218,7 @@ LyraAlpha AI is the only product combining deterministic engine context, dual-ag
 3. **Premium workflow depth** — Shock Simulator, Compare Assets, Portfolio Intelligence are workflow products built on structured computation, not just longer AI responses.
 4. **Plan-aware single-call routing** — cost discipline is architectural. All plans use `single` mode (dead code removed); model role (nano/mini/full) scales with plan and query complexity.
 5. **Region-native intelligence** — India and US treated as first-class markets with separate EOD pipelines, regional briefings, and market-context awareness.
-6. **Production AI safety** — post-retrieval injection scanning, LLM fallback, proactive observability alerting, and hot-patchable cost controls are shipped infrastructure, not a roadmap item.
+6. **Production AI safety** — full conversation and memory injection scanning, post-retrieval injection scanning, multi-asset mode plan gating, LLM fallback, proactive observability alerting, ENTERPRISE finite daily cap, conversation log idempotency — shipped infrastructure, not a roadmap item.
 7. **AMI 2.0 content pipeline** — agent-driven blog publishing, subscriber notification, and weekly digest via an HMAC-verified webhook bridge. Compounds SEO/GEO authority and subscriber engagement with near-zero marginal editorial cost.
 8. **Voice interface roadmap (Q2 2026)** — LYRA Voice Fintech Consultant will extend hands-free mobile access for Elite+ users, unlocking multitasking scenarios and deepening daily engagement.
 

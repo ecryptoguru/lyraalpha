@@ -1037,7 +1037,19 @@ export async function retrieveUserMemory(
   try {
     const docs = await vectorStore.searchUserMemory(userId, query, RAG_CONFIG.memoryTopK, options);
     if (docs.length === 0) return "";
-    return docs
+
+    // Scan memory chunks for injection patterns before injecting into prompt
+    const safeDocs = docs.filter((d) => {
+      for (const pattern of INJECTION_PATTERNS) {
+        if (pattern.test(d.content)) {
+          logger.warn({ userId, docId: d.id }, "Memory chunk blocked due to injection pattern");
+          return false;
+        }
+      }
+      return true;
+    });
+
+    return safeDocs
       .map(
         (d) =>
           `[MEMORY: ${new Date(d.metadata.createdAt as Date).toLocaleDateString()}]\n${d.content}`,
@@ -1066,6 +1078,33 @@ export async function storeConversationLog(
     logger.warn({ userId }, "storeConversationLog: skipping non-Clerk userId — update guard if ID format changes");
     return;
   }
+
+  // Generate idempotency key to prevent duplicate storage on retries
+  // Hash of userId + input + output + timestamp rounded to 10-second window
+  const timestampWindow = Math.floor(Date.now() / 10000) * 10000;
+  const idempotencyKey = createHash("sha256")
+    .update(`${userId}:${timestampWindow}:${input}:${output}`)
+    .digest("hex");
+
+  // Check if this exact exchange was already logged within the time window
+  try {
+    const existing = await prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM "AIRequestLog"
+      WHERE "userId" = ${userId}
+        AND "inputQuery" = ${input}
+        AND "outputResponse" = ${output}
+        AND "createdAt" >= NOW() - INTERVAL '10 seconds'
+      LIMIT 1
+    `;
+    if (existing && existing.length > 0) {
+      logger.debug({ userId, idempotencyKey }, "storeConversationLog: duplicate detected, skipping");
+      return;
+    }
+  } catch (e) {
+    // Idempotency check failed — proceed with storage to avoid data loss
+    logger.warn({ err: e, userId }, "storeConversationLog: idempotency check failed, proceeding with storage");
+  }
+
   try {
     await vectorStore.storeLog(
       userId,

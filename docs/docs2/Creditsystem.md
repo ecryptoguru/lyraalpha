@@ -67,9 +67,9 @@ In addition to monthly credits, a **per-user, per-UTC-day token ceiling** provid
 | **STARTER** | 50,000 |
 | **PRO** | 200,000 |
 | **ELITE** | 500,000 |
-| **ENTERPRISE** | Uncapped (governed by contract) |
+| **ENTERPRISE** | 2,000,000 tokens/day (~$500/day; env-configurable via `ENTERPRISE_DAILY_TOKEN_CAP`) |
 
-This check runs before credit deduction. If the daily ceiling is hit, the request is rejected with a clear message before any credit or API cost is incurred. Caps reset at midnight UTC and are hot-patchable by admins via `/admin/ai-limits` without a code deploy.
+The cap check applies to **all plans including ENTERPRISE**. If the daily ceiling is hit, the request is rejected with a clear message before any credit or API cost is incurred. Caps reset at midnight UTC and are hot-patchable by admins via `/admin/ai-limits` without a code deploy.
 
 ---
 
@@ -230,7 +230,7 @@ Those concepts may still exist as strategy ideas, but they are not the stable im
 - referral reward flow with tier ladder
 - rewards / XP surfaces in the dashboard
 - premium multi-asset workflow pricing for Compare Assets and Shock Simulator
-- daily token cap as secondary cost backstop (hot-patchable from `/admin/ai-limits`)
+- daily token cap as secondary cost backstop for all plans including ENTERPRISE (hot-patchable from `/admin/ai-limits`)
 - Myra public chat — no credits consumed by public visitors (landing page Myra is free to all)
 - Myra response caching — reduces LLM cost on repetitive support questions
 
