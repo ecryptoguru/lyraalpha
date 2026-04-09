@@ -103,6 +103,7 @@ const COINGECKO_TO_CONTRACT: Record<string, TokenContract> = {
   solana:          { network: "solana",    address: "So11111111111111111111111111111111111111112" },  // Wrapped SOL
   "avalanche-2":   { network: "avax",      address: "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7" }, // WAVAX
   binancecoin:     { network: "bsc",       address: "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c" }, // WBNB
+  polygon:         { network: "polygon",   address: "0x0000000000000000000000000000000000001010" }, // WMATIC
   // ERC-20 tokens on Ethereum
   chainlink:       { network: "eth",       address: "0x514910771af9ca656af840dff83e8264ecf986ca" },
   uniswap:         { network: "eth",       address: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984" },
@@ -122,6 +123,10 @@ const COINGECKO_TO_CONTRACT: Record<string, TokenContract> = {
   // Multi-chain tokens
   arbitrum:        { network: "arbitrum",  address: "0x912ce59144191c1204e64559fe8253a0e49e6548" },
   optimism:        { network: "optimism",  address: "0x4200000000000000000000000000000000000042" },
+  // Polygon tokens
+  "matic-network": { network: "polygon",   address: "0x0000000000000000000000000000000000001010" }, // WMATIC
+  // BSC tokens
+  "binance-usd":   { network: "bsc",       address: "0x55d398326f99059ff775485246999027b3197955" }, // BUSD
   // Cosmos ecosystem — no DEX pool data on GeckoTerminal
   // cosmos, polkadot, cardano, stellar, etc. — skip
 };
@@ -293,5 +298,133 @@ export class GeckoTerminalService {
 
     const pools = await this.getTokenPools(contract.network, contract.address);
     return this.computePoolLiquiditySummary(pools);
+  }
+
+  /**
+   * Get trending pools across all networks.
+   * GET /trending/pools
+   */
+  static async getTrendingPools(): Promise<GeckoTerminalPool[]> {
+    const cacheKey = "gt:trending_pools";
+    const cached = await getCache<GeckoTerminalPool[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const url = `${BASE_URL}/trending/pools`;
+      const res = await rateLimitedFetch(url);
+      const json = await res.json();
+      const pools: GeckoTerminalPool[] = json.data || [];
+      await setCache(cacheKey, pools, CACHE_TTL.TRENDING);
+      logger.info({ pools: pools.length }, "Fetched trending pools");
+      return pools;
+    } catch (err) {
+      logger.error({ err: String(err) }, "getTrendingPools failed");
+      return [];
+    }
+  }
+
+  /**
+   * Get network overview data (total TVL, volume, etc. for a specific network).
+   * GET /networks/{network}
+   */
+  static async getNetworkOverview(network: string): Promise<{
+    id: string;
+    type: string;
+    attributes: {
+      name: string;
+      tvl_usd: string | null;
+      volume_usd: { h24: string | null };
+      transactions: { h24: { buys: number; sells: number } };
+    };
+  } | null> {
+    const cacheKey = `gt:network:${network}`;
+    const cached = await getCache<{
+      id: string;
+      type: string;
+      attributes: {
+        name: string;
+        tvl_usd: string | null;
+        volume_usd: { h24: string | null };
+        transactions: { h24: { buys: number; sells: number } };
+      };
+    }>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const url = `${BASE_URL}/networks/${network}`;
+      const res = await rateLimitedFetch(url);
+      const json = await res.json();
+      const data = json.data;
+      if (data) await setCache(cacheKey, data, 1800); // 30 min cache
+      return data || null;
+    } catch (err) {
+      logger.error({ err: String(err), network }, "getNetworkOverview failed");
+      return null;
+    }
+  }
+
+  /**
+   * Get DEX overview data for a specific DEX.
+   * GET /networks/{network}/dexes/{dex}
+   */
+  static async getDexOverview(network: string, dex: string): Promise<{
+    id: string;
+    type: string;
+    attributes: {
+      name: string;
+      address: string;
+      tvl_usd: string | null;
+      volume_usd: { h24: string | null };
+      transactions: { h24: { buys: number; sells: number } };
+    };
+  } | null> {
+    const cacheKey = `gt:dex:${network}:${dex}`;
+    const cached = await getCache<{
+      id: string;
+      type: string;
+      attributes: {
+        name: string;
+        address: string;
+        tvl_usd: string | null;
+        volume_usd: { h24: string | null };
+        transactions: { h24: { buys: number; sells: number } };
+      };
+    }>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const url = `${BASE_URL}/networks/${network}/dexes/${dex}`;
+      const res = await rateLimitedFetch(url);
+      const json = await res.json();
+      const data = json.data;
+      if (data) await setCache(cacheKey, data, 1800); // 30 min cache
+      return data || null;
+    } catch (err) {
+      logger.error({ err: String(err), network, dex }, "getDexOverview failed");
+      return null;
+    }
+  }
+
+  /**
+   * Get top pools for a specific DEX on a network.
+   * GET /networks/{network}/dexes/{dex}/pools
+   */
+  static async getDexPools(network: string, dex: string): Promise<GeckoTerminalPool[]> {
+    const cacheKey = `gt:dex_pools:${network}:${dex}`;
+    const cached = await getCache<GeckoTerminalPool[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const url = `${BASE_URL}/networks/${network}/dexes/${dex}/pools?page=1`;
+      const res = await rateLimitedFetch(url);
+      const json = await res.json();
+      const pools: GeckoTerminalPool[] = json.data || [];
+      await setCache(cacheKey, pools, CACHE_TTL.TOKEN_POOLS);
+      logger.debug({ network, dex, pools: pools.length }, "Fetched DEX pools");
+      return pools;
+    } catch (err) {
+      logger.error({ err: String(err), network, dex }, "getDexPools failed");
+      return [];
+    }
   }
 }

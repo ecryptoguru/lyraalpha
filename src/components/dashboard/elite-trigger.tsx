@@ -29,7 +29,6 @@ type TriggerContext =
   | "crypto_onchain_hidden"
   | "mf_style_drift_hidden"
   | "mf_overlap_locked"
-  | "commodity_correlations_truncated"
   | "general";
 
 const TRIGGER_CONFIG: Record<TriggerContext, {
@@ -73,12 +72,6 @@ const TRIGGER_CONFIG: Record<TriggerContext, {
     headline: "Reveal portfolio overlap",
     description: "Overlap detection shows whether multiple funds are quietly creating the same portfolio bet.",
     cta: "Unlock Overlap Detection",
-  },
-  commodity_correlations_truncated: {
-    icon: BarChart3,
-    headline: "Finish the commodity system",
-    description: "Inter-commodity relationships, regime sensitivity and seasonal patterns give you the macro frame behind commodity pricing.",
-    cta: "Unlock Commodity system",
   },
   general: {
     icon: Gem,

@@ -30,10 +30,10 @@ export const PLAN_DISPLAY_NAMES: Record<PlanTier, string> = {
 };
 
 export const PLAN_MARKET_ACCESS: Record<PlanTier, string> = {
-  STARTER: "IN + US",
-  PRO: "IN + US",
-  ELITE: "All markets + CRYPTO",
-  ENTERPRISE: "All markets + CRYPTO + custom feeds",
+  STARTER: "Crypto (core tokens)",
+  PRO: "Crypto (core + altcoins)",
+  ELITE: "Crypto (full on-chain)",
+  ENTERPRISE: "Crypto (full + custom feeds)",
 };
 
 export const PLAN_TRIAL_FACTS = {
@@ -76,7 +76,7 @@ export function getEnterpriseHybridLabel(): string {
 
 export function buildMyraPlatformFacts(): string {
   return [
-    "- **Asset coverage**: cross-asset intelligence across US and India — stocks, ETFs, crypto, mutual funds, and commodities",
+    "- **Asset coverage**: crypto-native intelligence across 50+ tokens — on-chain data, DeFi metrics, network signals",
     "- **DSE Scores** (0–100): Trend, Momentum, Volatility, Liquidity, Trust, Sentiment",
     "- **Signal Strength**: 4-layer composite directional signal — analytical signal, not a buy/sell recommendation",
     "- **Score Velocity Badge**: shows rising/falling score momentum direction on asset cards and watchlist rows",
@@ -104,7 +104,7 @@ export function buildPublicMyraPlatformFacts(): string {
     "- **Audience**: public site visitors are not assumed to be signed in; do not describe them as being on Starter, Pro, Elite, or Enterprise unless they explicitly say so",
     "- **Waitlist**: joining the waitlist is the main public onboarding path during prelaunch; direct visitors to [join the waitlist](/#join-waitlist)",
     "- **Early access**: waitlist users may receive limited early access before launch; do not promise a specific plan tier or immediate entitlement",
-    "- **Asset coverage**: LyraAlpha covers stocks, ETFs, crypto, mutual funds, and commodities across US and Indian markets",
+    "- **Asset coverage**: LyraAlpha covers crypto tokens with on-chain analysis, DeFi metrics, and network signals",
     "- **Lyra Intel**: the AI financial analyst lives inside the authenticated product; guide public visitors to [sign up](/sign-up) or [sign in](/sign-in) to access it",
     "- **Plans summary (generic)**: STARTER is free (50 credits/mo); PRO is $14.99/mo (500 credits); ELITE is $39.99/mo (1,500 credits + premium tools: Compare Assets, Shock Simulator); ENTERPRISE is custom — explain these if asked without assuming which plan the visitor is on",
     "- **Premium workflows**: Compare Assets and Shock Simulator are ELITE/Enterprise features available inside the authenticated dashboard",

@@ -16,7 +16,7 @@ vi.mock("@/lib/prisma", () => ({
 
 import { prisma } from "@/lib/prisma";
 
-describe("GET /api/stocks/[symbol]/scenarios", () => {
+describe("GET /api/crypto/[symbol]/scenarios", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -24,9 +24,9 @@ describe("GET /api/stocks/[symbol]/scenarios", () => {
   it("returns 404 when asset is missing", async () => {
     vi.mocked(prisma.asset.findUnique).mockResolvedValue(null as any);
 
-    const req = new Request("http://localhost/api/stocks/AAPL/scenarios");
+    const req = new Request("http://localhost/api/crypto/BTC/scenarios");
     const res = await GET(req as unknown as NextRequest, {
-      params: Promise.resolve({ symbol: "AAPL" }),
+      params: Promise.resolve({ symbol: "BTC" }),
     });
 
     expect(res.status).toBe(404);
@@ -36,15 +36,15 @@ describe("GET /api/stocks/[symbol]/scenarios", () => {
 
   it("returns 200 not_ready payload when scenarioData is missing", async () => {
     vi.mocked(prisma.asset.findUnique).mockResolvedValue({
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      type: "STOCK",
+      symbol: "BTC",
+      name: "Bitcoin",
+      type: "CRYPTO",
       scenarioData: null,
     } as any);
 
-    const req = new Request("http://localhost/api/stocks/AAPL/scenarios");
+    const req = new Request("http://localhost/api/crypto/BTC/scenarios");
     const res = await GET(req as unknown as NextRequest, {
-      params: Promise.resolve({ symbol: "AAPL" }),
+      params: Promise.resolve({ symbol: "BTC" }),
     });
 
     expect(res.status).toBe(200);
@@ -52,7 +52,7 @@ describe("GET /api/stocks/[symbol]/scenarios", () => {
 
     expect(json.ready).toBe(false);
     expect(json.status).toBe("not_ready");
-    expect(json.symbol).toBe("AAPL");
+    expect(json.symbol).toBe("BTC");
     expect(json.scenarios).toBeNull();
     expect(typeof json.message).toBe("string");
   });
@@ -91,22 +91,22 @@ describe("GET /api/stocks/[symbol]/scenarios", () => {
     };
 
     vi.mocked(prisma.asset.findUnique).mockResolvedValue({
-      symbol: "AAPL",
-      name: "Apple Inc.",
-      type: "STOCK",
+      symbol: "BTC",
+      name: "Bitcoin",
+      type: "CRYPTO",
       scenarioData,
     } as any);
 
-    const req = new Request("http://localhost/api/stocks/AAPL/scenarios");
+    const req = new Request("http://localhost/api/crypto/BTC/scenarios");
     const res = await GET(req as unknown as NextRequest, {
-      params: Promise.resolve({ symbol: "AAPL" }),
+      params: Promise.resolve({ symbol: "BTC" }),
     });
 
     expect(res.status).toBe(200);
     const json = await res.json();
 
     expect(json.ready).toBe(true);
-    expect(json.symbol).toBe("AAPL");
+    expect(json.symbol).toBe("BTC");
     expect(json.scenarios).toBeTruthy();
     expect(json.scenarios.riskVariants).toBeTruthy();
 

@@ -248,28 +248,28 @@ export const PortfolioQuerySchema = z.object({
 // ─── Broker Integration / Normalization Schema ──────────────────────────────
 
 const BrokerProviderSchema = z.enum([
-  "zerodha",
-  "upstox",
-  "angel_one",
-  "dhan",
-  "fyers",
-  "groww",
-  "icici_direct",
-  "kotak_neo",
-  "five_paisa",
-  "motilal_oswal",
-  "shoonya",
-  "alice_blue",
-  "hdfc_securities",
-  "axis_direct",
-  "plaid",
-  "alpaca",
+  "koinx",
+  "wazirx",
+  "coindcx",
+  "binance",
+  "coinbase",
+  "kraken",
+  "bybit",
+  "okx",
+  "zebpay",
+  "giottus",
+  "buyucoin",
+  "uniswap",
+  "pancakeswap",
+  "sushiswap",
+  "curve",
+  "jupiter",
 ]);
 
 const BrokerRegionSchema = z.enum(["IN", "US", "GLOBAL"]);
 const BrokerAccessModelSchema = z.enum(["public_api", "partner_api", "oauth", "sdk", "statement", "email", "manual"]);
-const BrokerAssetClassSchema = z.enum(["STOCK", "ETF", "MUTUAL_FUND", "CRYPTO", "COMMODITY", "BOND", "CASH_EQUIVALENT", "DERIVATIVE", "OTHER"]);
-const BrokerTransactionTypeSchema = z.enum(["buy", "sell", "dividend", "switch", "transfer", "fee", "interest", "deposit", "withdrawal", "split", "merger", "corporate_action"]);
+const BrokerAssetClassSchema = z.enum(["CRYPTO", "DEFI", "NFTS", "LAYER1", "LAYER2"]);
+const BrokerTransactionTypeSchema = z.enum(["buy", "sell", "transfer", "fee", "deposit", "withdrawal", "swap", "stake", "unstake", "liquidity_provide", "liquidity_remove", "bridge", "claim", "airdrop", "reward"]);
 const BrokerSyncScopeSchema = z.enum(["holdings", "positions", "transactions", "balances", "orders"]);
 
 export const BrokerIntegrationMatrixEntrySchema = z.object({
@@ -299,9 +299,11 @@ export const BrokerSourceReferenceSchema = z.object({
 export const BrokerInstrumentIdentitySchema = z.object({
   symbol: z.string().min(1).max(24),
   name: z.string().min(1).max(200),
-  isin: z.string().max(32).nullable().optional(),
+  chain: z.string().max(50).nullable().optional(),
+  contractAddress: z.string().max(100).nullable().optional(),
+  tokenStandard: z.enum(["ERC20", "ERC721", "ERC1155", "SPL", "BEP20"]).nullable().optional(),
   exchange: z.string().max(20).nullable().optional(),
-  currency: z.enum(["USD", "INR"]),
+  currency: z.enum(["USD", "INR", "USDT", "USDC", "ETH", "BTC"]),
   assetClass: BrokerAssetClassSchema,
   region: BrokerRegionSchema,
   sector: z.string().max(120).nullable().optional(),
@@ -317,7 +319,7 @@ export const BrokerLotSchema = z.object({
 });
 
 export const BrokerCashBalanceSchema = z.object({
-  currency: z.enum(["USD", "INR"]),
+  currency: z.enum(["USD", "INR", "USDT", "USDC", "ETH", "BTC", "BNB"]),
   available: z.number(),
   settled: z.number().nullable().optional(),
   marginUsed: z.number().nullable().optional(),
@@ -389,7 +391,7 @@ export const BrokerAccountSchema = z.object({
   brokerAccountId: z.string().max(120).nullable().optional(),
   accountType: z.string().max(80).nullable().optional(),
   status: z.string().max(50).nullable().optional(),
-  currency: z.enum(["USD", "INR"]),
+  currency: z.enum(["USD", "INR", "USDT", "USDC", "ETH", "BTC", "BNB"]),
   portfolioValue: z.number().nullable().optional(),
   cashBalance: BrokerCashBalanceSchema.nullable().optional(),
   buyingPower: z.number().nullable().optional(),
@@ -439,10 +441,11 @@ export const BrokerAuthHandleSchema = z.object({
 });
 
 export const BrokerInstrumentKeySchema = z.object({
-  isin: z.string().max(32).nullable(),
+  contractAddress: z.string().max(100).nullable(),
   symbol: z.string().min(1).max(24),
   exchange: z.string().max(20).nullable(),
   region: BrokerRegionSchema,
+  chain: z.string().max(50).nullable().optional(),
 });
 
 export const BrokerMergedHoldingSchema = z.object({

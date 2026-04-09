@@ -80,8 +80,8 @@ export const ENGINE_THRESHOLDS = {
 
   TRUST: {
     // Base scores by asset type
-    REGULATED_BASE: 80, // Stocks, ETFs
-    UNREGULATED_BASE: 40, // Crypto
+    REGULATED_BASE: 80, // Regulated crypto
+    UNREGULATED_BASE: 40, // Unregulated crypto
 
     // Market cap modifiers
     MEGA_CAP_THRESHOLD: 100_000_000_000, // $100B

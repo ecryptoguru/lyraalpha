@@ -4,7 +4,7 @@ import {
   InclusionType,
   Prisma,
 } from "@/generated/prisma/client";
-import { StockMappingDTO } from "../types/discovery.dto";
+import { CryptoMappingDTO } from "../types/discovery.dto";
 import { withCache } from "@/lib/redis";
 import { MarketContextSnapshot } from "@/lib/engines/market-regime";
 import { getLatestSectorRegime } from "@/lib/engines/sector-regime";
@@ -251,9 +251,9 @@ export class DiscoveryService {
   /**
    * Universal mapper from DB model to API DTO.
    */
-  static mapToDTO(m: StockMappingWithRelations): StockMappingDTO {
+  static mapToDTO(m: StockMappingWithRelations): CryptoMappingDTO {
     // Extract signals from latest scores
-    const signals: Required<NonNullable<StockMappingDTO["signals"]>> = {
+    const signals: Required<NonNullable<CryptoMappingDTO["signals"]>> = {
       trend: 0,
       momentum: 0,
       volatility: 0,

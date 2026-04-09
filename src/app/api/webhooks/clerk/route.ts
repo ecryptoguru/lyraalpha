@@ -247,7 +247,7 @@ export async function POST(req: Request) {
             userId: data.id,
             preferredRegion: "US",
             experienceLevel: "BEGINNER",
-            interests: ["STOCKS", "ETF"],
+            interests: ["CRYPTO"],
             onboardingCompleted: false,
             blogSubscribed: true,
             ...(welcomeSent ? { welcomeEmailSentAt: new Date() } : {}),

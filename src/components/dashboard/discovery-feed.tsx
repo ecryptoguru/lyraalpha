@@ -24,8 +24,6 @@ import type { DiscoveryFeedResponse } from "@/lib/services/discovery-feed.servic
 import { cn } from "@/lib/utils";
 
 const TYPE_LABEL: Record<string, string> = {
-  STOCK: "Stocks",
-  ETF: "ETFs",
   CRYPTO: "Crypto",
   COMMODITY: "Commodities",
   MUTUAL_FUND: "Mutual Funds",
@@ -66,11 +64,7 @@ const fetcher = async (url: string) => {
 
 const TYPE_FILTERS = [
   { key: "all", label: "All Assets" },
-  { key: "stock", label: "Stocks" },
-  { key: "etf", label: "ETFs" },
   { key: "crypto", label: "Crypto" },
-  { key: "commodity", label: "Commodities" },
-  { key: "mf", label: "Mutual Fund" },
 ] as const;
 
 export function DiscoveryFeed({
@@ -126,7 +120,7 @@ export function DiscoveryFeed({
     return TYPE_FILTERS.filter((filter) => {
       if (filter.key === "all") return true;
       if (filter.key === "crypto" && region === "US") return true;
-      const mapped = filter.key === "mf" ? "MUTUAL_FUND" : filter.key.toUpperCase();
+      const mapped = filter.key.toUpperCase();
       return (available[mapped] ?? 0) > 0;
     });
   }, [data?.availableTypes, region]);

@@ -13,7 +13,6 @@ export type DashboardRouteKey =
   | "learning"
   | "settings"
   | "assets"
-  | "discovery-stocks"
   | "stress-test"
   | "rewards"
   | "admin"
@@ -55,7 +54,6 @@ export const DASHBOARD_ROUTES: DashboardRouteMeta[] = [
   { key: "learning",   title: "Learning Hub",      url: "/dashboard/learning",    section: "Settings", navOnly: true, detailSegmentFormatter: formatTitleWords },
 
   // ── Not in main nav (breadcrumb/redirect pages only) ─────────────────────
-  { key: "discovery-stocks", title: "Sector Pulse", url: "/dashboard/discovery-stocks", section: "Main" },
   { key: "stress-test",      title: "Shock Test",   url: "/dashboard/stress-test",      section: "Main",     eliteOnly: true },
   { key: "rewards",          title: "Credits & XP", url: "/dashboard/rewards",          section: "Settings" },
   { key: "admin",            title: "Admin",        url: "/admin",                      section: "Settings", adminOnly: true },

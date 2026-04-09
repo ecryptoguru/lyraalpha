@@ -244,11 +244,11 @@ export AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output te
 export APP_URL="https://app.yourdomain.com"
 export CRON_SECRET="your-cron-secret"
 
-# Create schedules
-npx tsx scripts/setup-eventbridge-schedules.ts setup
+# Create schedules (QStash)
+npx tsx scripts/setup-qstash-schedules.ts setup
 
-# Verify
-npx tsx scripts/setup-eventbridge-schedules.ts list
+# Verify schedules
+npx tsx scripts/setup-qstash-schedules.ts list
 ```
 
 EventBridge sends `POST https://app.yourdomain.com/api/cron/<name>` with:
@@ -405,7 +405,7 @@ If anything goes wrong after DNS cutover:
 |------|--------|
 | `sst.config.ts` | **NEW** — SST deployment config (replaces Amplify) |
 | `scripts/migrate-database.ts` | **UPDATED** — pg_restore + pgvector support |
-| `scripts/setup-eventbridge-schedules.ts` | **UPDATED** — HTTP targets, not Lambda ARNs |
+| `scripts/setup-qstash-schedules.ts` | **UPDATED** — QStash cron schedules for crypto sync jobs |
 | `src/lib/prisma-aws.ts` | **UPDATED** — RDS SSL config, no debug logs |
 | `.env.aws.template` | **UPDATED** — Removed ElastiCache, no real secrets |
 | `next.config.ts` | **1 line change** — `VERCEL_ENV` → `NODE_ENV` |
@@ -433,8 +433,8 @@ npx sst secret set DatabaseUrl "..."   # (repeat for all 21 secrets)
 npx sst deploy --stage staging         # test first
 npx sst deploy --stage production
  
-# 6. Create EventBridge schedules
+# 6. Create QStash schedules
 AWS_ACCOUNT_ID="..." APP_URL="https://yourdomain.com" CRON_SECRET="..." \
-  npx tsx scripts/setup-eventbridge-schedules.ts setup
+  npx tsx scripts/setup-qstash-schedules.ts setup
  
 # 7. Switch DNS → done

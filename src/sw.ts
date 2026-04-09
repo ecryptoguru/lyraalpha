@@ -3,9 +3,20 @@ import { defaultCache } from "@serwist/next/worker";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 import { Serwist, NetworkOnly, NetworkFirst } from "serwist";
 
+// Simple logger for service worker context
+const swLogger = {
+  error: (message: string, error?: unknown) => {
+    // Service workers run in a separate context without access to the main logger
+    // console.error is the appropriate logging method here
+    console.error(`[SW] ${message}`, error);
+  }
+};
+
 declare global {
   interface WorkerGlobalScope extends SerwistGlobalConfig {
     __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
+    registration: ServiceWorkerRegistration;
+    clients: Clients;
   }
 }
 
@@ -86,8 +97,7 @@ self.addEventListener("push", (e: Event) => {
   }
 
   event.waitUntil(
-    // @ts-expect-error - registration not available on basic WorkerGlobalScope
-    (self.registration as ServiceWorkerRegistration)
+    self.registration
       .showNotification(data.title ?? "LyraAlpha AI", {
         body: data.body ?? "",
         icon: data.icon ?? "/logo.png",
@@ -95,7 +105,7 @@ self.addEventListener("push", (e: Event) => {
         data: { url: data.url ?? "/dashboard" },
       })
       .catch((err: unknown) => {
-        console.error("[SW] showNotification failed:", err);
+        swLogger.error("showNotification failed", err);
       })
   );
 });
@@ -104,6 +114,5 @@ self.addEventListener("notificationclick", (e: Event) => {
   const event = e as unknown as CustomNotificationEvent;
   event.notification.close();
   const url = event.notification?.data?.url ?? "/dashboard";
-  // @ts-expect-error - clients not available on basic WorkerGlobalScope
-  event.waitUntil((self.clients as Clients).openWindow(url));
+  event.waitUntil(self.clients.openWindow(url));
 });

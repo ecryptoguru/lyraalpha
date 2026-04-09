@@ -91,7 +91,7 @@ export function ScenarioAnalysisCard({ symbol, plan, className }: ScenarioAnalys
   const [confidence, setConfidence] = useState<Confidence>(0.95);
 
   const { data: apiData, isLoading, error } = useSWR<ScenarioApiResponse>(
-    `/api/stocks/${symbol}/scenarios`,
+    `/api/crypto/${symbol}/scenarios`,
     fetcher,
     { revalidateOnFocus: false, keepPreviousData: true, dedupingInterval: 60000 },
   );

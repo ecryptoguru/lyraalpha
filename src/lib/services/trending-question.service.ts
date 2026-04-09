@@ -14,12 +14,12 @@ const CURATED_FALLBACK_QUESTIONS = [
   { question: "What are the biggest risks in the market today?", category: "risk-check" },
   { question: "Is the current rally sustainable or overextended?", category: "risk-check" },
   { question: "How is inflation affecting different asset classes?", category: "big-picture" },
-  { question: "What does the current interest rate path mean for stocks?", category: "big-picture" },
-  { question: "How is Bitcoin performing relative to tech stocks?", category: "compared-to" },
+  { question: "What does the current interest rate path mean for crypto?", category: "big-picture" },
+  { question: "How is Bitcoin performing relative to other crypto assets?", category: "compared-to" },
   { question: "Gold vs bonds — which is the better safe haven now?", category: "compared-to" },
-  { question: "What makes a stock's momentum score change?", category: "how-it-works" },
+  { question: "What makes a crypto's momentum score change?", category: "how-it-works" },
   { question: "How does market regime affect your portfolio?", category: "how-it-works" },
-  { question: "Which AI stocks have the strongest fundamentals?", category: "asset-spotlight" },
+  { question: "Which AI crypto protocols have the strongest fundamentals?", category: "asset-spotlight" },
   { question: "Is Ethereum still undervalued compared to Bitcoin?", category: "asset-spotlight" },
 ];
 
@@ -60,14 +60,14 @@ Requirements:
 - Analytical: No price predictions or financial advice. Focus on understanding WHY things are happening.
 - Length: Maximum 12 words per question. Shorter is better.
 - Variety: Each question must cover a different angle. No two questions about the same topic.
-- Tickers: Never include the ".NS" suffix for Indian stock ticker symbols (e.g., write "HDFCBANK" instead of "HDFCBANK.NS").
+- Tickers: Never include exchange suffixes for crypto ticker symbols (e.g., write "BTC" instead of "BTC-USD").
 - Keep the questions natural, like something a real person would type.
 
 Categories (use exactly one per question):
 - "whats-moving" — what's driving markets right now
 - "risk-check" — what could go wrong, what to watch out for
 - "big-picture" — macro themes, economic trends, policy shifts
-- "asset-spotlight" — focused on a specific stock, crypto, or ETF
+- "asset-spotlight" — focused on a specific crypto asset
 - "compared-to" — cross-asset comparisons or relative value
 - "how-it-works" — educational, helps users understand market mechanics
 

@@ -13,11 +13,11 @@ export function getScenario(id: StressScenarioId | string, region: "US" | "IN"):
 }
 
 function normalizeType(assetType: string): SupportedStressAssetType {
-  if (assetType === "ETF" || assetType === "CRYPTO" || assetType === "COMMODITY" || assetType === "MUTUAL_FUND") {
+  if (assetType === "CRYPTO" || assetType === "DEFI" || assetType === "NFTS" || assetType === "LAYER1" || assetType === "LAYER2") {
     return assetType;
   }
 
-  return "STOCK";
+  return "CRYPTO";
 }
 
 function looksLikeGold(symbol: string, name?: string | null, category?: string | null) {
@@ -75,26 +75,6 @@ export function getBestProxyPath(
     if (looksLikeOil(symbol, options?.name, options?.category)) {
       return pickProxy(paths, ["SPY", "IWM", "QQQ"]);
     }
-    if (normalizedType === "COMMODITY") {
-      return pickProxy(paths, ["GLD", "SPY", "IWM"]);
-    }
-    if (normalizedType === "MUTUAL_FUND") {
-      if (looksLikeTech(symbol, options?.name, options?.sector, options?.category)) {
-        return pickProxy(paths, ["QQQ", "SPY", "IWM"]);
-      }
-      if (looksLikeGold(symbol, options?.name, options?.category)) {
-        return pickProxy(paths, ["GLD", "TLT", "SPY"]);
-      }
-      return pickProxy(paths, ["SPY", "TLT", "QQQ"]);
-    }
-    if (normalizedType === "ETF") {
-      if (symbol === "TLT") return pickProxy(paths, ["TLT", "SPY"]);
-      if (symbol === "IWM") return pickProxy(paths, ["IWM", "SPY"]);
-      if (symbol === "QQQ" || looksLikeTech(symbol, options?.name, options?.sector, options?.category)) {
-        return pickProxy(paths, ["QQQ", "SPY", "IWM"]);
-      }
-      return pickProxy(paths, ["SPY", "QQQ", "IWM"]);
-    }
     if (looksLikeTech(symbol, options?.name, options?.sector, options?.category)) {
       return pickProxy(paths, ["QQQ", "SPY", "IWM"]);
     }
@@ -107,18 +87,6 @@ export function getBestProxyPath(
     }
     if (looksLikeBanking(symbol, options?.name, options?.sector, options?.category) || symbol.toUpperCase() === "BANKBEES.NS") {
       return pickProxy(paths, ["BANKBEES.NS", "NIFTYBEES.NS", "GOLDBEES.NS"]);
-    }
-    if (normalizedType === "COMMODITY") {
-      return pickProxy(paths, ["GOLDBEES.NS", "NIFTYBEES.NS", "BANKBEES.NS"]);
-    }
-    if (normalizedType === "MUTUAL_FUND") {
-      if (looksLikeBanking(symbol, options?.name, options?.sector, options?.category)) {
-        return pickProxy(paths, ["BANKBEES.NS", "NIFTYBEES.NS"]);
-      }
-      if (looksLikeGold(symbol, options?.name, options?.category)) {
-        return pickProxy(paths, ["GOLDBEES.NS", "NIFTYBEES.NS"]);
-      }
-      return pickProxy(paths, ["NIFTYBEES.NS", "BANKBEES.NS", "GOLDBEES.NS"]);
     }
     if (looksLikeTech(symbol, options?.name, options?.sector, options?.category)) {
       return pickProxy(paths, ["NIFTYBEES.NS", "BANKBEES.NS"]);

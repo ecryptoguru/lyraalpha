@@ -1,16 +1,8 @@
 import type { PlanTier } from "@/lib/ai/config";
-import { canAccessAssetType, getPlanLimit, isElitePlan } from "@/lib/middleware/plan-gate";
+import { getPlanLimit, isElitePlan } from "@/lib/middleware/plan-gate";
 import { prisma } from "@/lib/prisma";
 import { withCache } from "@/lib/redis";
-import type { AssetType, Prisma } from "@/generated/prisma/client";
-
-const TYPE_MAP: Record<string, AssetType> = {
-  stock: "STOCK",
-  etf: "ETF",
-  crypto: "CRYPTO",
-  commodity: "COMMODITY",
-  mf: "MUTUAL_FUND",
-};
+import type { Prisma } from "@/generated/prisma/client";
 
 type DiscoveryInflection = {
   scoreType: string;
@@ -94,20 +86,6 @@ export async function getDiscoveryFeedData({
   const limit = Math.min(requestedLimit, planCap);
   const isElite = isElitePlan(plan);
 
-  if (typeFilter === "crypto" && !canAccessAssetType(plan, "CRYPTO")) {
-    return {
-      items: [],
-      total: 0,
-      totalVisible: 0,
-      plan,
-      planCap,
-      hasMore: false,
-      upgradeHint: "Upgrade to Elite to access crypto market intelligence.",
-      region,
-      availableTypes: {},
-    };
-  }
-
   const cacheKey = `discovery:feed:${region}:${typeFilter}:${limit}:${offset}:${plan}`;
 
   const data = await withCache(
@@ -115,19 +93,13 @@ export async function getDiscoveryFeedData({
     async () => {
       const baseWhere: Prisma.DiscoveryFeedItemWhereInput = {
         isSuppressed: false,
+        assetType: "CRYPTO",
         asset: {
           region,
         },
       };
 
-      if (!canAccessAssetType(plan, "CRYPTO")) {
-        baseWhere.assetType = { not: "CRYPTO" };
-      }
-
       const where: Prisma.DiscoveryFeedItemWhereInput = { ...baseWhere };
-      if (typeFilter !== "all" && TYPE_MAP[typeFilter]) {
-        where.assetType = TYPE_MAP[typeFilter];
-      }
 
       const [items, total, typeGroups] = await Promise.all([
         prisma.discoveryFeedItem.findMany({

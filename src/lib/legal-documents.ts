@@ -36,7 +36,7 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
       title: "3. Data We Do Not Intentionally Collect",
       body: [
         "We do not intentionally collect biometric identifiers, government identity numbers, or sensitive personal data unless specifically required and legally permitted.",
-        "We do not request brokerage passwords or banking credentials inside the product.",
+        "We do not request exchange passwords or banking credentials inside the product.",
       ],
     },
     {

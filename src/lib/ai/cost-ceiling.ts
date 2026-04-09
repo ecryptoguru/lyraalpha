@@ -10,6 +10,7 @@
  * - Truncates the LARGEST context block first (knowledge > web > history)
  * - Logs a warning when truncation happens for monitoring
  * - Uses fast char-based estimation (~4 chars/token) to avoid tiktoken latency
+ * - Tracks estimation accuracy for monitoring and improvement
  */
 
 import { createLogger } from "@/lib/logger";
@@ -68,6 +69,42 @@ export interface CostCeilingResult {
   exceeded: boolean;
   truncatedContext: string;
   truncatedChars: number;
+}
+
+/**
+ * Record estimation accuracy for monitoring.
+ * Compares estimated tokens (from char-based estimation) with actual tokens from the model.
+ */
+export async function recordEstimationAccuracy(
+  estimatedTokens: number,
+  actualTokens: number,
+  tier: string,
+): Promise<void> {
+  try {
+    const errorPct = Math.abs((actualTokens - estimatedTokens) / estimatedTokens) * 100;
+    const windowKey = `ai:cost_estimation:window:${Math.floor(Date.now() / (60 * 60 * 1000))}`; // 1-hour windows
+
+    const pipeline = (await import("@/lib/redis")).redis.pipeline();
+    pipeline.hincrby(windowKey, "total", 1);
+    pipeline.hincrby(windowKey, "errorSum", Math.round(errorPct));
+    pipeline.expire(windowKey, 25 * 60 * 60); // 25 hours TTL
+    const results = await pipeline.exec();
+
+    const total = (results?.[0] as number) ?? 0;
+    const errorSum = (results?.[1] as number) ?? 0;
+
+    if (total >= 50) { // Only log after sufficient samples
+      const avgErrorPct = errorSum / total;
+      if (avgErrorPct > 20) { // Alert if average error exceeds 20%
+        logger.warn(
+          { event: "cost_estimation_accuracy", avgErrorPct: avgErrorPct.toFixed(1), total, tier },
+          "Cost ceiling estimation accuracy degraded",
+        );
+      }
+    }
+  } catch {
+    // Redis failure — never block
+  }
 }
 
 /**

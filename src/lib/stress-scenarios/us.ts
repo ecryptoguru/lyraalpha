@@ -577,11 +577,7 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
       resilienceThemes: ["Gold", "High-quality duration", "Defensive cash-flow names"],
     },
     assetTypeAdjustments: {
-      STOCK: { betaMultiplier: 1.08, confidenceDelta: 0.02, rationale: "Single-name equities usually underperform broad beta in recessionary earnings resets." },
-      ETF: { betaMultiplier: 1.02, confidenceDelta: 0.04, rationale: "Diversified ETF exposure tends to track benchmark stress more closely." },
       CRYPTO: { betaMultiplier: 1.18, confidenceDelta: -0.08, rationale: "Crypto usually behaves like high-beta liquidity risk during recession scares." },
-      COMMODITY: { betaMultiplier: 0.92, confidenceDelta: -0.02, rationale: "Commodity baskets split between growth sensitivity and inflation hedging." },
-      MUTUAL_FUND: { betaMultiplier: 0.96, confidenceDelta: -0.05, rationale: "Mutual fund behavior is inferred from underlying mandate rather than direct trading history." },
     },
     factors: {
       equity: -0.16,
@@ -725,11 +721,7 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
       resilienceThemes: ["Energy cash flows", "Financials", "Shorter-duration value"],
     },
     assetTypeAdjustments: {
-      STOCK: { betaMultiplier: 1.04, confidenceDelta: 0.03, rationale: "Single-name equities with long-duration cash flows are more rate-sensitive than the broad index." },
-      ETF: { betaMultiplier: 1.01, confidenceDelta: 0.05, rationale: "Broad ETFs track benchmark repricing more closely under rate shocks." },
       CRYPTO: { betaMultiplier: 1.12, confidenceDelta: -0.07, rationale: "Crypto often trades like long-duration liquidity-sensitive risk during yield spikes." },
-      COMMODITY: { betaMultiplier: 0.94, confidenceDelta: -0.01, rationale: "Commodity exposure can partly offset rate pressure through inflation linkage." },
-      MUTUAL_FUND: { betaMultiplier: 0.95, confidenceDelta: -0.05, rationale: "Mutual fund mandate inference reduces precision for rate-sensitive portfolios." },
     },
     factors: {
       equity: -0.12,
@@ -873,11 +865,7 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
       resilienceThemes: ["Gold", "Value", "Energy and old-economy cash flows"],
     },
     assetTypeAdjustments: {
-      STOCK: { betaMultiplier: 1.10, confidenceDelta: 0.03, rationale: "Single-name tech and growth stocks usually undershoot the broad market during bubble unwinds." },
-      ETF: { betaMultiplier: 1.04, confidenceDelta: 0.05, rationale: "Broad ETFs diversify some tech-bubble idiosyncrasy but still reprice quickly." },
       CRYPTO: { betaMultiplier: 1.16, confidenceDelta: -0.08, rationale: "Crypto behaves like speculative duration risk during narrative collapses." },
-      COMMODITY: { betaMultiplier: 0.88, confidenceDelta: 0.01, rationale: "Commodity exposure can outperform when capital rotates away from speculative growth." },
-      MUTUAL_FUND: { betaMultiplier: 0.97, confidenceDelta: -0.05, rationale: "Fund mandate inference adds uncertainty around concentrated tech exposure." },
     },
     factors: {
       equity: -0.20,
@@ -1021,11 +1009,7 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
       resilienceThemes: ["Energy producers", "Commodity baskets", "Gold as inflation hedge"],
     },
     assetTypeAdjustments: {
-      STOCK: { betaMultiplier: 1.03, confidenceDelta: 0.03, rationale: "Single-name equities with fuel sensitivity or margin pressure can diverge more than the benchmark." },
-      ETF: { betaMultiplier: 1.00, confidenceDelta: 0.05, rationale: "Broad ETFs capture sector rotation without as much idiosyncratic margin risk." },
-      CRYPTO: { betaMultiplier: 1.05, confidenceDelta: -0.06, rationale: "Crypto can wobble with liquidity and inflation repricing but linkage is less direct." },
-      COMMODITY: { betaMultiplier: 1.12, confidenceDelta: 0.02, rationale: "Commodity baskets and energy-linked assets can outperform in oil-driven inflation spikes." },
-      MUTUAL_FUND: { betaMultiplier: 0.97, confidenceDelta: -0.05, rationale: "Fund mandate inference lowers confidence on sector-level oil sensitivity." },
+      CRYPTO: { betaMultiplier: 1.05, confidenceDelta: -0.06, rationale: "Crypto linkage is looser and mostly comes through broader risk and liquidity conditions." },
     },
     factors: {
       equity: -0.09,

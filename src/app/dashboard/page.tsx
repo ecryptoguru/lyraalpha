@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Home, ShieldAlert, Newspaper, Radar } from "lucide-react";
+import { Home, Newspaper, TrendingUp, Activity } from "lucide-react";
 import Link from "next/link";
 import { DashboardMarketBriefCard } from "@/components/dashboard/dashboard-market-brief-card";
 import { DashboardFeedPreviews } from "@/components/dashboard/dashboard-feed-previews";
@@ -34,25 +34,25 @@ export default async function DashboardPage({
 
   const NEXT_STEPS = [
     {
-      icon: <ShieldAlert className="h-5 w-5 text-rose-400" />,
-      bg: "bg-rose-500/8 border-rose-500/20",
-      label: "Portfolio stress",
-      action: "Shock Simulator",
-      href: "/dashboard/portfolio",
+      icon: <Activity className="h-5 w-5 text-amber-400" />,
+      bg: "bg-amber-500/8 border-amber-500/20",
+      label: "On-chain signals",
+      action: "Discovery Feed",
+      href: "/dashboard/discovery",
     },
     {
-      icon: <Newspaper className="h-5 w-5 text-amber-400" />,
-      bg: "bg-amber-500/8 border-amber-500/20",
-      label: "Market rotation",
-      action: "Market pulse",
+      icon: <Newspaper className="h-5 w-5 text-primary" />,
+      bg: "bg-primary/8 border-primary/20",
+      label: "Market pulse",
+      action: "Daily Briefing",
       href: "/dashboard#market-intelligence",
     },
     {
-      icon: <Radar className="h-5 w-5 text-primary" />,
-      bg: "bg-primary/8 border-primary/20",
-      label: "Fresh setup",
-      action: "Multibagger Radar",
-      href: "/dashboard/discovery",
+      icon: <TrendingUp className="h-5 w-5 text-emerald-400" />,
+      bg: "bg-emerald-500/8 border-emerald-500/20",
+      label: "Top movers",
+      action: "Crypto Intel",
+      href: "/dashboard/assets",
     },
   ];
 
@@ -62,7 +62,7 @@ export default async function DashboardPage({
         <PageHeader
           icon={<Home className="h-5 w-5" />}
           title={greeting}
-          eyebrow="Your market snapshot"
+          eyebrow="Your crypto snapshot"
           chips={
             <>
               <StatChip value={region} label="Market" variant="muted" />

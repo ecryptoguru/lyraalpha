@@ -11,13 +11,17 @@ const THRESHOLDS = {
   // Daily cost spike: alert when today's total exceeds this USD amount
   dailyCostUsd: Number(process.env.AI_ALERT_DAILY_COST_USD ?? 50),
   // RAG zero-result rate: alert when % of requests returning 0 RAG chunks exceeds threshold (15-min window)
-  ragZeroResultRatePct: Number(process.env.AI_ALERT_RAG_ZERO_RESULT_PCT ?? 20),
+  ragZeroResultRatePct: Number(process.env.AI_ALERT_RAG_ZERO_RESULT_PCT ?? 10),
   // Web search: alert after this many consecutive failures (mirrors circuit breaker warn threshold)
   webSearchConsecutiveFailures: Number(process.env.AI_ALERT_WEB_SEARCH_FAILURES ?? 3),
   // Output validation: alert when % of responses failing section checks exceeds threshold (15-min window)
   outputValidationFailureRatePct: Number(process.env.AI_ALERT_VALIDATION_FAILURE_PCT ?? 30),
   // Fallback rate: alert when % of requests using nano fallback exceeds threshold
   fallbackRatePct: Number(process.env.AI_ALERT_FALLBACK_RATE_PCT ?? 10),
+  // Fallback rate mitigation: automatically switch to backup model when this threshold is exceeded
+  fallbackRateMitigationPct: Number(process.env.AI_ALERT_FALLBACK_RATE_MITIGATION_PCT ?? 15),
+  // Latency budget violation: alert when % of requests exceeding latency budget exceeds threshold (15-min window)
+  latencyViolationRatePct: Number(process.env.AI_ALERT_LATENCY_VIOLATION_PCT ?? 15),
 };
 
 // ─── Redis keys ───────────────────────────────────────────────────────────────
@@ -162,10 +166,13 @@ export async function recordValidationResult(passed: boolean): Promise<void> {
   }
 }
 
-/** OBS-1e: Fallback rate alert.
- *  Uses a 15-min sliding window. Call from service.ts whenever wasFallback=true. */
+/** OBS-1e: Fallback rate alert with automatic mitigation.
+ *  Uses a 15-min sliding window. Call from service.ts whenever wasFallback=true.
+ *  When fallback rate exceeds mitigation threshold, sets a Redis flag to trigger
+ *  automatic model switching in the service layer. */
 export async function recordFallbackResult(wasFallback: boolean): Promise<void> {
   const windowKey = `ai:fallback:window:${Math.floor(Date.now() / (15 * 60 * 1000))}`;
+  const mitigationFlagKey = "ai:fallback:mitigation_active";
   try {
     const pipeline = (await import("@/lib/redis")).redis.pipeline();
     pipeline.hincrby(windowKey, "total", 1);
@@ -178,6 +185,8 @@ export async function recordFallbackResult(wasFallback: boolean): Promise<void> 
     if (total < 10) return;
 
     const fallbackRatePct = (fallbacks / total) * 100;
+
+    // Alert threshold (10%)
     if (fallbackRatePct >= THRESHOLDS.fallbackRatePct) {
       logger.warn(
         { event: "ai_alert_fallback", fallbackRatePct: fallbackRatePct.toFixed(1), total, threshold: THRESHOLDS.fallbackRatePct },
@@ -189,6 +198,72 @@ export async function recordFallbackResult(wasFallback: boolean): Promise<void> 
         value: Math.round(fallbackRatePct),
         threshold: THRESHOLDS.fallbackRatePct,
         detail: `${fallbacks}/${total} requests (${fallbackRatePct.toFixed(1)}%) fell back to nano in last 15 min. Primary model may be degraded.`,
+      });
+    }
+
+    // Mitigation threshold (15%) - set flag for automatic model switching
+    if (fallbackRatePct >= THRESHOLDS.fallbackRateMitigationPct) {
+      logger.warn(
+        { event: "ai_fallback_mitigation", fallbackRatePct: fallbackRatePct.toFixed(1), total, threshold: THRESHOLDS.fallbackRateMitigationPct },
+        "AI fallback mitigation triggered — setting backup model flag",
+      );
+      // Set mitigation flag with 30-minute TTL to avoid permanent switching
+      await (await import("@/lib/redis")).setCache(mitigationFlagKey, true, 30 * 60);
+      await sendWebhookAlert({
+        alert: "fallback_mitigation_triggered",
+        severity: "critical",
+        value: Math.round(fallbackRatePct),
+        threshold: THRESHOLDS.fallbackRateMitigationPct,
+        detail: `${fallbacks}/${total} requests (${fallbackRatePct.toFixed(1)}%) fell back to nano in last 15 min. Automatic mitigation triggered.`,
+      });
+    }
+  } catch {
+    // Redis failure — never block
+  }
+}
+
+/**
+ * Check if fallback mitigation is currently active.
+ * Service layer should call this before selecting the primary model.
+ */
+export async function isFallbackMitigationActive(): Promise<boolean> {
+  try {
+    const mitigationFlagKey = "ai:fallback:mitigation_active";
+    const isActive = await (await import("@/lib/redis")).getCache<boolean>(mitigationFlagKey);
+    return isActive === true;
+  } catch {
+    return false;
+  }
+}
+
+/** OBS-1f: Latency budget violation alert.
+ *  Uses a 15-min sliding window. Call from service.ts when request exceeds latency budget.
+ */
+export async function recordLatencyViolation(exceededBudget: boolean, latencyMs: number, tier: string): Promise<void> {
+  const windowKey = `ai:latency:window:${Math.floor(Date.now() / (15 * 60 * 1000))}`;
+  try {
+    const pipeline = (await import("@/lib/redis")).redis.pipeline();
+    pipeline.hincrby(windowKey, "total", 1);
+    if (exceededBudget) pipeline.hincrby(windowKey, "violations", 1);
+    pipeline.expire(windowKey, 20 * 60);
+    const results = await pipeline.exec();
+
+    const total = (results?.[0] as number) ?? 0;
+    const violations = (results?.[1] as number) ?? 0;
+    if (total < 10) return;
+
+    const violationRatePct = (violations / total) * 100;
+    if (violationRatePct >= THRESHOLDS.latencyViolationRatePct) {
+      logger.warn(
+        { event: "ai_alert_latency", violationRatePct: violationRatePct.toFixed(1), total, threshold: THRESHOLDS.latencyViolationRatePct, tier },
+        "AI alert: latency budget violation rate elevated",
+      );
+      await sendWebhookAlert({
+        alert: "latency_violation_rate_elevated",
+        severity: "warn",
+        value: Math.round(violationRatePct),
+        threshold: THRESHOLDS.latencyViolationRatePct,
+        detail: `${violations}/${total} requests (${violationRatePct.toFixed(1)}%) exceeded latency budget in last 15 min. Tier: ${tier}`,
       });
     }
   } catch {

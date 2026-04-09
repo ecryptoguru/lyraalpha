@@ -44,10 +44,10 @@ const tools = [
   },
   {
     eyebrow: "Asset Intelligence",
-    title: "AI Stock Analysis",
+    title: "AI Crypto Analysis",
     description:
-      "Drop a single ticker and get a structured read on setup, key drivers, risk, and what deserves attention next — before you spend more time on it.",
-    href: "/tools/ai-stock-analysis",
+      "Drop a single crypto ticker and get a structured read on setup, key drivers, risk, and what deserves attention next — before you spend more time on it.",
+    href: "/tools/ai-crypto-analysis",
     icon: BookOpen,
     accent: "teal",
   },
@@ -56,12 +56,12 @@ const tools = [
 export const metadata: Metadata = {
   title: "Investor Tools | LyraAlpha AI — Portfolio, Research & Market Intelligence",
   description:
-    "Free investor tools built on deterministic engine computation. Portfolio health scoring, AI investment research, market narrative tracking, and stock analysis for US and India markets. No guesswork — every AI response is grounded in computed signals.",
+    "Free investor tools built on deterministic engine computation. Portfolio health scoring, AI investment research, market narrative tracking, and crypto analysis. No guesswork — every AI response is grounded in computed signals.",
   alternates: { canonical: "https://lyraalpha.ai/tools" },
   openGraph: {
     title: "Investor Tools | LyraAlpha AI",
     description:
-      "Portfolio intelligence, market narrative tracking, AI research, and stock analysis — grounded in deterministic computation, not generic AI guesswork.",
+      "Portfolio intelligence, market narrative tracking, AI research, and crypto analysis — grounded in deterministic computation, not generic AI guesswork.",
     url: "https://lyraalpha.ai/tools",
     images: ["/og-image.png"],
   },
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Investor Tools | LyraAlpha AI",
     description:
-      "Portfolio intelligence, market narrative tracking, AI research, and stock analysis — grounded in deterministic computation, not generic AI guesswork.",
+      "Portfolio intelligence, market narrative tracking, AI research, and crypto analysis — grounded in deterministic computation, not generic AI guesswork.",
     images: ["/og-image.png"],
   },
 };

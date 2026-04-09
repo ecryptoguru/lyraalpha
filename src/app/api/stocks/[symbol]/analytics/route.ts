@@ -367,10 +367,6 @@ export async function GET(
       fundHouse: currentAsset.fundHouse || null,
       financials: currentAsset.financials || null,
       topHoldings: currentAsset.topHoldings || null,
-      etfLookthrough: currentAsset.etfLookthrough || null,
-      mfLookthrough: currentAsset.mfLookthrough || null,
-      commodityIntelligence: currentAsset.commodityIntelligence || null,
-      cryptoIntelligence: currentAsset.cryptoIntelligence || null,
       fundPerformanceHistory: currentAsset.fundPerformanceHistory || null,
     };
 

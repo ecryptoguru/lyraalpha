@@ -77,158 +77,8 @@ interface AssetComputeSignals {
 }
 
 const DEFAULT_SYMBOLS = [
-  // Mega-Cap Tech
-  "AAPL",
-  "NVDA",
-  "MSFT",
-  "GOOGL",
-  "AMZN",
-  "META",
-  "TSLA",
-  "AVGO",
-  "NFLX",
-  "ADBE",
   // Digital Assets — Top 50 by market cap (synced via CoinGecko, not Yahoo)
   ...getDefaultCryptoSymbols(),
-  // Sector Leaders (Refined)
-  "V",
-  "MA",
-  "UNH",
-  "COST",
-  "PEP",
-  "PG",
-  "NKE",
-  "DIS",
-  "XOM",
-  "KO",
-
-  // Commodities (Key Benchmarks)
-  "GC=F",
-  "SI=F",
-  "CL=F",
-  "NG=F",
-  "BZ=F",
-  "HG=F",
-  "PL=F",
-  "ZC=F",
-  "ZS=F",
-  "ZW=F",
-
-  // ETFs — Broad Market
-  "SPY",
-  "QQQ",
-  "IWM",
-  "DIA",
-  "VOO",
-  "VTI",
-  "IVV",
-  "RSP",
-  // ETFs — Sector
-  "XLK",
-  "XLF",
-  "XLE",
-  "XLV",
-  "XLI",
-  "XLC",
-  "XLY",
-  "XLP",
-  "XLU",
-  "XLRE",
-  "XLB",
-  // ETFs — Fixed Income
-  "TLT",
-  "BND",
-  "AGG",
-  "HYG",
-  "LQD",
-  "TIP",
-  "SHY",
-  // ETFs — International
-  "EFA",
-  "EEM",
-  "VWO",
-  "VXUS",
-  "INDA",
-  // ETFs — Thematic
-  "ARKK",
-  "ARKG",
-  "BOTZ",
-  "HACK",
-  "ICLN",
-  "TAN",
-  "LIT",
-  "KWEB",
-  // ETFs — Commodity-Backed
-  "GLD",
-  "SLV",
-  "USO",
-  "UNG",
-  "DBA",
-  // ETFs — Volatility & Leverage
-  "SQQQ",
-  "TQQQ",
-  "UVXY",
-  // ETFs — Dividend & Income
-  "VYM",
-  "SCHD",
-  "DVY",
-  "HDV",
-  // ETFs — Factor
-  "MDY",
-  "IJR",
-  "MTUM",
-  "QUAL",
-  "VLUE",
-  "USMV",
-  // ETFs — Sector Deep
-  "SMH",
-  "XBI",
-  "KRE",
-  "XHB",
-  "XRT",
-  "XOP",
-  "ITB",
-  "IYR",
-  "VNQ",
-  "SOXX",
-  // ETFs — Fixed Income Deep
-  "IEF",
-  "GOVT",
-  "MUB",
-  "EMB",
-  "BNDX",
-  "VCSH",
-  "VCIT",
-  // ETFs — International Deep
-  "IEMG",
-  "MCHI",
-  "EWJ",
-  "EWZ",
-  "EWT",
-  "EWY",
-  "FXI",
-  "VGK",
-  // ETFs — Thematic Deep
-  "SKYY",
-  "ROBO",
-  "DRIV",
-  "FINX",
-  "BETZ",
-  "BLOK",
-  "CIBR",
-  "AIQ",
-  "QCLN",
-  "REMX",
-  // ETFs — Commodity Deep
-  "PDBC",
-  "GSG",
-  "COPX",
-  // ETFs — Dividend Deep
-  "DGRO",
-  "NOBL",
-  "JEPI",
-  "JEPQ",
-  "SPYD",
 ];
 
 const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
@@ -250,26 +100,6 @@ if (EXTRA_SYMBOLS.length > 0) {
 
 // Pre-computed Set for O(1) dedup in resolveUniverse — avoids rebuilding on every sync cycle
 const DEFAULT_SYMBOLS_SET = new Set(DEFAULT_SYMBOLS);
-
-const ETF_SYMBOLS = new Set([
-  // Original 51
-  "SPY", "QQQ", "IWM", "DIA", "VOO", "VTI", "IVV", "RSP",
-  "XLK", "XLF", "XLE", "XLV", "XLI", "XLC", "XLY", "XLP", "XLU", "XLRE", "XLB",
-  "TLT", "BND", "AGG", "HYG", "LQD", "TIP", "SHY",
-  "EFA", "EEM", "VWO", "VXUS", "INDA",
-  "ARKK", "ARKG", "BOTZ", "HACK", "ICLN", "TAN", "LIT", "KWEB",
-  "GLD", "SLV", "USO", "UNG", "DBA",
-  "SQQQ", "TQQQ", "UVXY",
-  "VYM", "SCHD", "DVY", "HDV",
-  // New 49
-  "MDY", "IJR", "MTUM", "QUAL", "VLUE", "USMV",
-  "SMH", "XBI", "KRE", "XHB", "XRT", "XOP", "ITB", "IYR", "VNQ", "SOXX",
-  "IEF", "GOVT", "MUB", "EMB", "BNDX", "VCSH", "VCIT",
-  "IEMG", "MCHI", "EWJ", "EWZ", "EWT", "EWY", "FXI", "VGK",
-  "SKYY", "ROBO", "DRIV", "FINX", "BETZ", "BLOK", "CIBR", "AIQ", "QCLN", "REMX",
-  "PDBC", "GSG", "COPX",
-  "DGRO", "NOBL", "JEPI", "JEPQ", "SPYD",
-]);
 
 const FUNDAMENTALS_SLA_HOURS = 24 * 7;
 const CRYPTO_QUOTES_SLA_HOURS = 6;
@@ -465,13 +295,12 @@ export class MarketSyncService {
               returnOnEquity: (getRawValue(rawQuote.returnOnEquity) as number), 
             };
 
-            // Ensure summary is available for MF enrichment if not already fetched
+            // Ensure summary is available for crypto enrichment if not already fetched
             // OR if essential metrics like ROE/PEG are missing and we have a deep sync window
             let effectiveSummary = summary;
             const needsDeepData = !asset?.pegRatio || !asset?.roe;
-            const isEtfType = asset?.type === AssetType.ETF || ETF_SYMBOLS.has(symbol);
-            const needsExtended = isUSEquityOrETF && (isEtfType || !asset?.description || !asset?.topHoldings || !asset?.fundPerformanceHistory);
-            if (!effectiveSummary && (needsDeepData || needsExtended || asset?.type === AssetType.MUTUAL_FUND || asset?.type === AssetType.ETF)) {
+            const needsExtended = isUSEquityOrETF && (!asset?.description || !asset?.topHoldings || !asset?.fundPerformanceHistory);
+            if (!effectiveSummary && (needsDeepData || needsExtended)) {
                // Use restricted fetch if not in daily window but data is missing
                effectiveSummary = await fetchInstitutionalSummary(symbol, needsExtended);
             }
@@ -585,8 +414,7 @@ export class MarketSyncService {
 
               // Extended data: ETF Top Holdings + Sector Weights
               ...(() => {
-                const isEtfType = asset?.type === AssetType.ETF || ETF_SYMBOLS.has(symbol);
-                if (!isEtfType || !effectiveSummary?.topHoldings) return {};
+                if (!effectiveSummary?.topHoldings) return {};
                 const th = effectiveSummary.topHoldings;
                 const holdings = th.holdings?.map(h => ({
                   symbol: h.symbol || null,
@@ -620,8 +448,7 @@ export class MarketSyncService {
 
               // Extended data: ETF Fund Performance History
               ...(() => {
-                const isEtfType = asset?.type === AssetType.ETF || ETF_SYMBOLS.has(symbol);
-                if (!isEtfType || !effectiveSummary?.fundPerformance?.performanceOverview) return {};
+                if (!effectiveSummary?.fundPerformance?.performanceOverview) return {};
                 const perf = effectiveSummary.fundPerformance.performanceOverview;
                 return {
                   fundPerformanceHistory: {
@@ -1019,18 +846,14 @@ export class MarketSyncService {
    * @param opts.excludeIndianStocks — true for Phase 1 (Yahoo sync), false for Phase 2 (analytics).
    *   Indian equities (stocks + ETFs) are excluded from Yahoo sync because they use NSE India API (Phase 1c).
    */
-  private static classifySymbolToAssetType(symbol: string): AssetType {
-    const mcxInSymbols = new Set(["GOLD-MCX", "SILVER-MCX"]);
-    if (isCryptoSymbol(symbol)) return AssetType.CRYPTO;
-    if (symbol.endsWith("=F") || mcxInSymbols.has(symbol)) return AssetType.COMMODITY;
-    if (symbol.startsWith("MF-")) return AssetType.MUTUAL_FUND;
-    if (ETF_SYMBOLS.has(symbol)) return AssetType.ETF;
-    return AssetType.STOCK;
+  private static classifySymbolToAssetType(): AssetType {
+    // Crypto-only platform - all assets are CRYPTO
+    return AssetType.CRYPTO;
   }
 
   private static async resolveUniverseByTypes(region: string | undefined, types: AssetType[]): Promise<string[]> {
     const symbols = await this.resolveUniverse(region, { excludeIndianStocks: true });
-    return symbols.filter((symbol) => types.includes(this.classifySymbolToAssetType(symbol)));
+    return symbols.filter(() => types.includes(this.classifySymbolToAssetType()));
   }
 
   private static async resolveUniverse(region?: string, opts?: { excludeIndianStocks?: boolean }): Promise<string[]> {
@@ -2129,13 +1952,7 @@ export class MarketSyncService {
       const isCrypto = isCryptoSymbol(symbol);
       const type = isCrypto
         ? AssetType.CRYPTO
-        : symbol.endsWith("=F") || MCX_IN_SYMBOLS.has(symbol)
-          ? AssetType.COMMODITY
-          : symbol.startsWith("MF-")
-            ? AssetType.MUTUAL_FUND
-            : ETF_SYMBOLS.has(symbol)
-            ? AssetType.ETF
-            : AssetType.STOCK;
+        : AssetType.CRYPTO;
 
       const coingeckoId = isCrypto ? symbolToCoingeckoId(symbol) : undefined;
 

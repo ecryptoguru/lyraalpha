@@ -6,9 +6,9 @@ This document is written for AI coding agents (Cursor/Windsurf/Copilot/etc.) so 
 
 **LyraAlpha AI** is a Next.js (App Router) web application that provides:
 
-- A **multi-asset discovery + intelligence dashboard** (US + India)
+- A **crypto-native discovery + intelligence dashboard** (on-chain data, DeFi metrics, network signals)
 - **Asset pages** with computed analytics/scores and AI summaries
-- **Lyra**: an AI analyst (market intelligence)
+- **Lyra**: an AI analyst (crypto market intelligence)
 - **Myra**: a support agent (platform help) — available on both the public landing page and inside the authenticated dashboard
 - Plan-gated **Elite tools** (e.g., Compare Assets, Shock Simulator)
 - A Prisma/Postgres-backed data layer, Redis/Upstash caching + rate limiting, and Clerk auth

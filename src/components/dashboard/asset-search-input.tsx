@@ -42,12 +42,8 @@ interface AssetSearchInputProps {
   global?: boolean;
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  STOCK: "text-sky-400 bg-sky-400/10 border-sky-400/20",
+const ASSET_TYPE_COLORS: Record<string, string> = {
   CRYPTO: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-  ETF: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  COMMODITY: "text-orange-400 bg-orange-400/10 border-orange-400/20",
-  MUTUAL_FUND: "text-amber-400 bg-amber-400/10 border-amber-400/20",
 };
 
 export function AssetSearchInput({
@@ -194,7 +190,7 @@ export function AssetSearchInput({
               <div className="space-y-1">
                 {data.assets.map((asset) => {
                   const friendlyName = getFriendlySymbol(asset.symbol, asset.type, asset.name);
-                  const typeStyle = TYPE_COLORS[asset.type] ?? "text-muted-foreground bg-muted/20 border-border/30";
+                  const typeStyle = ASSET_TYPE_COLORS[asset.type] ?? "text-muted-foreground bg-muted/20 border-border/30";
                   return (
                     <button
                       key={asset.symbol}

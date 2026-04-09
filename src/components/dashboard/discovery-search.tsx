@@ -63,8 +63,8 @@ export function DiscoverySearch() {
               setIsOpen(true);
             }}
             onFocus={() => setIsOpen(true)}
-            placeholder={region === "IN" ? "Search REL, Reliance, Gold" : "Search AAPL, Apple, Gold"}
-            aria-label="Search stocks"
+            placeholder={region === "IN" ? "Search BTC, Bitcoin, SOL" : "Search BTC, Bitcoin, ETH"}
+            aria-label="Search crypto assets"
             className="pl-9 h-12 felt-input bg-card/40 backdrop-blur-2xl border-primary/10 focus:border-primary/30 rounded-2xl font-bold text-[13px] tracking-tight transition-all w-full shadow-2xl shadow-black/20"
           />
           {isLoading && (
@@ -111,7 +111,7 @@ export function DiscoverySearch() {
                     {data.sectors.map((s: { slug: string; name: string }) => (
                       <Link
                         key={s.slug}
-                        href={`/dashboard/discovery-stocks/${s.slug}`}
+                        href={`/dashboard/discovery/${s.slug}`}
                         onClick={() => setIsOpen(false)}
                         className="flex items-center justify-between p-4 rounded-2xl hover:bg-muted/20 transition-colors group/item min-h-[56px] cursor-pointer"
                       >

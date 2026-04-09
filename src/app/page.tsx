@@ -15,18 +15,18 @@ import { Navbar } from "@/components/layout/Navbar";
 export const metadata: Metadata = {
   title: "LyraAlpha AI | The AI that computes before it speaks",
   description:
-    "The only financial intelligence platform that grounds every AI response in deterministic engine computation. Lyra interprets what the engines computed — never invents. US & India. 5 asset classes. Join the early access waitlist.",
+    "The only financial intelligence platform that grounds every AI response in deterministic engine computation. Lyra interprets what the engines computed — never invents. Crypto-native market intelligence. Join the early access waitlist.",
   openGraph: {
     title: "LyraAlpha AI | The AI that computes before it speaks",
     description:
-      "Stop guessing. Start knowing. AI-grounded financial intelligence for US & India investors across equities, crypto, ETFs, mutual funds, and commodities. Early access waitlist open.",
+      "Stop guessing. Start knowing. AI-grounded crypto intelligence for on-chain analysis, DeFi metrics, and network signals. Early access waitlist open.",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "LyraAlpha AI | The AI that computes before it speaks",
     description:
-      "Stop guessing. Start knowing. AI-grounded financial intelligence for US & India investors across equities, crypto, ETFs, mutual funds, and commodities. Early access waitlist open.",
+      "Stop guessing. Start knowing. AI-grounded crypto intelligence for on-chain analysis, DeFi metrics, and network signals. Early access waitlist open.",
     images: ["/og-image.png"],
   },
 };
@@ -38,7 +38,7 @@ const ORG_SCHEMA = {
   url: "https://lyraalpha.ai",
   logo: "https://lyraalpha.ai/logo.png",
   description:
-    "AI-grounded financial intelligence platform for US and India markets. Deterministic engine computation with AI interpretation across equities, crypto, ETFs, mutual funds, and commodities.",
+    "AI-grounded crypto intelligence platform. Deterministic engine computation with AI interpretation for on-chain data, DeFi metrics, and network signals.",
   sameAs: [] as string[],
 };
 
@@ -67,7 +67,7 @@ const APP_SCHEMA = {
     description: "Free waitlist — early access cohort",
   },
   description:
-    "The only financial intelligence platform that grounds every AI response in deterministic engine computation. Lyra interprets what the engines computed across US and India markets.",
+    "The only financial intelligence platform that grounds every AI response in deterministic engine computation. Lyra interprets what the engines computed for crypto markets.",
 };
 
 function HomeJsonLd() {

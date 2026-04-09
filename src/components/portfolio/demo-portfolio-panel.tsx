@@ -48,28 +48,27 @@ const US_DEMO_HOLDINGS = [
   { symbol: "NVDA", name: "NVIDIA Corp.", qty: 20, avgPrice: 420.0, price: 875.40, changePercent: 2.31, sector: "Technology", weight: 34.1 },
   { symbol: "SPY", name: "SPDR S&P 500 ETF", qty: 40, avgPrice: 440.0, price: 512.30, changePercent: 0.45, sector: "ETF", weight: 40.1 },
   { symbol: "GOOGL", name: "Alphabet Inc.", qty: 15, avgPrice: 130.0, price: 157.80, changePercent: -0.32, sector: "Technology", weight: 4.6 },
-  { symbol: "JPM", name: "JPMorgan Chase", qty: 25, avgPrice: 175.0, price: 196.42, changePercent: 0.15, sector: "Financials", weight: 9.6 },
-  { symbol: "JNJ", name: "Johnson & Johnson", qty: 20, avgPrice: 158.0, price: 152.30, changePercent: -0.44, sector: "Healthcare", weight: 5.9 },
-  { symbol: "GLD", name: "SPDR Gold Shares", qty: 30, avgPrice: 185.0, price: 213.60, changePercent: 0.61, sector: "Commodity", weight: 12.5 },
-  { symbol: "XOM", name: "Exxon Mobil", qty: 18, avgPrice: 108.0, price: 119.85, changePercent: -0.88, sector: "Energy", weight: 4.2 },
-  { symbol: "BRK-B", name: "Berkshire Hathaway B", qty: 10, avgPrice: 330.0, price: 367.20, changePercent: 0.22, sector: "Financials", weight: 7.2 },
+  { symbol: "BTC", name: "Bitcoin", qty: 0.5, avgPrice: 65000.0, price: 68000.0, changePercent: 2.5, sector: "Layer 1", weight: 25.0 },
+  { symbol: "ETH", name: "Ethereum", qty: 5.0, avgPrice: 3500.0, price: 3800.0, changePercent: 1.8, sector: "Layer 1", weight: 15.0 },
+  { symbol: "SOL", name: "Solana", qty: 50.0, avgPrice: 145.0, price: 165.0, changePercent: 3.2, sector: "Layer 1", weight: 12.5 },
+  { symbol: "AVAX", name: "Avalanche", qty: 30.0, avgPrice: 38.0, price: 42.5, changePercent: -1.2, sector: "Layer 1", weight: 4.2 },
+  { symbol: "UNI", name: "Uniswap", qty: 20.0, avgPrice: 8.5, price: 10.2, changePercent: 4.5, sector: "DeFi", weight: 7.2 },
 ];
 
 const US_DEMO_ALLOCATION = [
-  { label: "Technology", percent: 46.4, color: "#3b82f6" },
-  { label: "ETF", percent: 19.4, color: "#38bdf8" },
-  { label: "Financials", percent: 10.3, color: "#22c55e" },
-  { label: "Commodity", percent: 8.1, color: "#fbbf24" },
-  { label: "Healthcare", percent: 7.9, color: "#a78bfa" },
-  { label: "Energy", percent: 7.9, color: "#f97316" },
+  { label: "Layer 1", percent: 56.7, color: "#f7931a" },
+  { label: "DeFi", percent: 22.2, color: "#3b82f6" },
+  { label: "NFTs", percent: 10.3, color: "#a78bfa" },
+  { label: "Layer 2", percent: 8.1, color: "#22c55e" },
+  { label: "Stablecoins", percent: 2.7, color: "#f97316" },
 ];
 
 const US_DEMO_HEALTH_DIMENSIONS = [
-  { label: "Diversification", score: 62, color: "#3b82f6", desc: "Moderate — 46% in single sector" },
+  { label: "Diversification", score: 62, color: "#3b82f6", desc: "Moderate — 57% in Layer 1" },
   { label: "Concentration", score: 74, color: "#22c55e", desc: "Reasonable spread across 10 names" },
-  { label: "Volatility Control", score: 71, color: "#fbbf24", desc: "Elevated — NVDA at 34% weight" },
-  { label: "Correlation Risk", score: 58, color: "#f97316", desc: "High tech-sector correlation" },
-  { label: "Quality & Trust", score: 81, color: "#22c55e", desc: "Strong fundamentals overall" },
+  { label: "Volatility Control", score: 71, color: "#fbbf24", desc: "Elevated — BTC at 25% weight" },
+  { label: "Correlation Risk", score: 58, color: "#f97316", desc: "High crypto-market correlation" },
+  { label: "On-Chain Health", score: 81, color: "#22c55e", desc: "Strong network fundamentals" },
   { label: "Fragility Score", score: 67, color: "#fbbf24", desc: "Moderate tail risk exposure" },
 ];
 

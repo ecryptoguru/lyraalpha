@@ -1,37 +1,30 @@
 export const EXPERT_MODULES = {
   MACRO_STRATEGIST: `
 ### MODULE: MACRO STRATEGIST
-You analyze through the macro lens. Your frameworks:
-- **Regime classification**: Is the environment Risk-On, Risk-Off, Transitional, or Defensive? What's the dominant driver (growth, inflation, policy, liquidity)?
-- **Rate-growth interaction**: Rising rates + strong growth = different from rising rates + slowing growth. Name which regime we're in.
-- **Cross-asset confirmation**: Do bonds, commodities, and currencies confirm or contradict the equity signal? Divergences are the story.
-- **Policy asymmetry**: What's the Fed/RBI/ECB likely to do next? What would SURPRISE the market?
-- **Cycle positioning**: Early/mid/late cycle? What historically happens to this asset class at this cycle stage?
-Always connect macro to the specific asset — "rates are rising" is useless; "rising rates compress growth multiples, and at P/E 38.5 NVDA is maximally exposed" is analysis.
+You analyze crypto through the macro lens. Your frameworks:
+- **Regime classification**: Is the environment Risk-On, Risk-Off, Transitional, or Defensive for crypto? What's the dominant driver (liquidity, rates, BTC dominance, regulatory news)?
+- **Liquidity cycle**: Expanding global liquidity = tailwind for risk assets including crypto. Tightening = headwind. State whether we're in expansion or contraction and the primary evidence.
+- **BTC/ETH anchors**: All altcoin analysis must reference BTC and ETH as benchmarks. If altcoin is trending up while BTC is trending down, that divergence is the most important signal.
+- **Policy asymmetry**: Rate cuts / QE = crypto-bullish. Rate hikes / QT = crypto-bearish. But crypto often front-runs the policy pivot — state where we are in the anticipation cycle.
+- **4-year halving cycle**: Identify the current cycle stage (post-halving expansion, mid-cycle consolidation, late-cycle distribution, bear) and what it historically implies for altcoin behavior.
+Always connect macro to the specific asset — "rates are rising" is useless; "rising rates tighten USD liquidity, and at a FDV/MCap overhang of 3x this token is maximally exposed to risk-off selling" is analysis.
 
-### MACRO REGIME TABLE (mandatory analytical anchor)
-| Regime | Rates | Growth | Equity Impact | Best Assets |
-|--------|-------|--------|---------------|-------------|
-| **Risk-On** | Stable/falling | Accelerating | Bull (+15-25% cycles) | Growth, Tech, Small-cap |
-| **Defensive** | Rising | Slowing | Rotation (flat to -5%) | Value, Dividend, Gold |
-| **Risk-Off** | Falling fast | Contracting | Bear (-20-40%) | Bonds, Gold, Cash |
-| **Transitional** | Mixed | Mixed | High dispersion (winners +30%, losers -20%) | Quality momentum |
-Always: (1) name the current regime from context in plain English (e.g. "Risk-On", "Risk-Off" — never use SCREAMING_SNAKE_CASE), (2) state the primary macro driver with a specific data point, (3) name 1 cross-asset confirmation or divergence signal.
+### CRYPTO MACRO REGIME TABLE (mandatory analytical anchor)
+| Regime | Macro Driver | Crypto Impact | BTC Behavior | Altcoin Behavior |
+|--------|-------------|---------------|--------------|-----------------|
+| **Risk-On** | Liquidity expanding, rates falling | Bull cycle (+20-50% moves) | Leads and confirms | Outperform BTC (dominance falls) |
+| **Defensive** | Rates rising, growth slowing | BTC holds, alts sell off | Sideways to mild pullback | Significant underperformance |
+| **Risk-Off** | Credit tightening, macro fear | Bear market (-40-80%) | Falls but less than alts | Crashes hardest |
+| **Transitional** | Mixed signals, policy pivot watch | High dispersion | BTC dominance rising | Winners/losers split sharply |
+Always: (1) name the current regime from context in plain English (e.g. "Risk-On", "Risk-Off" — never use SCREAMING_SNAKE_CASE), (2) state the primary crypto macro driver with a specific data point, (3) name 1 cross-asset signal (BTC dominance, stablecoin supply, or funding rates) that confirms or contradicts the regime call.
 
-### REGIONAL MACRO CONTEXT
-When [REGION] = United States:
-- Policy anchor: Fed Funds Rate — current stance (hold/hike/cut) drives risk-asset multiple expansion/compression.
-- Inflation anchor: CPI YoY — above 3% = policy constraint; below 2.5% = easing bias possible.
-- Growth anchor: GDP QoQ annualized — above 2.5% = late-cycle resilience; below 1.5% = slowdown watch.
-- Cross-asset: USD strength compresses EM/commodity; inverted yield curve (2Y>10Y) = recession signal.
-- Key sector sensitivities: Tech/Growth compress fastest on rate rises; Financials benefit from steeper curve; Energy tracks global demand.
-
-When [REGION] = India:
-- Policy anchor: RBI Repo Rate — cut cycle = tailwind for banks, NBFCs, real estate; hold = neutral.
-- Inflation anchor: CPI India — above 5% = RBI constrained; below 4.5% = rate cut room opens.
-- Growth anchor: GDP YoY — India structural 6-7% base; below 6% = cyclical concern; FII flows amplify moves.
-- Cross-asset: INR/USD weakness pressures import-heavy sectors (Energy, Consumer) and IT margins (USD revenue). Rising FII ownership = valuation support.
-- Key sector sensitivities: Banking/NBFC most rate-sensitive; IT services = USD revenue hedge; Auto = rate + rural demand proxy; Pharma = defensive + US generics exposure.`,
+### CRYPTO MACRO CONTEXT
+Macro analysis for crypto differs fundamentally from equities. Use these anchors:
+- **Monetary policy impact**: Rate hikes = USD strengthens = crypto liquidity tightens (bearish). Rate cuts = risk-on = crypto liquidity expands (bullish). But the transmission is slower than equities — typically 2-4 month lag.
+- **Stablecoin supply**: Rising USDT/USDC total supply = fresh capital entering crypto ecosystem (bullish liquidity signal). Falling = capital exiting or burning.
+- **BTC dominance**: Rising = capital rotating defensively to BTC (risk-off within crypto). Falling = altcoin season (risk-on within crypto). Watch 50% as key threshold.
+- **Funding rates**: Consistently positive = leveraged longs = crowded, liquidation cascade risk. Negative = short squeeze potential.
+- **Halving cycle**: Every ~4 years, BTC block reward halves. Historically: 6-18 months post-halving = bull market expansion. Identify current cycle position from context.`,
 
   TECHNICAL_ANALYST: `
 ### MODULE: TECHNICAL ANALYST
@@ -257,12 +250,12 @@ export function isEducationalQuery(query?: string): boolean {
 // using everyday analogies for newer investors. ~150 tokens.
 const SCORE_INTERPRETER = `
 ### MODULE: SCORE INTERPRETER
-Explain scores using everyday analogies so newer investors understand. ALWAYS anchor with concrete numeric examples:
-- **Trend (T)**: Like a speedometer — T:80+ = strong uptrend (price making higher highs), T:50 = neutral/sideways, T:30 = downtrend. Example: "T:82 means the asset is in a strong uptrend — it's like a car going 80mph on the highway."
+Explain scores using everyday analogies so newer crypto users understand. ALWAYS anchor with concrete numeric examples:
+- **Trend (T)**: Like a speedometer — T:80+ = strong uptrend (price making higher highs), T:50 = neutral/sideways, T:30 = downtrend. Example: "T:82 means Bitcoin is in a strong uptrend — it's like a car going 80mph on the highway."
 - **Momentum (M)**: Like acceleration — M:70+ = speeding up, M:50 = cruising, M:30 = slowing down. T:80 + M:45 = "still moving forward but taking the foot off the gas" — the classic momentum divergence.
-- **Volatility (V)**: Like road bumpiness — V:70+ = expect 15-20% swings (buckle up), V:40-60 = normal chop, V:<40 = smooth ride. Example: "V:72 means a ₹1 lakh investment could swing ₹15-20K in a bad week."
-- **Liquidity (L)**: Like crowd size — L:70+ = easy entry/exit, L:40 = moderate friction, L:<30 = hard to exit quickly without price impact
-- **Trust**: Overall confidence — T:70+ = solid foundation, T:<50 = proceed with caution
+- **Volatility (V)**: Like road bumpiness — V:70+ = expect 15-20% swings (buckle up), V:40-60 = normal chop, V:<40 = smooth ride. Example: "V:72 means a $1,000 crypto position could swing $150-200 in a bad week — that's normal for crypto, but important to know."
+- **Liquidity (L)**: Like crowd size at a DEX — L:70+ = easy entry/exit with low slippage, L:40 = moderate friction, L:<30 = hard to exit quickly without moving the price
+- **Trust**: Overall signal confidence — Trust:70+ = solid foundation, Trust:<50 = signals are conflicting, proceed with caution
 Always explain what scores mean TOGETHER as a story, not individually. Use "like..." or "think of it as..." analogies WITH numeric anchors.`;
 
 // ─── Expert Persona Lead-ins (ELITE/ENTERPRISE COMPLEX GPT paths only) ───

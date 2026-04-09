@@ -41,16 +41,17 @@ function canonicalExchange(exchange: string | null | undefined): string | null {
 
 function normalizeKeyParts(holding: BrokerHolding): BrokerInstrumentKey {
   return {
-    isin: holding.instrument.isin?.trim().toUpperCase() ?? null,
+    contractAddress: holding.instrument.contractAddress?.trim().toLowerCase() ?? null,
     symbol: canonicalSymbol(holding.instrument.symbol),
     exchange: canonicalExchange(holding.instrument.exchange),
     region: holding.instrument.region,
+    chain: holding.instrument.chain ?? null,
   };
 }
 
 function holdingKey(holding: BrokerHolding): string {
   const key = normalizeKeyParts(holding);
-  return [key.region, key.isin ?? "", key.symbol, key.exchange ?? ""].join("|");
+  return [key.region, key.contractAddress ?? "", key.symbol, key.exchange ?? "", key.chain ?? ""].join("|");
 }
 
 function scoreInstrumentCompleteness(holding: BrokerHolding): number {
@@ -60,7 +61,9 @@ function scoreInstrumentCompleteness(holding: BrokerHolding): number {
     return v !== 0;
   };
   return [
-    holding.instrument.isin,
+    holding.instrument.contractAddress,
+    holding.instrument.chain,
+    holding.instrument.tokenStandard,
     holding.instrument.exchange,
     holding.instrument.sector,
     holding.instrument.industry,
@@ -80,9 +83,9 @@ function pickBestInstrument(contributions: BrokerHolding[]): BrokerHolding["inst
     const scoreDiff = scoreInstrumentCompleteness(b) - scoreInstrumentCompleteness(a);
     if (scoreDiff !== 0) return scoreDiff;
 
-    const aHasIsin = a.instrument.isin ? 1 : 0;
-    const bHasIsin = b.instrument.isin ? 1 : 0;
-    if (aHasIsin !== bHasIsin) return bHasIsin - aHasIsin;
+    const aHasContractAddress = a.instrument.contractAddress ? 1 : 0;
+    const bHasContractAddress = b.instrument.contractAddress ? 1 : 0;
+    if (aHasContractAddress !== bHasContractAddress) return bHasContractAddress - aHasContractAddress;
 
     return a.instrument.name.localeCompare(b.instrument.name);
   })[0].instrument;

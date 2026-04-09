@@ -61,7 +61,7 @@ const _staticPosts: Omit<BlogPost, "readingTime">[] = [
     content: `
 ## The Hallucination Problem Is Structural, Not a Bug
 
-When you ask a general-purpose AI model about a stock's PE ratio, momentum score, or volatility regime — it generates text that sounds like analysis. Sometimes it's right. Sometimes it fabricates a number with the same confidence it would use if it were correct.
+When you ask a general-purpose AI model about a crypto's PE ratio, momentum score, or volatility regime — it generates text that sounds like analysis. Sometimes it's right. Sometimes it fabricates a number with the same confidence it would use if it were correct.
 
 This is not a GPT problem. It's not a Gemini problem. It's a category problem.
 
@@ -71,9 +71,9 @@ Language models are trained to predict plausible next tokens. In financial analy
 
 ## Why Generic Finance AI Fails
 
-**No deterministic backbone.** A model that hasn't had structured market signals computed and injected into its context will hallucinate them. "The stock has strong momentum" is not a statement derived from data — it's a pattern-matched plausible string.
+**No deterministic backbone.** A model that hasn't had structured market signals computed and injected into its context will hallucinate them. "The crypto has strong momentum" is not a statement derived from data — it's a pattern-matched plausible string.
 
-**No auditability.** When a generic tool says a company has a P/E of 22x and it's actually 34x, there is no trace. No computation log. No engine output to inspect. The model generated it, and it's gone.
+**No auditability.** When a generic tool says a protocol has a P/E of 22x and it's actually 34x, there is no trace. No computation log. No engine output to inspect. The model generated it, and it's gone.
 
 **No regime awareness.** Asset performance means nothing in isolation. A 3% drawdown in a bull regime and the same drawdown in a fragility regime are fundamentally different signals. Generic models have no access to this context.
 
@@ -186,7 +186,7 @@ Regime changes everything. A risk-on bullish signal is worth acting on. The same
     content: `
 ## Why Dual-Market Coverage Matters
 
-India has 90M+ registered equity investors. The US has 160M+ brokerage accounts. An increasing number of investors are active in both markets — yet almost no analytical tool is built for both natively.
+India has 90M+ registered crypto investors. The US has 160M+ crypto exchange accounts. An increasing number of investors are active in both markets — yet almost no analytical tool is built for both natively.
 
 "Natively" is the key word. There's a difference between a tool that supports both markets and one that is built for both from the ground up.
 

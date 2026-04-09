@@ -57,14 +57,16 @@ function buildQuestionFocus(query?: string, symbol?: string): string | null {
   if (!query || !symbol || symbol === "GLOBAL") return null;
   const q = query.toLowerCase();
   const focus: string[] = [];
-  if (/business|model|revenue|moat|customer|segment|what does .* do/.test(q)) focus.push("business model");
-  if (/grow|growth|driver|catalyst|adoption|market share|volume|tvl|expansion/.test(q)) focus.push("growth drivers");
-  if (/risk|downside|bear|fragile|break|concern|headwind/.test(q)) focus.push("risks");
-  if (/valu|cheap|expensive|multiple|pe\b|p\/e|pb\b|p\/b|fcf|rerating|target price/.test(q)) focus.push("valuation insight");
-  if (/momentum|trend|score|signal|setup|technical/.test(q)) focus.push("signal story");
-  if (/result|earnings|quarter|guidance|margin|cash flow|fcf/.test(q)) focus.push("operating and financial context");
+  if (/protocol|what does .* do|use case|utility|smart contract|consensus|layer|l1|l2|defi|dapp/.test(q)) focus.push("protocol summary");
+  if (/grow|growth|driver|catalyst|adoption|active address|developer|github|commit|tvl|expansion/.test(q)) focus.push("growth drivers");
+  if (/risk|downside|bear|fragile|break|concern|headwind|exploit|hack|regulation|sec|ban/.test(q)) focus.push("risks");
+  if (/valu|cheap|expensive|fdv|mcap|market cap|dilut|supply|tokenomics|unlock|vesting|emission|inflation/.test(q)) focus.push("tokenomics valuation");
+  if (/stake|staking|yield|apy|apr|reward|validator|node/.test(q)) focus.push("staking and yield");
+  if (/on.chain|onchain|wallet|address|transaction|volume|velocity|whale|holder|concentration/.test(q)) focus.push("on-chain fundamentals");
+  if (/momentum|trend|score|signal|setup|technical|ath|atl|52w|cycle/.test(q)) focus.push("signal story");
+  if (/liquidity|dex|cex|pool|spread|slippage|depth|orderbook/.test(q)) focus.push("liquidity analysis");
   if (focus.length === 0) {
-    focus.push("business model", "growth drivers", "risks", "valuation insight");
+    focus.push("protocol summary", "growth drivers", "risks", "tokenomics valuation");
   }
   return `[QUESTION_FOCUS] Prioritize ${focus.join(" → ")}. Add other useful supporting data only if it sharpens the answer. Do not repeat the same point across sections.`;
 }
@@ -176,9 +178,13 @@ export function buildCompressedContext(
     if (tm.losers?.length) lines.push(`[TOP_LOSERS] ${tm.losers.join(", ")}`);
   }
 
-  // --- Region ---
+  // --- Region / Network ---
   if (context.region) {
-    lines.push(`[REGION] ${context.region === "IN" ? "India" : "United States"}`);
+    if (type === "CRYPTO") {
+      // Crypto is global; region is less relevant. Omit or show chain context if available.
+    } else {
+      lines.push(`[REGION] ${context.region === "IN" ? "India" : "United States"}`);
+    }
   }
 
   // ─── ASSET ENRICHMENT (P0/P1/P2 — conditional, only for asset-specific queries) ───

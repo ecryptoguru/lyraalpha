@@ -40,11 +40,7 @@ describe("stress scenario registry", () => {
         expect(scenario?.shockType).toBeDefined();
         expect(scenario?.narrative?.headline).toBeTruthy();
         expect(scenario?.narrative?.dominantDrivers.length).toBeGreaterThan(0);
-        expect(scenario?.assetTypeAdjustments?.STOCK).toBeDefined();
-        expect(scenario?.assetTypeAdjustments?.ETF).toBeDefined();
         expect(scenario?.assetTypeAdjustments?.CRYPTO).toBeDefined();
-        expect(scenario?.assetTypeAdjustments?.COMMODITY).toBeDefined();
-        expect(scenario?.assetTypeAdjustments?.MUTUAL_FUND).toBeDefined();
       }
     }
   });

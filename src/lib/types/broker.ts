@@ -3,22 +3,25 @@
 export type BrokerRegion = "IN" | "US" | "GLOBAL";
 
 export type BrokerProvider =
-  | "zerodha"
-  | "upstox"
-  | "angel_one"
-  | "dhan"
-  | "fyers"
-  | "groww"
-  | "icici_direct"
-  | "kotak_neo"
-  | "five_paisa"
-  | "motilal_oswal"
-  | "shoonya"
-  | "alice_blue"
-  | "hdfc_securities"
-  | "axis_direct"
-  | "plaid"
-  | "alpaca";
+  // ── India CEX ───────────────────────────────────────────────────────────────────
+  | "koinx"
+  | "wazirx"
+  | "coindcx"
+  // ── Global CEX ─────────────────────────────────────────────────────────────────
+  | "binance"
+  | "coinbase"
+  | "kraken"
+  | "bybit"
+  | "okx"
+  | "zebpay"
+  // ── DEX ───────────────────────────────────────────────────────────────────────────
+  | "giottus"
+  | "buyucoin"
+  | "uniswap"
+  | "pancakeswap"
+  | "sushiswap"
+  | "curve"
+  | "jupiter";
 
 export type BrokerAccessModel =
   | "public_api"
@@ -30,29 +33,28 @@ export type BrokerAccessModel =
   | "manual";
 
 export type BrokerAssetClass =
-  | "STOCK"
-  | "ETF"
-  | "MUTUAL_FUND"
   | "CRYPTO"
-  | "COMMODITY"
-  | "BOND"
-  | "CASH_EQUIVALENT"
-  | "DERIVATIVE"
-  | "OTHER";
+  | "DEFI"
+  | "NFTS"
+  | "LAYER1"
+  | "LAYER2";
 
 export type BrokerTransactionType =
   | "buy"
   | "sell"
-  | "dividend"
-  | "switch"
   | "transfer"
   | "fee"
-  | "interest"
   | "deposit"
   | "withdrawal"
-  | "split"
-  | "merger"
-  | "corporate_action";
+  | "swap"
+  | "stake"
+  | "unstake"
+  | "liquidity_provide"
+  | "liquidity_remove"
+  | "bridge"
+  | "claim"
+  | "airdrop"
+  | "reward";
 
 export type BrokerPositionSide = "long" | "short" | "flat";
 export type BrokerSyncScope = "holdings" | "positions" | "transactions" | "balances" | "orders";
@@ -89,9 +91,11 @@ export interface BrokerSourceReference {
 export interface BrokerInstrumentIdentity {
   symbol: string;
   name: string;
-  isin?: string | null;
+  chain?: string | null;
+  contractAddress?: string | null;
+  tokenStandard?: "ERC20" | "ERC721" | "ERC1155" | "SPL" | "BEP20" | null;
   exchange?: string | null;
-  currency: "USD" | "INR";
+  currency: "USD" | "INR" | "USDT" | "USDC" | "ETH" | "BTC";
   assetClass: BrokerAssetClass;
   region: BrokerRegion;
   sector?: string | null;
@@ -107,7 +111,7 @@ export interface BrokerLot {
 }
 
 export interface BrokerCashBalance {
-  currency: "USD" | "INR";
+  currency: "USD" | "INR" | "USDT" | "USDC" | "ETH" | "BTC" | "BNB";
   available: number;
   settled?: number | null;
   marginUsed?: number | null;
@@ -179,7 +183,7 @@ export interface BrokerAccount {
   brokerAccountId?: string | null;
   accountType?: string | null;
   status?: string | null;
-  currency: "USD" | "INR";
+  currency: "USD" | "INR" | "USDT" | "USDC" | "ETH" | "BTC" | "BNB";
   portfolioValue?: number | null;
   cashBalance?: BrokerCashBalance | null;
   buyingPower?: number | null;
@@ -270,13 +274,14 @@ export interface BrokerAuthHandle {
 
 /**
  * Canonical instrument key used during cross-broker deduplication.
- * ISIN is preferred; symbol+exchange is the operational fallback.
+ * Contract address is preferred for crypto; symbol+exchange is the operational fallback.
  */
 export interface BrokerInstrumentKey {
-  isin: string | null;
+  contractAddress: string | null;
   symbol: string;
   exchange: string | null;
   region: BrokerRegion;
+  chain?: string | null;
 }
 
 /**
@@ -335,195 +340,140 @@ export interface BrokerNormalizerConfig {
   exchangeMap: Record<string, string>;
 }
 
-// ─── India integration matrix ─────────────────────────────────────────────────
+// ─── India CEX integration matrix ─────────────────────────────────────────────────
 
-export const INDIA_BROKER_INTEGRATION_MATRIX: BrokerIntegrationMatrixEntry[] = [
+export const INDIA_CEX_INTEGRATION_MATRIX: BrokerIntegrationMatrixEntry[] = [
   {
     rank: 1,
-    provider: "zerodha",
-    label: "Zerodha",
+    provider: "koinx",
+    label: "KoinX",
     region: "IN",
-    accessModel: "public_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "Kite Connect: login_url → request_token → session exchange. Paid developer subscription required. Token refreshes daily via re-login or partner auto-renew.",
-    productionNotes: "Highest production leverage. Mature docs, strong ecosystem, straightforward holdings/positions fetch. Build first.",
+    accessModel: "partner_api",
+    scope: ["holdings", "transactions", "balances"],
+    authNotes: "KoinX API: API key + client ID authentication. Partner integration for portfolio tracking and tax reports.",
+    productionNotes: "Partner integration with tax compliance features. Supports 270+ chains and exchanges. Priority integration.",
     phase: "phase_1",
   },
   {
     rank: 2,
-    provider: "upstox",
-    label: "Upstox",
+    provider: "wazirx",
+    label: "WazirX",
     region: "IN",
     accessModel: "public_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "OAuth 2.0 PKCE flow. Short-lived access token + refresh token. Developer app registration required.",
-    productionNotes: "Clean REST v3 surface, well-documented holdings and portfolio endpoints. Strong second connector for retail coverage.",
+    scope: ["holdings", "transactions", "orders", "balances"],
+    authNotes: "WazirX API: API key + secret key authentication. Binance-owned, strong API documentation.",
+    productionNotes: "India's largest crypto exchange. Mature API, good documentation. Build first.",
     phase: "phase_1",
   },
   {
     rank: 3,
-    provider: "angel_one",
-    label: "Angel One",
+    provider: "coindcx",
+    label: "CoinDCX",
     region: "IN",
     accessModel: "public_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "SmartAPI: TOTP + client code login → JWT session token. API key required at registration.",
-    productionNotes: "High retail relevance. Good production fit for portfolio-level sync once auth is wired.",
+    scope: ["holdings", "transactions", "orders", "balances"],
+    authNotes: "CoinDCX API: API key + secret authentication. OAuth 2.0 available for partner integration.",
+    productionNotes: "Major Indian exchange with good API coverage. Strong retail relevance.",
     phase: "phase_1",
   },
   {
     rank: 4,
-    provider: "dhan",
-    label: "Dhan",
+    provider: "zebpay",
+    label: "Zebpay",
     region: "IN",
     accessModel: "public_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "DhanHQ v2: access token from developer portal. Token is long-lived but user-scoped.",
-    productionNotes: "Clean API surface with dedicated holdings/positions endpoints. Practical and well-maintained.",
-    phase: "phase_1",
+    scope: ["holdings", "transactions", "orders", "balances"],
+    authNotes: "Zebpay API: API key authentication. Established player with stable API.",
+    productionNotes: "Early Indian exchange, established user base. Good for market coverage.",
+    phase: "phase_2",
   },
   {
     rank: 5,
-    provider: "fyers",
-    label: "FYERS",
+    provider: "giottus",
+    label: "Giottus",
     region: "IN",
     accessModel: "public_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "API Connect / SDK: auth code flow → access token via TOTP. App_id + secret required.",
-    productionNotes: "Strong trading and portfolio primitives. Good complement to the first four connectors.",
-    phase: "phase_1",
+    scope: ["holdings", "transactions", "orders", "balances"],
+    authNotes: "Giottus API: API key + secret authentication. API-focused exchange.",
+    productionNotes: "API-focused Indian exchange. Good for technical users.",
+    phase: "phase_2",
   },
   {
     rank: 6,
-    provider: "groww",
-    label: "Groww",
+    provider: "buyucoin",
+    label: "BuyUcoin",
     region: "IN",
     accessModel: "public_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "Groww API portal provides portfolio and positions endpoints. Verify partner onboarding and access policy before going live.",
-    productionNotes: "Highest user-base relevance for MF + stocks. Treat as a high-value Phase 2 connector, not a fallback.",
+    scope: ["holdings", "transactions", "orders", "balances"],
+    authNotes: "BuyUcoin API: API key authentication. Good coverage of Indian market.",
+    productionNotes: "Good retail breadth. Add as secondary source once Phase 1 connectors are live.",
     phase: "phase_2",
-  },
-  {
-    rank: 7,
-    provider: "icici_direct",
-    label: "ICICI Direct",
-    region: "IN",
-    accessModel: "partner_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "Breeze Connect API / iCICIdirect Open API: API key + session token. May require formal partner agreement.",
-    productionNotes: "Strong brand trust, large user base. Expect compliance friction and onboarding lead time.",
-    phase: "phase_2",
-  },
-  {
-    rank: 8,
-    provider: "kotak_neo",
-    label: "Kotak Neo",
-    region: "IN",
-    accessModel: "sdk",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "Neo API / Python SDK: session token via OTP login. Consumer key + secret from developer portal.",
-    productionNotes: "Good banking-brand coverage. Worth adding once core adapters are stable and proven in production.",
-    phase: "phase_2",
-  },
-  {
-    rank: 9,
-    provider: "five_paisa",
-    label: "5paisa",
-    region: "IN",
-    accessModel: "public_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "Xstream / developer API: API key + JWT login. Verify SDK version compatibility carefully.",
-    productionNotes: "Good retail breadth. Auth and SDK setup need careful environment testing before production.",
-    phase: "phase_2",
-  },
-  {
-    rank: 10,
-    provider: "motilal_oswal",
-    label: "Motilal Oswal",
-    region: "IN",
-    accessModel: "partner_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "MO API portal: access may require partner onboarding approval. Token-based session once approved.",
-    productionNotes: "Valuable for broader market coverage. Add after core set is proven to reduce onboarding risk.",
-    phase: "phase_2",
-  },
-  {
-    rank: 11,
-    provider: "shoonya",
-    label: "Shoonya (Finvasia)",
-    region: "IN",
-    accessModel: "public_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "NorenApi: SHA-256 password hash + TOTP login flow. Python/JS client libraries available.",
-    productionNotes: "Zero brokerage platform with an active developer community. Good long-tail coverage for cost-conscious traders.",
-    phase: "phase_3",
-  },
-  {
-    rank: 12,
-    provider: "alice_blue",
-    label: "Alice Blue",
-    region: "IN",
-    accessModel: "public_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "ANT+ API / OpenAPI: session auth via client credentials. Developer registration required.",
-    productionNotes: "Niche but active base. Add as a secondary source once Phase 1 and 2 connectors are live.",
-    phase: "phase_3",
-  },
-  {
-    rank: 13,
-    provider: "hdfc_securities",
-    label: "HDFC Securities",
-    region: "IN",
-    accessModel: "partner_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "API access requires formal partner agreement with HDFC Securities. Limited public documentation.",
-    productionNotes: "High brand trust but high onboarding friction. Defer until compliance and partner capacity allows.",
-    phase: "fallback",
-  },
-  {
-    rank: 14,
-    provider: "axis_direct",
-    label: "Axis Direct",
-    region: "IN",
-    accessModel: "partner_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "Axis Direct API access is partner-gated. Expect formal approval process.",
-    productionNotes: "Meaningful user base in the banking-brokerage segment. Keep as a fallback until partner path clears.",
-    phase: "fallback",
   },
 ];
 
-// ─── US integration matrix ────────────────────────────────────────────────────
+// ─── Global CEX integration matrix ────────────────────────────────────────────────────
 
-export const US_BROKER_INTEGRATION_MATRIX: BrokerIntegrationMatrixEntry[] = [
+export const GLOBAL_CEX_INTEGRATION_MATRIX: BrokerIntegrationMatrixEntry[] = [
   {
     rank: 1,
-    provider: "plaid",
-    label: "Plaid",
-    region: "US",
-    accessModel: "oauth",
-    scope: ["holdings", "positions", "transactions", "balances"],
-    authNotes: "Plaid Link (OAuth 2.0 consent UI): public_token exchange → access_token. Investments product required. Institution-level consent and re-auth on token expiry.",
-    productionNotes: "Best first US connector. Covers 70-80% of retail investors via Robinhood, Fidelity, Schwab, E*TRADE, TD Ameritrade. Read-only. Sync every 6-12 hours.",
+    provider: "binance",
+    label: "Binance",
+    region: "GLOBAL",
+    accessModel: "public_api",
+    scope: ["holdings", "transactions", "orders", "balances"],
+    authNotes: "Binance API: API key + secret authentication. HMAC-SHA256 signature required. IP whitelist available.",
+    productionNotes: "Global leader with excellent API. Highest liquidity, most trading pairs. Build first.",
     phase: "phase_1",
   },
   {
     rank: 2,
-    provider: "alpaca",
-    label: "Alpaca",
+    provider: "coinbase",
+    label: "Coinbase",
     region: "US",
-    accessModel: "public_api",
-    scope: ["holdings", "positions", "transactions", "orders", "balances"],
-    authNotes: "API key + secret (paper and live accounts). OAuth flow available for broker-partner integration. Webhooks for real-time trade events.",
-    productionNotes: "Best direct-brokerage layer for real-time portfolio state and power users. Supports live trading, webhooks, and streaming quotes.",
+    accessModel: "oauth",
+    scope: ["holdings", "transactions", "orders", "balances"],
+    authNotes: "Coinbase API: OAuth 2.0 authentication. API key + secret for advanced trading. Strong security.",
+    productionNotes: "US market leader. Excellent OAuth flow. Good for institutional users.",
     phase: "phase_1",
+  },
+  {
+    rank: 3,
+    provider: "kraken",
+    label: "Kraken",
+    region: "GLOBAL",
+    accessModel: "public_api",
+    scope: ["holdings", "transactions", "orders", "balances"],
+    authNotes: "Kraken API: API key + secret authentication. API nonce required. Strong institutional focus.",
+    productionNotes: "Strong API, institutional-grade. Good for high-value accounts.",
+    phase: "phase_1",
+  },
+  {
+    rank: 4,
+    provider: "bybit",
+    label: "Bybit",
+    region: "GLOBAL",
+    accessModel: "public_api",
+    scope: ["holdings", "transactions", "orders", "balances"],
+    authNotes: "Bybit API: API key + secret authentication. Derivatives-focused. Good API documentation.",
+    productionNotes: "Derivatives leader. Good for trading-focused users.",
+    phase: "phase_2",
+  },
+  {
+    rank: 5,
+    provider: "okx",
+    label: "OKX",
+    region: "GLOBAL",
+    accessModel: "public_api",
+    scope: ["holdings", "transactions", "orders", "balances"],
+    authNotes: "OKX API: API key + secret passphrase authentication. Good global coverage.",
+    productionNotes: "Global exchange with good API. Strong derivatives offering.",
+    phase: "phase_2",
   },
 ];
 
 // ─── Combined convenience export ──────────────────────────────────────────────
 
 export const ALL_BROKER_INTEGRATION_MATRIX: BrokerIntegrationMatrixEntry[] = [
-  ...INDIA_BROKER_INTEGRATION_MATRIX,
-  ...US_BROKER_INTEGRATION_MATRIX,
+  ...INDIA_CEX_INTEGRATION_MATRIX,
+  ...GLOBAL_CEX_INTEGRATION_MATRIX,
 ];

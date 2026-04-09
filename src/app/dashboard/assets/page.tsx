@@ -368,8 +368,8 @@ export default function AssetsPage() {
         <div className="relative z-10 animate-slide-up-fade">
           <PageHeader
             icon={<Search className="h-5 w-5" />}
-            title="Asset Intelligence"
-            eyebrow="Cross-asset terminal"
+            title="Crypto Intelligence"
+            eyebrow="On-chain terminal"
             chips={
               <>
                 <StatChip value={region} label="Market" variant="muted" />
@@ -403,11 +403,7 @@ export default function AssetsPage() {
                 router.push(`/dashboard/assets/${symbol.trim().toUpperCase()}`);
               }
             }}
-            placeholder={
-              region === "IN"
-                ? "Search REL, Reliance, Gold"
-                : "Search AAPL, Apple, Gold"
-            }
+            placeholder="Search BTC, Bitcoin, ETH"
           />
         </div>
 
@@ -426,7 +422,7 @@ export default function AssetsPage() {
                   )}
                 >
                   <Filter className="h-4 w-4" />
-                  Type: {selectedType === "ALL" ? "All" : selectedType === "MUTUAL_FUND" ? "MUTUAL FUND" : selectedType === "ETF" ? "ETF" : selectedType}
+                  Type: {selectedType === "ALL" ? "All" : selectedType}
                   <ChevronDown className="h-3 w-3 opacity-40" />
                 </Button>
               </DropdownMenuTrigger>
@@ -434,13 +430,13 @@ export default function AssetsPage() {
                 align="start"
                 className="w-48 rounded-3xl border border-white/10 bg-card/70 p-1 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl"
               >
-                {(region === "IN" ? ["ALL", "STOCK", "MUTUAL_FUND", "ETF", "COMMODITY"] : ["ALL", "STOCK", "ETF", "CRYPTO", "COMMODITY"]).map((type) => (
+                {["ALL", "CRYPTO"].map((type) => (
                   <DropdownMenuItem
                     key={type}
                     onClick={() => setSelectedType(type)}
                     className="flex items-center justify-between rounded-2xl px-3 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
                   >
-                    {type === "MUTUAL_FUND" ? "MUTUAL FUND" : type === "ETF" ? "ETF" : type}
+                    {type}
                     {selectedType === type && (
                       <Check className="h-3.5 w-3.5 text-primary" />
                     )}

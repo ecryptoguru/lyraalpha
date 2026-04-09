@@ -150,7 +150,7 @@ export class IntelligenceEventsService {
    *
    * - NEWS/MARKET/TECHNICAL events older than 48 hours
    * - INSIDER/ANALYST events older than 7 days
-   * - EARNINGS events older than 30 days
+   * - PROTOCOL events older than 30 days
    * - FUNDAMENTAL events kept indefinitely (rare, valuable)
    * - MarketRegime entries older than 7 days
    * - Inactive TrendingQuestions (replaced by active set)
@@ -165,7 +165,7 @@ export class IntelligenceEventsService {
       // With daily sync writing one row/day, we need at least 60 days of history to keep.
       const D90 = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
 
-      const [newsResult, marketResult, techResult, insiderResult, analystResult, earningsResult, regimeResult, tqResult] = await Promise.all([
+      const [newsResult, marketResult, techResult, insiderResult, analystResult, protocolResult, regimeResult, tqResult] = await Promise.all([
         prisma.institutionalEvent.deleteMany({
           where: { type: "NEWS", date: { lt: H48 } },
         }),
@@ -182,7 +182,7 @@ export class IntelligenceEventsService {
           where: { type: "ANALYST", date: { lt: D7 } },
         }),
         prisma.institutionalEvent.deleteMany({
-          where: { type: "EARNINGS", date: { lt: D30 } },
+          where: { type: "PROTOCOL", date: { lt: D30 } },
         }),
         prisma.marketRegime.deleteMany({
           where: { date: { lt: D90 } },
@@ -192,7 +192,7 @@ export class IntelligenceEventsService {
         }),
       ]);
 
-      const total = newsResult.count + marketResult.count + techResult.count + insiderResult.count + analystResult.count + earningsResult.count + regimeResult.count + tqResult.count;
+      const total = newsResult.count + marketResult.count + techResult.count + insiderResult.count + analystResult.count + protocolResult.count + regimeResult.count + tqResult.count;
       if (total > 0) {
         logger.info({
           news: newsResult.count,
@@ -200,7 +200,7 @@ export class IntelligenceEventsService {
           technical: techResult.count,
           insider: insiderResult.count,
           analyst: analystResult.count,
-          earnings: earningsResult.count,
+          protocol: protocolResult.count,
           regime: regimeResult.count,
           trendingQ: tqResult.count,
           duration: timer.endFormatted(),

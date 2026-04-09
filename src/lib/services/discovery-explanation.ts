@@ -11,11 +11,7 @@ import type { DiscoveryArchetype, ScoreInflection } from "@/lib/engines/discover
 // ─── Asset Type Labels ──────────────────────────────────────────────────────
 
 const TYPE_LABELS: Record<string, string> = {
-  STOCK: "Stock",
-  ETF: "ETF",
   CRYPTO: "Crypto",
-  COMMODITY: "Commodity",
-  MUTUAL_FUND: "Mutual Fund",
 };
 
 // ─── Headline Templates ─────────────────────────────────────────────────────

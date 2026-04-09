@@ -1,37 +1,27 @@
 import type { BrokerConnector, BrokerProvider } from "@/lib/types/broker";
 
-import { ZerodhaConnector } from "./zerodha";
-import { UpstoxConnector } from "./upstox";
-import { AngelOneConnector } from "./angel-one";
-import { DhanConnector } from "./dhan";
-import { FyersConnector } from "./fyers";
-import { GrowwConnector } from "./groww";
-import { ICICIDirectConnector } from "./icici-direct";
-import { KotakNeoConnector } from "./kotak-neo";
-import { FivePaisaConnector } from "./five-paisa";
-import { MotilalOswalConnector } from "./motilal-oswal";
-import { ShoonyaConnector } from "./shoonya";
-import { AliceBlueConnector } from "./alice-blue";
-import { PlaidConnector } from "./plaid";
-import { AlpacaConnector } from "./alpaca";
+import { KoinxConnector } from "./koinx";
+import { BinanceConnector } from "./binance";
+import { CoinbaseConnector } from "./coinbase";
+import { WazirxConnector } from "./wazirx";
+import { CoinDCXConnector } from "./coindcx";
+import { KrakenConnector } from "./kraken";
+import { UniswapConnector } from "./uniswap";
+import { PancakeswapConnector } from "./pancakeswap";
+import { SushiswapConnector } from "./sushiswap";
 
 // ─── Registry ────────────────────────────────────────────────────────────────
 
 const REGISTRY = new Map<BrokerProvider, BrokerConnector>([
-  ["zerodha", ZerodhaConnector],
-  ["upstox", UpstoxConnector],
-  ["angel_one", AngelOneConnector],
-  ["dhan", DhanConnector],
-  ["fyers", FyersConnector],
-  ["groww", GrowwConnector],
-  ["icici_direct", ICICIDirectConnector],
-  ["kotak_neo", KotakNeoConnector],
-  ["five_paisa", FivePaisaConnector],
-  ["motilal_oswal", MotilalOswalConnector],
-  ["shoonya", ShoonyaConnector],
-  ["alice_blue", AliceBlueConnector],
-  ["plaid", PlaidConnector],
-  ["alpaca", AlpacaConnector],
+  ["koinx", new KoinxConnector()],
+  ["binance", new BinanceConnector()],
+  ["coinbase", new CoinbaseConnector()],
+  ["wazirx", new WazirxConnector()],
+  ["coindcx", new CoinDCXConnector()],
+  ["kraken", new KrakenConnector()],
+  ["uniswap", new UniswapConnector()],
+  ["pancakeswap", new PancakeswapConnector()],
+  ["sushiswap", new SushiswapConnector()],
 ]);
 
 export function getConnector(provider: BrokerProvider): BrokerConnector {
@@ -46,21 +36,6 @@ export function listConnectors(): BrokerConnector[] {
   return Array.from(REGISTRY.values());
 }
 
-export {
-  ZerodhaConnector,
-  UpstoxConnector,
-  AngelOneConnector,
-  DhanConnector,
-  FyersConnector,
-  GrowwConnector,
-  ICICIDirectConnector,
-  KotakNeoConnector,
-  FivePaisaConnector,
-  MotilalOswalConnector,
-  ShoonyaConnector,
-  AliceBlueConnector,
-  PlaidConnector,
-  AlpacaConnector,
-};
+export { KoinxConnector };
 
 export { BrokerConnectorError, withRetry } from "./base";

@@ -49,8 +49,8 @@ export class LyraService {
     });
 
     const promptData = {
-      stockName: mapping.asset.name,
-      stockSymbol: mapping.asset.symbol,
+      assetName: mapping.asset.name,
+      assetSymbol: mapping.asset.symbol,
       sectorName: mapping.sector.name,
       inclusionType: mapping.inclusionType,
       inclusionReason: mapping.inclusionReason || "Structural business alignment",
@@ -80,7 +80,7 @@ export class LyraService {
   }
 
   /**
-   * Generates an institutional "Why this stock is here" explanation.
+   * Generates an institutional "Why this asset is here" explanation.
    * Uses Next.js unstable_cache when available, falls back to direct execution.
    */
   static async explainInclusion(assetId: string, sectorId: string): Promise<string> {

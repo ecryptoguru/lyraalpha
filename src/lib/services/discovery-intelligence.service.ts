@@ -30,7 +30,7 @@ export async function computeDiscoveryFeed(): Promise<{ total: number; surfaced:
   const assets = await prisma.asset.findMany({
     where: {
       lastPriceUpdate: { not: null },
-      type: { in: ["STOCK", "ETF", "CRYPTO", "COMMODITY", "MUTUAL_FUND"] },
+      type: { in: ["CRYPTO"] },
     },
     select: {
       id: true,
@@ -39,7 +39,6 @@ export async function computeDiscoveryFeed(): Promise<{ total: number; surfaced:
       type: true,
       region: true,
       scoreDynamics: true,
-      etfLookthrough: true,
       signalStrength: true,
       price: true,
       changePercent: true,
@@ -109,9 +108,6 @@ export async function computeDiscoveryFeed(): Promise<{ total: number; surfaced:
         ? (asset.signalStrength as Record<string, unknown>).label as string
         : undefined;
 
-      const structuralDetail = asset.type === "ETF" && asset.etfLookthrough
-        ? getETFStructuralDetail(asset.etfLookthrough as Record<string, unknown>)
-        : undefined;
 
       const headline = generateHeadline(
         partial.archetype,
@@ -120,7 +116,7 @@ export async function computeDiscoveryFeed(): Promise<{ total: number; surfaced:
         partial.type,
         partial.inflections,
         partial.drs,
-        { regimeState, structuralDetail },
+        { regimeState },
       );
 
       const context = generateContext(
@@ -132,7 +128,6 @@ export async function computeDiscoveryFeed(): Promise<{ total: number; surfaced:
           regimeState,
           transitionDirection: latestRegime?.transitionDirection,
           signalLabel,
-          structuralDetail,
         },
       );
 
@@ -258,7 +253,6 @@ interface AssetRow {
   type: AssetType;
   region: string | null;
   scoreDynamics: unknown;
-  etfLookthrough: unknown;
   signalStrength: unknown;
   price: number | null;
   changePercent: number | null;
@@ -308,7 +302,7 @@ function buildDRSInput(
     latestScores,
     peerMedians: typePeerMedians,
     regimeAlignment,
-    etfLookthrough: asset.type === "ETF" ? asset.etfLookthrough as DRSInput["etfLookthrough"] : null,
+    etfLookthrough: null,
     signalStrength: asset.signalStrength as DRSInput["signalStrength"],
     lastSyncAge,
   };
@@ -402,14 +396,4 @@ function extractRegimeLabel(current: Record<string, unknown>): string {
     return current.label as string;
   }
   return "unknown";
-}
-
-function getETFStructuralDetail(lookthrough: Record<string, unknown>): string | undefined {
-  const concentration = lookthrough.concentration as { level?: string; hhi?: number; top5Weight?: number } | undefined;
-  if (!concentration) return undefined;
-
-  if (concentration.level === "high") {
-    return `Concentration risk elevated — Top-5 holdings at ${concentration.top5Weight?.toFixed(1) || "?"}%, HHI ${concentration.hhi?.toFixed(4) || "?"}`;
-  }
-  return undefined;
 }

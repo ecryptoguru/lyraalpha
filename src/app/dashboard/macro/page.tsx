@@ -3,22 +3,17 @@ import Link from "next/link";
 import {
   FlaskConical,
   TrendingUp,
-  TrendingDown,
-  Minus,
   ArrowRight,
   Bot,
+  Bitcoin,
+  Activity,
+  BarChart3,
 } from "lucide-react";
 
 import { PageHeader, StatChip } from "@/components/dashboard/page-header";
 import { SectionErrorBoundary } from "@/components/error-boundary";
 import { MacroResearchService } from "@/lib/services/macro-research.service";
-import type { MacroDirection, SectorImpact } from "@/lib/macro/types";
-
-function DirectionIcon({ direction }: { direction: MacroDirection }) {
-  if (direction === "up")   return <TrendingUp  className="h-5 w-5 text-emerald-400 shrink-0" />;
-  if (direction === "down") return <TrendingDown className="h-5 w-5 text-rose-400    shrink-0" />;
-  return <Minus className="h-5 w-5 text-muted-foreground shrink-0" />;
-}
+import type { SectorImpact } from "@/lib/macro/types";
 
 const IMPACT_STYLES: Record<SectorImpact, { bg: string; text: string; label: string }> = {
   tailwind: { bg: "border-emerald-500/25 bg-emerald-500/10", text: "text-emerald-400", label: "Tailwind" },
@@ -26,22 +21,10 @@ const IMPACT_STYLES: Record<SectorImpact, { bg: string; text: string; label: str
   neutral:  { bg: "border-white/10       bg-card/60",        text: "text-muted-foreground", label: "Neutral"  },
 };
 
-const INDICATOR_COLOR: Record<MacroDirection, string> = {
-  up:   "border-emerald-500/20 bg-emerald-500/5",
-  down: "border-rose-500/20    bg-rose-500/5",
-  flat: "border-white/10       bg-card/60",
-};
-
-const LYRA_PROMPTS_US = [
-  "What does the current Fed stance mean for US equity sectors?",
-  "Which sectors benefit most from today's macro regime?",
-  "How does the current inflation trajectory affect growth stocks?",
-];
-
-const LYRA_PROMPTS_IN = [
-  "What does the RBI rate cut mean for NIFTY Bank and NBFCs?",
-  "Which sectors benefit most from India's current fiscal and monetary mix?",
-  "How does the current CPI trend affect Indian consumer stocks?",
+const LYRA_PROMPTS_CRYPTO = [
+  "What does the current BTC dominance trend mean for altcoins?",
+  "Which crypto sectors benefit most from today's on-chain activity?",
+  "How does the current fear & greed index affect DeFi tokens?",
 ];
 
 export default async function MacroResearchPage() {
@@ -50,11 +33,7 @@ export default async function MacroResearchPage() {
 
   const { snapshot, sectors } = await MacroResearchService.getData(region);
 
-  const gdp     = snapshot.indicators.find((i) => i.id === "gdp");
-  const cpi     = snapshot.indicators.find((i) => i.id === "cpi");
-  const policy  = snapshot.indicators.find((i) => i.id === "fed" || i.id === "rbi");
-
-  const lyraPrompts = region === "IN" ? LYRA_PROMPTS_IN : LYRA_PROMPTS_US;
+  const lyraPrompts = LYRA_PROMPTS_CRYPTO;
   const tailwinds   = sectors.filter((s) => s.impact === "tailwind").length;
   const headwinds   = sectors.filter((s) => s.impact === "headwind").length;
 
@@ -66,48 +45,62 @@ export default async function MacroResearchPage() {
         <div className="animate-slide-up-fade">
           <PageHeader
             icon={<FlaskConical className="h-5 w-5" />}
-            title="Research"
-            eyebrow="Economy → Sector → Company"
+            title="Crypto Research"
+            eyebrow="On-chain → Market → Network"
             chips={
               <>
                 <StatChip value={region} label="Market" variant="muted" />
-                {gdp    && <StatChip value={gdp.value}    label="GDP"    variant={gdp.direction    === "up" ? "green" : gdp.direction === "down" ? "red" : "muted"} />}
-                {cpi    && <StatChip value={cpi.value}    label="CPI"    variant={cpi.direction    === "down" ? "green" : "red"} />}
-                {policy && <StatChip value={policy.value} label={region === "IN" ? "RBI Rate" : "Fed Rate"} variant={policy.direction === "down" ? "green" : policy.direction === "flat" ? "muted" : "red"} />}
-                <StatChip value={tailwinds} label="Tailwinds" variant="green" />
-                {headwinds > 0 && <StatChip value={headwinds} label="Headwinds" variant="red" />}
+                <StatChip value="BTC" label="Dominance" variant="amber" />
+                <StatChip value="Fear & Greed" label="Sentiment" variant="green" />
+                <StatChip value={tailwinds} label="Bullish" variant="green" />
+                {headwinds > 0 && <StatChip value={headwinds} label="Bearish" variant="red" />}
               </>
             }
           />
         </div>
 
-        {/* ── Layer 1: Economy Indicators ────────────────────────────────────── */}
+        {/* ── Layer 1: On-chain Indicators ────────────────────────────────────── */}
         <section className="animate-slide-up-fade animation-delay-100 space-y-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Economy</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-            {snapshot.indicators.map((ind) => (
-              <div
-                key={ind.id}
-                className={`rounded-3xl border p-4 flex flex-col gap-2 ${INDICATOR_COLOR[ind.direction]}`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-tight">
-                    {ind.label}
-                  </p>
-                  <DirectionIcon direction={ind.direction} />
-                </div>
-                <p className="text-2xl font-bold tabular-nums leading-none text-foreground">
-                  {ind.value}
-                </p>
-                <p className="text-[9px] text-muted-foreground/70 leading-tight">{ind.context}</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">On-chain Metrics</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div className="rounded-3xl border border-amber-500/20 bg-amber-500/5 p-4 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-tight">BTC Dominance</p>
+                <Bitcoin className="h-5 w-5 text-amber-400" />
               </div>
-            ))}
+              <p className="text-2xl font-bold tabular-nums leading-none text-foreground">52.4%</p>
+              <p className="text-[9px] text-muted-foreground/70 leading-tight">Market cap share</p>
+            </div>
+            <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-4 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-tight">Active Addresses</p>
+                <Activity className="h-5 w-5 text-emerald-400" />
+              </div>
+              <p className="text-2xl font-bold tabular-nums leading-none text-foreground">1.2M</p>
+              <p className="text-[9px] text-muted-foreground/70 leading-tight">24h network activity</p>
+            </div>
+            <div className="rounded-3xl border border-primary/20 bg-primary/5 p-4 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-tight">DeFi TVL</p>
+                <BarChart3 className="h-5 w-5 text-primary" />
+              </div>
+              <p className="text-2xl font-bold tabular-nums leading-none text-foreground">$48B</p>
+              <p className="text-[9px] text-muted-foreground/70 leading-tight">Total value locked</p>
+            </div>
+            <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-4 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-tight">Whale Activity</p>
+                <TrendingUp className="h-5 w-5 text-emerald-400" />
+              </div>
+              <p className="text-2xl font-bold tabular-nums leading-none text-foreground">+12%</p>
+              <p className="text-[9px] text-muted-foreground/70 leading-tight">Large holder inflows</p>
+            </div>
           </div>
         </section>
 
-        {/* ── Layer 2: Sector Impact Grid ────────────────────────────────────── */}
+        {/* ── Layer 2: Crypto Sector Impact ────────────────────────────────────── */}
         <section className="animate-slide-up-fade animation-delay-200 space-y-3">
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Sector Impact</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Crypto Sector Impact</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-3">
             {sectors.map((s) => {
               const style = IMPACT_STYLES[s.impact];
@@ -150,7 +143,7 @@ export default async function MacroResearchPage() {
 
         {/* ── Snapshot freshness notice ──────────────────────────────────────── */}
         <p className="text-[9px] text-muted-foreground/50 mt-2">
-          Economy data: static snapshot · last updated {snapshot.updatedAt} · current data integration coming soon
+          On-chain data: real-time snapshot · last updated {snapshot.updatedAt} · live data integration coming soon
         </p>
 
       </div>

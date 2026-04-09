@@ -144,6 +144,7 @@ export interface TierConfig {
   crossSectorEnabled: boolean;
   wordBudgetMultiplier: number | null; // null = unconstrained (Elite)
   gpt54Role: Gpt54Role | null; // null = fall back to primary AZURE_OPENAI_CHAT_DEPLOYMENT
+  latencyBudgetMs: number; // Maximum allowed latency in milliseconds
 }
 
 // ─── Word budget formula (for reference) ───
@@ -165,6 +166,7 @@ const STARTER_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: false,
     wordBudgetMultiplier: 0.439,  // targetWords: ~300
     gpt54Role: "lyra-nano",
+    latencyBudgetMs: 8000,  // 8s for SIMPLE queries
   },
   MODERATE: {
     maxTokens: 1850,      // targetWords:600 → 600/((1850-450)*0.72)=0.595
@@ -176,6 +178,7 @@ const STARTER_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: false,
     wordBudgetMultiplier: 0.595,  // targetWords: ~600 (audit: nano writes 580-606w vs old 450w instruction)
     gpt54Role: "lyra-nano",
+    latencyBudgetMs: 15000,  // 15s for MODERATE queries
   },
   COMPLEX: {
     maxTokens: 2600,      // targetWords:650 → 650/((2600-450)*0.72)=0.420
@@ -187,6 +190,7 @@ const STARTER_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: false,
     wordBudgetMultiplier: 0.420,  // targetWords: ~650
     gpt54Role: "lyra-mini",
+    latencyBudgetMs: 30000,  // 30s for COMPLEX queries
   },
 };
 
@@ -204,6 +208,7 @@ const PRO_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: false,
     wordBudgetMultiplier: 0.333,  // targetWords: ~300
     gpt54Role: "lyra-mini",       // upgraded from nano: nano undershoots edu target consistently
+    latencyBudgetMs: 8000,  // 8s for SIMPLE queries
   },
   MODERATE: {
     maxTokens: 2200,      // targetWords:750 → 750/((2200-450)*0.72)=0.595
@@ -215,6 +220,7 @@ const PRO_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: false,
     wordBudgetMultiplier: 0.595,  // targetWords: ~750
     gpt54Role: "lyra-mini",       // upgraded from nano: richer signal analysis, $0.00039/query delta
+    latencyBudgetMs: 15000,  // 15s for MODERATE queries
   },
   COMPLEX: {
     maxTokens: 2900,      // targetWords:950 → 950/((2900-450)*0.72)=0.539
@@ -226,6 +232,7 @@ const PRO_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: true,
     wordBudgetMultiplier: 0.539,  // targetWords: ~950
     gpt54Role: "lyra-full",
+    latencyBudgetMs: 30000,  // 30s for COMPLEX queries
   },
 };
 
@@ -244,6 +251,7 @@ const ELITE_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: false,
     wordBudgetMultiplier: 0.448,  // targetWords: ~500
     gpt54Role: "lyra-mini",       // upgraded from nano: nano undershoots edu word target (capacity gap)
+    latencyBudgetMs: 8000,  // 8s for SIMPLE queries
   },
   MODERATE: {
     maxTokens: 2600,      // targetWords:800 → 800/((2600-450)*0.72)=0.517
@@ -255,6 +263,7 @@ const ELITE_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: true,
     wordBudgetMultiplier: 0.517,  // targetWords: ~800
     gpt54Role: "lyra-mini",
+    latencyBudgetMs: 15000,  // 15s for MODERATE queries
   },
   COMPLEX: {
     maxTokens: 3200,      // targetWords:1000 → 1000/((3200-450)*0.72)=0.505
@@ -266,6 +275,7 @@ const ELITE_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: true,
     wordBudgetMultiplier: 0.505,  // targetWords: ~1000
     gpt54Role: "lyra-full",
+    latencyBudgetMs: 30000,  // 30s for COMPLEX queries
   },
 };
 
@@ -284,6 +294,7 @@ const ENTERPRISE_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: false,
     wordBudgetMultiplier: 0.357,  // targetWords: ~450
     gpt54Role: "lyra-mini",       // upgraded from nano: nano undershoots edu target consistently
+    latencyBudgetMs: 8000,  // 8s for SIMPLE queries
   },
   MODERATE: {
     maxTokens: 2600,      // targetWords:800 → 800/((2600-450)*0.72)=0.517
@@ -295,6 +306,7 @@ const ENTERPRISE_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: true,
     wordBudgetMultiplier: 0.517,  // targetWords: ~800
     gpt54Role: "lyra-mini",
+    latencyBudgetMs: 15000,  // 15s for MODERATE queries
   },
   COMPLEX: {
     maxTokens: 3500,      // targetWords:950 → 950/((3500-450)*0.72)=0.430
@@ -306,6 +318,7 @@ const ENTERPRISE_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
     crossSectorEnabled: true,
     wordBudgetMultiplier: 0.430,  // targetWords: ~950 (audit Mar-24: was overshooting 1350w at 0.455)
     gpt54Role: "lyra-full",
+    latencyBudgetMs: 30000,  // 30s for COMPLEX queries
   },
 };
 

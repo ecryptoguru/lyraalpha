@@ -8,13 +8,13 @@ export interface EvidenceReferenceDTO {
   excerpt: string | null;
 }
 
-export interface StockMappingDTO {
+export interface CryptoMappingDTO {
   symbol: string;
   name: string;
   inclusionType: InclusionType;
   inclusionReason: string | null;
   assetId: string;
-  type: string; // EQUITY, CRYPTO, COMMODITY, etc.
+  type: string; // CRYPTO, DEFI, NFTS, LAYER1, LAYER2, etc.
   currency: string; // USD, INR, etc.
   metadata?: Record<string, unknown> | null;
 
@@ -64,9 +64,9 @@ export interface DiscoverySectorDTO {
   marketContext?: MarketContextSnapshot;
 
   tiers: {
-    Strong: StockMappingDTO[];
-    Moderate: StockMappingDTO[];
-    Emerging: StockMappingDTO[];
-    Peripheral: StockMappingDTO[];
+    Strong: CryptoMappingDTO[];
+    Moderate: CryptoMappingDTO[];
+    Emerging: CryptoMappingDTO[];
+    Peripheral: CryptoMappingDTO[];
   };
 }

@@ -1,21 +1,19 @@
 /**
  * H6: Post-stream output validation
  *
- * Lightweight, tier-aware section-presence checks that run AFTER the stream
- * is fully consumed. Purely observational — logs warnings but never blocks
- * or retries the response.
+ * Runs AFTER the LLM stream finishes to validate the response structure.
+ * Non-blocking: logs warnings but never blocks the user from receiving the response.
  *
- * Con mitigations:
- * - Soft logging only (warn level) — user always gets the full response
- * - Tier-aware: SIMPLE/educational queries skip structural checks entirely
- * - Section checks are substring-based (zero regex overhead)
- * - Follow-up count uses a simple split, not a full parse
- * - No false positives for portfolio/compare/stress-test modes which use
- *   different section structures
+ * Validation rules:
+ * - Tier-aware section presence checks (e.g., STARTER SIMPLE requires 4 sections)
+ * - Follow-up question count limits (prevents excessive follow-ups)
+ * - JSON schema validation for tool outputs (when tools are activated)
+ * - No strict JSON schema validation for natural language responses
  */
 
 import { createLogger } from "@/lib/logger";
 import { recordValidationResult } from "./alerting";
+import { z } from "zod";
 
 const logger = createLogger({ service: "output-validation" });
 
@@ -72,7 +70,7 @@ const ELITE_ASSET_COMPLEX_SECTIONS = [
 ];
 
 // Global/macro queries use a different structure
-const GLOBAL_SECTIONS = ["## Market Pulse", "## Sector & Asset Class View", "## Key Risks", "## What to Watch"];
+const GLOBAL_SECTIONS = ["## Market Pulse", "## Crypto Sector View", "## Key Risks", "## What to Watch"];
 
 // Follow-up rules: format instructions require exactly 3
 const EXPECTED_FOLLOW_UP_COUNT = 3;
@@ -119,7 +117,7 @@ export function validateOutput(
   if (isGlobal) {
     fullExpected = [...GLOBAL_SECTIONS];
     if (tier === "COMPLEX" && (plan === "ELITE" || plan === "ENTERPRISE")) {
-      fullExpected.push("## Cross-Asset Signals");
+      fullExpected.push("## On-Chain & Cross-Asset Signals");
     }
   } else if (plan === "STARTER") {
     fullExpected = tier === "MODERATE"
@@ -201,5 +199,28 @@ export function logValidationResult(result: OutputValidationResult): void {
       },
       `Follow-up question count mismatch: expected ${EXPECTED_FOLLOW_UP_COUNT}, got ${result.followUpCount}`,
     );
+  }
+}
+
+/**
+ * Validate tool output against a Zod schema.
+ * Used when tools are activated to ensure structured outputs match expected format.
+ * Returns validation result with parsed data or error details.
+ */
+export function validateToolOutput<T>(
+  output: unknown,
+  schema: z.ZodSchema<T>,
+): { success: boolean; data?: T; error?: string } {
+  try {
+    const parsed = schema.parse(output);
+    return { success: true, data: parsed };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const errorDetails = error.issues.map((e) =>
+        `${Array.isArray(e.path) ? e.path.join(".") : String(e.path)}: ${e.message}`
+      ).join(", ");
+      return { success: false, error: errorDetails };
+    }
+    return { success: false, error: "Unknown validation error" };
   }
 }

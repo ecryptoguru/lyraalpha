@@ -139,7 +139,7 @@ export function MarketAssetCard({
   ]), [signals]);
 
   const metricCells = useMemo<MetricCell[]>(() => {
-    if (type === "COMMODITY" && meta?.openInterest) {
+    if (type === "CRYPTO" && meta?.openInterest) {
       return [
         {
           label: "Open Interest",

@@ -329,11 +329,7 @@ export const IN_SCENARIOS: ScenarioDefinition[] = [
       resilienceThemes: ["Gold in INR", "Defensive consumption", "High-quality large caps"],
     },
     assetTypeAdjustments: {
-      STOCK: { betaMultiplier: 1.08, confidenceDelta: 0.02, rationale: "Single-name equities in India usually feel recession downgrades more sharply than the benchmark." },
-      ETF: { betaMultiplier: 1.02, confidenceDelta: 0.04, rationale: "ETF exposure tracks broad Indian stress better than concentrated names." },
       CRYPTO: { betaMultiplier: 1.15, confidenceDelta: -0.08, rationale: "Crypto behaves like high-beta liquidity risk during macro growth scares." },
-      COMMODITY: { betaMultiplier: 0.93, confidenceDelta: -0.01, rationale: "Commodity-linked exposures mix inflation hedging with growth sensitivity." },
-      MUTUAL_FUND: { betaMultiplier: 0.96, confidenceDelta: -0.05, rationale: "Fund-style inference lowers confidence versus direct market history." },
     },
     factors: {
       equity: -0.14,
@@ -420,11 +416,7 @@ export const IN_SCENARIOS: ScenarioDefinition[] = [
       resilienceThemes: ["Banks with deposit strength", "Gold in INR", "Cash-flow-heavy value"],
     },
     assetTypeAdjustments: {
-      STOCK: { betaMultiplier: 1.05, confidenceDelta: 0.03, rationale: "Single-name equities in India can reprice faster than index beta when rates jump." },
-      ETF: { betaMultiplier: 1.01, confidenceDelta: 0.04, rationale: "ETF exposure usually tracks the benchmark path more tightly in rate shocks." },
       CRYPTO: { betaMultiplier: 1.10, confidenceDelta: -0.07, rationale: "Crypto remains a secondary liquidity-risk expression when real rates rise." },
-      COMMODITY: { betaMultiplier: 0.95, confidenceDelta: -0.01, rationale: "Commodities can partly offset duration pain through inflation linkage." },
-      MUTUAL_FUND: { betaMultiplier: 0.95, confidenceDelta: -0.05, rationale: "Mutual fund mandate inference adds uncertainty to duration mapping." },
     },
     factors: {
       equity: -0.12,
@@ -511,11 +503,7 @@ export const IN_SCENARIOS: ScenarioDefinition[] = [
       resilienceThemes: ["Banks", "Defensive consumption", "Gold in INR"],
     },
     assetTypeAdjustments: {
-      STOCK: { betaMultiplier: 1.10, confidenceDelta: 0.03, rationale: "Single-name tech and platform equities tend to underperform broad beta in growth unwinds." },
-      ETF: { betaMultiplier: 1.03, confidenceDelta: 0.04, rationale: "ETF exposure diversifies some single-name tech collapse risk." },
       CRYPTO: { betaMultiplier: 1.15, confidenceDelta: -0.08, rationale: "Crypto usually trades like speculative liquidity beta during tech-led de-risking." },
-      COMMODITY: { betaMultiplier: 0.90, confidenceDelta: 0.00, rationale: "Commodity-linked assets can offer relative ballast when tech leadership unwinds." },
-      MUTUAL_FUND: { betaMultiplier: 0.97, confidenceDelta: -0.05, rationale: "Mutual fund style inference reduces precision on concentrated growth mandates." },
     },
     factors: {
       equity: -0.18,
@@ -602,11 +590,7 @@ export const IN_SCENARIOS: ScenarioDefinition[] = [
       resilienceThemes: ["Gold in INR", "Defensives", "Some commodity-linked exposures"],
     },
     assetTypeAdjustments: {
-      STOCK: { betaMultiplier: 1.04, confidenceDelta: 0.03, rationale: "Import-cost-sensitive Indian equities often underperform benchmark beta in oil spikes." },
-      ETF: { betaMultiplier: 1.00, confidenceDelta: 0.04, rationale: "ETF exposure broadly reflects inflation and sector rotation without as much idiosyncratic cost pressure." },
       CRYPTO: { betaMultiplier: 1.05, confidenceDelta: -0.06, rationale: "Crypto linkage is looser and mostly comes through broader risk and liquidity conditions." },
-      COMMODITY: { betaMultiplier: 1.10, confidenceDelta: 0.01, rationale: "Commodity-linked assets can benefit when inflation is led by energy." },
-      MUTUAL_FUND: { betaMultiplier: 0.97, confidenceDelta: -0.05, rationale: "Mutual fund oil sensitivity depends on mandate, so inference reduces confidence." },
     },
     factors: {
       equity: -0.10,

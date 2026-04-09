@@ -134,6 +134,43 @@ function scoreMemoryCandidate(
   return score;
 }
 
+/**
+ * Calculate quality score for RAG results beyond similarity.
+ * Considers: recency, content length, source authority (if available).
+ */
+export function calculateRAGQualityScore(
+  doc: { content: string; similarity?: number; metadata: Record<string, unknown> },
+  tier?: string,
+): number {
+  let score = doc.similarity || 0;
+
+  // Recency boost: more recent content is higher quality
+  const createdAt = doc.metadata.createdAt instanceof Date
+    ? doc.metadata.createdAt
+    : new Date(String(doc.metadata.createdAt));
+  if (!Number.isNaN(createdAt.getTime())) {
+    const ageDays = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    if (ageDays <= 7) score += 0.10;  // Very recent (last week)
+    else if (ageDays <= 30) score += 0.05;  // Recent (last month)
+    else if (ageDays <= 90) score += 0.02;  // Moderately recent (last quarter)
+  }
+
+  // Content length quality: too short may lack context, too long may be verbose
+  const contentLength = doc.content.length;
+  if (contentLength >= 200 && contentLength <= 2000) {
+    score += 0.05;  // Optimal length
+  } else if (contentLength < 100) {
+    score -= 0.10;  // Too short, likely low quality
+  }
+
+  // Tier-aware adjustments: COMPLEX queries benefit from longer, more detailed content
+  if (tier === "COMPLEX" && contentLength > 1000) {
+    score += 0.03;
+  }
+
+  return Math.min(1.0, score);  // Cap at 1.0
+}
+
 function toPgVectorLiteral(values: number[]): string {
   return `[${values.join(",")}]`;
 }

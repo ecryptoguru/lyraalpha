@@ -27,7 +27,7 @@ const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export function SameSectorMovers({ symbol }: { symbol: string }) {
   const { data, isLoading } = useSWR<SectorMoversResponse>(
-    symbol ? `/api/stocks/${symbol}/sector-movers` : null,
+    symbol ? `/api/crypto/${symbol}/sector-movers` : null,
     fetcher,
     { revalidateOnFocus: false, dedupingInterval: 300_000 },
   );

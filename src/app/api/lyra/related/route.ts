@@ -69,7 +69,7 @@ User's Question: ${currentQuestion || topic}
 DIVERSITY RULES (each question must be a DIFFERENT type):
 1. **Deeper dive** — dig deeper into the same topic (e.g., "What's driving that volatility spike?")
 2. **Risk angle** — surface a risk or concern (e.g., "What's the biggest risk if I hold this?")
-3. **Comparison or context** — compare to a benchmark or zoom out to macro (e.g., "How does this compare to SPY?")
+3. **Comparison or context** — compare to a benchmark or zoom out to macro (e.g., "How does this compare to BTC?")
 
 STYLE RULES:
 - Maximum 12 words per question. Shorter = better.
@@ -77,7 +77,7 @@ STYLE RULES:
 - Conversational tone — like texting a smart friend.
 - Questions should make the user think "oh yeah, I want to know that too."
 - No buy/sell advice. Analytical framing only.
-- Never include the ".NS" suffix for Indian stock ticker symbols (e.g., write "HDFCBANK" instead of "HDFCBANK.NS").`,
+- Never include exchange suffixes for crypto ticker symbols (e.g., write "BTC" instead of "BTC-USD").`,
       });
 
       const response = NextResponse.json({

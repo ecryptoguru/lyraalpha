@@ -42,11 +42,11 @@ function clamp(value: number, min: number, max: number) {
 }
 
 function normalizeAssetType(assetType: string): SupportedStressAssetType {
-  if (assetType === "ETF" || assetType === "CRYPTO" || assetType === "COMMODITY" || assetType === "MUTUAL_FUND") {
+  if (assetType === "CRYPTO" || assetType === "DEFI" || assetType === "NFTS" || assetType === "LAYER1" || assetType === "LAYER2") {
     return assetType;
   }
 
-  return "STOCK";
+  return "CRYPTO";
 }
 
 function buildExplanationPayload(args: {
@@ -225,11 +225,7 @@ function applyHybridAdjustment(args: {
     confidenceDelta += 0.01;
   }
 
-  if (args.normalizedType === "MUTUAL_FUND") {
-    confidenceDelta -= 0.06;
-  }
-
-  if (!args.asset.sector && !args.asset.category && args.normalizedType !== "ETF") {
+  if (!args.asset.sector && !args.asset.category && args.normalizedType !== "CRYPTO") {
     confidenceDelta -= 0.03;
   }
 

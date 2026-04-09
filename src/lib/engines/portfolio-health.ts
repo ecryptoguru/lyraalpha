@@ -112,7 +112,7 @@ function computeCorrelationScore(holdings: HoldingInput[]): number {
   if (holdings.length < 2) return 50;
 
   // Use weight-based HHI rather than count ratios so that a tiny crypto
-  // position among 50 large-cap stocks does not inflate type diversity.
+  // position among 50 large-cap crypto assets does not inflate type diversity.
   const typeWeights: Record<string, number> = {};
   const sectorWeights: Record<string, number> = {};
 

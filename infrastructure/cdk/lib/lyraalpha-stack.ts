@@ -11,6 +11,13 @@ import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { Construct } from 'constructs';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _events = events;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _targets = targets;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _lambda = lambda;
+
 export class LyraAlphaStack extends cdk.Stack {
   public readonly dbEndpoint: string;
   public readonly cacheEndpoint: string;

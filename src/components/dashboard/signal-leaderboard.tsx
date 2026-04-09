@@ -29,14 +29,12 @@ interface SignalLeaderboardProps {
 
 export const SignalLeaderboard = memo(function SignalLeaderboard({ assets, className }: SignalLeaderboardProps) {
   const { mode } = useViewMode();
-  const [filter, setFilter] = useState<"all" | "stocks" | "crypto" | "etf">("all");
+  const [filter, setFilter] = useState<"all" | "crypto">("all");
 
   const filteredAssets = useMemo(() => assets
     .filter((asset) => {
       if (filter === "all") return true;
-      if (filter === "stocks") return asset.type === "STOCK";
       if (filter === "crypto") return asset.type === "CRYPTO";
-      if (filter === "etf") return asset.type === "ETF";
       return true;
     })
     .slice(0, mode === "simple" ? 10 : 20), [assets, filter, mode]);
@@ -61,7 +59,7 @@ export const SignalLeaderboard = memo(function SignalLeaderboard({ assets, class
           <CardTitle className="flex items-center justify-between">
             <span className="text-sm font-semibold">Signal Strength Leaders</span>
             <div className="flex gap-2">
-              {(["all", "stocks", "crypto", "etf"] as const).map((f) => (
+              {(["all", "crypto"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
@@ -123,7 +121,7 @@ export const SignalLeaderboard = memo(function SignalLeaderboard({ assets, class
         <CardTitle className="flex items-center justify-between">
           <span className="text-sm font-semibold">Signal Strength Leaderboard</span>
           <div className="flex gap-2">
-            {(["all", "stocks", "crypto", "etf"] as const).map((f) => (
+            {(["all", "crypto"] as const).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}

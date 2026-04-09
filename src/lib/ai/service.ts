@@ -30,7 +30,7 @@ import { compressKnowledgeContext } from "./compress";
 import { distillSessionNotes, getGlobalNotes, getSessionNotes } from "./memory";
 import { validateOutput, logValidationResult } from "./output-validation";
 import { applyCostCeiling } from "./cost-ceiling";
-import { recordFallbackResult, alertIfDailyCostExceeded } from "./alerting";
+import { recordFallbackResult, alertIfDailyCostExceeded, recordLatencyViolation } from "./alerting";
 import {
   logModelCacheEvent,
   logModelRouting,
@@ -1324,6 +1324,7 @@ logRetrievalMetric({
         const usageAny = usage as Record<string, unknown>;
         const cachedTokens = (usageAny.cachedInputTokens as number) ?? 0;
         const reasoningTokens = (usageAny.reasoningTokens as number) ?? 0;
+        const durationMs = timer.end();
         const tokenReport = {
           tokens: usage.totalTokens,
           inputTokens: usage.inputTokens,
@@ -1334,8 +1335,14 @@ logRetrievalMetric({
           tier,
           reasoningEffort: gptReasoningEffort,
           duration: timer.endFormatted(),
+          durationMs,
         };
         logger.info(tokenReport, "LLM generation finished");
+
+        // Track latency budget violations
+        const latencyBudgetMs = tierConfig.latencyBudgetMs;
+        const exceededBudget = durationMs > latencyBudgetMs;
+        recordLatencyViolation(exceededBudget, durationMs, tier).catch(() => {});
 
         // Increment daily token counter (fire-and-forget — never blocks response path)
         if (userPlan !== "ENTERPRISE") {
@@ -1465,15 +1472,22 @@ logRetrievalMetric({
           },
         },
         onFinish: async ({ text, usage }) => {
+          const durationMs = timer.end();
           logModelRouting({
             model: nanoDeployment,
             tier,
             tokens: usage.totalTokens ?? ((usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)),
             wasFallback: true,
             duration: timer.endFormatted(),
-            durationMs: timer.end(),
+            durationMs,
           });
           recordFallbackResult(true).catch(() => {});
+
+          // Track latency budget violations for fallback as well
+          const latencyBudgetMs = tierConfig.latencyBudgetMs;
+          const exceededBudget = durationMs > latencyBudgetMs;
+          recordLatencyViolation(exceededBudget, durationMs, tier).catch(() => {});
+
           if (userPlan !== "ENTERPRISE") {
             incrementDailyTokens(userId, usage.totalTokens ?? 0).catch(() => {});
           }

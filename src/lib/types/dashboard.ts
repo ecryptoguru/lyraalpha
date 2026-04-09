@@ -14,7 +14,7 @@ export interface FeaturedAsset {
   name: string;
   price: number;
   change: number;
-  type: "STOCK" | "MUTUAL_FUND" | "ETF";
+  type: "CRYPTO";
 }
 
 export interface TopMover {
@@ -22,7 +22,7 @@ export interface TopMover {
   name: string;
   price: number;
   changePercent: number;
-  type: "STOCK" | "ETF" | "CRYPTO" | "COMMODITY" | "MUTUAL_FUND";
+  type: "CRYPTO";
 }
 
 export interface CrossSectorCorrelation {

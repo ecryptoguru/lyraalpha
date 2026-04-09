@@ -9,14 +9,14 @@ import { PRELAUNCH_WAITLIST_SECTION_ID } from "@/lib/config/prelaunch";
 
 function PanelNoise() {
   const noiseRows = [
-    { sym: "TSLA", dir: "↑", val: "+8.34%", color: "text-teal-400" },
-    { sym: "META", dir: "↓", val: "-3.12%", color: "text-rose-400" },
-    { sym: "SPY",  dir: "↑", val: "+0.44%", color: "text-teal-400" },
-    { sym: "BTC",  dir: "↓", val: "-5.87%", color: "text-rose-400" },
-    { sym: "NVDA", dir: "↑", val: "+12.1%", color: "text-teal-400" },
-    { sym: "GLD",  dir: "↓", val: "-0.92%", color: "text-rose-400" },
-    { sym: "AMZN", dir: "↑", val: "+2.33%", color: "text-teal-400" },
-    { sym: "OIL",  dir: "↓", val: "-1.44%", color: "text-rose-400" },
+    { sym: "BTC",  dir: "↑", val: "+8.34%", color: "text-teal-400" },
+    { sym: "ETH",  dir: "↓", val: "-3.12%", color: "text-rose-400" },
+    { sym: "SOL",  dir: "↑", val: "+12.1%", color: "text-teal-400" },
+    { sym: "BNB",  dir: "↓", val: "-0.92%", color: "text-rose-400" },
+    { sym: "XRP",  dir: "↑", val: "+2.33%", color: "text-teal-400" },
+    { sym: "ADA",  dir: "↓", val: "-1.44%", color: "text-rose-400" },
+    { sym: "AVAX", dir: "↑", val: "+5.67%", color: "text-teal-400" },
+    { sym: "DOT",  dir: "↓", val: "-4.21%", color: "text-rose-400" },
   ];
 
   return (
@@ -64,10 +64,10 @@ function PanelNoise() {
 function PanelSignal() {
   const nodes = [
     { x: 50, y: 20, label: "MACRO",  active: true  },
-    { x: 20, y: 50, label: "EQUITY", active: true  },
-    { x: 80, y: 50, label: "CRYPTO", active: false },
-    { x: 35, y: 78, label: "ETF",    active: true  },
-    { x: 65, y: 78, label: "COMMOD", active: false },
+    { x: 30, y: 50, label: "L1",     active: true  },
+    { x: 70, y: 50, label: "L2",     active: true  },
+    { x: 30, y: 78, label: "DeFi",   active: true  },
+    { x: 70, y: 78, label: "NFT",    active: false },
   ];
   const edges: [number, number][] = [[0,1],[0,2],[1,3],[2,4],[0,3]];
 
@@ -189,29 +189,29 @@ function PanelClarity() {
   );
 }
 
-// ─── Panel 4: Dual Market ────────────────────────────────────────────────────
+// ─── Panel 4: Crypto Coverage ────────────────────────────────────────────────────
 
 function PanelDualMarket() {
-  const indiaFeatures = [
-    "NSE/BSE EOD sync pipelines",
-    "INR pricing & RBI policy context",
-    "India-aware macro regime framing",
-    "Zerodha-style broker connectivity",
-    "100% Mutual fund coverage",
+  const layer1Features = [
+    "Bitcoin & Ethereum deep analysis",
+    "On-chain metrics & network health",
+    "Real-time blockchain data sync",
+    "DeFi protocol tracking",
+    "Staking & yield farming insights",
   ];
-  const usFeatures = [
-    "NYSE/NASDAQ coverage",
-    "USD pricing & Fed policy signals",
-    "US macro regime framing",
-    "Aggregator-path broker connectivity",
-    "Comprehensive ETF & crypto coverage",
+  const layer2Features = [
+    "Solana, Avalanche, Polygon coverage",
+    "Smart contract analysis",
+    "Cross-chain bridge monitoring",
+    "Layer-2 scaling solutions",
+    "Emerging protocol discovery",
   ];
   const coverage = [
-    { asset: "Equities",     val: "100% Both" },
-    { asset: "ETFs",         val: "100% US / 85% IN" },
-    { asset: "Mutual Funds", val: "95% US / 100% IN" },
-    { asset: "Crypto",       val: "100% US / 90% IN" },
-    { asset: "Commodities",  val: "100% US / 85% IN" },
+    { asset: "Layer 1",      val: "100% Coverage" },
+    { asset: "Layer 2",      val: "95% Coverage" },
+    { asset: "DeFi",         val: "90% Coverage" },
+    { asset: "Stablecoins",  val: "100% Coverage" },
+    { asset: "NFTs",         val: "85% Coverage" },
   ];
 
   return (
@@ -220,20 +220,20 @@ function PanelDualMarket() {
         <div className="mb-8">
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.4em] text-white/30">Phase 04</p>
           <h2 className="mt-3 text-4xl font-extralight leading-tight tracking-[-0.04em] text-white sm:text-5xl">
-            Built for two markets.{" "}
+            Full crypto stack.{" "}
             <span className="font-light text-amber-400">Natively.</span>
           </h2>
           <p className="mt-4 max-w-lg font-mono text-sm leading-7 text-white/42">
-            Separate EOD sync pipelines, dual-currency pricing, and market-specific regime framing — not adapted, built from the start.
+            Layer 1 foundations, Layer 2 scaling, DeFi protocols, and on-chain metrics — built for crypto from day one.
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="relative overflow-hidden rounded-2xl border border-amber-400/20 bg-amber-400/5 p-4">
             <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-amber-500/6 to-transparent" />
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-amber-400/70">01 India Market</p>
-            <p className="mt-2 text-sm font-semibold text-white">90M+ Investors · 15–20% CAGR</p>
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-amber-400/70">01 Layer 1</p>
+            <p className="mt-2 text-sm font-semibold text-white">BTC, ETH, SOL, ADA · Core</p>
             <ul className="mt-3 space-y-1.5">
-              {indiaFeatures.map((f) => (
+              {layer1Features.map((f) => (
                 <li key={f} className="flex items-start gap-2">
                   <span className="mt-0.5 text-amber-400/70 text-[10px]">·</span>
                   <span className="font-mono text-[10px] leading-5 text-white/50">{f}</span>
@@ -243,10 +243,10 @@ function PanelDualMarket() {
           </div>
           <div className="relative overflow-hidden rounded-2xl border border-teal-400/18 bg-teal-400/4 p-4">
             <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-teal-500/5 to-transparent" />
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-teal-400/70">02 US Market</p>
-            <p className="mt-2 text-sm font-semibold text-white">160M+ Accounts · 8% CAGR</p>
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-teal-400/70">02 Layer 2 & DeFi</p>
+            <p className="mt-2 text-sm font-semibold text-white">Scaling & Innovation</p>
             <ul className="mt-3 space-y-1.5">
-              {usFeatures.map((f) => (
+              {layer2Features.map((f) => (
                 <li key={f} className="flex items-start gap-2">
                   <span className="mt-0.5 text-teal-400/70 text-[10px]">·</span>
                   <span className="font-mono text-[10px] leading-5 text-white/50">{f}</span>
@@ -255,8 +255,8 @@ function PanelDualMarket() {
             </ul>
           </div>
           <div className="relative overflow-hidden rounded-2xl border border-white/8 bg-white/3 p-4">
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-white/35">03 Asset Coverage</p>
-            <p className="mt-2 text-sm font-semibold text-white">First-class across both</p>
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.3em] text-white/35">03 Coverage</p>
+            <p className="mt-2 text-sm font-semibold text-white">Comprehensive ecosystem</p>
             <div className="mt-3 space-y-2">
               {coverage.map((c) => (
                 <div key={c.asset} className="flex items-center justify-between border-b border-white/6 pb-1.5 last:border-0 last:pb-0">
@@ -279,32 +279,32 @@ function PanelCompetitive() {
     { label: "Deterministic Analytics", score: "10/10" },
     { label: "AI Interpretation",       score: "10/10" },
     { label: "Workflow Depth",           score: "9/10"  },
-    { label: "Dual-Market Coverage",     score: "10/10" },
+    { label: "On-Chain Coverage",        score: "10/10" },
     { label: "Trust Infrastructure",     score: "10/10" },
   ];
   const competitors = [
     {
-      name: "Screeners",
-      sub: "Finviz, Screener.in",
+      name: "Chain Explorers",
+      sub: "Etherscan, Solscan",
       gap: "no synthesis or interpretation",
       color: "text-rose-400",
     },
     {
       name: "Generic AI",
-      sub: "ChatGPT Finance, Perplexity",
+      sub: "ChatGPT Crypto, Perplexity",
       gap: "no deterministic backbone",
       color: "text-amber-400",
     },
     {
-      name: "Robo-Advisors",
-      sub: "Groww, Zerodha Coin",
-      gap: "automation, not analytical intelligence",
+      name: "DeFi Dashboards",
+      sub: "DeFi Llama, DefiPulse",
+      gap: "data aggregation, not intelligence",
       color: "text-amber-400",
     },
     {
-      name: "Niche AI Tools",
-      sub: "Danelfin, Kavout",
-      gap: "US-only and narrow in coverage",
+      name: "Niche Crypto Tools",
+      sub: "Glassnode, Messari",
+      gap: "on-chain only, no AI interpretation",
       color: "text-rose-400",
     },
   ];
@@ -319,7 +319,7 @@ function PanelCompetitive() {
             <span className="font-light text-teal-400">all five dimensions.</span>
           </h2>
           <p className="mt-4 max-w-lg font-mono text-sm leading-7 text-white/42">
-            Screeners, generic AI, robo-advisors, and niche tools — all have critical gaps.
+            Chain explorers, generic AI, DeFi dashboards, and on-chain tools — all have critical gaps.
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -353,7 +353,7 @@ function PanelCompetitive() {
                 <span className="text-sm font-bold text-teal-400">LyraAlpha AI</span>
               </div>
               <p className="mt-1 pl-5 font-mono text-[10px] leading-5 text-white/55">
-                Deterministic computation + Grounded AI + Premium Workflows across US & India natively.
+                Deterministic computation + Grounded AI + Premium Workflows across the entire crypto ecosystem.
               </p>
             </div>
           </div>

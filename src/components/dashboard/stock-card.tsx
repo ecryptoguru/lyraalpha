@@ -29,12 +29,12 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LyraInsightSheet } from "@/components/lyra/lyra-insight-sheet";
 
-interface StockCardProps {
+interface CryptoCardProps {
   data: StockCardData;
   inclusionReason?: string;
 }
 
-export function StockCard({ data, inclusionReason }: StockCardProps) {
+export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
   const [explanation, setExplanation] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [lyraOpen, setLyraOpen] = useState(false);

@@ -1,5 +1,8 @@
 import { Tool } from "ai";
 import { z } from "zod";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger({ service: "ai-tools" });
 
 /**
  * Lyra tool registry.
@@ -8,6 +11,12 @@ import { z } from "zod";
  *
  * Per-tier allowlists prevent STARTER/PRO from accessing expensive tools.
  * Pattern: `getAllowedTools(tier)` → subset of aiTools for that tier.
+ *
+ * Tool validation workflow:
+ * 1. Tool must have a strict Zod schema (no z.any(), z.unknown())
+ * 2. Tool must have an execute function defined
+ * 3. Tool must be explicitly added to allowlist before activation
+ * 4. Tool handler must be tested before production deployment
  */
 export const aiTools: Record<string, Tool> = {
   // ─── Reserved for future LLM-callable tools ──────────────────────────────
@@ -19,7 +28,7 @@ export const aiTools: Record<string, Tool> = {
   //     symbol: z.string().min(1).max(10).describe("Asset ticker symbol e.g. AAPL, BTC, RELIANCE.NS"),
   //   }),
   //   execute: async ({ symbol }) => { ... }
-  // }),
+  // ),
 };
 
 // ─── Per-tier tool allowlists ─────────────────────────────────────────────
@@ -35,7 +44,30 @@ const TOOL_ALLOWLIST: Record<string, readonly string[]> = {
 };
 
 /**
+ * Validates a tool before activation.
+ * Ensures the tool has a strict schema and execute function.
+ * Throws an error if validation fails.
+ */
+export function validateToolDefinition(toolKey: string, tool: Tool): void {
+  if (!tool.inputSchema) {
+    throw new Error(`Tool "${toolKey}" is missing inputSchema`);
+  }
+
+  // Check for unsafe schema types
+  const schemaStr = JSON.stringify(tool.inputSchema);
+  if (schemaStr.includes('"any"') || schemaStr.includes('"unknown"')) {
+    throw new Error(`Tool "${toolKey}" has unsafe schema type (any/unknown). Use strict Zod types.`);
+  }
+
+  // Check if execute function exists
+  if (!tool.execute) {
+    throw new Error(`Tool "${toolKey}" is missing execute function`);
+  }
+}
+
+/**
  * Returns the allowed tool subset for a given plan tier.
+ * Validates each tool before returning it.
  * Empty object = no tools passed to streamText (current behaviour for all tiers).
  */
 export function getAllowedTools(
@@ -43,9 +75,23 @@ export function getAllowedTools(
 ): Record<string, Tool> {
   const allowed = TOOL_ALLOWLIST[planTier] ?? [];
   if (allowed.length === 0) return {};
-  return Object.fromEntries(
-    Object.entries(aiTools).filter(([key]) => (allowed as string[]).includes(key)),
-  );
+
+  const tools: Record<string, Tool> = {};
+  for (const [key, tool] of Object.entries(aiTools)) {
+    if ((allowed as string[]).includes(key)) {
+      // Validate tool before activation
+      try {
+        validateToolDefinition(key, tool);
+        tools[key] = tool;
+      } catch (error) {
+        logger.error({ toolKey: key, error }, "Tool validation failed");
+        // Skip invalid tools rather than crashing
+        continue;
+      }
+    }
+  }
+
+  return tools;
 }
 
 // Expose zod for tool definitions added in this file

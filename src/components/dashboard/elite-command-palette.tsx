@@ -44,7 +44,7 @@ const STATIC_COMMANDS = (router: ReturnType<typeof useRouter>): CommandItem[] =>
     icon: <ChartLine className="h-4 w-4" />,
     action: () => router.push("/dashboard/assets"),
     category: "navigate",
-    keywords: ["assets", "stocks", "market", "analysis"],
+    keywords: ["assets", "crypto", "market", "analysis"],
   },
   {
     id: "nav-compare",

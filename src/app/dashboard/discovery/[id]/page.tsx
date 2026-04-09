@@ -11,11 +11,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BackButton } from "@/components/ui/back-button";
-import { StockCard } from "@/components/dashboard/stock-card";
+import { CryptoCard } from "@/components/dashboard/stock-card";
 import { IntelligenceLoader } from "@/components/ui/intelligence-loader";
 import { cn, formatCompactNumber, getCurrencyConfig } from "@/lib/utils";
 
-import { DiscoverySectorDTO, StockMappingDTO } from "@/lib/types/discovery.dto";
+import { DiscoverySectorDTO, CryptoMappingDTO } from "@/lib/types/discovery.dto";
 import { StockCardData } from "@/components/dashboard/types";
 
 import useSWR from "swr";
@@ -46,7 +46,7 @@ export default function SectorDetailPage() {
 
     return Object.entries(data.tiers)
       .map(([tierName, stocks]) => {
-        const filteredStocks = (stocks as StockMappingDTO[]).filter(
+        const filteredStocks = (stocks as CryptoMappingDTO[]).filter(
           (s) =>
             s.name.toLowerCase().includes(deferredSearch.toLowerCase()) ||
             s.symbol.toLowerCase().includes(deferredSearch.toLowerCase()),
@@ -142,7 +142,7 @@ export default function SectorDetailPage() {
             className="pl-9 h-12 felt-input bg-card/40 backdrop-blur-2xl border-primary/10 focus:border-primary/30 rounded-2xl font-bold text-[13px] tracking-tight transition-all w-full shadow-2xl shadow-black/20"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            aria-label="Filter stocks"
+            aria-label="Filter crypto assets"
           />
         </div>
         <div className="hidden md:flex items-center gap-2 pr-2">
@@ -185,7 +185,7 @@ export default function SectorDetailPage() {
 
               <div className="grid gap-3 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {stocks.map((mapping) => (
-                  <StockCard
+                  <CryptoCard
                     key={mapping.symbol}
                     data={mapDTOToCardData(mapping, data.sectorId)}
                     inclusionReason={mapping.inclusionReason || undefined}
@@ -204,7 +204,7 @@ export default function SectorDetailPage() {
             <div className="space-y-1">
               <p className="text-lg font-bold">No Intelligence Found</p>
               <p className="text-[10px] text-muted-foreground/80 dark:text-muted-foreground opacity-90 dark:opacity-60">
-                No companies matching &quot;{search}&quot; meet the criteria.
+                No crypto assets matching &quot;{search}&quot; meet the criteria.
               </p>
             </div>
             <Button
@@ -222,7 +222,7 @@ export default function SectorDetailPage() {
 }
 
 function mapDTOToCardData(
-  dto: StockMappingDTO,
+  dto: CryptoMappingDTO,
   sectorId: string,
 ): StockCardData {
   return {

@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -24,7 +24,7 @@ async function restoreCredits() {
     console.log('Found:', user.email, '| Plan:', user.plan, '| Current credits:', user.credits);
 
     const amount = user.plan === 'ELITE' || user.plan === 'ENTERPRISE' ? 1500 : 500;
-    
+
     // Create credit transaction
     const transaction = await prisma.creditTransaction.create({
       data: {
@@ -36,7 +36,7 @@ async function restoreCredits() {
     });
 
     // Create credit lot
-    const lot = await prisma.creditLot.create({
+    await prisma.creditLot.create({
       data: {
         userId: user.id,
         transactionId: transaction.id,

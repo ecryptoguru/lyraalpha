@@ -220,7 +220,7 @@ export function DiscoverySectorGrid() {
         return (
           <Link
             key={data.id}
-            href={`/dashboard/discovery-stocks/${data.slug}`}
+            href={`/dashboard/discovery/${data.slug}`}
             className="group block h-full cursor-pointer"
           >
             <div className="relative h-full">

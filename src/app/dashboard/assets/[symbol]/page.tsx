@@ -28,7 +28,6 @@ import { CommoditySeasonalCard } from "@/components/analytics/commodity-seasonal
 import { CommodityCorrelationCard } from "@/components/analytics/commodity-correlation-card";
 import { CommodityStructuralContext } from "@/components/analytics/commodity-structural-context";
 import { MCXPriceCard } from "@/components/analytics/mcx-price-card";
-import { FinnhubIntelligenceCard } from "@/components/analytics/finnhub-intelligence-card";
 import { ScenarioAnalysisCard } from "@/components/stocks/scenario-analysis-card";
 import { SameSectorMovers } from "@/components/dashboard/same-sector-movers";
 import dynamic from "next/dynamic";
@@ -976,14 +975,6 @@ export default function AssetPage({
               financials={analyticsComputed.financials as Record<string, unknown>}
               currencySymbol={currencySymbol}
               region={currencyRegion}
-            />
-          )}
-
-          {/* Finnhub Intelligence — US Stocks & ETFs */}
-          {(analyticsComputed.type === "STOCK" || analyticsComputed.type === "ETF") && analyticsComputed.metadata && (
-            <FinnhubIntelligenceCard
-              metadata={analyticsComputed.metadata as Record<string, unknown>}
-              price={analyticsComputed.price}
             />
           )}
 

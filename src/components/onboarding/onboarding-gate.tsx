@@ -9,7 +9,7 @@ import { useRegion, type Region } from "@/lib/context/RegionContext";
 interface UserPreferences {
   preferredRegion: "US" | "IN" | "BOTH";
   experienceLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
-  interests: Array<"STOCKS" | "ETF" | "CRYPTO" | "MUTUAL_FUNDS" | "COMMODITIES">;
+  interests: Array<"CRYPTO" | "DEFI" | "NFTS" | "LAYER1" | "LAYER2">;
   onboardingCompleted: boolean;
   dashboardMode?: string;
 }
@@ -20,17 +20,17 @@ const INTEREST_OPTIONS: Array<{
   description: string;
   icon: React.ReactNode;
 }> = [
-  { key: "STOCKS", label: "Stocks", description: "Equities & individual companies", icon: <TrendingUp className="h-4 w-4" /> },
-  { key: "ETF", label: "ETFs", description: "Index & sector funds", icon: <BarChart2 className="h-4 w-4" /> },
-  { key: "CRYPTO", label: "Crypto", description: "Digital assets & DeFi", icon: <Cpu className="h-4 w-4" /> },
-  { key: "MUTUAL_FUNDS", label: "Mutual Funds", description: "Managed fund portfolios", icon: <Globe className="h-4 w-4" /> },
-  { key: "COMMODITIES", label: "Commodities", description: "Gold, oil & raw materials", icon: <Coins className="h-4 w-4" /> },
+  { key: "CRYPTO", label: "Crypto Assets", description: "Bitcoin, Ethereum, and major tokens", icon: <Coins className="h-4 w-4" /> },
+  { key: "DEFI", label: "DeFi", description: "Decentralized finance protocols", icon: <Cpu className="h-4 w-4" /> },
+  { key: "NFTS", label: "NFTs", description: "Non-fungible tokens & digital collectibles", icon: <TrendingUp className="h-4 w-4" /> },
+  { key: "LAYER1", label: "Layer 1", description: "Base blockchain networks", icon: <Globe className="h-4 w-4" /> },
+  { key: "LAYER2", label: "Layer 2", description: "Scaling solutions & sidechains", icon: <BarChart2 className="h-4 w-4" /> },
 ];
 
 const REGION_OPTIONS = [
-  { key: "US" as const, label: "US Markets", description: "NYSE, NASDAQ, S&P 500", flag: "🇺🇸" },
-  { key: "IN" as const, label: "Indian Markets", description: "NSE, BSE, Nifty 50", flag: "🇮🇳" },
-  { key: "BOTH" as const, label: "Both", description: "Global multi-market view", flag: "🌐" },
+  { key: "US" as const, label: "US Markets", description: "US-based crypto exchanges", flag: "🇺🇸" },
+  { key: "IN" as const, label: "Indian Markets", description: "Indian crypto exchanges", flag: "🇮🇳" },
+  { key: "BOTH" as const, label: "Both", description: "Global crypto markets", flag: "🌐" },
 ];
 
 const EXPERIENCE_OPTIONS = [
@@ -53,7 +53,7 @@ export function OnboardingGate({ initialCompleted = false }: { initialCompleted?
 
   const [preferredRegion, setPreferredRegion] = useState<UserPreferences["preferredRegion"]>("US");
   const [experienceLevel, setExperienceLevel] = useState<UserPreferences["experienceLevel"]>("BEGINNER");
-  const [interests, setInterests] = useState<UserPreferences["interests"]>(["STOCKS", "ETF"]);
+  const [interests, setInterests] = useState<UserPreferences["interests"]>(["CRYPTO", "DEFI"]);
   const [onboardingCompleted, setOnboardingCompleted] = useState(initialCompleted);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ export function OnboardingGate({ initialCompleted = false }: { initialCompleted?
         if (!active) return;
         setPreferredRegion(prefs.preferredRegion || "US");
         setExperienceLevel(prefs.experienceLevel || "BEGINNER");
-        setInterests(Array.isArray(prefs.interests) && prefs.interests.length > 0 ? prefs.interests : ["STOCKS", "ETF"]);
+        setInterests(Array.isArray(prefs.interests) && prefs.interests.length > 0 ? prefs.interests : ["CRYPTO", "DEFI"]);
         const completed = Boolean(prefs.onboardingCompleted);
         setOnboardingCompleted(completed);
         try { window.localStorage.setItem(ONBOARDING_CACHE_KEY, completed ? "1" : "0"); } catch { /* ignore */ }

@@ -3,7 +3,7 @@ import { LandingReveal } from "@/components/landing/LandingReveal";
 const trustMetrics = [
   {
     value: "01 · The Data Glut",
-    label: "90M+ equity investors in India. 160M+ brokerage accounts in the US. Everyone drowning in the same fragmented streams: prices, charts, fundamentals, screeners, earnings, news — zero synthesis.",
+    label: "400M+ crypto holders globally. 100M+ active wallets. Everyone drowning in the same fragmented streams: prices, charts, on-chain metrics, DeFi data, network signals, news — zero synthesis.",
     accent: "default",
   },
   {
@@ -13,7 +13,7 @@ const trustMetrics = [
   },
   {
     value: "03 · The Missing Framework",
-    label: "No institutional framework exists for retail investors to interpret signals and regime context. The problem isn't access to information. It's the inability to synthesize it into a decision.",
+    label: "No institutional framework exists for crypto investors to interpret on-chain signals and regime context. The problem isn't access to information. It's the inability to synthesize it into a decision.",
     accent: "teal",
   },
 ] as const;

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { addCredits } from "@/lib/services/credit.service";
 import { CreditTransactionType } from "@/generated/prisma/enums";
@@ -11,7 +11,7 @@ const logger = createLogger({ service: "restore-credits" });
  * One-time endpoint to restore monthly credits for users affected by the reset-credits bug.
  * Requires authentication. Grants 1500 credits to ELITE/ENTERPRISE users.
  */
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
     const { userId } = await auth();
     if (!userId) {

@@ -60,7 +60,7 @@ const signals = [
   { name: "Momentum",   desc: "Rate of change and acceleration",           score: "65", accent: "default" },
   { name: "Volatility", desc: "Price dispersion and regime risk",          score: "42", accent: "default" },
   { name: "Liquidity",  desc: "Bid-ask spread and trading depth",          score: "88", accent: "teal" },
-  { name: "Trust",      desc: "Earnings quality and insider activity",     score: "72", accent: "default" },
+  { name: "Trust",      desc: "On-chain activity and network health",     score: "72", accent: "default" },
   { name: "Sentiment",  desc: "Market psychology and positioning",         score: "55", accent: "default" },
 ] as const;
 
@@ -194,9 +194,9 @@ export function Features() {
                 },
                 {
                   eyebrow: "Assets",
-                  title: "AI Stock Analysis",
+                  title: "AI Crypto Analysis",
                   description: "Best when you want to go from a single name into deeper analytics and next actions.",
-                  href: "/dashboard/assets/AAPL",
+                  href: "/dashboard/assets/BTC",
                   accent: "default",
                 },
               ].map((item) => (

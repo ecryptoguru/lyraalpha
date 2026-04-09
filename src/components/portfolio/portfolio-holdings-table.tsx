@@ -16,12 +16,8 @@ interface PortfolioHoldingsTableProps {
   isLoading?: boolean;
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  STOCK:       "text-amber-400 bg-amber-400/10 border-amber-400/20",
-  ETF:         "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+const ASSET_TYPE_COLORS: Record<string, string> = {
   CRYPTO:      "text-sky-400 bg-sky-400/10 border-sky-400/20",
-  COMMODITY:   "text-orange-400 bg-orange-400/10 border-orange-400/20",
-  MUTUAL_FUND: "text-violet-400 bg-violet-400/10 border-violet-400/20",
 };
 
 const DSE_KEYS = ["avgTrendScore", "avgMomentumScore", "avgVolatilityScore", "avgLiquidityScore", "avgTrustScore", "avgSentimentScore"] as const;
@@ -184,7 +180,7 @@ function HoldingRow({
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <p className="text-sm font-bold text-foreground">{holding.asset.symbol}</p>
-                <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-md border shrink-0", TYPE_COLORS[holding.asset.type] ?? "text-muted-foreground bg-muted/10 border-muted/20")}>
+                <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-md border shrink-0", ASSET_TYPE_COLORS[holding.asset.type] ?? "text-muted-foreground bg-muted/10 border-muted/20")}>
                   {holding.asset.type}
                 </span>
               </div>

@@ -168,7 +168,7 @@ export function MarketRegimeCard({
                         </span>
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">
-                        Measures how similarly different market sectors are moving. Computed from 60-day daily return correlations across all sectors. High correlation = macro-driven market (sectors move together). Low = sector-specific dynamics (stock-picking matters more).
+                        Measures how similarly different market sectors are moving. Computed from 60-day daily return correlations across all sectors. High correlation = macro-driven market (sectors move together). Low = sector-specific dynamics (individual asset selection matters more).
                       </TooltipContent>
                     </Tooltip>
                     <Tooltip>
@@ -187,7 +187,7 @@ export function MarketRegimeCard({
                           ? "Macro Driven: Sectors are highly correlated — broad market forces (rates, geopolitics) dominate. Diversification across sectors provides less protection."
                           : crossSectorCorrelation.regime === "TRANSITIONING"
                           ? "Transitioning: Sector correlations are shifting. The market may be moving from sector-specific to macro-driven (or vice versa). Monitor closely."
-                          : "Sector Specific: Sectors are moving independently — individual sector and stock selection is the primary alpha driver."}
+                          : "Sector Specific: Sectors are moving independently — individual sector and asset selection is the primary alpha driver."}
                       </TooltipContent>
                     </Tooltip>
                     {crossSectorCorrelation.trend !== "STABLE" && (

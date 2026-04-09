@@ -412,4 +412,128 @@ export class CoinGeckoService {
       })
       .filter(Boolean) as { date: string; open: number; high: number; low: number; close: number; volume: number }[];
   }
+
+  /**
+   * Get global market data (total market cap, volume, BTC dominance, etc.)
+   * GET /global
+   */
+  static async getGlobalData(): Promise<{
+    totalMarketCap: Record<string, number>;
+    totalVolume: Record<string, number>;
+    btcDominance: number;
+    ethDominance: number;
+    activeCryptocurrencies: number;
+    markets: number;
+  } | null> {
+    const cacheKey = "cg:global";
+    const cached = await getCache<{
+      totalMarketCap: Record<string, number>;
+      totalVolume: Record<string, number>;
+      btcDominance: number;
+      ethDominance: number;
+      activeCryptocurrencies: number;
+      markets: number;
+    }>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const res = await rateLimitedFetch(`${BASE_URL}/global`);
+      const data = await res.json();
+      await setCache(cacheKey, data, 300); // 5 min cache
+      logger.info({ btcDominance: data.data.market_cap_percentage.btc }, "Fetched global market data");
+      return {
+        totalMarketCap: data.data.total_market_cap,
+        totalVolume: data.data.total_volume,
+        btcDominance: data.data.market_cap_percentage.btc,
+        ethDominance: data.data.market_cap_percentage.eth,
+        activeCryptocurrencies: data.data.active_cryptocurrencies,
+        markets: data.data.markets,
+      };
+    } catch (err) {
+      logger.error({ err: sanitizeError(err) }, "getGlobalData failed");
+      return null;
+    }
+  }
+
+  /**
+   * Get trending coins (top 7 trending coins on CoinGecko)
+   * GET /search/trending
+   */
+  static async getTrendingCoins(): Promise<
+    { id: string; name: string; symbol: string; marketCapRank: number | null; score: number }[]
+  > {
+    const cacheKey = "cg:trending";
+    const cached = await getCache<{ id: string; name: string; symbol: string; marketCapRank: number | null; score: number }[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const res = await rateLimitedFetch(`${BASE_URL}/search/trending`);
+      const data = await res.json();
+      await setCache(cacheKey, data, 600); // 10 min cache
+      const coins = data.coins.map((item: Record<string, unknown>) => ({
+        id: String((item.item as Record<string, unknown>).id),
+        name: String((item.item as Record<string, unknown>).name),
+        symbol: String((item.item as Record<string, unknown>).symbol),
+        marketCapRank: (item.item as Record<string, unknown>).market_cap_rank as number | null,
+        score: Number((item.item as Record<string, unknown>).score),
+      }));
+      logger.info({ count: coins.length }, "Fetched trending coins");
+      return coins;
+    } catch (err) {
+      logger.error({ err: sanitizeError(err) }, "getTrendingCoins failed");
+      return [];
+    }
+  }
+
+  /**
+   * Get exchange rates (crypto to fiat conversions)
+   * GET /exchange_rates
+   */
+  static async getExchangeRates(): Promise<Record<string, { name: string; unit: string; value: number; type: string }>> {
+    const cacheKey = "cg:exchange_rates";
+    const cached = await getCache<Record<string, { name: string; unit: string; value: number; type: string }>>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const res = await rateLimitedFetch(`${BASE_URL}/exchange_rates`);
+      const data = await res.json();
+      await setCache(cacheKey, data, 86400); // 24 hour cache
+      logger.info({ count: Object.keys(data.rates).length }, "Fetched exchange rates");
+      return data.rates;
+    } catch (err) {
+      logger.error({ err: sanitizeError(err) }, "getExchangeRates failed");
+      return {};
+    }
+  }
+
+  /**
+   * Get coin categories (DeFi, NFT, Layer 1, etc.)
+   * GET /coins/categories
+   */
+  static async getCoinCategories(): Promise<
+    { id: string; name: string; marketCap: number; marketCapChange24h: number; volume: number }[]
+  > {
+    const cacheKey = "cg:categories";
+    const cached = await getCache<{ id: string; name: string; marketCap: number; marketCapChange24h: number; volume: number }[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const params = new URLSearchParams({ order: "market_cap_desc" });
+      const res = await rateLimitedFetch(`${BASE_URL}/coins/categories?${params}`);
+      const data = await res.json();
+      await setCache(cacheKey, data, 3600); // 1 hour cache
+      const categories = data.map((cat: Record<string, unknown>) => ({
+        id: String(cat.id),
+        name: String(cat.name),
+        marketCap: Number(cat.market_cap),
+        marketCapChange24h: Number(cat.market_cap_change_24h),
+        volume: Number(cat.volume_24h),
+      }));
+      logger.info({ count: categories.length }, "Fetched coin categories");
+      return categories;
+    } catch (err) {
+      logger.error({ err: sanitizeError(err) }, "getCoinCategories failed");
+      return [];
+    }
+  }
 }

@@ -99,7 +99,8 @@ function resolveTopic(query: string): "finance" | "news" | "general" {
 
 // Region-specific domain lists — steer Tavily toward high-quality financial sources.
 // Without domain steering, Tavily may return Reddit/Quora/paywalled sites for finance queries.
-const INDIA_FINANCE_DOMAINS = [
+// Configurable via environment variables for runtime flexibility.
+const DEFAULT_INDIA_FINANCE_DOMAINS = [
   "moneycontrol.com",
   "economictimes.indiatimes.com",
   "livemint.com",
@@ -111,7 +112,7 @@ const INDIA_FINANCE_DOMAINS = [
   "bseindia.com",
 ];
 
-const US_FINANCE_DOMAINS = [
+const DEFAULT_US_FINANCE_DOMAINS = [
   "reuters.com",
   "bloomberg.com",
   "wsj.com",
@@ -123,6 +124,18 @@ const US_FINANCE_DOMAINS = [
   "federalreserve.gov",
   "sec.gov",
 ];
+
+function getIndiaFinanceDomains(): string[] {
+  const envValue = process.env.TAVILY_INDIA_FINANCE_DOMAINS;
+  if (!envValue) return DEFAULT_INDIA_FINANCE_DOMAINS;
+  return envValue.split(",").map((d) => d.trim()).filter(Boolean);
+}
+
+function getUSFinanceDomains(): string[] {
+  const envValue = process.env.TAVILY_US_FINANCE_DOMAINS;
+  if (!envValue) return DEFAULT_US_FINANCE_DOMAINS;
+  return envValue.split(",").map((d) => d.trim()).filter(Boolean);
+}
 
 // ── Main exported function ────────────────────────────────────────────────────
 // queryComplexity drives result count: "complex"→5, anything else→3.
@@ -181,9 +194,9 @@ export async function searchWeb(
   // Domain steering: pin high-quality financial sources per region.
   // Applied regardless of topic — finance + news queries both benefit.
   if (region === "IN") {
-    searchOptions.includeDomains = INDIA_FINANCE_DOMAINS;
+    searchOptions.includeDomains = getIndiaFinanceDomains();
   } else {
-    searchOptions.includeDomains = US_FINANCE_DOMAINS;
+    searchOptions.includeDomains = getUSFinanceDomains();
   }
 
   try {

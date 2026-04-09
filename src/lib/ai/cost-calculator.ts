@@ -1,4 +1,7 @@
 import { getEncoding } from "js-tiktoken";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger({ service: "cost-calculator" });
 
 type TiktokenEncoding = ReturnType<typeof getEncoding>;
 
@@ -123,7 +126,7 @@ function normalizeModel(model: string): string {
   }
   if (process.env.NODE_ENV !== "test" && !WARNED_UNKNOWN_MODELS.has(normalized)) {
     WARNED_UNKNOWN_MODELS.add(normalized);
-    console.warn(`[cost-calculator] Falling back to ${DEFAULT_MODEL} pricing for unknown model: ${model}`);
+    logger.warn({ model, normalized, defaultModel: DEFAULT_MODEL }, "Falling back to default pricing for unknown model");
   }
   return DEFAULT_MODEL;
 }

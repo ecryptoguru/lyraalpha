@@ -34,207 +34,125 @@ interface BrokerEntry {
 }
 
 const BROKERS: BrokerEntry[] = [
-  // ── Phase 1 India ──────────────────────────────────────────────────────────
+  // ── Phase 1 India CEX ────────────────────────────────────────────────────────
   {
-    provider: "zerodha",
-    label: "Zerodha",
+    provider: "koinx",
+    label: "KoinX",
     region: "IN",
     phase: 1,
-    description: "India's largest discount broker. Requires a paid Kite Connect developer subscription.",
-    authType: "oauth",
-    fields: [
-      { key: "api_key", label: "API Key", placeholder: "kite_api_key", type: "text" },
-      { key: "api_secret", label: "API Secret", placeholder: "kite_api_secret", type: "password" },
-      { key: "request_token", label: "Request Token", placeholder: "Paste from redirect URL", type: "text", hint: "Login at kite.zerodha.com/connect/login?api_key=YOUR_KEY, then paste the request_token from the redirect URL." },
-    ],
-    docsUrl: "https://kite.trade/docs/connect/v3/",
-  },
-  {
-    provider: "upstox",
-    label: "Upstox",
-    region: "IN",
-    phase: 1,
-    description: "Upstox API v2 — OAuth 2.0 PKCE flow. Free developer access.",
-    authType: "oauth",
-    fields: [
-      { key: "client_id", label: "Client ID", placeholder: "upstox_client_id", type: "text" },
-      { key: "client_secret", label: "Client Secret", placeholder: "upstox_client_secret", type: "password" },
-      { key: "code", label: "Auth Code", placeholder: "Authorization code from redirect", type: "text", hint: "Complete the OAuth flow at api.upstox.com, paste the code from the redirect URL." },
-      { key: "redirect_uri", label: "Redirect URI", placeholder: "https://your-app.com/callback", type: "text" },
-    ],
-    docsUrl: "https://upstox.com/developer/api-documentation/",
-  },
-  {
-    provider: "angel_one",
-    label: "Angel One",
-    region: "IN",
-    phase: 1,
-    description: "SmartAPI — direct login with client code, password, and TOTP.",
-    authType: "totp",
-    fields: [
-      { key: "api_key", label: "API Key", placeholder: "SmartAPI key", type: "text" },
-      { key: "clientcode", label: "Client Code", placeholder: "Your Angel One client code", type: "text" },
-      { key: "password", label: "Password", placeholder: "Your login password", type: "password" },
-      { key: "totp", label: "TOTP Code", placeholder: "6-digit TOTP", type: "text", hint: "Generate from your authenticator app. Must be entered within 30 seconds." },
-    ],
-    docsUrl: "https://smartapi.angelbroking.com/docs",
-  },
-  {
-    provider: "dhan",
-    label: "Dhan",
-    region: "IN",
-    phase: 1,
-    description: "DhanHQ API v2 — long-lived access token from the developer portal.",
+    description: "India's leading crypto tax and portfolio platform. Partner integration with 270+ chains and exchanges.",
     authType: "api_key",
     fields: [
-      { key: "client_id", label: "Client ID", placeholder: "Your Dhan client ID", type: "text" },
-      { key: "access_token", label: "Access Token", placeholder: "Access token from DhanHQ portal", type: "password", hint: "Generate from https://dhanhq.co/docs/v2/ — tokens are valid for one year." },
+      { key: "api_key", label: "API Key", placeholder: "koinx_api_key", type: "text" },
+      { key: "client_id", label: "Client ID", placeholder: "koinx_client_id", type: "text" },
     ],
-    docsUrl: "https://dhanhq.co/docs/v2/",
+    docsUrl: "https://api-docs.koinx.com/",
   },
   {
-    provider: "fyers",
-    label: "FYERS",
+    provider: "wazirx",
+    label: "WazirX",
     region: "IN",
     phase: 1,
-    description: "FYERS API v3 — OAuth authorization code flow.",
-    authType: "oauth",
-    fields: [
-      { key: "app_id", label: "App ID", placeholder: "FYERS app ID (e.g. XY1234-100)", type: "text" },
-      { key: "app_secret", label: "App Secret", placeholder: "FYERS app secret", type: "password" },
-      { key: "auth_code", label: "Auth Code", placeholder: "Authorization code from redirect", type: "text", hint: "Complete login at myapi.fyers.in, paste the auth_code from the redirect URL." },
-    ],
-    docsUrl: "https://myapi.fyers.in/",
-  },
-  // ── Phase 2 India ──────────────────────────────────────────────────────────
-  {
-    provider: "groww",
-    label: "Groww",
-    region: "IN",
-    phase: 2,
-    description: "Groww partner API — token issued from the Groww partner portal.",
+    description: "India's largest crypto exchange. Binance-owned with strong API documentation.",
     authType: "api_key",
     fields: [
-      { key: "user_id", label: "User ID", placeholder: "Groww user ID", type: "text" },
-      { key: "access_token", label: "Access Token", placeholder: "Access token from Groww partner portal", type: "password" },
+      { key: "api_key", label: "API Key", placeholder: "wazirx_api_key", type: "text" },
+      { key: "secret_key", label: "Secret Key", placeholder: "wazirx_secret_key", type: "password" },
     ],
-    docsUrl: "https://groww.in/open-api",
+    docsUrl: "https://docs.wazirx.com/",
   },
   {
-    provider: "icici_direct",
-    label: "ICICI Direct",
+    provider: "coindcx",
+    label: "CoinDCX",
     region: "IN",
-    phase: 2,
-    description: "Breeze Connect API — API key + secret with optional session token.",
+    phase: 1,
+    description: "Major Indian crypto exchange with good API coverage and strong retail relevance.",
     authType: "api_key",
     fields: [
-      { key: "api_key", label: "API Key", placeholder: "Breeze API key", type: "text" },
-      { key: "api_secret", label: "API Secret", placeholder: "Breeze API secret", type: "password" },
-      { key: "session_token", label: "Session Token (optional)", placeholder: "Pre-generated session token", type: "password", hint: "Optional. If blank, a session will be generated automatically." },
+      { key: "api_key", label: "API Key", placeholder: "coindcx_api_key", type: "text" },
+      { key: "secret_key", label: "Secret Key", placeholder: "coindcx_secret_key", type: "password" },
     ],
-    docsUrl: "https://api.icicidirect.com/apiuser/",
+    docsUrl: "https://docs.coindcx.com/",
   },
+  // ── Phase 1 Global CEX ──────────────────────────────────────────────────────
   {
-    provider: "kotak_neo",
-    label: "Kotak Neo",
-    region: "IN",
-    phase: 2,
-    description: "Kotak Neo REST API — consumer key/secret with OTP login.",
-    authType: "totp",
-    fields: [
-      { key: "consumer_key", label: "Consumer Key", placeholder: "Neo API consumer key", type: "text" },
-      { key: "consumer_secret", label: "Consumer Secret", placeholder: "Neo API consumer secret", type: "password" },
-      { key: "mobile_number", label: "Mobile Number", placeholder: "Registered mobile number", type: "text" },
-      { key: "password", label: "Password", placeholder: "Login password", type: "password" },
-      { key: "mpin", label: "MPIN", placeholder: "4-digit MPIN", type: "password" },
-      { key: "otp", label: "OTP", placeholder: "OTP sent to your mobile", type: "text", hint: "Request OTP via the Neo portal before connecting." },
-    ],
-    docsUrl: "https://gw-napi.kotaksecurities.com/",
-  },
-  {
-    provider: "five_paisa",
-    label: "5paisa",
-    region: "IN",
-    phase: 2,
-    description: "5paisa OpenAPI — app credentials with TOTP.",
-    authType: "totp",
-    fields: [
-      { key: "app_name", label: "App Name", placeholder: "5paisa app name", type: "text" },
-      { key: "user_key", label: "User Key", placeholder: "API user key", type: "text" },
-      { key: "encryption_key", label: "Encryption Key", placeholder: "API encryption key", type: "password" },
-      { key: "user_id", label: "Email / User ID", placeholder: "Registered email", type: "text" },
-      { key: "password", label: "Password", placeholder: "Login password", type: "password" },
-    ],
-    docsUrl: "https://www.5paisa.com/developer-apis",
-  },
-  {
-    provider: "motilal_oswal",
-    label: "Motilal Oswal",
-    region: "IN",
-    phase: 2,
-    description: "MO OpenAPI — partner API key with TOTP login.",
-    authType: "totp",
-    fields: [
-      { key: "api_key", label: "API Key", placeholder: "MO API key", type: "text" },
-      { key: "client_id", label: "Client ID", placeholder: "MO client ID", type: "text" },
-      { key: "password", label: "Password", placeholder: "Login password", type: "password" },
-      { key: "totp", label: "TOTP Code", placeholder: "6-digit TOTP", type: "text", hint: "From your TOTP authenticator app." },
-    ],
-    docsUrl: "https://openapi.motilaloswal.com/",
-  },
-  // ── Phase 3 India ──────────────────────────────────────────────────────────
-  {
-    provider: "shoonya",
-    label: "Shoonya (Finvasia)",
-    region: "IN",
-    phase: 3,
-    description: "NorenAPI — zero brokerage. SHA-256 password + TOTP login.",
-    authType: "totp",
-    fields: [
-      { key: "user_id", label: "User ID", placeholder: "Shoonya user ID", type: "text" },
-      { key: "password", label: "Password", placeholder: "Login password", type: "password" },
-      { key: "totp", label: "TOTP Code", placeholder: "6-digit TOTP", type: "text", hint: "From your authenticator app." },
-      { key: "vendor_code", label: "Vendor Code", placeholder: "NorenAPI vendor code", type: "text" },
-      { key: "api_secret", label: "API Secret", placeholder: "NorenAPI app key secret", type: "password" },
-    ],
-    docsUrl: "https://api.shoonya.com/",
-  },
-  {
-    provider: "alice_blue",
-    label: "Alice Blue",
-    region: "IN",
-    phase: 3,
-    description: "ANT+ API — user ID + API key session flow.",
-    authType: "api_key",
-    fields: [
-      { key: "user_id", label: "User ID", placeholder: "Alice Blue user ID", type: "text" },
-      { key: "api_key", label: "API Key", placeholder: "ANT+ API key", type: "password" },
-    ],
-    docsUrl: "https://ant.aliceblueonline.com/",
-  },
-  // ── US ────────────────────────────────────────────────────────────────────
-  {
-    provider: "plaid",
-    label: "Plaid",
+    provider: "binance",
+    label: "Binance",
     region: "US",
     phase: 1,
-    description: "Connect 12,000+ US financial institutions via Plaid Link. Broadest US brokerage coverage.",
-    authType: "oauth",
-    fields: [],  // Plaid uses Link SDK — no manual credential entry
-    docsUrl: "https://plaid.com/docs/investments/",
-  },
-  {
-    provider: "alpaca",
-    label: "Alpaca",
-    region: "US",
-    phase: 1,
-    description: "Commission-free US equities & crypto. API key or OAuth.",
+    description: "Global crypto exchange leader with excellent API, highest liquidity and most trading pairs.",
     authType: "api_key",
     fields: [
-      { key: "api_key", label: "API Key ID", placeholder: "APCA-API-KEY-ID", type: "text" },
-      { key: "api_secret", label: "API Secret Key", placeholder: "APCA-API-SECRET-KEY", type: "password" },
+      { key: "api_key", label: "API Key", placeholder: "binance_api_key", type: "text" },
+      { key: "secret_key", label: "Secret Key", placeholder: "binance_secret_key", type: "password" },
     ],
-    docsUrl: "https://docs.alpaca.markets/",
+    docsUrl: "https://binance-docs.github.io/apidocs/",
+  },
+  {
+    provider: "coinbase",
+    label: "Coinbase",
+    region: "US",
+    phase: 1,
+    description: "US market leader with excellent OAuth flow. Good for institutional users.",
+    authType: "oauth",
+    fields: [
+      { key: "api_key", label: "API Key", placeholder: "coinbase_api_key", type: "text" },
+      { key: "secret_key", label: "API Secret", placeholder: "coinbase_api_secret", type: "password" },
+    ],
+    docsUrl: "https://docs.cloud.coinbase.com/",
+  },
+  {
+    provider: "kraken",
+    label: "Kraken",
+    region: "US",
+    phase: 1,
+    description: "Strong API with institutional-grade security. Good for high-value accounts.",
+    authType: "api_key",
+    fields: [
+      { key: "api_key", label: "API Key", placeholder: "kraken_api_key", type: "text" },
+      { key: "secret_key", label: "Secret Key", placeholder: "kraken_secret_key", type: "password" },
+    ],
+    docsUrl: "https://docs.kraken.com/",
+  },
+  // ── DEX ───────────────────────────────────────────────────────────────────────────
+  {
+    provider: "uniswap",
+    label: "Uniswap",
+    region: "US",
+    phase: 1,
+    description: "Leading DEX on Ethereum and L2s. Connect via MetaMask or Phantom wallet.",
+    authType: "api_key",
+    fields: [
+      { key: "wallet_address", label: "Wallet Address", placeholder: "0x...", type: "text" },
+      { key: "chain", label: "Chain", placeholder: "ethereum", type: "text", hint: "Supported: ethereum, polygon, arbitrum, optimism, bsc, avalanche" },
+    ],
+    docsUrl: "https://docs.uniswap.org/",
+  },
+  {
+    provider: "pancakeswap",
+    label: "Pancakeswap",
+    region: "US",
+    phase: 1,
+    description: "Leading DEX on BSC. Connect via MetaMask or Phantom wallet.",
+    authType: "api_key",
+    fields: [
+      { key: "wallet_address", label: "Wallet Address", placeholder: "0x...", type: "text" },
+      { key: "chain", label: "Chain", placeholder: "bsc", type: "text", hint: "Supported: bsc, ethereum" },
+    ],
+    docsUrl: "https://docs.pancakeswap.finance/",
+  },
+  {
+    provider: "sushiswap",
+    label: "Sushiswap",
+    region: "US",
+    phase: 1,
+    description: "Multi-chain DEX. Connect via MetaMask or Phantom wallet.",
+    authType: "api_key",
+    fields: [
+      { key: "wallet_address", label: "Wallet Address", placeholder: "0x...", type: "text" },
+      { key: "chain", label: "Chain", placeholder: "ethereum", type: "text", hint: "Supported: ethereum, polygon, arbitrum, optimism, bsc, avalanche, fantom" },
+    ],
+    docsUrl: "https://docs.sushi.com/",
   },
 ];
 
@@ -389,7 +307,7 @@ export function BrokerConnectDialog({
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-white">{b.label}</span>
-                        {b.provider === "plaid" && (
+                        {b.provider === "koinx" && (
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-blue-500/40 text-blue-400">
                             Link
                           </Badge>
@@ -408,88 +326,25 @@ export function BrokerConnectDialog({
         {/* ── Credential form ───────────────────────────────────────────────── */}
         {selectedBroker && !syncResult && (
           <form onSubmit={handleConnect} className="space-y-4 mt-2">
-            {/* Plaid uses Link SDK — show instructions instead of form */}
-            {selectedBroker.provider === "plaid" ? (
-              <div className="rounded-lg border border-blue-500/20 bg-blue-500/5 p-4 text-sm text-zinc-300 space-y-2">
-                <p className="font-medium text-blue-300">Plaid Link</p>
-                <p>
-                  Plaid uses a secure browser-based flow. Click{" "}
-                  <strong>Open Plaid Link</strong> to authenticate your US brokerage account. Your credentials never touch our servers.
-                </p>
-                <p className="text-zinc-400 text-xs">
-                  Requires: PLAID_CLIENT_ID and PLAID_SECRET configured on the server.
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-2 border-blue-500/40 text-blue-300 hover:bg-blue-500/10"
-                  onClick={async () => {
-                    try {
-                      const res = await fetch("/api/broker/plaid/link-token", { method: "POST" });
-                      const data = await res.json() as { link_token?: string; error?: string };
-                      if (!res.ok || !data.link_token) {
-                        toast.error(data.error ?? "Failed to start Plaid Link");
-                        return;
-                      }
-                      // Lazy-load the Plaid Link SDK only when needed (not in root layout)
-                      type PlaidWindow = { Plaid?: { create: (cfg: Record<string, unknown>) => { open: () => void } } };
-                      const win = window as unknown as PlaidWindow;
-                      if (!win.Plaid) {
-                        await new Promise<void>((resolve, reject) => {
-                          const existing = document.getElementById("plaid-link-sdk");
-                          if (existing) { resolve(); return; }
-                          const script = document.createElement("script");
-                          script.id = "plaid-link-sdk";
-                          script.src = "https://cdn.plaid.com/link/v2/stable/link-initialize.js";
-                          script.async = true;
-                          script.onload = () => resolve();
-                          script.onerror = () => reject(new Error("Failed to load Plaid Link SDK"));
-                          document.head.appendChild(script);
-                        });
-                      }
-                      const Plaid = (window as unknown as PlaidWindow).Plaid;
-                      if (!Plaid) {
-                        toast.error("Plaid Link SDK failed to initialize.");
-                        return;
-                      }
-                      const handler = Plaid.create({
-                        token: data.link_token,
-                        onSuccess: async (public_token: string) => {
-                          setCredentials({ public_token });
-                          // Auto-submit
-                          setIsSubmitting(true);
-                          try {
-                            const syncRes = await fetch(`/api/portfolio/${portfolioId}/broker/sync`, {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ provider: "plaid", credentials: { public_token }, replaceExisting }),
-                            });
-                            const syncData = await syncRes.json() as {
-                              summary?: { holdingCount: number };
-                              warnings?: string[];
-                              error?: string;
-                            };
-                            if (!syncRes.ok || syncData.error) {
-                              toast.error(syncData.error ?? "Plaid sync failed");
-                            } else {
-                              setSyncResult({ holdingCount: syncData.summary?.holdingCount ?? 0, warnings: syncData.warnings ?? [] });
-                              toast.success(`Plaid synced — ${syncData.summary?.holdingCount ?? 0} holdings imported`);
-                              onSuccess?.();
-                            }
-                          } finally {
-                            setIsSubmitting(false);
-                          }
-                        },
-                        onExit: () => {},
-                      });
-                      handler.open();
-                    } catch (err) {
-                      toast.error(err instanceof Error ? err.message : "Failed to start Plaid Link");
-                    }
-                  }}
-                >
-                  Open Plaid Link
-                </Button>
+            {/* Crypto exchanges use API key authentication */}
+            {selectedBroker.authType === "api_key" ? (
+              <div className="space-y-3">
+                {selectedBroker.fields.map((field) => (
+                  <div key={field.key} className="space-y-1">
+                    <Label htmlFor={field.key} className="text-sm text-zinc-300">
+                      {field.label}
+                    </Label>
+                    <Input
+                      id={field.key}
+                      type={field.type || "text"}
+                      placeholder={field.placeholder}
+                      value={credentials[field.key] || ""}
+                      onChange={(e) => setCredentials({ ...credentials, [field.key]: e.target.value })}
+                      className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500"
+                    />
+                    {field.hint && <p className="text-xs text-zinc-400">{field.hint}</p>}
+                  </div>
+                ))}
               </div>
             ) : (
               <>

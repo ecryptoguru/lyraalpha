@@ -23,11 +23,11 @@ export type StressShockType =
   | "oil-spike";
 
 export type SupportedStressAssetType =
-  | "STOCK"
-  | "ETF"
   | "CRYPTO"
-  | "COMMODITY"
-  | "MUTUAL_FUND";
+  | "DEFI"
+  | "NFTS"
+  | "LAYER1"
+  | "LAYER2";
 
 export interface ScenarioProxyPath {
   proxy: string; // proxy symbol label (e.g. "SPY", "NIFTY50")

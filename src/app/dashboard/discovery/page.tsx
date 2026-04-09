@@ -19,7 +19,7 @@ export default async function DiscoveryPage({
   const initialTab = resolvedParams?.tab === "sectors" ? "sectors" : "radar";
 
   const initialData = await getDiscoveryFeedData({
-    typeFilter: "all",
+    typeFilter: "CRYPTO",
     region: initialRegion,
     requestedLimit: 20,
     offset: 0,
@@ -35,8 +35,8 @@ export default async function DiscoveryPage({
         <div className="relative z-10 animate-slide-up-fade">
           <PageHeader
             icon={<Radar className="h-5 w-5" />}
-            title={initialTab === "sectors" ? "Sector Pulse" : "Multibagger Radar"}
-            eyebrow={initialTab === "sectors" ? "Where the groups are moving" : "What surfaced today"}
+            title={initialTab === "sectors" ? "Sector Pulse" : "Crypto Discovery"}
+            eyebrow={initialTab === "sectors" ? "Where the groups are moving" : "On-chain signals surfaced today"}
             chips={
               <>
                 {initialTab === "radar" && (

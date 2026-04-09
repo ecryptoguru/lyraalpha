@@ -105,19 +105,11 @@ const ARCHETYPE_CONFIG: Record<string, { label: string; tooltip: string; icon: t
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  STOCK: "Stock",
-  ETF: "ETF",
   CRYPTO: "Crypto",
-  COMMODITY: "Commodity",
-  MUTUAL_FUND: "MF",
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  STOCK: "text-primary bg-primary/10 border-primary/20",
-  ETF: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   CRYPTO: "text-orange-400 bg-orange-400/10 border-orange-400/20",
-  COMMODITY: "text-rose-400 bg-rose-400/10 border-rose-400/20",
-  MUTUAL_FUND: "text-cyan-400 bg-cyan-400/10 border-cyan-400/20",
 };
 
 const SCORE_LABELS: Record<string, string> = {

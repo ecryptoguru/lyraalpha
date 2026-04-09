@@ -48,10 +48,10 @@ export async function GET(req: NextRequest) {
       if (cached) return NextResponse.json(cached);
     } catch { /* Redis unavailable */ }
 
-    // Get stocks with scores
+    // Get crypto assets with scores
     const assets = await prisma.asset.findMany({
       where: {
-        type: "STOCK",
+        type: "CRYPTO",
         region,
         avgTrendScore: { not: null },
         avgMomentumScore: { not: null },

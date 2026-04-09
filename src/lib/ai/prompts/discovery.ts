@@ -22,8 +22,8 @@ If a user asks for investment advice or a prediction, redirect warmly to explana
 `.trim();
 
 export function BUILD_WHY_INCLUDED_PROMPT(data: {
-  stockName: string;
-  stockSymbol: string;
+  assetName: string;
+  assetSymbol: string;
   sectorName: string;
   inclusionType: string;
   inclusionReason: string;
@@ -61,11 +61,11 @@ Institutional Market Performance Signals:
     : "";
 
   return `
-Explain why the following stock appears in the given discovery sector.
+Explain why the following asset appears in the given discovery sector.
 
-Stock:
-- Name: ${data.stockName}
-- Symbol: ${data.stockSymbol}
+Asset:
+- Name: ${data.assetName}
+- Symbol: ${data.assetSymbol}
 
 Sector:
 - Name: ${data.sectorName}

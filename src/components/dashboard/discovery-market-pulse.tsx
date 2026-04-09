@@ -128,14 +128,14 @@ export function DiscoveryMarketPulse() {
           <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/20">
             <div>
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-40 mb-1">Strongest</p>
-              <Link href={`/dashboard/discovery-stocks/${maxSector.slug}`} className="hover:text-primary transition-colors">
+              <Link href={`/dashboard/discovery/${maxSector.slug}`} className="hover:text-primary transition-colors">
                 <p className="text-[10px] font-bold tracking-tight truncate">{maxSector.name}</p>
                 <p className={cn("text-xs font-bold font-mono", getScoreColor(maxSector.latestRegime!.regimeScore))}>{maxSector.latestRegime!.regimeScore}/100</p>
               </Link>
             </div>
             <div>
               <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-40 mb-1">Weakest</p>
-              <Link href={`/dashboard/discovery-stocks/${minSector.slug}`} className="hover:text-primary transition-colors">
+              <Link href={`/dashboard/discovery/${minSector.slug}`} className="hover:text-primary transition-colors">
                 <p className="text-[10px] font-bold tracking-tight truncate">{minSector.name}</p>
                 <p className={cn("text-xs font-bold font-mono", getScoreColor(minSector.latestRegime!.regimeScore))}>{minSector.latestRegime!.regimeScore}/100</p>
               </Link>

@@ -26,7 +26,7 @@ vi.mock("@/lib/prisma", () => ({
         { symbol: "SPY" },
         { symbol: "BTC-USD" },
       ]),
-      findFirst: vi.fn().mockResolvedValue({ symbol: "NVDA", type: "STOCK" }),
+      findFirst: vi.fn().mockResolvedValue({ symbol: "NVDA", type: "CRYPTO" }),
       findUnique: vi.fn().mockResolvedValue({
         price: 142.30,
         changePercent: 2.15,
@@ -179,7 +179,7 @@ describe("Service Optimizations", () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_s", plan: "STARTER" } as any);
       await generateLyraStream(
         [{ role: "user", content: "What is RSI?" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_s",
       );
       expect(streamText).toHaveBeenCalled();
@@ -188,7 +188,7 @@ describe("Service Optimizations", () => {
     it("uses streamText (single mode) for PRO COMPLEX queries", async () => {
       await generateLyraStream(
         [{ role: "user", content: "Compare AAPL vs MSFT vs GOOGL in the current macro environment" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
       expect(streamText).toHaveBeenCalled();
@@ -198,7 +198,7 @@ describe("Service Optimizations", () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_elite", plan: "ELITE" } as any);
       await generateLyraStream(
         [{ role: "user", content: "How is NVDA performing this quarter?" }],
-        { scores: {}, assetType: "STOCK", symbol: "NVDA" },
+        { scores: {}, assetType: "CRYPTO", symbol: "NVDA" },
         "user_elite",
       );
       expect(streamText).toHaveBeenCalled();
@@ -208,7 +208,7 @@ describe("Service Optimizations", () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_elite2", plan: "ELITE" } as any);
       await generateLyraStream(
         [{ role: "user", content: "Compare AAPL vs MSFT vs GOOGL portfolio impact and cross-sector correlation analysis" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_elite2",
       );
       expect(streamText).toHaveBeenCalled();
@@ -218,7 +218,7 @@ describe("Service Optimizations", () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_ent", plan: "ENTERPRISE" } as any);
       await generateLyraStream(
         [{ role: "user", content: "Compare AAPL vs MSFT vs GOOGL portfolio impact and cross-sector correlation analysis" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_ent",
       );
       expect(streamText).toHaveBeenCalled();
@@ -228,7 +228,7 @@ describe("Service Optimizations", () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_elite3", plan: "ELITE" } as any);
       const { result } = await generateLyraStream(
         [{ role: "user", content: "How is NVDA performing this quarter?" }],
-        { scores: {}, assetType: "STOCK", symbol: "NVDA" },
+        { scores: {}, assetType: "CRYPTO", symbol: "NVDA" },
         "user_elite3",
       );
       const chunks: string[] = [];
@@ -333,7 +333,7 @@ describe("Service Optimizations", () => {
       it(`triggers RAG for: "${query}"`, async () => {
         await generateLyraStream(
           [{ role: "user", content: query }],
-          { scores: {}, assetType: "STOCK" },
+          { scores: {}, assetType: "CRYPTO" },
           "user_123",
         );
 
@@ -357,7 +357,7 @@ describe("Service Optimizations", () => {
 
       const response = await generateLyraStream(
         [{ role: "user", content: "How is NVDA doing?" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -378,7 +378,7 @@ describe("Service Optimizations", () => {
         modelFamily: "gpt",
         planTier: "PRO",
         tier: "COMPLEX",
-        assetType: "STOCK",
+        assetType: "CRYPTO",
         responseMode: "default",
         query: "Compare AAPL vs MSFT",
       });
@@ -386,7 +386,7 @@ describe("Service Optimizations", () => {
         modelFamily: "gpt",
         planTier: "PRO",
         tier: "COMPLEX",
-        assetType: "STOCK",
+        assetType: "CRYPTO",
         responseMode: "compare",
         query: "Compare AAPL vs MSFT",
       });
@@ -394,7 +394,7 @@ describe("Service Optimizations", () => {
         modelFamily: "gpt",
         planTier: "ELITE",
         tier: "COMPLEX",
-        assetType: "STOCK",
+        assetType: "CRYPTO",
         responseMode: "compare",
         query: "Compare AAPL vs MSFT",
       });
@@ -410,7 +410,7 @@ describe("Service Optimizations", () => {
         [{ role: "user", content: "Compare AAPL vs MSFT on momentum and valuation" }],
         {
           scores: {},
-          assetType: "STOCK",
+          assetType: "CRYPTO",
           chatMode: "compare",
           compareContext: [{ symbol: "AAPL" }, { symbol: "MSFT" }],
         },
@@ -432,7 +432,7 @@ describe("Service Optimizations", () => {
         [{ role: "user", content: "Compare AAPL vs MSFT latest news and current developments" }],
         {
           scores: {},
-          assetType: "STOCK",
+          assetType: "CRYPTO",
           chatMode: "compare",
           compareContext: [{ symbol: "AAPL" }, { symbol: "MSFT" }],
         },
@@ -461,7 +461,7 @@ describe("Service Optimizations", () => {
         ({
           scores: {},
           symbol: "RELIANCE.NS",
-          assetType: "STOCK",
+          assetType: "CRYPTO",
           region: "IN",
         } as any),
         "user_123",
@@ -496,7 +496,7 @@ describe("Service Optimizations", () => {
         [{ role: "user", content: "Compare AAPL vs MSFT on momentum and regime fit" }],
         {
           scores: {},
-          assetType: "STOCK",
+          assetType: "CRYPTO",
           chatMode: "compare",
           compareContext: [
             { symbol: "AAPL", scores: { trend: 78, momentum: 72 } },
@@ -528,7 +528,7 @@ describe("Service Optimizations", () => {
 
       const response = await generateLyraStream(
         [{ role: "user", content: "Compare AAPL vs MSFT in the current macro environment" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -547,7 +547,7 @@ describe("Service Optimizations", () => {
 
       await generateLyraStream(
         [{ role: "user", content: "Compare AAPL vs MSFT in the current macro environment" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -572,7 +572,7 @@ describe("Service Optimizations", () => {
 
       await generateLyraStream(
         [{ role: "user", content: "Compare AAPL vs MSFT in the current macro environment" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -592,7 +592,7 @@ describe("Service Optimizations", () => {
     it("fetches price data when symbol is provided", async () => {
       await generateLyraStream(
         [{ role: "user", content: "How is NVDA doing?" }],
-        { scores: {}, symbol: "NVDA", assetType: "STOCK" },
+        { scores: {}, symbol: "NVDA", assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -636,7 +636,7 @@ describe("Service Optimizations", () => {
     it("price data is passed to context builder (appears in context message)", async () => {
       await generateLyraStream(
         [{ role: "user", content: "How is NVDA doing?" }],
-        { scores: {}, symbol: "NVDA", assetType: "STOCK" },
+        { scores: {}, symbol: "NVDA", assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -669,7 +669,7 @@ describe("Service Optimizations", () => {
 
       await generateLyraStream(
         [{ role: "user", content: "AAPL outlook for next quarter" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -688,7 +688,7 @@ describe("Service Optimizations", () => {
     it("cross-sector runs in parallel for COMPLEX queries", async () => {
       await generateLyraStream(
         [{ role: "user", content: "Compare AAPL vs MSFT vs GOOGL in the current macro environment" }],
-        { scores: {}, symbol: "AAPL", assetType: "STOCK" },
+        { scores: {}, symbol: "AAPL", assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -715,7 +715,7 @@ describe("Service Optimizations", () => {
       await expect(
         generateLyraStream(
           [{ role: "user", content: "What is the analyst target price for AAPL?" }],
-          { scores: {}, symbol: "AAPL", assetType: "STOCK" },
+          { scores: {}, symbol: "AAPL", assetType: "CRYPTO" },
           "user_123",
         ),
       ).resolves.toBeDefined();
@@ -725,7 +725,7 @@ describe("Service Optimizations", () => {
       await expect(
         generateLyraStream(
           [{ role: "user", content: "What is the current price of AAPL?" }],
-          { scores: {}, symbol: "AAPL", assetType: "STOCK" },
+          { scores: {}, symbol: "AAPL", assetType: "CRYPTO" },
           "user_123",
         ),
       ).resolves.toBeDefined();
@@ -736,7 +736,7 @@ describe("Service Optimizations", () => {
     it("SIMPLE tier skips memory retrieval", async () => {
       await generateLyraStream(
         [{ role: "user", content: "What is a PE ratio?" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -751,7 +751,7 @@ describe("Service Optimizations", () => {
     it("COMPLEX tier enables cross-sector correlation", async () => {
       await generateLyraStream(
         [{ role: "user", content: "Compare AAPL vs MSFT portfolio impact and cross-sector correlation" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -761,7 +761,7 @@ describe("Service Optimizations", () => {
     it("MODERATE tier does NOT enable cross-sector", async () => {
       await generateLyraStream(
         [{ role: "user", content: "How is NVDA doing today?" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
       expect(prisma.marketRegime.findFirst).not.toHaveBeenCalled();
@@ -791,7 +791,7 @@ describe("Service Optimizations", () => {
         dividendYield: null,
         marketCap: "3.5T",
         metadata: null,
-        type: "STOCK",
+        type: "CRYPTO",
         description: "NVIDIA designs accelerated computing hardware and software.",
         industry: "Semiconductors",
         sector: "Technology",
@@ -817,7 +817,7 @@ describe("Service Optimizations", () => {
       expect(retrieveInstitutionalKnowledge).toHaveBeenCalledWith(
         "NVDA stock",
         expect.any(Number),
-        "STOCK",
+        "CRYPTO",
         expect.any(Boolean),
         expect.any(String),
       );
@@ -839,8 +839,8 @@ describe("Service Optimizations", () => {
       ]);
 
       const streamCall = vi.mocked(streamText).mock.calls[0][0] as any;
-      expect(streamCall.system).toContain("## Business & Growth");
-      expect(streamCall.system).toContain("## Valuation Insight");
+      expect(streamCall.system).toContain("## Protocol & Growth");
+      expect(streamCall.system).toContain("## Tokenomics Valuation");
       expect(streamCall.system).not.toContain("## Market Pulse");
     });
   });
@@ -849,7 +849,7 @@ describe("Service Optimizations", () => {
     it("appends context as the last system message for optimal prompt caching", async () => {
       await generateLyraStream(
         [{ role: "user", content: "Analyze AAPL" }],
-        { scores: {}, symbol: "AAPL", assetType: "STOCK" },
+        { scores: {}, symbol: "AAPL", assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -878,7 +878,7 @@ describe("Service Optimizations", () => {
         dividendYield: null,
         marketCap: null,
         metadata: null,
-        type: "STOCK",
+        type: "CRYPTO",
         description: null,
         industry: null,
         sector: null,
@@ -905,13 +905,13 @@ describe("Service Optimizations", () => {
       const streamCall = vi.mocked(streamText).mock.calls[0][0] as any;
       const lastMsg = streamCall.messages[streamCall.messages.length - 1];
       expect(lastMsg.content).toContain("[ASSET] NVDA");
-      expect(lastMsg.content).toContain("Type: STOCK");
+      expect(lastMsg.content).toContain("Type: CRYPTO");
     });
 
     it("system prompt includes core identity and rules", async () => {
       await generateLyraStream(
         [{ role: "user", content: "How is AAPL?" }],
-        { scores: {}, assetType: "STOCK" },
+        { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
 
