@@ -15,7 +15,6 @@ const log = createLogger({ module: "myra" });
 // Myra uses GPT-5.4-nano (Azure) exclusively — same provider as Lyra.
 // Role: "myra" → AZURE_OPENAI_DEPLOYMENT_MYRA env var, falls back to primary.
 const MYRA_MAX_TOKENS = 700;
-const MYRA_TEMPERATURE = 0.35;
 
 // ─── Myra response cache ─────────────────────────────────────────────────────
 // Caches LLM responses for identical normalized queries to avoid redundant calls.
@@ -459,7 +458,7 @@ export async function buildSupportPrompt(
   return { system: systemPrompt, messages };
 }
 
-export { MYRA_MAX_TOKENS, MYRA_TEMPERATURE };
+export { MYRA_MAX_TOKENS };
 
 // ─── generateSupportReply ────────────────────────────────────────────────────
 
@@ -475,7 +474,6 @@ export async function generateSupportReply(
 
     const result = await generateText({
       model: getGpt54Model("myra"),
-      temperature: MYRA_TEMPERATURE,
       maxOutputTokens: MYRA_MAX_TOKENS,
       providerOptions: {
         openai: {

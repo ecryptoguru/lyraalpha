@@ -3,7 +3,7 @@ import {
   DISCOVERY_BASE_SYSTEM,
   BUILD_WHY_INCLUDED_PROMPT,
 } from "@/lib/ai/prompts/discovery";
-import { AI_CONFIG, getAzureOpenAIApiKey, getAzureOpenAIBaseURL, getGpt54Deployment } from "@/lib/ai/config";
+import { getAzureOpenAIApiKey, getAzureOpenAIBaseURL, getGpt54Deployment } from "@/lib/ai/config";
 import { prisma } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
 import { createLogger } from "@/lib/logger";
@@ -72,7 +72,6 @@ export class LyraService {
         { role: "system", content: DISCOVERY_BASE_SYSTEM },
         { role: "user", content: BUILD_WHY_INCLUDED_PROMPT(promptData) },
       ],
-      temperature: AI_CONFIG.temperature,
       max_tokens: 600,
     });
 

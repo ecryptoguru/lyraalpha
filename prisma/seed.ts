@@ -1,5 +1,6 @@
 import { AssetType, InclusionType } from "../src/generated/prisma/client";
 import { directPrisma as prisma } from "../src/lib/prisma";
+import { blogPosts as staticBlogPosts } from "../src/lib/blog/posts";
 
 // Institutional Sectors & Themes
 const SECTORS = [
@@ -819,6 +820,48 @@ async function main() {
   } catch (e) {
     console.error("Failed to seed Lyra Trending Questions:", e);
   }
+
+  // Seed Blog Posts from the static content source so the blog stays database-backed.
+  console.log("📝 Seeding Blog Posts...");
+  for (const post of staticBlogPosts) {
+    await prisma.blogPost.upsert({
+      where: { slug: post.slug },
+      update: {
+        title: post.title,
+        description: post.description,
+        content: post.content,
+        author: post.author,
+        category: post.category,
+        tags: post.tags,
+        featured: post.featured ?? false,
+        status: "published",
+        publishedAt: new Date(post.date),
+        metaDescription: post.metaDescription ?? null,
+        keywords: post.keywords ?? [],
+        heroImageUrl: post.heroImageUrl ?? null,
+        sourceAgent: post.sourceAgent ?? null,
+        sourceContentId: post.slug,
+      },
+      create: {
+        slug: post.slug,
+        title: post.title,
+        description: post.description,
+        content: post.content,
+        author: post.author,
+        category: post.category,
+        tags: post.tags,
+        featured: post.featured ?? false,
+        status: "published",
+        publishedAt: new Date(post.date),
+        metaDescription: post.metaDescription ?? null,
+        keywords: post.keywords ?? [],
+        heroImageUrl: post.heroImageUrl ?? null,
+        sourceAgent: post.sourceAgent ?? null,
+        sourceContentId: post.slug,
+      },
+    });
+  }
+  console.log("✅ Blog Posts Seeded Successfully.");
 
   console.log("✅ Discovery Universe Seeded Successfully.");
 }

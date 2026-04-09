@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createLogger } from "@/lib/logger";
+import { NewsDataCryptoService } from "@/lib/services/newsdata.service";
 import { withCronAuthAndLogging } from "@/lib/middleware/cron-auth";
 
 const logger = createLogger({ service: "cron-news-sync" });
@@ -11,16 +12,18 @@ export const preferredRegion = "bom1";
 /**
  * POST /api/cron/news-sync
  * Crypto news sync (every 6 hours):
- * - CryptoPanic + other crypto-native news sources
+ * - NewsData.io crypto endpoint
  */
 export async function POST(request: Request) {
   return withCronAuthAndLogging(
     request,
     { logger, job: "news-sync" },
     async () => {
+      const articles = await NewsDataCryptoService.getTrendingNews(10);
       return NextResponse.json({
         success: true,
-        message: "Crypto news sync completed",
+        message: "Crypto news sync completed via NewsData.io",
+        fetched: articles.length,
         timestamp: new Date().toISOString(),
       });
     },

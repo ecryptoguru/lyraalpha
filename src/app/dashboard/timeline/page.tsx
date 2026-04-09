@@ -87,6 +87,8 @@ function getProviderBadge(provider: string | undefined) {
     finnhub: { label: "Finnhub", color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
     finnhub_crypto: { label: "Finnhub", color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
     cryptopanic: { label: "CryptoPanic", color: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
+    newsdata: { label: "NewsData.io", color: "bg-sky-500/10 text-sky-400 border-sky-500/20" },
+    newsdata_crypto: { label: "NewsData.io", color: "bg-sky-500/10 text-sky-400 border-sky-500/20" },
     india_rss: { label: "India RSS", color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
   };
   const info = labels[provider];

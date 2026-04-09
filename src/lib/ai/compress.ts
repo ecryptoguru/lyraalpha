@@ -42,7 +42,6 @@ export async function compressKnowledgeContext(rawContext: string, maxTokens: nu
       system: COMPRESS_SYSTEM_PROMPT,
       messages: [{ role: "user", content: rawContext }],
       maxOutputTokens: maxTokens,
-      temperature: 0.1,
       abortSignal: controller.signal,
       providerOptions: {
         openai: { textVerbosity: "low" as const }, // text.verbosity:'low' → dense bullets, not prose

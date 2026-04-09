@@ -528,7 +528,7 @@ export class MarketSyncService {
 
         // Legacy Yahoo intelligence sync is disabled by default.
         // Source-of-truth for intelligence domains is now:
-        // Finnhub + CryptoPanic + India RSS via FinnhubSyncService.syncAll().
+        // Finnhub + NewsData.io + India RSS via FinnhubSyncService.syncAll().
         if (shouldSyncLegacyYahooNews) {
           const SIX_HOURS_AGO = new Date(Date.now() - 6 * 60 * 60 * 1000);
           const recentNews = await prisma.institutionalEvent.findMany({
@@ -547,7 +547,7 @@ export class MarketSyncService {
           }
           await Promise.all(staleAssets.map(a => IntelligenceEventsService.syncNewsIntelligence(a.id, a.symbol)));
         } else {
-          logger.debug("Legacy Yahoo intelligence sync skipped (replaced by Finnhub/CryptoPanic/India RSS)");
+          logger.debug("Legacy Yahoo intelligence sync skipped (replaced by Finnhub/NewsData.io/India RSS)");
         }
       }
     }

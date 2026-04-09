@@ -90,20 +90,7 @@ Required env vars:
 
 These are not necessarily blocking for a local dev build, but the related features will not work without them.
 
-### 9. Gemini / Google GenAI
-Used for Gemini-based AI paths and fallback model routing.
-
-Required env vars:
-- `GEMINI_API_KEY`
-- `ENABLE_GEMINI_FLASH_3`
-
-### 10. OpenRouter
-Used for model routing / alternate provider access.
-
-Required env vars:
-- `OPENROUTER_API_KEY`
-
-### 11. Brevo Email
+### 9. Brevo Email
 Used for onboarding emails and blog/newsletter distribution.
 
 Required env vars:
@@ -113,7 +100,7 @@ Required env vars:
 - `BREVO_ONBOARDING_LIST_ID`
 - `BREVO_BLOG_LIST_ID`
 
-### 12. Web Push Notifications (VAPID)
+### 10. Web Push Notifications (VAPID)
 Used for browser push notifications.
 
 Required env vars:
@@ -121,42 +108,23 @@ Required env vars:
 - `VAPID_PRIVATE_KEY`
 - `VAPID_EMAIL`
 
-### 13. CoinGecko
+### 11. CoinGecko
 Used for crypto market data.
 
 Required env vars:
 - `COINGECKO_API_KEY`
 
-### 14. Metals.dev
-Used for metals and commodities pricing.
-
-Required env vars:
-- `METALS_DEV_API_KEY`
-
-### 15. Finnhub
-Used for stock and market data.
-
-Required env vars:
-- `FINNHUB_API_KEY`
-
-### 16. CryptoPanic
+### 12. NewsData.io Crypto News
 Used for crypto news and sentiment.
 
 Required env vars:
-- `CRYPTOPANIC_API_KEY`
+- `NEWSDATA_API_KEY`
 
-### 17. Tavily
+### 13. Tavily
 Used for web search / research augmentation.
 
 Required env vars:
 - `TAVILY_API_KEY`
-
-### 18. Deepgram
-Used for speech-to-text fallback and voice transcription paths.
-
-Required env vars:
-- `DEEPGRAM_API_KEY`
-- `DEEPGRAM_ALLOW_DIRECT_API_KEY_FALLBACK`
 
 ## Runtime flags and operational settings
 
@@ -164,7 +132,6 @@ These are not external services, but they should be reviewed during the fork set
 
 - `SKIP_AUTH`
 - `SKIP_RATE_LIMIT`
-- `MYRA_AI_PROVIDER`
 - `ENABLE_LEGACY_YAHOO_INTELLIGENCE`
 - `ENABLE_EDU_CACHE`
 - `ENABLE_TRENDING_FALLBACK`
@@ -175,7 +142,7 @@ For the new `lyraalpha` fork, replace all environment values with fresh project-
 
 - Use new Clerk app keys and webhook secret.
 - Use the new Stripe product / price IDs.
-- Use fresh OpenAI, Azure OpenAI, Gemini, and OpenRouter keys.
+- Use fresh OpenAI and Azure OpenAI keys.
 - Recreate Redis and QStash credentials for the new deployment if needed.
 - Update sender email domains and VAPID email to match the new brand.
 - Point `NEXT_PUBLIC_APP_URL` to the new production or preview URL.

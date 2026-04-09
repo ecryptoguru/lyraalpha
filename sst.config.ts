@@ -27,8 +27,6 @@ export default $config({
     const stripeElitePriceId  = new sst.Secret("StripeElitePriceId");
     const azureOpenaiKey      = new sst.Secret("AzureOpenaiKey");
     const azureOpenaiEndpoint = new sst.Secret("AzureOpenaiEndpoint");
-    const openrouterKey       = new sst.Secret("OpenrouterKey");
-    const geminiApiKey        = new sst.Secret("GeminiApiKey");
     const upstashRedisUrl     = new sst.Secret("UpstashRedisRestUrl");
     const upstashRedisToken   = new sst.Secret("UpstashRedisRestToken");
     const cronSecret          = new sst.Secret("CronSecret");
@@ -36,7 +34,6 @@ export default $config({
     const coingeckoApiKey     = new sst.Secret("CoingeckoApiKey");
     const brevoApiKey         = new sst.Secret("BrevoApiKey");
     const vapidPrivateKey     = new sst.Secret("VapidPrivateKey");
-    const deepgramApiKey      = new sst.Secret("DeepgramApiKey");
     const voiceSessionSecret  = new sst.Secret("VoiceSessionSecret");
 
     new sst.aws.Nextjs("LyraAlpha", {
@@ -52,8 +49,6 @@ export default $config({
         stripeElitePriceId,
         azureOpenaiKey,
         azureOpenaiEndpoint,
-        openrouterKey,
-        geminiApiKey,
         upstashRedisUrl,
         upstashRedisToken,
         cronSecret,
@@ -61,7 +56,6 @@ export default $config({
         coingeckoApiKey,
         brevoApiKey,
         vapidPrivateKey,
-        deepgramApiKey,
         voiceSessionSecret,
       ],
 
@@ -82,12 +76,9 @@ export default $config({
         PLAN_CACHE_ENABLED:                     "true",
         REDIS_TIMING_ENABLED:                   "true",
         CACHE_STATS_SAMPLE_RATE:                "0",
-        ENABLE_GEMINI_FLASH_3:                  "true",
         ENABLE_LEGACY_YAHOO_INTELLIGENCE:       "false",
         ENABLE_EDU_CACHE:                       "true",
         ENABLE_TRENDING_FALLBACK:               "false",
-        MYRA_AI_PROVIDER:                       "gemini",
-        DEEPGRAM_ALLOW_DIRECT_API_KEY_FALLBACK: "true",
 
         // ── DB connection pool — RDS handles more than Supabase pooler ─────
         // 5 per Lambda instance. At 50 concurrent Lambdas = 250 connections

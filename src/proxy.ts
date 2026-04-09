@@ -6,6 +6,7 @@ const isPublicApiRoute = createRouteMatcher([
   "/api/share(.*)",
   "/api/waitlist(.*)",
   "/api/prelaunch/validate-coupon",
+  "/api/clerk-js",
   "/api/support/public-chat",
 ]);
 

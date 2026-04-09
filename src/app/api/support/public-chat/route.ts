@@ -3,7 +3,6 @@ import { streamText } from "ai";
 import {
   buildSupportPrompt,
   MYRA_MAX_TOKENS,
-  MYRA_TEMPERATURE,
   getMyraResponseCache,
   setMyraResponseCache,
 } from "@/lib/support/ai-responder";
@@ -89,7 +88,6 @@ export async function POST(req: NextRequest) {
 
     const result = streamText({
       model: getGpt54Model("myra"),
-      temperature: MYRA_TEMPERATURE,
       maxOutputTokens: MYRA_MAX_TOKENS,
       providerOptions: {
         openai: {

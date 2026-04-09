@@ -33,13 +33,6 @@ export default async function Layout({ children }: { children: React.ReactNode }
     redirect("/sign-in");
   }
 
-  // Prelaunch gate — authenticated STARTER users must redeem a coupon before entering the dashboard.
-  // This closes the bypass for Google OAuth, direct URL navigation, and any other path that skips
-  // the client-side coupon check on the sign-in page.
-  if (viewer.plan === "STARTER") {
-    redirect("/sign-in");
-  }
-
   return (
     <DashboardLayoutClient
       initialRegion={initialRegion}

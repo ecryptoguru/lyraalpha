@@ -125,7 +125,6 @@ export const AI_CONFIG = {
   get model() {
     return getAzureChatDeployment();
   },
-  temperature: 0.1,
 };
 
 // ─── Tiered Routing Configuration ───

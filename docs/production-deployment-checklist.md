@@ -79,15 +79,9 @@
 - `AZURE_OPENAI_EMBEDDING_DEPLOYMENT`
 
 **Market data (required):**
-- `WEBSEARCHAPI_KEY`
-- `FINNHUB_API_KEY`
+- `TAVILY_API_KEY`
 - `COINGECKO_API_KEY`
-- `CRYPTOPANIC_API_KEY`
-- `METALS_DEV_API_KEY`
-
-**Myra support provider stack (optional — only required if Myra uses Gemini/OpenRouter fallbacks):**
-- `GEMINI_API_KEY`
-- `OPENROUTER_API_KEY`
+- `NEWSDATA_API_KEY`
 
 ## Pre-deploy checks in Vercel
 - Verify all production env vars exist in the Vercel project.
@@ -116,4 +110,4 @@
 - The current verified local pre-deploy path is: `npm run lint`, `npm run typecheck`, `npm test`, `VERCEL_ENV=production npm run build`, `npx vercel build`, and `python .windsurf/scripts/checklist.py . --skip-performance`.
 - `security_scan.py` is significantly less noisy, but any remaining findings should still be treated as triage input and reviewed in code context before being treated as confirmed vulnerabilities.
 - If any local secrets were ever committed, copied into logs, shared in screenshots, or exposed outside approved secret stores, rotate them before production launch.
-- Minimum rotation scope before launch if exposure is suspected: Clerk, Stripe, Supabase, Upstash Redis/QStash, Brevo, Azure OpenAI, OpenRouter, Gemini, and all market-data provider keys.
+- Minimum rotation scope before launch if exposure is suspected: Clerk, Stripe, Supabase, Upstash Redis/QStash, Brevo, and Azure OpenAI.

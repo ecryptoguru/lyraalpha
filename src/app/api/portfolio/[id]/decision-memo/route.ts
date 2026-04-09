@@ -101,7 +101,6 @@ JSON SHAPE:
     model: getGpt54Model("lyra-mini"),
     prompt,
     maxOutputTokens: 280,
-    temperature: 0.25,
   });
 
   const cleaned = result.text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();

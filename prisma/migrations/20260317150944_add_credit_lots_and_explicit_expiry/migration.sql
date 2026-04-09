@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE "CreditLot" ALTER COLUMN "updatedAt" DROP DEFAULT;
+ALTER TABLE IF EXISTS "CreditLot" ALTER COLUMN "updatedAt" DROP DEFAULT;

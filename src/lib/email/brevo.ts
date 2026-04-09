@@ -108,8 +108,8 @@ export async function sendBrevoEmail(payload: BrevoEmailPayload): Promise<boolea
 export async function subscribeToBrevoBlogList(email: string): Promise<boolean> {
   const blogListId = parseListId(process.env.BREVO_BLOG_LIST_ID);
   if (!blogListId) {
-    logger.warn("BREVO_BLOG_LIST_ID not configured, skipping blog subscription");
-    return false;
+    logger.debug("BREVO_BLOG_LIST_ID not configured, skipping blog subscription");
+    return true;
   }
 
   return upsertBrevoContact({
@@ -121,8 +121,8 @@ export async function subscribeToBrevoBlogList(email: string): Promise<boolean> 
 export async function unsubscribeFromBrevoBlogList(email: string): Promise<boolean> {
   const blogListId = parseListId(process.env.BREVO_BLOG_LIST_ID);
   if (!blogListId) {
-    logger.warn("BREVO_BLOG_LIST_ID not configured, skipping blog unsubscription");
-    return false;
+    logger.debug("BREVO_BLOG_LIST_ID not configured, skipping blog unsubscription");
+    return true;
   }
 
   return brevoRequest(`/contacts/lists/${blogListId}/contacts/remove`, {
