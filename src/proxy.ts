@@ -1,12 +1,13 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse, type NextRequest } from "next/server";
 import { getConfiguredAppUrl, isAuthBypassEnabled, isAuthBypassHeaderEnabled } from "@/lib/runtime-env";
+import { rateLimitAuthBypass } from "@/lib/rate-limit";
 
 const isPublicApiRoute = createRouteMatcher([
   "/api/share(.*)",
   "/api/waitlist(.*)",
-  "/api/prelaunch/validate-coupon",
   "/api/clerk-js",
+  "/clerk-js(.*)",
   "/api/support/public-chat",
 ]);
 
@@ -20,6 +21,17 @@ const isApiRoute = createRouteMatcher(["/api(.*)"]);
 
 const REFERRAL_COOKIE_NAME = "referral_code";
 const REFERRAL_COOKIE_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
+function setReferralCookie(res: NextResponse, refCode: string) {
+  res.cookies.set(REFERRAL_COOKIE_NAME, refCode, {
+    httpOnly: true,
+    secure: IS_PRODUCTION,
+    sameSite: "lax",
+    maxAge: REFERRAL_COOKIE_MAX_AGE,
+    path: "/",
+  });
+}
 
 // Allowed origins for CORS — restrict in production
 const configuredAppUrl = getConfiguredAppUrl();
@@ -85,17 +97,21 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   const skipAuthViaHeader = isAuthBypassHeaderEnabled(
     req.headers.get("x-skip-auth") ?? req.headers.get("SKIP_AUTH"),
   );
+  
+  // Rate limit auth bypass attempts using IP address as identifier
+  if (skipAuthViaHeader) {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() 
+      ?? req.headers.get("x-real-ip") 
+      ?? "unknown";
+    const rl = await rateLimitAuthBypass(ip);
+    if (rl) return rl;
+  }
+  
   if (skipAuthViaEnv || skipAuthViaHeader) {
     const res = NextResponse.next();
     const refCode = req.nextUrl.searchParams.get("ref");
     if (refCode) {
-      res.cookies.set(REFERRAL_COOKIE_NAME, refCode, {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-        maxAge: REFERRAL_COOKIE_MAX_AGE,
-        path: "/",
-      });
+      setReferralCookie(res, refCode);
     }
     return res;
   }
@@ -124,13 +140,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   const refCode = req.nextUrl.searchParams.get("ref");
   if (refCode && !req.cookies.has(REFERRAL_COOKIE_NAME)) {
     const res = NextResponse.next();
-    res.cookies.set(REFERRAL_COOKIE_NAME, refCode, {
-      httpOnly: true,
-      secure: (process.env.NODE_ENV as string) === "production",
-      sameSite: "lax",
-      maxAge: REFERRAL_COOKIE_MAX_AGE,
-      path: "/",
-    });
+    setReferralCookie(res, refCode);
     return res;
   }
 

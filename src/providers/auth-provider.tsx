@@ -4,7 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
-    <ClerkProvider afterSignOutUrl="/" clerkJSUrl="/api/clerk-js" telemetry={false}>
+    <ClerkProvider afterSignOutUrl="/" clerkJSUrl="/clerk-js/clerk.browser.js" telemetry={false}>
       {children}
     </ClerkProvider>
   );

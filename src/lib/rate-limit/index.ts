@@ -4,6 +4,7 @@ import {
   discoveryRateLimiter,
   marketDataRateLimiter,
   generalRateLimiter,
+  authBypassRateLimiter,
 } from "./config";
 import { createRateLimitErrorResponse } from "./errors";
 import { headers } from "next/headers";
@@ -256,6 +257,38 @@ export async function rateLimitGeneral(
   void identifier;
   void userId;
   return null;
+}
+
+/**
+ * Rate limit for auth bypass attempts (very restrictive - security-sensitive operation)
+ * Uses IP address as identifier since userId may not be available for bypass attempts
+ */
+export async function rateLimitAuthBypass(
+  identifier: string,
+): Promise<NextResponse | null> {
+  try {
+    // Don't bypass rate limiting for auth bypass attempts themselves
+    if (isRateLimitBypassEnabled()) return null;
+
+    // Use STARTER tier for all auth bypass attempts (most restrictive)
+    const limiter = authBypassRateLimiter["STARTER"];
+    if (!limiter) return null;
+
+    const { success, limit, remaining, reset } = await timed(
+      "authBypass.limit",
+      () => withTimeout(limiter.limit(identifier), TIMEOUTS_MS.general),
+      { tier: "STARTER", timeoutMs: TIMEOUTS_MS.general },
+    );
+
+    if (!success) {
+      return createRateLimitErrorResponse(limit, remaining, reset);
+    }
+
+    return null;
+  } catch (error) {
+    // Fail open for auth bypass rate limiting to prevent blocking legitimate development
+    return handleFailOpen(error, "auth-bypass", identifier);
+  }
 }
 
 /**

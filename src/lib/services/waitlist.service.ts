@@ -10,12 +10,10 @@ export interface CreateWaitlistInput {
   lastName?: string;
   source?: string;
   notes?: string;
-  couponAccess?: boolean;
 }
 
 export interface WaitlistStats {
   total: number;
-  couponAccessCount: number;
   recent7d: number;
 }
 
@@ -27,7 +25,6 @@ export interface WaitlistUserRecord {
   source: string;
   status: string;
   notes: string | null;
-  couponAccess: boolean;
   brevoSyncedAt: Date | null;
   lastEmailedAt: Date | null;
   createdAt: Date;
@@ -45,7 +42,6 @@ async function upsertWaitlistRow(params: {
   lastName: string | null;
   source: string;
   notes: string | null;
-  couponAccess: boolean;
 }) {
   const rows = await prisma.$queryRaw<WaitlistUserRecord[]>(Prisma.sql`
     INSERT INTO public."WaitlistUser" (
@@ -55,7 +51,6 @@ async function upsertWaitlistRow(params: {
       "lastName",
       "source",
       "notes",
-      "couponAccess",
       "updatedAt"
     )
     VALUES (
@@ -65,7 +60,6 @@ async function upsertWaitlistRow(params: {
       ${params.lastName},
       ${params.source},
       ${params.notes},
-      ${params.couponAccess},
       NOW()
     )
     ON CONFLICT ("email") DO UPDATE SET
@@ -73,7 +67,6 @@ async function upsertWaitlistRow(params: {
       "lastName" = EXCLUDED."lastName",
       "source" = EXCLUDED."source",
       "notes" = EXCLUDED."notes",
-      "couponAccess" = public."WaitlistUser"."couponAccess" OR EXCLUDED."couponAccess",
       "updatedAt" = NOW()
     RETURNING
       "id",
@@ -83,7 +76,6 @@ async function upsertWaitlistRow(params: {
       "source",
       "status",
       "notes",
-      "couponAccess",
       "brevoSyncedAt",
       "lastEmailedAt",
       "createdAt",
@@ -99,7 +91,6 @@ export async function createOrUpdateWaitlistUser(input: CreateWaitlistInput) {
   const lastName = sanitizeOptional(input.lastName);
   const source = sanitizeOptional(input.source) ?? "landing_page";
   const notes = sanitizeOptional(input.notes);
-  const couponAccess = Boolean(input.couponAccess);
 
   const record = await upsertWaitlistRow({
     email,
@@ -107,7 +98,6 @@ export async function createOrUpdateWaitlistUser(input: CreateWaitlistInput) {
     lastName,
     source,
     notes,
-    couponAccess,
   });
 
   const waitlistListId = process.env.BREVO_WAITLIST_LIST_ID;
@@ -120,7 +110,6 @@ export async function createOrUpdateWaitlistUser(input: CreateWaitlistInput) {
     attributes: {
       SOURCE: source,
       WAITLIST: true,
-      COUPONACCESS: couponAccess,
     },
   });
 
@@ -152,10 +141,9 @@ export async function createOrUpdateWaitlistUser(input: CreateWaitlistInput) {
 }
 
 export async function getWaitlistStats(): Promise<WaitlistStats> {
-  const rows = await prisma.$queryRaw<Array<{ total: bigint; couponAccessCount: bigint; recent7d: bigint }>>(Prisma.sql`
+  const rows = await prisma.$queryRaw<Array<{ total: bigint; recent7d: bigint }>>(Prisma.sql`
     SELECT
       COUNT(*)::bigint AS total,
-      COUNT(*) FILTER (WHERE "couponAccess" = true)::bigint AS "couponAccessCount",
       COUNT(*) FILTER (WHERE "createdAt" >= NOW() - INTERVAL '7 day')::bigint AS "recent7d"
     FROM public."WaitlistUser"
   `);
@@ -164,7 +152,6 @@ export async function getWaitlistStats(): Promise<WaitlistStats> {
 
   return {
     total: Number(stats?.total ?? 0),
-    couponAccessCount: Number(stats?.couponAccessCount ?? 0),
     recent7d: Number(stats?.recent7d ?? 0),
   };
 }
@@ -179,7 +166,6 @@ export async function getWaitlistUsers(): Promise<WaitlistUserRecord[]> {
       "source",
       "status",
       "notes",
-      "couponAccess",
       "brevoSyncedAt",
       "lastEmailedAt",
       "createdAt",
@@ -201,7 +187,6 @@ export async function getWaitlistUsersByIds(ids: string[]): Promise<WaitlistUser
       "source",
       "status",
       "notes",
-      "couponAccess",
       "brevoSyncedAt",
       "lastEmailedAt",
       "createdAt",

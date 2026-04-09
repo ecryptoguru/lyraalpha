@@ -40,6 +40,13 @@ const RATE_LIMIT_CONFIG = {
     ELITE:      { requests: 20000, window: "1h" as Duration },
     ENTERPRISE: { requests: 80000, window: "1h" as Duration },
   },
+  authBypass: {
+    // Very restrictive rate limit for auth bypass attempts (security-sensitive operation)
+    STARTER:    { requests: 10,   window: "1h" as Duration },
+    PRO:        { requests: 10,   window: "1h" as Duration },
+    ELITE:      { requests: 10,   window: "1h" as Duration },
+    ENTERPRISE: { requests: 10,   window: "1h" as Duration },
+  },
 } as const satisfies Record<string, TierLimits>;
 
 export { RATE_LIMIT_CONFIG };
@@ -85,3 +92,4 @@ export const chatMonthlyCapRateLimiter = buildLimiters("chatMonthlyCap");
 export const discoveryRateLimiter = buildLimiters("discovery");
 export const marketDataRateLimiter = buildLimiters("marketdata");
 export const generalRateLimiter = buildLimiters("general");
+export const authBypassRateLimiter = buildLimiters("authBypass");

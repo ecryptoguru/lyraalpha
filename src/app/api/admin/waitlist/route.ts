@@ -37,14 +37,13 @@ export async function POST() {
   try {
     const users = await getWaitlistUsers();
     const csvRows = [
-      ["email", "firstName", "lastName", "source", "status", "couponAccess", "createdAt", "lastEmailedAt"],
+      ["email", "firstName", "lastName", "source", "status", "createdAt", "lastEmailedAt"],
       ...users.map((user: WaitlistUserRecord) => [
         user.email,
         user.firstName ?? "",
         user.lastName ?? "",
         user.source,
         user.status,
-        user.couponAccess ? "true" : "false",
         user.createdAt.toISOString(),
         user.lastEmailedAt?.toISOString() ?? "",
       ]),

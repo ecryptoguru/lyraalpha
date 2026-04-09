@@ -1,8 +1,24 @@
 "use client";
 
 import { SignUp } from "@clerk/nextjs";
+import { FeatureCards, type FeatureItem } from "@/components/auth/FeatureCards";
 
 export default function SignUpPage() {
+  const featureItems: FeatureItem[] = [
+    {
+      label: "Portfolio",
+      detail: "Concentration, overlap and fragility analysis from day one.",
+    },
+    {
+      label: "Narratives",
+      detail: "Market regime framing before you react to isolated signals.",
+    },
+    {
+      label: "Lyra AI",
+      detail: "Deeper scenario framing grounded in computed data, not guesses.",
+    },
+  ];
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-background px-4 py-8 sm:px-6">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.08),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.08),transparent_30%)]" />
@@ -19,32 +35,7 @@ export default function SignUpPage() {
               Create a Clerk account to access market intelligence, portfolio tools, and Lyra.
             </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              {[
-                {
-                  label: "Portfolio",
-                  detail: "Concentration, overlap and fragility analysis from day one.",
-                },
-                {
-                  label: "Narratives",
-                  detail: "Market regime framing before you react to isolated signals.",
-                },
-                {
-                  label: "Lyra AI",
-                  detail: "Deeper scenario framing grounded in computed data, not guesses.",
-                },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-3xl border border-white/10 bg-background/60 p-4"
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                    {item.label}
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-foreground/85">{item.detail}</p>
-                </div>
-              ))}
-            </div>
+            <FeatureCards items={featureItems} />
           </div>
 
           <div className="overflow-hidden rounded-4xl border border-white/10 bg-card/70 p-3 shadow-[0_24px_80px_-32px_rgba(2,6,23,0.72)] backdrop-blur-xl sm:p-4">

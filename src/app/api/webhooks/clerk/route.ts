@@ -8,8 +8,6 @@ import { upsertBrevoContact, sendBrevoEmail } from "@/lib/email/brevo";
 import { buildWelcomeEmail } from "@/lib/email/templates";
 import { invalidatePlanCache } from "@/lib/middleware/plan-gate";
 import { isPrivilegedEmail } from "@/lib/auth";
-import { grantCreditsInTransaction } from "@/lib/services/credit.service";
-import { isAllowedPrelaunchCoupon, normalizePrelaunchCoupon } from "@/lib/config/prelaunch";
 import { z } from "zod";
 import { apiError } from "@/lib/api-response";
 
@@ -28,7 +26,7 @@ const ClerkUserEventSchema = z.object({
     primary_email_address_id: z.string().optional(),
     first_name: z.string().nullish(),
     last_name: z.string().nullish(),
-    unsafe_metadata: z.object({ coupon_code: z.string().optional() }).catchall(z.unknown()).optional(),
+    unsafe_metadata: z.record(z.string(), z.unknown()).optional(),
   }),
   type: z.string(),
 });
@@ -83,142 +81,28 @@ export async function POST(req: Request) {
         const firstName = data.first_name || undefined;
         const lastName = data.last_name || undefined;
 
-        // SECURITY NOTE: unsafe_metadata is user-writable in Clerk — any user can self-set
-        // coupon_code before sign-up. This is intentional (sign-up coupon flow), but the
-        // code must be valid, active, and within maxUses as verified below. The atomic
-        // transaction below increments usedCount inside the same tx to prevent TOCTOU abuse.
-        const couponCode = normalizePrelaunchCoupon(data.unsafe_metadata?.coupon_code);
-        let plan: "STARTER" | "ELITE" = "STARTER";
-        let trialEndsAt: Date | null = null;
-        let promoCredits = 0;
-        let promoDurationDays = 0;
-        let promoId: string | null = null;
-
         const isAdmin = isPrivilegedEmail(email);
-        if (isAdmin) {
-          plan = "ELITE";
-        } else if (couponCode) {
-          if (isAllowedPrelaunchCoupon(couponCode)) {
-            // Hardcoded prelaunch coupon (ELITE15, ELITE30) — not DB-managed, no usedCount.
-            // Grant 30-day Elite trial with 500 bonus credits.
-            plan = "ELITE";
-            trialEndsAt = new Date();
-            trialEndsAt.setDate(trialEndsAt.getDate() + 30);
-            promoCredits = 500;
-            promoDurationDays = 30;
-            logger.info({ userId: data.id, code: couponCode }, "Applied hardcoded prelaunch coupon");
-          } else {
-            // DB promo: do a lightweight pre-flight check (isActive + expiresAt only).
-            // maxUses is re-validated atomically inside the transaction below to prevent TOCTOU.
-            const promoPreFlight = await prisma.promoCode.findUnique({
-              where: { code: couponCode },
-              select: { id: true, isActive: true, expiresAt: true, durationDays: true, bonusCredits: true },
-            });
-            if (
-              promoPreFlight?.isActive &&
-              (!promoPreFlight.expiresAt || promoPreFlight.expiresAt > new Date())
-            ) {
-              plan = "ELITE";
-              trialEndsAt = new Date();
-              trialEndsAt.setDate(trialEndsAt.getDate() + promoPreFlight.durationDays);
-              promoCredits = promoPreFlight.bonusCredits ?? 50;
-              promoDurationDays = promoPreFlight.durationDays;
-              promoId = promoPreFlight.id;
-              logger.info({ userId: data.id, code: couponCode, days: promoPreFlight.durationDays, credits: promoCredits }, "Applied trial promo code (pending atomic tx confirmation)");
-            } else {
-              logger.warn({ userId: data.id, code: couponCode }, "Invalid or expired promo code used at sign-up");
-            }
-          }
-        }
+        const plan: "STARTER" | "ELITE" = isAdmin ? "ELITE" : "STARTER";
 
-        // For DB promo codes, key by promoId. For hardcoded coupons (no promoId), key by couponCode.
-        const promoGrantReferenceId = promoCredits > 0
-          ? (promoId ? `clerk-signup-promo:${promoId}:${data.id}` : `clerk-signup-prelaunch:${couponCode}:${data.id}`)
-          : null;
-
-        // Single atomic transaction: prevents TOCTOU race on limited-use coupons
-        await prisma.$transaction(async (tx) => {
-          const existingPromoGrant = promoGrantReferenceId
-            ? await tx.creditTransaction.findFirst({
-                where: {
-                  userId: data.id,
-                  referenceId: promoGrantReferenceId,
-                },
-                select: { id: true },
-              })
-            : null;
-
-          const shouldGrantPromoCredits = Boolean(promoCredits > 0 && !existingPromoGrant);
-
-          if (promoId && !existingPromoGrant) {
-            // Atomically re-validate maxUses and increment inside the transaction.
-            // The WHERE clause compares usedCount < maxUses at the DB level, so two
-            // concurrent sign-ups cannot both succeed when only one use remains.
-            const affected = await tx.$executeRaw`
-              UPDATE "PromoCode"
-              SET "usedCount" = "usedCount" + 1
-              WHERE id = ${promoId}
-                AND "isActive" = true
-                AND ("maxUses" IS NULL OR "usedCount" < "maxUses")
-            `;
-            if (affected === 0) {
-              // Race: another concurrent request already consumed the last use.
-              // Roll back by throwing — Prisma will abort the whole transaction.
-              throw new Error(`PROMO_EXHAUSTED:${promoId}`);
-            }
-          }
-
-          await tx.user.upsert({
-            where: { id: data.id },
-            create: {
-              id: data.id,
-              email,
-              plan,
-              trialEndsAt,
-              ...(shouldGrantPromoCredits
-                ? {
-                    credits: 0,
-                    monthlyCreditsBalance: 0,
-                    bonusCreditsBalance: 0,
-                    purchasedCreditsBalance: 0,
-                    totalCreditsEarned: 0,
-                  }
-                : {}),
-              updatedAt: new Date(),
-            } as never,
-            update: {
-              email,
-              ...(isAdmin ? { plan: "ELITE" as const, trialEndsAt: null } : {}),
-              ...(plan === "ELITE" && !isAdmin
-                ? {
-                    plan: "ELITE" as const,
-                    trialEndsAt,
-                  }
-                : {}),
-              ...(shouldGrantPromoCredits
-                ? {
-                    credits: 0,
-                    monthlyCreditsBalance: 0,
-                    bonusCreditsBalance: 0,
-                    purchasedCreditsBalance: 0,
-                    totalCreditsEarned: 0,
-                    totalCreditsSpent: 0,
-                  }
-                : {}),
-              updatedAt: new Date(),
-            },
-          });
-
-          if (shouldGrantPromoCredits) {
-            await grantCreditsInTransaction(
-              tx,
-              data.id,
-              promoCredits,
-              "ADJUSTMENT",
-              `Promo trial credits — ${couponCode ?? "PROMO"} (${promoDurationDays}-day Elite)`,
-              promoGrantReferenceId ?? undefined,
-            );
-          }
+        await prisma.user.upsert({
+          where: { id: data.id },
+          create: {
+            id: data.id,
+            email,
+            plan,
+            credits: 0,
+            monthlyCreditsBalance: 0,
+            bonusCreditsBalance: 0,
+            purchasedCreditsBalance: 0,
+            totalCreditsEarned: 0,
+            totalCreditsSpent: 0,
+            updatedAt: new Date(),
+          },
+          update: {
+            email,
+            ...(isAdmin ? { plan: "ELITE" as const } : {}),
+            updatedAt: new Date(),
+          },
         });
 
         const welcome = buildWelcomeEmail({ firstName });
@@ -256,10 +140,6 @@ export async function POST(req: Request) {
             ...(welcomeSent ? { welcomeEmailSentAt: new Date() } : {}),
           },
         });
-
-        if (!isAdmin && !promoId) {
-          logger.info({ userId: data.id, email }, "Created starter user without promo access; coupon redemption remains required at sign-in");
-        }
 
         logger.info({ userId: data.id, email, plan }, "User created via webhook");
         break;

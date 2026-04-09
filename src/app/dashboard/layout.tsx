@@ -24,7 +24,9 @@ export const metadata: Metadata = {
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const savedRegion = cookieStore.get("user_region_preference")?.value;
-  const initialRegion = (savedRegion === "US" || savedRegion === "IN") ? (savedRegion as Region) : "US";
+  const VALID_REGIONS = ["US", "IN"] as const;
+  type ValidRegion = typeof VALID_REGIONS[number];
+  const initialRegion = (VALID_REGIONS.includes(savedRegion as ValidRegion) ? savedRegion : "US") as Region;
   const viewer = await getDashboardViewer();
 
   // Auth gate — middleware already blocks unauthenticated requests but handle null userId
