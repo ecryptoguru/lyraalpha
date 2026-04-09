@@ -499,27 +499,26 @@ describe("POST /api/stocks/stress-test", () => {
     expect(gold.proxyUsed).toBe("GOLDBEES.NS");
   });
 
-  it("reduces confidence for mutual funds because replay precision is lower", async () => {
-    vi.mocked(prisma.asset.findMany).mockResolvedValue([
-      { id: "id-mf", symbol: "BALANCEDMF", name: "Balanced Advantage Fund", type: "MUTUAL_FUND", region: "US", sector: null, category: "Balanced" },
-    ] as any);
-
+  it("reduces confidence for proxy-based replay because replay precision is lower", async () => {
     mockPriceHistoryByAsset({
       byAssetId: {
-        "id-mf": {
+        "id-proxy": {
           recent: makePriceHistory(makeLinearSeries(100, 99, 61)) as any,
           scenario: [{ date: new Date("2022-01-01"), close: 100 }],
         },
       },
     });
 
-    const res = await POST(makeRequest({ symbols: ["BALANCEDMF"], scenarioId: "recession", region: "US" }));
-    const json = await res.json();
-    const fund = json.results.find((r: any) => r.symbol === "BALANCEDMF");
+    vi.mocked(prisma.asset.findMany).mockResolvedValue([
+      { id: "id-proxy", symbol: "PROXYCRYPTO", name: "Proxy Crypto", type: "CRYPTO", region: "US", sector: null, category: null },
+    ] as any);
 
-    expect(fund.method).toBe("PROXY");
-    expect(fund.confidence).toBeLessThan(0.65);
-    expect(fund.rationale).toContain("mandate");
+    const res = await POST(makeRequest({ symbols: ["PROXYCRYPTO"], scenarioId: "recession", region: "US" }));
+    const json = await res.json();
+    const asset = json.results.find((r: any) => r.symbol === "PROXYCRYPTO");
+
+    expect(asset.method).toBe("PROXY");
+    expect(asset.confidence).toBeLessThan(0.65);
   });
 
   it("keeps error results explanation-safe with empty arrays and null narrative fields", async () => {

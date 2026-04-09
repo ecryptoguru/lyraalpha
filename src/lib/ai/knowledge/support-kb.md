@@ -2,7 +2,7 @@
 
 ## About LyraAlpha AI
 
-LyraAlpha AI is an institutional-grade financial intelligence platform for retail investors. It provides AI-powered market analysis, asset scoring, regime detection, and portfolio intelligence across US and Indian markets — stocks, ETFs, crypto, mutual funds, and commodities.
+LyraAlpha AI is an institutional-grade financial intelligence platform for retail investors. It provides AI-powered market analysis, asset scoring, regime detection, and portfolio intelligence across US and Indian markets — focused exclusively on cryptocurrency assets.
 
 The platform is NOT a trading platform. It does not execute trades, manage portfolios, or provide personalised financial advice. It is an intelligence and research tool.
 
@@ -31,7 +31,7 @@ Myra is available to all visitors — including public visitors on the landing p
 ### PRO ($14.99/month | ₹1,499/month)
 - 500 Lyra AI credits per month
 - Full Lyra Intel (GPT-5.4-mini for SIMPLE/MODERATE, GPT-5.4-full for COMPLEX)
-- Full ETF, Mutual Fund, and Commodity intelligence
+- Full crypto intelligence including on-chain metrics and protocol data
 - India + US markets
 - Portfolio Health with dimension breakdown
 - Monte Carlo simulation (Modes A and B)
@@ -62,13 +62,13 @@ To upgrade your plan, go to **Dashboard → Upgrade** or visit `/dashboard/upgra
 Lyra is the platform's AI financial analyst. Available at `/dashboard/lyra` (also shown as **Lyra Intel** in the sidebar).
 
 ### What Lyra Can Do
-- Analyse any asset in the platform's universe (US + India: stocks, ETFs, crypto, mutual funds, commodities)
+- Analyse any crypto asset in the platform's universe (US + India)
 - Explain market regime conditions (STRONG_RISK_ON → RISK_OFF)
 - Interpret DSE engine scores (Trend, Momentum, Volatility, Liquidity, Trust, Sentiment)
 - Explain Signal Strength and what it means for a specific asset
 - Provide cross-sector correlation analysis (PRO COMPLEX and ELITE)
 - Use live research augmentation on recency-sensitive queries (ELITE and ENTERPRISE)
-- Answer questions about Indian and US market dynamics
+- Answer questions about crypto market dynamics and on-chain metrics
 - Run portfolio-mode analysis on your holdings
 - Analyse stress scenarios via the **Shock Simulator** (ELITE, see below)
 - Compare multiple assets via **Compare Assets** (ELITE, see below)
@@ -102,8 +102,8 @@ Your plan determines how many credits you receive each month:
 | Query Type | Credit Cost | Examples |
 |---|---|---|
 | **SIMPLE** | 1 credit | "What is P/E ratio?", "What does Trend:82 mean?", "What is ARCS?" |
-| **MODERATE** | 3 credits | "Compare HDFC and ICICI", "Why is this stock's momentum falling?", "What is the current market regime?" |
-| **COMPLEX** | 5 credits | "Analyse NVDA vs AMD with sector correlation", "Portfolio risk assessment", "What happens if Fed cuts rates?" |
+| **MODERATE** | 3 credits | "Compare BTC and ETH", "Why is this crypto's momentum falling?", "What is the current market regime?" |
+| **COMPLEX** | 5 credits | "Analyse SOL vs ETH with sector correlation", "Portfolio risk assessment", "What happens if Fed cuts rates?" |
 | **Compare Assets** | 5 credits (first asset) + 3 per additional (up to 4 assets) | Multi-asset cross-sector synthesis via the Compare Assets page |
 | **Shock Simulator** | 5 credits (first asset) + 3 per additional (up to 4 assets) | Historical stress scenario via the Shock Simulator page |
 
@@ -169,7 +169,6 @@ Browse and analyse all assets in the platform's universe. Each asset page shows:
 - **Score Velocity Badge** — shows rising or falling momentum direction on the asset card
 - Asset-Regime Compatibility Score (ARCS)
 - **Same-Sector Movers** — other assets in the same sector with their compatibility scores for context
-- Analyst targets (for stocks)
 
 ### Discovery Feed — `/dashboard/discovery`
 A curated feed showing notable signal changes, momentum shifts, and regime-aligned opportunities.
@@ -177,7 +176,7 @@ A curated feed showing notable signal changes, momentum shifts, and regime-align
 - Feed depth varies by plan
 
 ### Timeline (Market Events) — `/dashboard/timeline`
-Upcoming and recent market events: earnings, economic releases, central bank decisions.
+Upcoming and recent market events: economic releases, central bank decisions, crypto protocol milestones.
 
 ### Watchlist — `/dashboard/watchlist`
 Save and track your favourite assets. Available to all plans.
@@ -287,9 +286,9 @@ Completing onboarding personalises your Discovery Feed and Lyra's default contex
 
 ## Asset Universe & Data
 
-- **Coverage**: US stocks, ETFs, crypto, commodities; Indian stocks, mutual funds, ETFs, commodities
+- **Coverage**: Crypto assets across US and India markets
 - **Data timing**: All market data is **end-of-day** (delayed 1 business day). Not suitable for intraday trading.
-- **Data sources**: US — Yahoo Finance; Indian Stocks — NSE India API + Yahoo Finance; Indian Mutual Funds — MFAPI; Crypto — CoinGecko
+- **Data sources**: Crypto — CoinGecko and on-chain data providers
 - For detailed score explanations (DSE, Signal Strength, Regime), ask Lyra Intel or see the Learning Hub
 
 ---

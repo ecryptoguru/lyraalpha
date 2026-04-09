@@ -19,6 +19,9 @@ import { generateText } from "ai";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { cleanAssetText, getFriendlyAssetName } from "@/lib/format-utils";
+import { applyCostCeiling } from "@/lib/ai/cost-ceiling";
+import { logValidationResult, validateOutput } from "@/lib/ai/output-validation";
+import { recordLatencyViolation } from "@/lib/ai/alerting";
 
 const logger = createLogger({ service: "daily-briefing" });
 
@@ -465,15 +468,58 @@ Rules:
 - Write like a person explaining the market to a smart colleague, not like a report generator.
 - Reference specific assets or sectors when possible.`;
 
+    // Apply cost ceiling to prevent runaway context from causing unexpected LLM costs
+    const ceilingResult = applyCostCeiling({
+      systemPrompt: "",
+      context: prompt,
+      historyChars: 0,
+      userQuery: "Generate daily market briefing",
+      plan: "ELITE",
+      tier: "COMPLEX",
+    });
+
+    if (ceilingResult.exceeded) {
+      logger.warn(
+        { region, truncatedChars: ceilingResult.truncatedChars, originalEstimate: ceilingResult.estimatedInputTokens, newEstimate: ceilingResult.estimatedInputTokens },
+        "Daily briefing cost ceiling exceeded - context truncated"
+      );
+    }
+
+    // Track latency for the LLM call
+    const llmStart = Date.now();
     const result = await generateText({
       model: getGpt54Model("lyra-nano"),
-      prompt,
+      prompt: ceilingResult.truncatedContext,
     });
+    const llmLatencyMs = Date.now() - llmStart;
+
+    // Latency budget: daily briefing is a cron job, budget is 30 seconds
+    const LATENCY_BUDGET_MS = 30_000;
+    if (llmLatencyMs > LATENCY_BUDGET_MS) {
+      recordLatencyViolation(true, llmLatencyMs, "COMPLEX").catch((e) =>
+        logger.warn({ err: e }, "Failed to record latency violation")
+      );
+      logger.warn(
+        { region, llmLatencyMs, budget: LATENCY_BUDGET_MS },
+        "Daily briefing LLM latency exceeded budget"
+      );
+    }
 
     const cleaned = result.text
       .replace(/```json\n?/g, "")
       .replace(/```\n?/g, "")
       .trim();
+
+    // Validate output structure (non-blocking, logs warnings)
+    const validationResult = validateOutput(
+      cleaned,
+      "COMPLEX",
+      "ELITE",
+      false, // not educational
+      "standard",
+      "GLOBAL",
+    );
+    logValidationResult(validationResult);
 
     const parsed = JSON.parse(cleaned) as {
       marketOverview: string;

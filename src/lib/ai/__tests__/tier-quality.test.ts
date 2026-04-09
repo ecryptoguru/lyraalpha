@@ -132,6 +132,29 @@ vi.mock("../orchestration", () => ({
 // Redis mock — controls plan cache hit/miss per test
 const redisCacheStore = new Map<string, unknown>();
 vi.mock("@/lib/redis", () => ({
+  redis: {
+    get: vi.fn(async (key: string) => redisCacheStore.get(key) ?? null),
+    set: vi.fn(async (key: string, value: unknown, options?: { nx?: boolean; ex?: number }) => {
+      if (options?.nx) {
+        // Set-if-not-exists: only set if key doesn't exist
+        if (redisCacheStore.has(key)) {
+          return null; // Key already exists
+        }
+        redisCacheStore.set(key, value);
+        return "OK";
+      }
+      redisCacheStore.set(key, value);
+      return "OK";
+    }),
+    del: vi.fn(async (key: string) => {
+      redisCacheStore.delete(key);
+      return 1;
+    }),
+    setex: vi.fn(async (key: string, seconds: number, value: unknown) => {
+      redisCacheStore.set(key, value);
+      return "OK";
+    }),
+  },
   getCache: vi.fn(async (key: string) => redisCacheStore.get(key) ?? null),
   setCache: vi.fn(async (key: string, value: unknown) => { redisCacheStore.set(key, value); }),
   delCache: vi.fn(async (key: string) => { redisCacheStore.delete(key); }),
@@ -334,7 +357,7 @@ describe("Pro Tier Prompt Quality", () => {
     it("uses rich reference example", () => {
       const example = BUILD_LYRA_REFERENCE_EXAMPLE({ assetType: "CRYPTO", planTier: "PRO", queryTier: "SIMPLE" });
       expect(example).toContain("REFERENCE OUTPUT");
-      expect(example).toContain("NVDA");
+      expect(example).toContain("ETH");
     });
   });
 
@@ -541,9 +564,9 @@ describe("Asset-Type Prompt Quality", () => {
     mockUserPlan("PRO");
   });
 
-  it("STOCK prompt includes earnings/valuation guidance", () => {
+  it("CRYPTO prompt includes crypto-specific guidance", () => {
     const prompt = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "test", "PRO", 600);
-    expect(prompt).toContain("earnings");
+    expect(prompt).toContain("on-chain");
   });
 
   it("CRYPTO prompt includes network/structural risk guidance", () => {
@@ -909,6 +932,8 @@ describe("Common Words Filter — extractMentionedSymbols", () => {
 // ═══════════════════════════════════════════════════════════════
 describe("Output Structure Validation", () => {
   beforeEach(() => {
+    redisCacheStore.clear(); // Clear in-flight locks between tests
+    _clearPlanCacheForTest();
     vi.clearAllMocks();
     mockUserPlan("PRO");
   });

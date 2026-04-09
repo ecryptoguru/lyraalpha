@@ -7,7 +7,7 @@ const SafeSymbol = z.string().min(1).max(20).regex(/^[A-Za-z0-9._\-:^=]+$/, "Inv
 const SafeSlug = z.string().min(1).max(100).regex(/^[a-z0-9\-]+$/, "Invalid slug format");
 const SafeRegion = z.enum(["US", "IN"]).default("US");
 export const DashboardModeSchema = z.enum(["simple", "advanced"]);
-const SafeAssetType = z.enum(["STOCK", "ETF", "CRYPTO", "COMMODITY", "MUTUAL_FUND"]);
+const SafeAssetType = z.enum(["CRYPTO"]);
 const SafeLimit = (max: number, def: number) => z.coerce.number().int().min(1).max(max).default(def);
 const SafeOffset = z.coerce.number().int().min(0).max(10000).default(0);
 

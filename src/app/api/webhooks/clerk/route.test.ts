@@ -2,14 +2,11 @@
  * @vitest-environment node
  *
  * Tests for the Clerk webhook route — signature verification, user.created
- * (coupon flow, admin elevation, TOCTOU maxUses race, idempotency),
- * user.updated, user.deleted GDPR purge.
+ * (admin elevation), user.updated, user.deleted GDPR purge.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
-
-const mockGrantCreditsInTransaction = vi.fn();
 
 vi.mock("@/lib/logger", () => ({
   createLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() }),
@@ -50,8 +47,6 @@ function restoreHeadersMock() {
 
 const mockPrisma = {
   $transaction: vi.fn(),
-  $executeRaw: vi.fn(),
-  promoCode: { findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
   user: {
     upsert: vi.fn(),
     findUnique: vi.fn(),
@@ -61,7 +56,7 @@ const mockPrisma = {
   watchlistItem: { deleteMany: vi.fn() },
   portfolio: { deleteMany: vi.fn() },
   userPreference: { deleteMany: vi.fn(), upsert: vi.fn() },
-  creditTransaction: { create: vi.fn(), findFirst: vi.fn(), deleteMany: vi.fn() },
+  creditTransaction: { deleteMany: vi.fn() },
   supportMessage: { deleteMany: vi.fn() },
   supportConversation: { deleteMany: vi.fn() },
 };
@@ -81,9 +76,6 @@ vi.mock("@/lib/middleware/plan-gate", () => ({
 }));
 vi.mock("@/lib/auth", () => ({
   isPrivilegedEmail: vi.fn((email: string) => email.endsWith("@lyraalpha.com")),
-}));
-vi.mock("@/lib/services/credit.service", () => ({
-  grantCreditsInTransaction: mockGrantCreditsInTransaction,
 }));
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -116,20 +108,6 @@ function makeUserEvent(type: string, overrides: Record<string, unknown> = {}) {
   };
 }
 
-// Makes the $transaction mock run an interactive callback with a tx proxy that
-// includes $executeRaw. This matches the new TOCTOU-safe transaction shape.
-function setupTransactionWithTx(txOverrides: Partial<typeof mockPrisma> = {}) {
-  const tx = { ...mockPrisma, ...txOverrides };
-  mockPrisma.$transaction.mockImplementation(
-    async (fn: unknown) => {
-      if (typeof fn === "function") return (fn as (tx: typeof mockPrisma) => Promise<unknown>)(tx);
-      // Array form (user.deleted)
-      return Promise.resolve([]);
-    },
-  );
-  return tx;
-}
-
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe("POST /api/webhooks/clerk", () => {
@@ -143,17 +121,10 @@ describe("POST /api/webhooks/clerk", () => {
     mockUpsertBrevoContact.mockResolvedValue(undefined);
     mockSendBrevoEmail.mockResolvedValue(true);
 
-    // Default: interactive callback tx
-    setupTransactionWithTx();
-
     mockPrisma.user.upsert.mockResolvedValue({ id: "user_abc", plan: "STARTER" });
     mockPrisma.user.findUnique.mockResolvedValue(null);
-    mockPrisma.promoCode.findUnique.mockResolvedValue(null);
-    mockPrisma.creditTransaction.findFirst.mockResolvedValue(null);
-    mockPrisma.creditTransaction.create.mockResolvedValue({});
     mockPrisma.userPreference.upsert.mockResolvedValue({});
-    mockPrisma.$executeRaw.mockResolvedValue(1); // 1 row updated = success
-    mockGrantCreditsInTransaction.mockResolvedValue(0);
+    mockPrisma.$transaction.mockResolvedValue([]);
   });
 
   // ── Signature / config guards ──────────────────────────────────────────────
@@ -180,9 +151,9 @@ describe("POST /api/webhooks/clerk", () => {
     expect(res.status).toBe(200);
   });
 
-  // ── user.created — no coupon ───────────────────────────────────────────────
+  // ── user.created ─────────────────────────────────────────────────────────────
 
-  it("creates a STARTER user when user.created has no coupon", async () => {
+  it("creates a STARTER user when user.created has non-admin email", async () => {
     const event = makeUserEvent("user.created");
     mockVerify.mockReturnValue(event);
     const { POST } = await import("./route");
@@ -212,208 +183,41 @@ describe("POST /api/webhooks/clerk", () => {
     );
   });
 
-  // ── user.created — hardcoded prelaunch coupon ──────────────────────────────
-
-  it("applies ELITE15 hardcoded coupon — skips DB promo lookup", async () => {
+  it("sends welcome email on user.created", async () => {
     const event = makeUserEvent("user.created", {
-      unsafe_metadata: { coupon_code: "ELITE15" },
-    });
-    mockVerify.mockReturnValue(event);
-    const { POST } = await import("./route");
-    const res = await POST(makeRequest(event));
-    expect(res.status).toBe(200);
-    // isAllowedPrelaunchCoupon path — DB promo pre-flight should not be called
-    expect(mockPrisma.promoCode.findUnique).not.toHaveBeenCalled();
-    expect(mockPrisma.user.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        create: expect.objectContaining({ plan: "ELITE" }),
-      }),
-    );
-  });
-
-  it("grants 500 credits with ADJUSTMENT type for ELITE15 coupon", async () => {
-    const event = makeUserEvent("user.created", {
-      unsafe_metadata: { coupon_code: "ELITE15" },
+      first_name: "John",
+      last_name: "Doe",
     });
     mockVerify.mockReturnValue(event);
     const { POST } = await import("./route");
     await POST(makeRequest(event));
-    expect(mockGrantCreditsInTransaction).toHaveBeenCalledWith(
-      expect.anything(),
-      "user_abc",
-      500,
-      "ADJUSTMENT",
-      expect.stringContaining("ELITE15"),
-      expect.any(String),
-    );
-  });
-
-  it("does NOT grant credits when credit was already granted (idempotency)", async () => {
-    const event = makeUserEvent("user.created", {
-      unsafe_metadata: { coupon_code: "ELITE15" },
-    });
-    mockVerify.mockReturnValue(event);
-    // Simulate existing credit transaction
-    mockPrisma.creditTransaction.findFirst.mockResolvedValue({ id: "existing_tx" });
-    const { POST } = await import("./route");
-    await POST(makeRequest(event));
-    expect(mockGrantCreditsInTransaction).not.toHaveBeenCalled();
-  });
-
-  // ── user.created — DB promo code ──────────────────────────────────────────
-
-  it("applies a valid DB promo code and runs $executeRaw atomically", async () => {
-    const promo = {
-      id: "promo_db_1",
-      isActive: true,
-      expiresAt: null,
-      durationDays: 30,
-      bonusCredits: 300,
-    };
-    mockPrisma.promoCode.findUnique.mockResolvedValue(promo);
-    mockPrisma.$executeRaw.mockResolvedValue(1);
-
-    const event = makeUserEvent("user.created", {
-      unsafe_metadata: { coupon_code: "DBCODE1" },
-    });
-    mockVerify.mockReturnValue(event);
-    const { POST } = await import("./route");
-    const res = await POST(makeRequest(event));
-    expect(res.status).toBe(200);
-    expect(mockPrisma.$executeRaw).toHaveBeenCalled();
-    expect(mockPrisma.user.upsert).toHaveBeenCalledWith(
+    expect(mockUpsertBrevoContact).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ plan: "ELITE" }),
-      }),
+        email: "test@example.com",
+        firstName: "John",
+        lastName: "Doe",
+      })
     );
+    expect(mockSendBrevoEmail).toHaveBeenCalled();
   });
 
-  it("grants DB promo bonusCredits with ADJUSTMENT type", async () => {
-    const promo = {
-      id: "promo_db_1",
-      isActive: true,
-      expiresAt: null,
-      durationDays: 14,
-      bonusCredits: 200,
-    };
-    mockPrisma.promoCode.findUnique.mockResolvedValue(promo);
-    mockPrisma.$executeRaw.mockResolvedValue(1);
-
-    const event = makeUserEvent("user.created", {
-      unsafe_metadata: { coupon_code: "DBCODE1" },
-    });
+  it("creates user preferences on user.created", async () => {
+    const event = makeUserEvent("user.created");
     mockVerify.mockReturnValue(event);
     const { POST } = await import("./route");
     await POST(makeRequest(event));
-    expect(mockGrantCreditsInTransaction).toHaveBeenCalledWith(
-      expect.anything(),
-      "user_abc",
-      200,
-      "ADJUSTMENT",
-      expect.any(String),
-      expect.any(String),
-    );
-  });
-
-  it("rolls back and returns 500 when $executeRaw returns 0 (TOCTOU: maxUses exhausted in race)", async () => {
-    const promo = {
-      id: "promo_db_1",
-      isActive: true,
-      expiresAt: null,
-      durationDays: 30,
-      bonusCredits: 100,
-    };
-    mockPrisma.promoCode.findUnique.mockResolvedValue(promo);
-    // $executeRaw returns 0 — another request consumed the last use concurrently
-    mockPrisma.$executeRaw.mockResolvedValue(0);
-    // Simulate the throw propagating out of the tx callback → $transaction rethrows
-    mockPrisma.$transaction.mockImplementation(async (fn: unknown) => {
-      if (typeof fn === "function") {
-        const tx = {
-          ...mockPrisma,
-          $executeRaw: vi.fn().mockResolvedValue(0),
-          creditTransaction: { findFirst: vi.fn().mockResolvedValue(null) },
-        };
-        // Run fn and let it throw PROMO_EXHAUSTED
-        return (fn as (client: unknown) => Promise<unknown>)(tx);
-      }
-      return [];
-    });
-
-    const event = makeUserEvent("user.created", {
-      unsafe_metadata: { coupon_code: "RACEDBCODE" },
-    });
-    mockVerify.mockReturnValue(event);
-    const { POST } = await import("./route");
-    const res = await POST(makeRequest(event));
-    // Handler catches the thrown error and returns 500
-    expect(res.status).toBe(500);
-    // User must NOT have been upgraded
-    expect(mockPrisma.user.upsert).not.toHaveBeenCalled();
-  });
-
-  it("creates STARTER user when DB promo code is inactive (pre-flight)", async () => {
-    mockPrisma.promoCode.findUnique.mockResolvedValue({
-      id: "promo_bad",
-      isActive: false,
-      expiresAt: null,
-      durationDays: 30,
-      bonusCredits: 50,
-    });
-    const event = makeUserEvent("user.created", {
-      unsafe_metadata: { coupon_code: "INACTIVECODE" },
-    });
-    mockVerify.mockReturnValue(event);
-    const { POST } = await import("./route");
-    const res = await POST(makeRequest(event));
-    expect(res.status).toBe(200);
-    expect(mockPrisma.user.upsert).toHaveBeenCalledWith(
+    expect(mockPrisma.userPreference.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ plan: "STARTER" }),
-      }),
+        create: expect.objectContaining({
+          userId: "user_abc",
+          preferredRegion: "US",
+          experienceLevel: "BEGINNER",
+          interests: ["CRYPTO"],
+          onboardingCompleted: false,
+          blogSubscribed: true,
+        }),
+      })
     );
-    // No atomic increment attempted
-    expect(mockPrisma.$executeRaw).not.toHaveBeenCalled();
-  });
-
-  it("creates STARTER user when DB promo code is expired (pre-flight)", async () => {
-    const past = new Date(Date.now() - 1000 * 60 * 60 * 24);
-    mockPrisma.promoCode.findUnique.mockResolvedValue({
-      id: "promo_exp",
-      isActive: true,
-      expiresAt: past,
-      durationDays: 30,
-      bonusCredits: 50,
-    });
-    const event = makeUserEvent("user.created", {
-      unsafe_metadata: { coupon_code: "EXPIREDCODE" },
-    });
-    mockVerify.mockReturnValue(event);
-    const { POST } = await import("./route");
-    const res = await POST(makeRequest(event));
-    expect(res.status).toBe(200);
-    expect(mockPrisma.user.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        create: expect.objectContaining({ plan: "STARTER" }),
-      }),
-    );
-  });
-
-  it("creates STARTER user for a completely unknown coupon code", async () => {
-    mockPrisma.promoCode.findUnique.mockResolvedValue(null);
-    const event = makeUserEvent("user.created", {
-      unsafe_metadata: { coupon_code: "TOTALLYUNKNOWN" },
-    });
-    mockVerify.mockReturnValue(event);
-    const { POST } = await import("./route");
-    const res = await POST(makeRequest(event));
-    expect(res.status).toBe(200);
-    expect(mockPrisma.user.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        create: expect.objectContaining({ plan: "STARTER" }),
-      }),
-    );
-    expect(mockPrisma.$executeRaw).not.toHaveBeenCalled();
   });
 
   // ── user.deleted — GDPR purge ─────────────────────────────────────────────

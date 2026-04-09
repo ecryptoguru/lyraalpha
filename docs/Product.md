@@ -10,7 +10,7 @@ Live product. Shipped workflows. US and India, simultaneously.
 
 ## The problem every investor runs into
 
-Retail investors in 2026 have more data than at any point in history — prices, charts, fundamentals, screeners, earnings, news feeds, and now AI summaries coming from every direction. The most common experience is still confusion.
+Retail investors in 2026 have more data than at any point in history — prices, charts, fundamentals, screeners, on-chain metrics, news feeds, and now AI summaries coming from every direction. The most common experience is still confusion.
 
 Generic AI finance tools make this worse. They put a large language model in a financial wrapper and call it analysis. The outputs sound confident. They are not trustworthy. There is no deterministic backbone, no stable analytical framework, and no accountability when the model invents a metric it should have computed.
 
@@ -72,7 +72,7 @@ Fluent outputs, no deterministic backbone. LyraAlpha AI's model receives compute
 Portfolio automation, not analytical intelligence. A different job entirely. LyraAlpha AI sharpens judgment before decisions are made — it does not automate execution.
 
 **vs. niche AI tools (Danelfin, Kavout)**
-US-only, narrow coverage, no premium workflow depth, no portfolio layer. LyraAlpha AI covers equities, ETFs, mutual funds, crypto, and commodities across US and India, first-class.
+US-only, narrow coverage, no premium workflow depth, no portfolio layer. LyraAlpha AI covers crypto assets across US and India, first-class.
 
 ---
 
@@ -102,7 +102,7 @@ Not adapted. Built natively for both from the start.
 - Broker connectivity for Indian brokers (Zerodha-style) and US aggregator paths
 - RBI policy context and India-specific macro regime framing
 
-India has 90M+ registered equity investors growing at 15-20% annually. Almost no premium analytical product is built natively for that market. LyraAlpha AI is.
+India has 90M+ registered equity investors growing at 15-20% annually, with crypto adoption accelerating. Almost no premium analytical product is built natively for that market. LyraAlpha AI is.
 
 ### Credit economics that scale with analytical value
 
@@ -217,15 +217,11 @@ Lyra remembers past analytical context, prior questions, and portfolio context a
 
 **Live research augmentation (Elite and Enterprise)**
 
-On recency-sensitive queries, Lyra pulls live web research to complement RAG-retrieved platform knowledge. Earnings, macro shifts, and policy signals are woven into the response, not appended as a footnote.
+On recency-sensitive queries, Lyra pulls live web research to complement RAG-retrieved platform knowledge. Protocol metrics, macro shifts, and policy signals are woven into the response, not appended as a footnote.
 
 **Full asset class coverage**
 
-- Equities: individual stocks, earnings-aware analysis, sector regime context
-- ETFs: lookthrough analysis, underlying exposure framing
-- Mutual funds: lookthrough into holdings, manager context
-- Crypto: on-chain signals, crypto-regime framing
-- Commodities: macro pillar identification, dominant driver analysis, regime verdict
+- Crypto: on-chain signals, crypto-regime framing, protocol metrics, DeFi analytics
 
 ---
 
@@ -331,7 +327,7 @@ The cap check applies to **all plans including ENTERPRISE**. Hot-patchable from 
 
 ## The market
 
-India has 90M+ registered equity investors, growing 15-20% annually, with almost no premium analytical product built natively for it. The US has 160M+ brokerage account holders where premium tool ARPU of $150-600/year is well established.
+India has 90M+ registered equity investors growing at 15-20% annually, with crypto adoption accelerating. Almost no premium analytical product is built natively for that market. The US has 160M+ brokerage account holders where premium tool ARPU of $150-600/year is well established, with crypto investors increasingly seeking institutional-grade intelligence.
 
 AI trust is splitting. Users who tried shallow wrappers and found them unreliable are actively looking for something grounded. That is the exact moment LyraAlpha AI is positioned for.
 

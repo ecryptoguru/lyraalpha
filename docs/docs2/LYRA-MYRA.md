@@ -43,7 +43,7 @@ Lyra's analysis is built around the platform intelligence stack:
 - **ARCS**: Asset-Regime Compatibility Score
 - **Signal Strength** and related derived context
 - **Score Dynamics** and time-based movement signals
-- asset-type-specific intelligence: ETF lookthrough, MF lookthrough, crypto intelligence, commodity intelligence
+- asset-type-specific intelligence: crypto intelligence, on-chain metrics, protocol data, DeFi analytics
 - broker-connected portfolio snapshots that have already been normalized and deduplicated
 
 ### 2.3 Query Classification

@@ -19,6 +19,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { OnboardingGate } from "@/components/onboarding/onboarding-gate";
+import { DisclaimerBanner } from "@/components/compliance/DisclaimerBanner";
 import { useSessionTracking } from "@/hooks/use-session-tracking";
 import type { PlanTier } from "@/lib/ai/config";
 import { getDashboardBreadcrumbSegments } from "@/lib/dashboard-routes";
@@ -110,6 +111,7 @@ function DashboardLayoutInner({
           className="bg-background flex flex-col h-dvh md:h-svh overflow-x-clip overflow-y-auto scroll-smooth will-change-scroll overscroll-contain transition-colors duration-300 min-w-0 w-full max-w-full"
           style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}
         >
+          <DisclaimerBanner />
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b border-border/30 bg-background/80 backdrop-blur-xl sticky top-0 z-50 pr-4 w-full max-w-full">
             <div className="flex items-center gap-2 px-4" suppressHydrationWarning>
               <SidebarTrigger className="-ml-1 inline-flex text-muted-foreground hover:text-foreground" />

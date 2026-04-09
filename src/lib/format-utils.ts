@@ -51,12 +51,6 @@ export const OFFICIAL_NAME_MAP: Record<string, string> = {
   "GRT-USD": "THE GRAPH",
   "IMX-USD": "IMMUTABLE X",
   "THETA-USD": "THETA",
-  "SAND-USD": "THE SANDBOX",
-  "MANA-USD": "DECENTRALAND",
-  "AXS-USD": "AXIE INFINITY",
-  "FLOW-USD": "FLOW",
-  "EGLD-USD": "MULTIVERSX",
-  "KAVA-USD": "KAVA",
   "CRV-USD": "CURVE",
   "COMP-USD": "COMPOUND",
   "SNX-USD": "SYNTHETIX",
@@ -77,150 +71,23 @@ export const OFFICIAL_NAME_MAP: Record<string, string> = {
   "BONK-USD": "BONK",
 };
 
-const ETF_STRIP_SUFFIXES = [
-  ", Series 1",
-  " Series 1",
-  ", LP",
-  " LP",
-  ", Inc.",
-  " Inc.",
-  ", Inc",
-  " Inc",
-  " ETF",
-  " Fund",
-  " Trust",
-  " Index",
-  " Portfolio",
-  " Shares",
-];
-
-const MF_STRIP_PATTERNS = [
-  /\s*-\s*Direct Plan\s*-?\s*Growth\s*$/i,
-  /\s*-\s*Direct\s*-?\s*Growth\s*$/i,
-  /\s*Direct Plan\s*-?\s*Growth\s*$/i,
-  /\s*Direct\s*Growth\s*$/i,
-  /\s*-\s*Growth\s*$/i,
-  /\s*\(G\)\s*$/i,
-  /\s*\(D\)\s*$/i,
-];
-
-const COMPANY_STRIP_SUFFIXES = [
-  ", Inc.",
-  " Inc.",
-  ", Inc",
-  " Inc",
-  ", Ltd.",
-  " Ltd.",
-  ", Ltd",
-  " Ltd",
-  ", Limited",
-  " Limited",
-  ", PLC",
-  " PLC",
-  ", Plc",
-  " Plc",
-  ", S.A.",
-  " S.A.",
-];
-
-function stripETFSuffixes(name: string): string {
-  let cleaned = name;
-  for (const suffix of ETF_STRIP_SUFFIXES) {
-    if (cleaned.endsWith(suffix)) {
-      cleaned = cleaned.slice(0, -suffix.length);
-    }
-  }
-  return cleaned.trim();
-}
-
-function truncateETFName(name: string): string {
-  let cleaned = stripETFSuffixes(name);
-  if (cleaned.length > 28) {
-    const words = cleaned.split(" ");
-    let result = "";
-    for (const word of words) {
-      const next = result ? result + " " + word : word;
-      if (next.length > 28) break;
-      result = next;
-    }
-    cleaned = result || words[0];
-  }
-  return cleaned;
-}
-
-function stripMFPatterns(name: string): string {
-  let cleaned = name;
-  for (const pattern of MF_STRIP_PATTERNS) {
-    cleaned = cleaned.replace(pattern, "");
-  }
-  return cleaned.trim();
-}
-
-function stripCompanySuffixes(name: string): string {
-  let cleaned = name;
-  for (const suffix of COMPANY_STRIP_SUFFIXES) {
-    if (cleaned.endsWith(suffix)) {
-      cleaned = cleaned.slice(0, -suffix.length);
-      break;
-    }
-  }
-  return cleaned.trim();
-}
-
-function truncateMFName(name: string): string {
-  let cleaned = stripMFPatterns(name);
-  if (cleaned.length > 32) {
-    const words = cleaned.split(" ");
-    let result = "";
-    for (const word of words) {
-      const next = result ? result + " " + word : word;
-      if (next.length > 32) break;
-      result = next;
-    }
-    cleaned = result || words[0];
-  }
-  return cleaned;
-}
-
 export function getFriendlyAssetName(symbol: string, name?: string): string {
   const upperSymbol = symbol.toUpperCase();
+  
+  // 1. Check if it's a known mapping (Commodities/Common Crypto)
   if (OFFICIAL_NAME_MAP[upperSymbol]) {
     return OFFICIAL_NAME_MAP[upperSymbol];
   }
 
-  if (name && name !== symbol && !name.endsWith(".NS") && !name.endsWith(".BO") && !name.startsWith("MF-")) {
+  if (name && name !== symbol) {
     if (upperSymbol.endsWith("-USD")) {
       return name.split("/")[0].split("-")[0].replace(/ USD$/i, "").trim();
     }
-
-    const mfName = stripMFPatterns(name);
-    if (mfName && mfName !== name) {
-      return mfName;
-    }
-
-    const etfName = stripETFSuffixes(name);
-    if (etfName && etfName !== name) {
-      return etfName;
-    }
-
-    const companyName = stripCompanySuffixes(name);
-    if (companyName !== name.trim()) {
-      return companyName;
-    }
-
     return name.trim();
-  }
-
-  if (upperSymbol.endsWith(".NS") || upperSymbol.endsWith(".BO")) {
-    return symbol.replace(/\.NS$/i, "").replace(/\.BO$/i, "");
   }
 
   if (upperSymbol.endsWith("-USD")) {
     return symbol.replace(/-USD$/i, "");
-  }
-
-  if (upperSymbol.startsWith("MF-")) {
-    return "Mutual Fund";
   }
 
   return name || symbol;
@@ -234,54 +101,8 @@ export function getFriendlySymbol(symbol: string, type?: string, name?: string):
     return OFFICIAL_NAME_MAP[upperSymbol];
   }
 
-  // 2. Type-specific formatting
-  if (type === "CRYPTO") {
-    if (name) return name.split("/")[0].split("-")[0].replace(/ USD$/i, "").trim();
-    return symbol.replace(/-USD$/i, "");
-  }
-
-  if (type === "ETF") {
-    if (name) return truncateETFName(name);
-    return getFriendlyAssetName(symbol, name);
-  }
-
-  if (type === "MUTUAL_FUND") {
-    if (name) return truncateMFName(name);
-    return getFriendlyAssetName(symbol, name);
-  }
-
-  if (type === "STOCK") {
-    // Prefer the human-readable name from DB if it is meaningfully different from the raw symbol
-    if (name && name !== symbol && !name.endsWith(".NS") && !name.endsWith(".BO")) {
-      const cleanedName = stripCompanySuffixes(name);
-      const words = cleanedName.split(" ");
-      let short = "";
-      for (const word of words) {
-        const next = short ? short + " " + word : word;
-        if (next.length > 28) break;
-        short = next;
-      }
-      return short || symbol.replace(/\.NS$/, "").replace(/\.BO$/, "");
-    }
-    return symbol.replace(/\.NS$/, "").replace(/\.BO$/, "");
-  }
-
-  // 3. Fallback: use name with a reasonable cap
-  if (name) {
-    if (name.length > 30) {
-      const words = name.split(" ");
-      let result = "";
-      for (const word of words) {
-        const next = result ? result + " " + word : word;
-        if (next.length > 30) break;
-        result = next;
-      }
-      return result || words[0];
-    }
-    return name;
-  }
-
-  return getFriendlyAssetName(symbol, name);
+  // 2. Type-specific formatting - crypto only
+  return name || getFriendlyAssetName(symbol, name);
 }
 
 export function getFriendlyAssetSubtitle(symbol: string, type?: string, name?: string): string {

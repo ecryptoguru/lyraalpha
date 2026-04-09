@@ -376,15 +376,17 @@ class PrismaVectorStore {
         return response.data[0].embedding;
       } catch (error) {
         if (attempt === retries) {
-          logger.error({ err: error, attempt }, "Embedding generation failed");
-          throw error;
+          logger.error({ err: error, attempt }, "Embedding generation failed - returning empty array for graceful degradation");
+          // Return empty array instead of throwing to allow system to continue without RAG context
+          return [];
         }
         await new Promise((resolve) =>
           setTimeout(resolve, Math.pow(2, attempt) * 1000),
         );
       }
     }
-    throw new Error("Embedding generation failed");
+    logger.error("Embedding generation failed after all retries - returning empty array");
+    return [];
   }
 
   private async getEmbeddingsBatch(texts: string[], retries: number): Promise<number[][]> {
@@ -399,8 +401,9 @@ class PrismaVectorStore {
         return response.data.map((item) => item.embedding);
       } catch (error) {
         if (attempt === retries) {
-          logger.error({ err: error, attempt, batchSize: texts.length }, "Batch embedding generation failed");
-          throw error;
+          logger.error({ err: error, attempt, batchSize: texts.length }, "Batch embedding generation failed - returning empty arrays for graceful degradation");
+          // Return empty arrays instead of throwing to allow system to continue without RAG context
+          return texts.map(() => []);
         }
 
         const jitter = Math.floor(Math.random() * 250);
@@ -409,7 +412,8 @@ class PrismaVectorStore {
       }
     }
 
-    throw new Error("Batch embedding generation failed");
+    logger.error("Batch embedding generation failed after all retries - returning empty arrays");
+    return texts.map(() => []);
   }
 
   async processPendingMemoryEmbeddings(): Promise<{

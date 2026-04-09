@@ -189,12 +189,10 @@ export default function AssetsPage() {
     // If we have previous data and no more pages, stop
     if (previousPageData && !previousPageData.pagination.hasMore) return null;
     
-    // Construct URL with filters
-    const baseUrl = `/api/stocks/coverage?page=${pageIndex + 1}&limit=${PAGE_SIZE}&region=${region}`;
-    const typeParam = selectedType !== "ALL" ? `&type=${selectedType}` : "";
-    const queryParam = ""; // No longer filtering the grid textually since we use dropdown
+    // Construct URL with filters - crypto-only
+    const baseUrl = `/api/stocks/coverage?page=${pageIndex + 1}&limit=${PAGE_SIZE}&region=${region}&type=CRYPTO`;
     
-    return `${baseUrl}${typeParam}${queryParam}`;
+    return baseUrl;
   };
 
   const { data, setSize, isValidating, isLoading } = useSWRInfinite(
@@ -217,7 +215,7 @@ export default function AssetsPage() {
   }, [data]);
 
   const { data: moversData } = useSWR<{ topGainers: TopMoverItem[]; topLosers: TopMoverItem[] }>(
-    `/api/stocks/movers?region=${region}`,
+    `/api/stocks/movers?region=${region}&type=CRYPTO`,
     fetcher,
     { revalidateOnFocus: false, dedupingInterval: 60000 },
   );

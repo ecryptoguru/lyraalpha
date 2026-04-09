@@ -2,6 +2,7 @@ import { prisma } from "../prisma";
 import {
   Sector,
   InclusionType,
+  EvidenceSourceType,
   Prisma,
 } from "@/generated/prisma/client";
 import { CryptoMappingDTO } from "../types/discovery.dto";
@@ -15,7 +16,7 @@ const logger = createLogger({ service: "discovery-service" });
 
 export type Tier = "Strong" | "Moderate" | "Emerging" | "Peripheral";
 
-export type StockMappingWithRelations = Prisma.StockSectorGetPayload<{
+export type AssetMappingWithRelations = Prisma.StockSectorGetPayload<{
   include: {
     asset: {
       select: {
@@ -54,7 +55,7 @@ export interface ClusteredStocks {
     leadershipScore: number;
   };
   tiers: {
-    [key in Tier]: StockMappingWithRelations[];
+    [key in Tier]: AssetMappingWithRelations[];
   };
 }
 
@@ -218,7 +219,7 @@ export class DiscoveryService {
           },
         };
 
-        stockMappings.forEach((mapping: StockMappingWithRelations) => {
+        stockMappings.forEach((mapping: AssetMappingWithRelations) => {
           let adjustedScore = mapping.eligibilityScore;
 
           if (sectorRegime) {
@@ -251,7 +252,7 @@ export class DiscoveryService {
   /**
    * Universal mapper from DB model to API DTO.
    */
-  static mapToDTO(m: StockMappingWithRelations): CryptoMappingDTO {
+  static mapToDTO(m: AssetMappingWithRelations): CryptoMappingDTO {
     // Extract signals from latest scores
     const signals: Required<NonNullable<CryptoMappingDTO["signals"]>> = {
       trend: 0,
@@ -263,7 +264,7 @@ export class DiscoveryService {
     };
 
     if (m.asset.scores) {
-      m.asset.scores.forEach((s) => {
+      m.asset.scores.forEach((s: { type: string; value: number }) => {
         const type = s.type.toLowerCase() as keyof typeof signals;
         if (type in signals) {
           signals[type] = s.value;
@@ -296,7 +297,7 @@ export class DiscoveryService {
       type: m.asset.type,
       metadata: m.asset.metadata as Record<string, unknown> | null,
       signals, // Injected institutional signals
-      evidence: m.EvidenceReference.map((e) => ({
+      evidence: m.EvidenceReference.map((e: { sourceType: EvidenceSourceType; title: string; url: string | null; excerpt: string | null }) => ({
         sourceType: e.sourceType,
         title: e.title,
         url: e.url,

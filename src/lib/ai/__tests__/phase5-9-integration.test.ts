@@ -64,16 +64,8 @@ describe("Phase 5 — getModelCacheTtl", () => {
 import { getAllowedTools, aiTools } from "../tools";
 
 describe("Phase 6 — getAllowedTools", () => {
-  it("returns empty object for STARTER (no tools)", () => {
-    expect(getAllowedTools("STARTER")).toEqual({});
-  });
-
-  it("returns empty object for PRO (no tools)", () => {
-    expect(getAllowedTools("PRO")).toEqual({});
-  });
-
-  it("returns empty object for unknown tier (safe default)", () => {
-    expect(getAllowedTools("UNKNOWN")).toEqual({});
+  it("returns empty object (no tools activated)", () => {
+    expect(getAllowedTools()).toEqual({});
   });
 
   it("aiTools registry is an object (not null)", () => {

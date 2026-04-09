@@ -129,6 +129,19 @@ vi.mock("@/lib/services/credit.service", () => ({
 }));
 
 vi.mock("@/lib/redis", () => ({
+  redis: {
+    get: vi.fn().mockResolvedValue(null),
+    set: vi.fn(async (key: string, value: unknown, options?: { nx?: boolean; ex?: number }) => {
+      if (options?.nx) {
+        // Set-if-not-exists: only set if key doesn't exist
+        // For tests, always return "OK" to simulate successful lock acquisition
+        return "OK";
+      }
+      return "OK";
+    }),
+    del: vi.fn().mockResolvedValue(1),
+    setex: vi.fn().mockResolvedValue("OK"),
+  },
   getCache: vi.fn().mockResolvedValue(null),
   setCache: vi.fn().mockResolvedValue(undefined),
 }));

@@ -3,7 +3,7 @@ import { withStaleWhileRevalidate } from "@/lib/redis";
 import { dashboardHomeShellCacheKey } from "@/lib/cache-keys";
 import { DailyBriefingService, type DailyBriefing } from "@/lib/services/daily-briefing.service";
 import { PersonalBriefingService, type PersonalBriefingResponse } from "@/lib/services/personal-briefing.service";
-import { canAccessAssetType, isElitePlan } from "@/lib/middleware/plan-gate";
+import { isElitePlan } from "@/lib/middleware/plan-gate";
 import type { PlanTier } from "@/lib/ai/config";
 import { buildPortfolioAlertSummary, getPortfolioHealthBand } from "@/lib/portfolio-alerts";
 import { createShareObject, type IntelligenceShareObject } from "@/lib/intelligence-share";
@@ -361,7 +361,6 @@ async function getDiscoveryPreview(region: string, plan: PlanTier): Promise<Dash
   const where = {
     isSuppressed: false,
     asset: { region },
-    ...(canAccessAssetType(plan, "CRYPTO") ? {} : { assetType: { not: "CRYPTO" as const } }),
   };
 
   const items = await prisma.discoveryFeedItem.findMany({

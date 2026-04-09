@@ -3,12 +3,27 @@
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import {
-  Flame, Trophy, BookOpen,
-  ChevronRight, Lock, CheckCircle2, Clock,
-  Star, Zap, Brain, Bitcoin, BarChart3,
-  TrendingUp, Globe, Layers, Cpu, Search,
-  Percent, Compass, ShieldCheck, GraduationCap, MessageSquare,
-  ArrowRight, Target,
+  Bitcoin,
+  TrendingUp,
+  Compass,
+  Cpu,
+  Zap,
+  Brain,
+  ShieldCheck,
+  MessageSquare,
+  BarChart3,
+  GraduationCap,
+  Flame,
+  Trophy,
+  BookOpen,
+  Target,
+  ArrowRight,
+  Search,
+  Star,
+  CheckCircle2,
+  Clock,
+  ChevronRight,
+  Lock,
 } from "lucide-react";
 import Link from "next/link";
 import { SectionErrorBoundary } from "@/components/error-boundary";
@@ -80,24 +95,6 @@ const CATEGORY_CONFIG: Record<string, {
     color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
     glow: "shadow-amber-500/10",
     badge: "⚡", tagline: "On-chain signals, not noise",
-  },
-  etf: {
-    label: "ETF Transparency", icon: Layers,
-    color: "text-sky-400 bg-sky-500/10 border-sky-500/20",
-    glow: "shadow-sky-500/10",
-    badge: "🔍", tagline: "Look through the wrapper",
-  },
-  mf: {
-    label: "Mutual Fund Analysis", icon: Percent,
-    color: "text-teal-400 bg-teal-500/10 border-teal-500/20",
-    glow: "shadow-teal-500/10",
-    badge: "📊", tagline: "Is your active fund secretly passive?",
-  },
-  commodity: {
-    label: "Commodity Macro", icon: Globe,
-    color: "text-orange-400 bg-orange-500/10 border-orange-500/20",
-    glow: "shadow-orange-500/10",
-    badge: "🌍", tagline: "Oil, gold and regime cycles",
   },
   regime: {
     label: "Market Regimes", icon: TrendingUp,

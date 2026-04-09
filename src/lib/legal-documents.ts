@@ -36,7 +36,8 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
       title: "3. Data We Do Not Intentionally Collect",
       body: [
         "We do not intentionally collect biometric identifiers, government identity numbers, or sensitive personal data unless specifically required and legally permitted.",
-        "We do not request exchange passwords or banking credentials inside the product.",
+        "We do not request exchange passwords, banking credentials, or cryptocurrency private keys inside the product.",
+        "We do not collect wallet addresses, transaction hashes, or blockchain identifiers unless voluntarily provided by the user.",
       ],
     },
     {
@@ -48,7 +49,15 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      title: "5. AI and Model Operations",
+      title: "5. Sanctions Screening",
+      body: [
+        "We may screen user information against sanctions lists and watchlists to comply with applicable laws and regulations.",
+        "This screening is conducted for the purpose of preventing use of the platform by sanctioned individuals, entities, or jurisdictions.",
+        "We reserve the right to restrict or terminate access if screening results indicate sanctions status.",
+      ],
+    },
+    {
+      title: "6. AI and Model Operations",
       body: [
         "LYRA may use deterministic analytics outputs and licensed market context to generate explanations.",
         "Prompt and response logs may be retained for reliability, abuse monitoring, and quality audits.",
@@ -56,21 +65,22 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      title: "6. Sharing with Service Providers",
+      title: "7. Sharing with Service Providers",
       body: [
         "We share data only with trusted processors that help deliver authentication, billing, hosting, monitoring, and core platform infrastructure.",
         "All processors are contractually required to process data only for approved purposes.",
+        "We do not share user data with cryptocurrency exchanges, wallet providers, or blockchain analytics services.",
       ],
     },
     {
-      title: "7. Security and Retention",
+      title: "8. Security and Retention",
       body: [
         "We apply encryption in transit, access controls, and operational safeguards appropriate to the nature of the data.",
         "Data is retained only as long as needed to provide the service, comply with legal obligations, and resolve legitimate disputes.",
       ],
     },
     {
-      title: "8. Your Rights",
+      title: "9. Your Rights",
       body: [
         "Subject to applicable law, you may request access, correction, deletion, or restriction of your personal data.",
         "You may withdraw consent for optional processing at any time.",
@@ -78,28 +88,36 @@ export const PRIVACY_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      title: "9. Cookies and Similar Technologies",
+      title: "10. Cookies and Similar Technologies",
       body: [
         "We use cookies and similar technologies for session continuity, product performance, and security diagnostics.",
         "Where required by law, consent controls are provided.",
       ],
     },
     {
-      title: "10. Children",
+      title: "11. Children",
       body: [
         "The platform is not intended for users under 18 years of age.",
         "If you believe a minor has provided personal data, contact us for removal.",
       ],
     },
     {
-      title: "11. Policy Updates",
+      title: "12. International Data Transfers",
+      body: [
+        "Your data may be processed and stored in India and other countries where our service providers operate.",
+        "We ensure appropriate safeguards are in place for international data transfers in compliance with applicable data protection laws.",
+        "We do not transfer data to jurisdictions subject to comprehensive sanctions without appropriate legal authorization.",
+      ],
+    },
+    {
+      title: "13. Policy Updates",
       body: [
         "We may revise this policy periodically.",
         "Material updates will be communicated through the platform or associated communication channels.",
       ],
     },
     {
-      title: "12. Contact",
+      title: "14. Contact",
       body: [
         "For privacy and grievance requests, email support@fusionwaveai.com.",
         "This policy is governed by applicable laws of India, including the Digital Personal Data Protection Act, 2023.",
@@ -149,49 +167,78 @@ export const TERMS_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      title: "6. User Responsibilities",
+      title: "6. Cryptocurrency and Digital Asset Risks",
       body: [
-        "You agree to use the platform lawfully and not attempt abuse, reverse engineering of protected systems, or unauthorized access.",
-        "You are responsible for maintaining your account security and safeguarding credentials.",
+        "Cryptocurrencies and digital assets are highly volatile and may experience significant price fluctuations.",
+        "Digital assets may be subject to regulatory uncertainty, security risks, and technological failures.",
+        "Past performance of digital assets does not indicate future results.",
+        "Users should conduct their own due diligence and understand the risks before engaging with any digital asset.",
       ],
     },
     {
-      title: "7. Plans and Billing",
+      title: "7. Geographic Restrictions",
+      body: [
+        "The platform is not available to users located in, or residents of, countries subject to comprehensive sanctions imposed by the United States, European Union, United Nations, or other relevant authorities.",
+        "Restricted jurisdictions include but are not limited to: Iran, North Korea, Syria, Cuba, Russia, Crimea, Donetsk, Luhansk, and certain regions of Ukraine.",
+        "We reserve the right to restrict access from additional jurisdictions based on regulatory requirements.",
+        "Users are responsible for ensuring their use of the platform complies with applicable local laws.",
+      ],
+    },
+    {
+      title: "8. Anti-Money Laundering and Sanctions Compliance",
+      body: [
+        "We do not facilitate, enable, or support money laundering, terrorist financing, or any illegal activities.",
+        "We do not provide custody, exchange, or transfer services for digital assets or fiat currency.",
+        "We may implement screening measures to prevent use by sanctioned individuals, entities, or jurisdictions.",
+        "We reserve the right to report suspicious activity to relevant authorities as required by law.",
+      ],
+    },
+    {
+      title: "9. User Responsibilities",
+      body: [
+        "You agree to use the platform lawfully and not attempt abuse, reverse engineering of protected systems, or unauthorized access.",
+        "You are responsible for maintaining your account security and safeguarding credentials.",
+        "You must not use the platform for illegal purposes including but not limited to money laundering, tax evasion, or sanctions evasion.",
+      ],
+    },
+    {
+      title: "10. Plans and Billing",
       body: [
         "Paid plans provide access to higher limits and additional analytical depth.",
         "Subscription fees pay for platform access and service delivery, not financial outcomes.",
       ],
     },
     {
-      title: "8. Third-Party Data",
+      title: "11. Third-Party Data",
       body: [
         "The platform may rely on external data providers.",
         "We are not responsible for outages, inaccuracies, or delays originating from third-party sources.",
       ],
     },
     {
-      title: "9. Limitation of Liability",
+      title: "12. Limitation of Liability",
       body: [
         "To the maximum extent permitted by law, LyraAlpha AI is not liable for indirect, incidental, consequential, trading, or investment losses arising from use of the platform.",
         "Use of the platform is at your own risk.",
       ],
     },
     {
-      title: "10. Termination",
+      title: "13. Termination",
       body: [
         "We may suspend or terminate access for violations of these terms, abuse, or legal compliance requirements.",
+        "We may terminate access without notice for users located in restricted jurisdictions.",
         "You may discontinue use at any time.",
       ],
     },
     {
-      title: "11. Changes to Terms",
+      title: "14. Changes to Terms",
       body: [
         "We may update these terms from time to time.",
         "Continued use after an update constitutes acceptance of the revised terms.",
       ],
     },
     {
-      title: "12. Governing Law and Contact",
+      title: "15. Governing Law and Contact",
       body: [
         "These terms are governed by the laws of India.",
         "For legal and support queries, contact support@fusionwaveai.com.",

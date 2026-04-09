@@ -35,15 +35,11 @@ The AI layer is expected to operate on:
 
 ### 3.1 Assets
 
-The platform stores a multi-asset universe spanning:
+The platform stores a crypto-only asset universe spanning:
 
-- equities
-- ETFs
-- crypto
-- mutual funds
-- commodities
+- crypto assets
 
-Assets carry structured metadata such as symbol, name, region, currency, exchange and asset-type-specific intelligence fields.
+Assets carry structured metadata such as symbol, name, region, currency, exchange and asset-type-specific intelligence fields including on-chain metrics, protocol data, and DeFi analytics.
 
 ### 3.2 Scores and Derived Intelligence
 

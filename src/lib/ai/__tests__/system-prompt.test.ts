@@ -40,7 +40,7 @@ describe("System Prompt — BUILD_LYRA_STATIC_PROMPT", () => {
     it("reference example is available for Pro SIMPLE CRYPTO", () => {
       const example = BUILD_LYRA_REFERENCE_EXAMPLE({ assetType: "CRYPTO", planTier: "PRO", queryTier: "SIMPLE" });
       expect(example).toContain("REFERENCE OUTPUT");
-      expect(example).toContain("NVDA");
+      expect(example).toContain("ETH");
     });
 
     it("reference example returns a structure skeleton for MODERATE (non-STARTER)", () => {
@@ -64,7 +64,7 @@ describe("System Prompt — BUILD_LYRA_STATIC_PROMPT", () => {
     it("GLOBAL reference example includes macro sections", () => {
       const example = BUILD_LYRA_REFERENCE_EXAMPLE({ planTier: "PRO", queryTier: "SIMPLE" });
       expect(example).toContain("Market Pulse");
-      expect(example).toContain("Sector Dispersion");
+      expect(example).toContain("Crypto Sector View");
     });
   });
 

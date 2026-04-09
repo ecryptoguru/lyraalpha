@@ -21,15 +21,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
-type FilterType = "ALL" | "STOCK" | "ETF" | "CRYPTO" | "COMMODITY" | "MUTUAL_FUND";
+type FilterType = "ALL" | "CRYPTO";
 
-const TYPE_FILTERS: { label: string; value: FilterType }[] = [
+const filterOptions: { label: string; value: FilterType }[] = [
   { label: "All", value: "ALL" },
-  { label: "Stocks", value: "STOCK" },
-  { label: "ETFs", value: "ETF" },
   { label: "Crypto", value: "CRYPTO" },
-  { label: "Commodities", value: "COMMODITY" },
-  { label: "Mutual Fund", value: "MUTUAL_FUND" },
 ];
 
 function WatchlistRow({ item }: { item: WatchlistItem }) {
@@ -154,7 +150,7 @@ export default function WatchlistPage() {
             />
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {TYPE_FILTERS.map((f) => (
+            {filterOptions.map((f) => (
               <Button
                 key={f.value}
                 variant="outline"

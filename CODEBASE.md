@@ -14,6 +14,8 @@ This document is written for AI coding agents (Cursor/Windsurf/Copilot/etc.) so 
 - A Prisma/Postgres-backed data layer, Redis/Upstash caching + rate limiting, and Clerk auth
 - A **public blog system** with hybrid static + DB posts, AMI 2.0 webhook bridge, and QStash-scheduled email digest
 
+The platform is **crypto-only** — it focuses exclusively on cryptocurrency assets and on-chain intelligence.
+
 Core product constraints:
 
 - **The engines compute; the AI interprets.** Lyra is designed to interpret precomputed numbers and context.
@@ -178,8 +180,8 @@ Key API surfaces:
 - `src/app/api/discovery/search/route.ts` — global search (sectors + assets), region-aware
 - `src/app/api/discovery/sectors/[id]/route.ts` — sector detail data, region-aware
 - `src/app/api/portfolio/**` — portfolio CRUD, holdings, health, imports, broker sync, and simulation routes
-- `src/app/api/stocks/compare/route.ts` — Compare Assets backend with server-side symbol normalization, validation, and credit charging
-- `src/app/api/stocks/stress-test/route.ts` — Shock Simulator backend with server-side symbol normalization, validation, and credit charging
+- `src/app/api/stocks/compare/route.ts` — Compare Assets backend with server-side symbol normalization, validation, and credit charging (legacy route name, handles crypto assets)
+- `src/app/api/stocks/stress-test/route.ts` — Shock Simulator backend with server-side symbol normalization, validation, and credit charging (legacy route name, handles crypto assets)
 - `src/app/api/support/public-chat/route.ts` — **public Myra endpoint** (no auth required, rate-limited by IP)
 - `src/app/api/support/stream/route.ts` — authenticated Myra support streaming surface
 - `src/app/api/user/**` — user preferences, watchlist, credits
@@ -278,8 +280,8 @@ Prisma schema lives in `prisma/schema.prisma`.
 Important models / fields (not exhaustive):
 
 - `Asset`
-  - `symbol` (unique), `name`, `type`, `region` (US/IN), `currency` (USD/INR)
-  - many JSON fields for computed analytics
+  - `symbol` (unique), `name`, `type` (CRYPTO), `region` (US/IN), `currency` (USD/INR)
+  - many JSON fields for computed analytics and on-chain metrics
 - `PriceHistory` — OHLCV time series
 - `AssetScore` / score history (varies by implementation)
 - `User`
@@ -405,12 +407,9 @@ The old monolithic daily cron flow has been replaced with **region-specific EOD 
 
 US is intentionally split into smaller jobs to stay below serverless time limits.
 
-- `POST /api/cron/us-eod-stocks-sync`
-- `POST /api/cron/us-eod-etfs-sync`
-- `POST /api/cron/us-eod-commodities-sync`
 - `POST /api/cron/us-eod-crypto-sync`
 - `POST /api/cron/us-eod-postprocess`
-  - runs after the four US sync jobs
+  - runs after the US crypto sync job
   - recomputes US analytics once
   - generates the US briefing
   - warms US market narratives
@@ -421,9 +420,6 @@ All times are UTC.
 
 - `in-eod-sync` → `10:30` Mon-Fri
 - `in-eod-postprocess` → `10:45` Mon-Fri
-- `us-eod-stocks-sync` → `21:30` Mon-Fri
-- `us-eod-etfs-sync` → `21:35` Mon-Fri
-- `us-eod-commodities-sync` → `21:40` Mon-Fri
 - `us-eod-crypto-sync` → `21:45` Mon-Fri
 - `us-eod-postprocess` → `22:00` Mon-Fri
 - `crypto-sync` → every `8h`
@@ -519,7 +515,7 @@ Key properties:
   - query tier (SIMPLE/MODERATE/COMPLEX)
   - model family (always `gpt` now)
 - Portfolio-format prompting is only activated when real portfolio context is present.
-- Elite moderate commodity prompting explicitly asks for a regime verdict, dominant macro pillar, macro-justified vs sentiment-driven framing, and one cross-asset confirmation signal.
+- Elite moderate crypto prompting explicitly asks for a regime verdict, dominant macro pillar, macro-justified vs sentiment-driven framing, and one cross-asset confirmation signal.
 - `buildHumanizerGuidance(purpose)` helper in `src/lib/ai/prompts/humanizer.ts` standardizes human-readable prompt instructions across non-Lyra/Myra LLM generators (daily briefing, portfolio memo, trending question generation).
 
 Persona injection note:

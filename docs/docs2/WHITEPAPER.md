@@ -120,7 +120,7 @@ The **Shock Simulator** is the clearest example:
 
 - selectable historical shock regimes across the US and India
 - a hybrid replay engine that uses direct scenario windows when available and proxy replay when direct history is incomplete
-- asset-type-aware proxy mapping across equities, ETFs, crypto, commodities, and mutual funds
+- asset-type-aware proxy mapping across crypto assets
 - structured explanation payloads covering transmission mechanisms, pressure points, dominant drivers, resilience themes, and rationale
 - Lyra follow-up interpretation that turns replay output into hedge and resilience guidance
 

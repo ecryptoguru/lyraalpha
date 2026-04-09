@@ -1307,7 +1307,7 @@ logRetrievalMetric({
   }
   emitCacheEvent({ modelFamily: "gpt", operation: "read", outcome: "miss" });
 
-  const tierTools = getAllowedTools(userPlan);
+  const tierTools = getAllowedTools();
   const hasTools = Object.keys(tierTools).length > 0;
   // Use the tier-appropriate GPT-5.4 deployment (nano/mini/full) from tierConfig.
   // This is the primary cost lever: Starter SIMPLE → nano ($0.20/M) vs full ($2.50/M).

@@ -863,7 +863,6 @@ export class MarketSyncService {
         ? {
             NOT: {
               region: "IN",
-              type: { in: [AssetType.STOCK, AssetType.ETF] },
             },
           }
         : {}),
