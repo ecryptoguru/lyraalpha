@@ -197,9 +197,9 @@ async function backdateRegion(region: string) {
   });
 
   if (!benchmark) {
-    // Fallback: any ETF
+    // Fallback: any CRYPTO asset
     const fallback = await prisma.asset.findFirst({
-      where: { type: "ETF", region },
+      where: { type: "CRYPTO", region },
       orderBy: { avgTrendScore: "desc" },
       select: { id: true, symbol: true },
     });
@@ -211,7 +211,7 @@ async function backdateRegion(region: string) {
   }
 
   const bench = benchmark ?? (await prisma.asset.findFirst({
-    where: { type: "ETF", region },
+    where: { type: "CRYPTO", region },
     orderBy: { avgTrendScore: "desc" },
     select: { id: true, symbol: true },
   }))!;
