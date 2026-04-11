@@ -101,7 +101,7 @@ async function buildWindows(region: string): Promise<WindowData[]> {
   });
 
   const benchmark = benchmarkAsset ?? await prisma.asset.findFirst({
-    where: { type: "ETF", region },
+    where: { type: "CRYPTO", region },
     orderBy: { avgTrendScore: "desc" },
     select: { id: true, symbol: true },
   });
