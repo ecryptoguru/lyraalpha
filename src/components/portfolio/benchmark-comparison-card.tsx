@@ -53,7 +53,7 @@ interface QuoteData {
 function useBenchmarkQuotes(benchmarks: BenchmarkEntry[]) {
   const symbols = benchmarks.map((b) => b.symbol).join(",");
   const swr = useSWR<Record<string, QuoteData>>(
-    `/api/crypto/quotes?symbols=${encodeURIComponent(symbols)}`,
+    `/api/stocks/quotes?symbols=${encodeURIComponent(symbols)}`,
     (url: string) => fetch(url).then((r) => (r.ok ? r.json() : null)),
     { revalidateOnFocus: false },
   );

@@ -30,7 +30,7 @@ These signals include:
 - Trend, Momentum, Volatility, Liquidity, Trust, Sentiment
 - Market-regime framing and compatibility overlays
 - Score dynamics and time-based movement signals
-- Asset-type-specific intelligence (ETF lookthrough, MF lookthrough, crypto, commodity intelligence)
+- Asset-type-specific intelligence (crypto intelligence)
 - Stress-scenario replay outputs with driver summaries, transmission mechanisms, pressure points, resilience themes
 - Portfolio health, fragility, benchmark comparison, and Monte Carlo outputs
 
@@ -55,7 +55,7 @@ The premium layer is not just longer answers. It is a workflow system built on s
 **Shock Simulator:**
 - Selectable historical shock regimes across US and India contexts
 - Hybrid direct + proxy replay engine (proxy when direct history is insufficient)
-- Asset-type-aware proxy mapping across equities, ETFs, crypto, commodities, mutual funds
+- Asset-type-aware proxy mapping for crypto assets
 - Structured explanation payloads: transmission mechanisms, pressure points, dominant drivers, resilience themes, rationale
 - Lyra follow-up translating replay output into hedge and resilience framing
 

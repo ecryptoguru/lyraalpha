@@ -14,6 +14,10 @@ import {
   calculateLLMCost,
   REALTIME_VOICE_PRICING,
   REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION,
+  REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE,
+  REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE,
+  REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE_CONTINUOUS,
+  REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE_CONTINUOUS,
   REALTIME_VOICE_DEFAULT_TEXT_INPUT_TOKENS,
   REALTIME_VOICE_DEFAULT_TEXT_OUTPUT_TOKENS_PER_MINUTE,
   REALTIME_VOICE_STATIC_PREFIX_TOKENS,
@@ -41,8 +45,20 @@ describe("REALTIME_VOICE_PRICING constants", () => {
   it("text output is $2.40/M tokens", () => {
     expect(REALTIME_VOICE_PRICING.textOutputPerMillion).toBe(2.4);
   });
-  it("audio token assumption is 100 tokens/min/direction", () => {
-    expect(REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION).toBe(100);
+  it("audio input token rate is 300 tokens/min of session (50/50 split of 600 continuous)", () => {
+    expect(REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE).toBe(300);
+  });
+  it("audio output token rate is 600 tokens/min of session (50/50 split of 1,200 continuous)", () => {
+    expect(REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE).toBe(600);
+  });
+  it("continuous audio input rate is 600 tokens/min (1 token per 100ms per OpenAI docs)", () => {
+    expect(REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE_CONTINUOUS).toBe(600);
+  });
+  it("continuous audio output rate is 1,200 tokens/min (1 token per 50ms per OpenAI docs)", () => {
+    expect(REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE_CONTINUOUS).toBe(1_200);
+  });
+  it("legacy alias matches session input rate for backward compat", () => {
+    expect(REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION).toBe(300);
   });
   it("default text input tokens reflects measured prompt size (937)", () => {
     expect(REALTIME_VOICE_DEFAULT_TEXT_INPUT_TOKENS).toBe(937);
@@ -53,8 +69,8 @@ describe("REALTIME_VOICE_PRICING constants", () => {
   it("static prefix tokens constant is exported and reflects measured value", () => {
     expect(REALTIME_VOICE_STATIC_PREFIX_TOKENS).toBe(870);
   });
-  it("max response output tokens constant matches session config cap", () => {
-    expect(REALTIME_VOICE_MAX_RESPONSE_OUTPUT_TOKENS).toBe(300);
+  it("max response output tokens constant matches session config cap (350)", () => {
+    expect(REALTIME_VOICE_MAX_RESPONSE_OUTPUT_TOKENS).toBe(350);
   });  
   it("static prefix is less than total default text input tokens", () => {
     expect(REALTIME_VOICE_STATIC_PREFIX_TOKENS).toBeLessThan(REALTIME_VOICE_DEFAULT_TEXT_INPUT_TOKENS);
@@ -197,11 +213,11 @@ describe("estimateVoiceSessionCost", () => {
     expect(zeroResult.totalCost).toBe(0);
   });
 
-  it("1-minute call uses exactly 100 audio input tokens and 100 audio output tokens", () => {
+  it("1-minute call uses 300 audio input tokens and 600 audio output tokens (50/50 split)", () => {
     const result = estimateVoiceSessionCost(60);
-    // 100 tokens in + 100 tokens out
-    const expectedAudioIn = (100 / 1_000_000) * 10.0;
-    const expectedAudioOut = (100 / 1_000_000) * 20.0;
+    // 300 tokens in + 600 tokens out (50/50 split of continuous rates)
+    const expectedAudioIn = (300 / 1_000_000) * 10.0;   // $0.003
+    const expectedAudioOut = (600 / 1_000_000) * 20.0;   // $0.012
     expect(result.audioInputCost).toBeCloseTo(expectedAudioIn, 6);
     expect(result.audioOutputCost).toBeCloseTo(expectedAudioOut, 6);
   });
@@ -374,5 +390,97 @@ describe("calculateLLMCost model normalisation", () => {
       result.inputCost + result.cachedInputCost + result.outputCost,
       6,
     );
+  });
+});
+
+// ─── Exact cost per minute — gpt-realtime-mini ────────────────────────────────
+// Token rates per OpenAI official docs (developers.openai.com/api/docs/guides/realtime-costs):
+//   Continuous rates:  User audio input: 1 token / 100ms = 600 tokens/min
+//                      Assistant audio:  1 token / 50ms  = 1,200 tokens/min
+//   With 50/50 split:  Audio input:  300 tokens/min of session
+//                      Audio output:  600 tokens/min of session
+// Pricing per gpt-realtime-mini (per million tokens):
+//   Audio input:  $10.00  |  Cached audio input:  $0.30
+//   Audio output: $20.00  |  Text input:          $0.60
+//   Cached text:  $0.06   |  Text output:         $2.40
+
+describe("Exact cost per minute — gpt-realtime-mini voice agent", () => {
+  it("1-minute session: audio-only variable cost (no text)", () => {
+    const result = estimateVoiceSessionCost(60, 0, 0);
+    // Audio input:  300 tokens × $10/M  = $0.003000
+    // Audio output: 600 tokens × $20/M  = $0.012000
+    // Text output:  150 tokens × $2.40/M = $0.000360
+    expect(result.audioInputCost).toBeCloseTo(0.003, 6);
+    expect(result.audioOutputCost).toBeCloseTo(0.012, 6);
+    expect(result.textOutputCost).toBeCloseTo(0.00036, 6);
+    // Total variable cost per minute ≈ $0.015360
+    expect(result.totalCost).toBeCloseTo(0.01536, 6);
+  });
+
+  it("1-minute session: full cost with default text instructions (937 tokens)", () => {
+    const result = estimateVoiceSessionCost(60);
+    // Audio input:   300 × $10/M   = $0.003000
+    // Audio output:  600 × $20/M   = $0.012000
+    // Text input:    937 × $0.60/M  = $0.000562
+    // Text output:   150 × $2.40/M  = $0.000360
+    // Total ≈ $0.015922
+    expect(result.audioInputCost).toBeCloseTo(0.003, 6);
+    expect(result.audioOutputCost).toBeCloseTo(0.012, 6);
+    expect(result.textInputCost).toBeCloseTo(0.0005622, 6);
+    expect(result.textOutputCost).toBeCloseTo(0.00036, 6);
+    expect(result.totalCost).toBeCloseTo(0.0159222, 6);
+  });
+
+  it("1-minute session: with cached static prefix (870 of 937 tokens cached)", () => {
+    const result = estimateVoiceSessionCostCached(60);
+    // Cached text:   870 × $0.06/M  = $0.0000522
+    // Non-cached:    67  × $0.60/M  = $0.0000402
+    // Audio + text output same as above
+    expect(result.cachedTextInputCost).toBeCloseTo(0.0000522, 6);
+    expect(result.textInputCost).toBeCloseTo(0.0000402, 6);
+    // Total ≈ $0.0154524 (saves ~$0.00047 vs uncached)
+    expect(result.totalCost).toBeLessThan(estimateVoiceSessionCost(60).totalCost);
+  });
+
+  it("3-minute session: typical support call (cached)", () => {
+    const result = estimateVoiceSessionCostCached(180);
+    // Audio input:   900 × $10/M   = $0.009
+    // Audio output:  1,800 × $20/M  = $0.036
+    // Text input (cached prefix): 870 × $0.06/M + 67 × $0.60/M = $0.0000924
+    // Text output:   450 × $2.40/M  = $0.00108
+    // Total ≈ $0.0461724
+    expect(result.audioInputCost).toBeCloseTo(0.009, 6);
+    expect(result.audioOutputCost).toBeCloseTo(0.036, 6);
+    expect(result.totalCost).toBeCloseTo(0.0461724, 5);
+  });
+
+  it("5-minute session: long support call (cached)", () => {
+    const result = estimateVoiceSessionCostCached(300);
+    // Audio input:   1,500 × $10/M  = $0.015
+    // Audio output:  3,000 × $20/M  = $0.060
+    // Text: ~$0.0001324
+    // Text output: 750 × $2.40/M = $0.0018
+    // Total ≈ $0.0769324
+    expect(result.audioInputCost).toBeCloseTo(0.015, 6);
+    expect(result.audioOutputCost).toBeCloseTo(0.060, 6);
+    expect(result.totalCost).toBeCloseTo(0.0769324, 4);
+  });
+
+  it("audio output dominates cost — ~75% of total per minute", () => {
+    const result = estimateVoiceSessionCost(60, 0, 0);
+    const audioOutShare = result.audioOutputCost / result.totalCost;
+    // 0.012 / 0.01536 ≈ 0.78
+    expect(audioOutShare).toBeGreaterThan(0.70);
+    expect(audioOutShare).toBeLessThan(0.85);
+  });
+
+  it("summariseVoiceSessionCost gives consistent per-minute breakdown", () => {
+    const summary = summariseVoiceSessionCost(60);
+    // Worst case ≈ $0.0159222/min
+    expect(summary.worstCase.totalCost).toBeCloseTo(0.0159222, 5);
+    // With caching ≈ $0.0154524/min
+    expect(summary.withCaching.totalCost).toBeCloseTo(0.0154524, 5);
+    // Caching saves ~$0.00047 per minute
+    expect(summary.cachingSavingUsd).toBeCloseTo(0.0004698, 5);
   });
 });

@@ -16,7 +16,7 @@ vi.mock("@/lib/prisma", () => ({
 
 import { prisma } from "@/lib/prisma";
 
-describe("GET /api/crypto/[symbol]/scenarios", () => {
+describe("GET /api/stocks/[symbol]/scenarios", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -24,7 +24,7 @@ describe("GET /api/crypto/[symbol]/scenarios", () => {
   it("returns 404 when asset is missing", async () => {
     vi.mocked(prisma.asset.findUnique).mockResolvedValue(null as any);
 
-    const req = new Request("http://localhost/api/crypto/BTC/scenarios");
+    const req = new Request("http://localhost/api/stocks/BTC/scenarios");
     const res = await GET(req as unknown as NextRequest, {
       params: Promise.resolve({ symbol: "BTC" }),
     });
@@ -42,7 +42,7 @@ describe("GET /api/crypto/[symbol]/scenarios", () => {
       scenarioData: null,
     } as any);
 
-    const req = new Request("http://localhost/api/crypto/BTC/scenarios");
+    const req = new Request("http://localhost/api/stocks/BTC/scenarios");
     const res = await GET(req as unknown as NextRequest, {
       params: Promise.resolve({ symbol: "BTC" }),
     });
@@ -97,7 +97,7 @@ describe("GET /api/crypto/[symbol]/scenarios", () => {
       scenarioData,
     } as any);
 
-    const req = new Request("http://localhost/api/crypto/BTC/scenarios");
+    const req = new Request("http://localhost/api/stocks/BTC/scenarios");
     const res = await GET(req as unknown as NextRequest, {
       params: Promise.resolve({ symbol: "BTC" }),
     });

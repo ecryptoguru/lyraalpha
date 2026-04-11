@@ -218,7 +218,9 @@ export class DefiLlamaService {
         try {
           const protocols = await this.getProtocols();
           protocolCount = protocols.filter(p => p.chains.includes(chainName)).length;
-        } catch { /* non-critical — skip count if protocols fetch fails */ }
+        } catch (error) {
+          logger.debug({ err: error, chainName }, "Failed to fetch protocols for protocol count (non-critical)");
+        }
         return {
           tvl: chain.tvl,
           tvlChange7d: null,

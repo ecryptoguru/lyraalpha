@@ -49,7 +49,7 @@ Strong product quality does not compound without a strong distribution engine. T
 
 **SEO / GEO Content Engine + AMI 2.0 Blog Pipeline**
 - Build 50–100 high-intent answer pages, tool pages, and comparison pages
-- Target keywords: "stock analysis tool India", "compare ETF vs mutual fund", "portfolio stress test", "momentum score explained"
+- Target keywords: "crypto analysis tool India", "compare crypto assets", "portfolio stress test", "momentum score explained"
 - Content targeting: tool pages convert at 3–5x the rate of generic blog posts
 - SEO is a long-cycle investment — start M1, compounding returns from M6+
 - **AMI 2.0 content pipeline (already shipped):** the public blog at `/blog` is fed by the external AMI 2.0 agent via a secure webhook bridge. Posts are auto-published, ISR-revalidated, and paired with a weekly Monday digest to opted-in subscribers. This makes the blog a near-zero-marginal-cost distribution asset — capital here funds the AMI agent infrastructure and content strategy, not a writing team.
@@ -83,7 +83,7 @@ LyraAlpha AI is a data-intensive product. Reliability and freshness are product 
 ### Specific Uses
 
 **Premium Data Access**
-- Higher-rate API access for US and India market data (equities, ETFs, mutual funds, crypto, commodities)
+- Higher-rate API access for US and India crypto market data
 - Priority EOD data freshness for US and India pipelines
 - Coverage expansion as market universe grows
 

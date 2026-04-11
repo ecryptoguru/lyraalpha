@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { upsertBrevoContact, sendBrevoEmail } from "@/lib/email/brevo";
+import { grantCreditsInTransaction } from "@/lib/services/credit.service";
 import { buildWelcomeEmail } from "@/lib/email/templates";
 import { invalidatePlanCache } from "@/lib/middleware/plan-gate";
 import { isPrivilegedEmail } from "@/lib/auth";
@@ -82,7 +83,9 @@ export async function POST(req: Request) {
         const lastName = data.last_name || undefined;
 
         const isAdmin = isPrivilegedEmail(email);
-        const plan: "STARTER" | "ELITE" = isAdmin ? "ELITE" : "STARTER";
+        // All new sign-ups get ELITE plan + 500 bonus credits
+        const plan = "ELITE" as const;
+        const SIGNUP_BONUS_CREDITS = 500;
 
         await prisma.user.upsert({
           where: { id: data.id },
@@ -90,11 +93,11 @@ export async function POST(req: Request) {
             id: data.id,
             email,
             plan,
-            credits: 0,
+            credits: SIGNUP_BONUS_CREDITS,
             monthlyCreditsBalance: 0,
-            bonusCreditsBalance: 0,
+            bonusCreditsBalance: SIGNUP_BONUS_CREDITS,
             purchasedCreditsBalance: 0,
-            totalCreditsEarned: 0,
+            totalCreditsEarned: SIGNUP_BONUS_CREDITS,
             totalCreditsSpent: 0,
             updatedAt: new Date(),
           },
@@ -104,6 +107,32 @@ export async function POST(req: Request) {
             updatedAt: new Date(),
           },
         });
+
+        // Grant 500 bonus credits as a proper credit lot (3-month expiry)
+        // only on first creation — upsert update path skips this
+        try {
+          const existingUser = await prisma.user.findUnique({
+            where: { id: data.id },
+            select: { totalCreditsEarned: true },
+          });
+          // Only grant if this is a fresh signup (totalCreditsEarned matches the bonus)
+          if (existingUser && existingUser.totalCreditsEarned === SIGNUP_BONUS_CREDITS) {
+            await prisma.$transaction(async (tx) => {
+              await grantCreditsInTransaction(
+                tx,
+                data.id,
+                SIGNUP_BONUS_CREDITS,
+                "BONUS" as never,
+                "Sign-up bonus — welcome to LyraAlpha!",
+                undefined,
+                { countTowardEarned: false }, // already counted in upsert
+              );
+            });
+            logger.info({ userId: data.id, credits: SIGNUP_BONUS_CREDITS }, "Sign-up bonus credits granted");
+          }
+        } catch (creditErr) {
+          logger.error({ err: sanitizeError(creditErr), userId: data.id }, "Failed to grant sign-up bonus credits — user created but credits may not be available");
+        }
 
         const welcome = buildWelcomeEmail({ firstName });
         await upsertBrevoContact({
@@ -171,7 +200,7 @@ export async function POST(req: Request) {
               create: {
                 id: data.id,
                 email: emailAddress,
-                plan: isAdmin ? "ELITE" : "STARTER",
+                plan: "ELITE" as const,
                 trialEndsAt: null,
                 updatedAt: new Date(),
               },

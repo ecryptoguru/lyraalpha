@@ -21,13 +21,31 @@ export async function auth() {
   );
 
   if (isAuthBypassEnabled() || skipAuthViaHeader) {
-    return {
-      userId: "test-user-id",
-      sessionId: "test-session-id",
-      getToken: async () => "test-token",
-      debug: () => {},
-      redirectToSignIn: () => {},
-    };
+    // For auth bypass, try to use a real ELITE user from database for testing
+    // This ensures plan-gating works correctly during development
+    try {
+      const prismaModule = await import("@/lib/prisma");
+      const eliteUser = await prismaModule.directPrisma.user.findFirst({
+        where: { plan: "ELITE" },
+        select: { id: true },
+      });
+      const userId = eliteUser?.id || "test-user-id";
+      return {
+        userId,
+        sessionId: "test-session-id",
+        getToken: async () => "test-token",
+        debug: () => {},
+        redirectToSignIn: () => {},
+      };
+    } catch {
+      return {
+        userId: "test-user-id",
+        sessionId: "test-session-id",
+        getToken: async () => "test-token",
+        debug: () => {},
+        redirectToSignIn: () => {},
+      };
+    }
   }
   return clerkAuth();
 }

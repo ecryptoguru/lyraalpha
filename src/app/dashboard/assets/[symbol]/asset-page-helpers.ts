@@ -1,5 +1,4 @@
 import { AssetAnalyticsResponse, EventImpact, ScoreDynamics } from "@/types/analytics";
-import { MFAnalyticsResult } from "@/lib/engines/mutual-fund-analytics";
 import { AssetSignals, CompatibilityResult } from "@/lib/engines/compatibility";
 import { GroupingResult } from "@/lib/engines/grouping";
 import { MarketContextSnapshot } from "@/lib/engines/market-regime";
@@ -17,7 +16,6 @@ export interface AssetAnalytics {
     growth: number;
     momentum: number;
     volatility: number;
-    mfAnalytics?: MFAnalyticsResult;
   } | null;
   correlationData: Record<string, number>;
   events: {

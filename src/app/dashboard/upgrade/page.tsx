@@ -685,7 +685,7 @@ export default function UpgradePage() {
               {creditPackages.map((pkg) => {
                 const isLoading = purchasingId === pkg.id;
                 const isDisabled = purchasingId !== null;
-                const localizedPrice = getLocalizedCreditPackPrice(pkg, upgradeRegion);
+                const localizedPrice = getLocalizedCreditPackPrice(pkg);
                 return (
                 <div
                   key={pkg.id}

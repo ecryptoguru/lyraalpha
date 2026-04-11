@@ -8,7 +8,7 @@
  * - Key intelligence events
  * - Sector correlation state
  *
- * Cached in Redis for 24h per region. Triggered by cron once daily.
+ * Crypto-only platform. Cached in Redis for 24h. Triggered by cron once daily.
  */
 
 import { prisma } from "@/lib/prisma";
@@ -18,6 +18,7 @@ import { buildHumanizerGuidance } from "@/lib/ai/prompts/humanizer";
 import { generateText } from "ai";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
+import { safeJsonParse } from "@/lib/utils/json";
 import { cleanAssetText, getFriendlyAssetName } from "@/lib/format-utils";
 import { applyCostCeiling } from "@/lib/ai/cost-ceiling";
 import { logValidationResult, validateOutput } from "@/lib/ai/output-validation";
@@ -198,7 +199,7 @@ function buildLiveFallbackBriefing(region: string, inputs: BriefingInputs): Dail
   const leadEvent = inputs.recentEvents[0];
 
   const marketOverviewParts = [
-    `The ${region === "IN" ? "Indian" : "US"} market is currently reading ${inputs.regimeLabel.toLowerCase()}, with average asset performance at ${formatPercent(inputs.avgChange)} across ${inputs.totalAssets} tracked names.`,
+    `The crypto market is currently reading ${inputs.regimeLabel.toLowerCase()}, with average asset performance at ${formatPercent(inputs.avgChange)} across ${inputs.totalAssets} tracked names.`,
     leadDiscovery
       ? buildDiscoverySentence(leadDiscovery)
       : leadGainer
@@ -318,11 +319,7 @@ async function collectBriefingInputs(region: string): Promise<BriefingInputs> {
   const regimeLabel = regimeRow?.state?.toString().replace(/_/g, " ") || "NEUTRAL";
   let parsedContext: Record<string, { label?: string; score?: number }> | null = null;
   if (regimeRow?.context) {
-    try {
-      parsedContext = JSON.parse(regimeRow.context);
-    } catch {
-      parsedContext = null;
-    }
+    parsedContext = safeJsonParse<Record<string, { label?: string; score?: number }>>(regimeRow.context);
   }
 
   const regimeContext = parsedContext
@@ -383,7 +380,7 @@ export class DailyBriefingService {
     };
   }
 
-  static async generateBriefingForRegion(region: "US" | "IN"): Promise<{
+  static async generateBriefingForRegion(region: "US"): Promise<{
     success: boolean;
     source: DailyBriefing["source"] | null;
     generatedAt: string | null;
@@ -401,13 +398,9 @@ export class DailyBriefingService {
 
   static async generateBriefings(): Promise<{
     us: { success: boolean; source: DailyBriefing["source"] | null; generatedAt: string | null };
-    in: { success: boolean; source: DailyBriefing["source"] | null; generatedAt: string | null };
   }> {
-    const [us, india] = await Promise.all([
-      this.generateBriefingForRegion("US"),
-      this.generateBriefingForRegion("IN"),
-    ]);
-    return { us, in: india };
+    const us = await this.generateBriefingForRegion("US");
+    return { us };
   }
 
   private static async generateForRegion(region: string): Promise<DailyBriefing> {
@@ -428,7 +421,7 @@ export class DailyBriefingService {
       .map((d) => `${d.symbol} (DRS ${d.drs}): ${d.headline}`)
       .join("\n");
 
-    const prompt = `You are Lyra, an institutional-grade financial intelligence assistant. Generate a concise daily market briefing for the ${region === "IN" ? "Indian (NSE/BSE)" : "US"} market.
+    const prompt = `You are Lyra, an institutional-grade financial intelligence assistant. Generate a concise daily market briefing for the crypto market.
 
 ${buildHumanizerGuidance("daily market briefing")}
 
@@ -437,7 +430,7 @@ DATA SNAPSHOT:
 - Regime Context: ${inputs.regimeContext}
 - Breadth: ${inputs.breadth}% | Volatility (VIX proxy): ${inputs.volatility}
 - Sector Correlation: ${inputs.correlationRegime} (ρ=${inputs.avgCorrelation.toFixed(2)})
-- Universe: ${inputs.totalAssets} assets | Avg Change: ${inputs.avgChange >= 0 ? "+" : ""}${inputs.avgChange.toFixed(2)}%
+- Universe: ${inputs.totalAssets} crypto assets | Avg Change: ${inputs.avgChange >= 0 ? "+" : ""}${inputs.avgChange.toFixed(2)}%
 
 TOP GAINERS:
 ${gainersText || "No significant gainers today."}
@@ -465,8 +458,8 @@ Rules:
 - Maximum 3 key insights, 2 risks. Be specific, not generic.
 - No financial advice. Focus on WHAT is happening and WHY.
 - Plain English. No words like "confluence", "tailwinds", "idiosyncratic".
-- Write like a person explaining the market to a smart colleague, not like a report generator.
-- Reference specific assets or sectors when possible.`;
+- Write like a person explaining the crypto market to a smart colleague, not like a report generator.
+- Reference specific crypto assets or sectors when possible.`;
 
     // Apply cost ceiling to prevent runaway context from causing unexpected LLM costs
     const ceilingResult = applyCostCeiling({
@@ -521,13 +514,17 @@ Rules:
     );
     logValidationResult(validationResult);
 
-    const parsed = JSON.parse(cleaned) as {
+    const parsed = safeJsonParse<{
       marketOverview: string;
       keyInsights: string[];
       risksToWatch: string[];
       discoveryHighlight: string | null;
       regimeSentence: string;
-    };
+    }>(cleaned);
+
+    if (!parsed) {
+      throw new Error("Failed to parse daily briefing response");
+    }
 
     return {
       region,

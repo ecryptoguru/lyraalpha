@@ -13,7 +13,7 @@ export interface SectorRegimeData {
   sectorName: string;
   regime: MarketRegime;
   regimeScore: number;
-  participationRate: number; // % of stocks trending up
+  participationRate: number; // % of crypto assets trending up
   relativeStrength: number; // Sector vs market
   rotationMomentum: number; // Inflow/outflow trend
   leadershipScore: number; // Is sector leading?
@@ -34,25 +34,28 @@ export async function calculateSectorRegime(
 
   if (!sector) return null;
 
-  // Get all active stocks in sector with scores
-  const sectorStocks = await prisma.stockSector.findMany({
+  // Get all active crypto assets in sector with scores
+  const sectorAssets = await prisma.stockSector.findMany({
     where: { sectorId, isActive: true },
     include: {
       asset: {
-        include: {
+        select: {
+          symbol: true,
           scores: {
             take: 6,
             orderBy: { date: "desc" },
+            select: { type: true, value: true },
           },
         },
       },
     },
+    orderBy: { eligibilityScore: "desc" },
   });
 
-  if (sectorStocks.length === 0) return null;
+  if (sectorAssets.length === 0) return null;
 
-  // Extract signals for each stock
-  const stockSignals: AssetSignals[] = sectorStocks.map((stock) => {
+  // Extract signals for each asset
+  const assetSignals: AssetSignals[] = sectorAssets.map((asset) => {
     const signals: AssetSignals = {
       trend: 0,
       momentum: 0,
@@ -62,7 +65,7 @@ export async function calculateSectorRegime(
       trust: 0,
     };
 
-    stock.asset.scores.forEach((score) => {
+    asset.asset.scores.forEach((score) => {
       const type = score.type.toLowerCase() as keyof AssetSignals;
       if (type in signals) {
         signals[type] = score.value;
@@ -73,19 +76,19 @@ export async function calculateSectorRegime(
   });
 
   // 1. Calculate participation rate (% trending up)
-  const trendingUp = stockSignals.filter((s) => s.trend > 55).length;
-  const participationRate = (trendingUp / stockSignals.length) * 100;
+  const trendingUp = assetSignals.filter((s) => s.trend > 55).length;
+  const participationRate = (trendingUp / assetSignals.length) * 100;
 
   // 2. Calculate average sector metrics
   const avgTrend =
-    stockSignals.reduce((sum, s) => sum + s.trend, 0) / stockSignals.length;
+    assetSignals.reduce((sum, s) => sum + s.trend, 0) / assetSignals.length;
   const avgMomentum =
-    stockSignals.reduce((sum, s) => sum + s.momentum, 0) / stockSignals.length;
+    assetSignals.reduce((sum, s) => sum + s.momentum, 0) / assetSignals.length;
   const avgVolatility =
-    stockSignals.reduce((sum, s) => sum + s.volatility, 0) /
-    stockSignals.length;
+    assetSignals.reduce((sum, s) => sum + s.volatility, 0) /
+    assetSignals.length;
   const avgSentiment =
-    stockSignals.reduce((sum, s) => sum + s.sentiment, 0) / stockSignals.length;
+    assetSignals.reduce((sum, s) => sum + s.sentiment, 0) / assetSignals.length;
 
   // 3. Calculate relative strength (vs market)
   // Get global market trend
@@ -346,7 +349,7 @@ export async function calculateCrossSectorCorrelation(): Promise<CrossSectorCorr
     guidance: "Diversify across sectors as a default strategy.",
   };
 
-  // 1. Get all sectors with active stocks
+  // 1. Get all sectors with active crypto assets
   const sectors = await prisma.sector.findMany({
     where: { stockSectors: { some: { isActive: true } } },
     select: {
@@ -355,7 +358,6 @@ export async function calculateCrossSectorCorrelation(): Promise<CrossSectorCorr
       stockSectors: {
         where: { isActive: true },
         select: { assetId: true },
-        take: 20, // top 20 per sector for performance
       },
     },
   });
@@ -479,13 +481,13 @@ export async function calculateCrossSectorCorrelation(): Promise<CrossSectorCorr
     ? `Sectors moving in sync (avg ρ=${avgCorrelation.toFixed(2)}). Macro forces dominating — diversification benefits reduced.`
     : regime === "TRANSITIONING"
     ? `Sector correlations rising (avg ρ=${avgCorrelation.toFixed(2)}, trend: ${trend}). Potential regime shift — monitor for macro convergence.`
-    : `Sectors showing divergent behavior (avg ρ=${avgCorrelation.toFixed(2)}). Stock-picking and sector selection critical.`;
+    : `Sectors showing divergent behavior (avg ρ=${avgCorrelation.toFixed(2)}). Asset selection and sector selection critical.`;
 
   const guidance = regime === "MACRO_DRIVEN"
     ? "Focus on market timing over sector selection. Reduce position concentration. Consider hedging macro exposure."
     : regime === "TRANSITIONING"
     ? "Prepare for potential correlation spike. Review sector-concentrated positions. Increase cash or hedge tail risk."
-    : "Sector rotation opportunities available. Overweight leading sectors, underweight lagging. Stock selection adds alpha.";
+    : "Sector rotation opportunities available. Overweight leading sectors, underweight lagging. Asset selection adds alpha.";
 
   return {
     avgCorrelation: Math.round(avgCorrelation * 100) / 100,

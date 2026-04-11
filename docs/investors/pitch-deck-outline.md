@@ -19,7 +19,7 @@
 
 **Retail investors are drowning in data and starved for judgment.**
 
-- 90M+ equity investors in India. 160M+ brokerage accounts in the US.
+- 90M+ equity investors in India with growing crypto adoption. 160M+ brokerage accounts in the US.
 - They have charts, screeners, news, earnings, and now AI summaries.
 - What they do not have: a stable analytical framework, regime-aware context, or consistent interpretation.
 
@@ -79,7 +79,7 @@ This architectural principle separates LyraAlpha AI from every generic LLM wrapp
 | **SOM (3-year)** | $50–150M ARR | Premium SaaS capture at current plan economics |
 
 **India:**
-- 90M+ registered equity investors (NSE). Growing 15–20% annually.
+- 90M+ registered equity investors (NSE) with growing crypto adoption. Growing 15–20% annually.
 - 90M+ SIP accounts. Fintech SaaS ARPU expanding as demographic matures.
 - Acute scarcity of premium analytical products in a fast-growing investor cohort.
 
@@ -134,8 +134,8 @@ Show:
 
 **The product is live. Premium workflows are shipped and in use.**
 
-- Live across US + India asset universes
-- Equities, ETFs, mutual funds, crypto, commodities all covered
+- Live across US + India crypto asset universes
+- Crypto assets covered
 - Broker-connected portfolio import (India + US) live in production
 - EOD sync pipelines running Mon–Fri across both markets
 - Shock Simulator, Compare Assets, Portfolio Intelligence workspace: all shipped

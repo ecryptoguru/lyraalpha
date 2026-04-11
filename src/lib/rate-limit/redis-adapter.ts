@@ -1,3 +1,5 @@
+import { createLogger } from "@/lib/logger";
+
 type IORedisLike = {
   evalsha: (...args: unknown[]) => Promise<unknown>;
   eval: (...args: unknown[]) => Promise<unknown>;
@@ -14,6 +16,8 @@ type IORedisLike = {
     exec: () => Promise<Array<[unknown, unknown]> | null>;
   };
 };
+
+const logger = createLogger({ service: "redis-rate-limit-adapter" });
 
 /**
  * Adapter to make ioredis compatible with @upstash/ratelimit
@@ -79,7 +83,8 @@ export class RedisAdapter {
     if (res === null) return null;
     try {
       return JSON.parse(res) as TData;
-    } catch {
+    } catch (error) {
+      logger.warn({ err: error, key }, "Failed to parse Redis value as JSON, returning as string");
       return res as unknown as TData;
     }
   }

@@ -25,83 +25,83 @@ let benchmarkRunId = '';
 
 const QUESTION_GROUPS = [
   {
-    name: 'Beginner Investing',
+    name: 'Beginner Crypto',
     questions: [
-      'How do I start investing in the stock market in India?',
-      'How much money do I need to start investing?',
-      'What is the difference between trading and investing?',
-      'What is a demat account and how does it work?',
-      'Which broker is best in India?',
-      'How do I buy my first stock?',
-      'Is stock market investing safe?',
-      'Can I lose more than I invest?',
-      'How long should I hold stocks?',
-      'How do beginners choose stocks?',
+      'What is cryptocurrency and how does it work?',
+      'How do I start investing in cryptocurrency?',
+      'What is the difference between coins and tokens?',
+      'What is blockchain in cryptocurrency?',
+      'How do I buy my first cryptocurrency?',
+      'Is cryptocurrency safe?',
+      'Can I lose more than I invest in crypto?',
+      'How long should I hold cryptocurrency?',
+      'How do beginners choose which crypto to invest in?',
+      'What is a crypto wallet and how does it work?',
     ],
   },
   {
-    name: 'Stock Selection',
+    name: 'Crypto Selection',
     questions: [
-      'How do I know if a stock is undervalued?',
-      'What are the best stocks to buy right now?',
-      'How do I find multibagger stocks?',
-      'What financial ratios should I look at before investing?',
-      'How do I analyze company fundamentals?',
-      'How do I know if a stock is overvalued?',
-      'How do analysts value stocks?',
-      'How do I find small-cap opportunities?',
-      'How do I track insider buying?',
-      'What sectors will grow in the next 5 years?',
+      'How do I know if a cryptocurrency is undervalued?',
+      'What are the best cryptocurrencies to buy right now?',
+      'How do I find multibagger cryptocurrencies?',
+      'What metrics should I look at before investing in crypto?',
+      'How do I analyze cryptocurrency fundamentals?',
+      'How do I know if a cryptocurrency is overvalued?',
+      'How do I evaluate different cryptocurrencies?',
+      'How do I find promising altcoins?',
+      'How do I track whale movements in crypto?',
+      'What crypto sectors will grow in the next 5 years?',
     ],
   },
   {
-    name: 'Portfolio',
+    name: 'Crypto Portfolio',
     questions: [
-      'Is my portfolio diversified enough?',
-      'How many stocks should I own?',
-      'How do I rebalance my portfolio?',
-      'What is the ideal portfolio allocation?',
-      'How much should I invest in each stock?',
-      'Should I hold cash during market corrections?',
-      'How do I reduce portfolio risk?',
-      'What sectors should I add to diversify?',
-      'How do I build a long-term portfolio?',
-      'How do I track my portfolio performance?',
+      'Is my crypto portfolio diversified enough?',
+      'How many cryptocurrencies should I own?',
+      'How do I rebalance my crypto portfolio?',
+      'What is the ideal crypto portfolio allocation?',
+      'How much should I invest in each cryptocurrency?',
+      'Should I hold stablecoins during market corrections?',
+      'How do I reduce crypto portfolio risk?',
+      'What sectors should I add to diversify my crypto portfolio?',
+      'How do I build a long-term crypto portfolio?',
+      'How do I track my crypto portfolio performance?',
     ],
   },
   {
-    name: 'Market Timing',
+    name: 'Crypto Market Timing',
     questions: [
-      'Is this a good time to invest in the market?',
-      'Are we in a market bubble?',
-      'How do I know when the market will crash?',
-      'Should I invest during a market correction?',
-      'How do interest rates affect stocks?',
-      'What macro factors move the market?',
-      'How do global markets affect Indian stocks?',
+      'Is this a good time to invest in cryptocurrency?',
+      'Are we in a crypto market bubble?',
+      'How do I know when the crypto market will crash?',
+      'Should I invest during a crypto market correction?',
+      'How do interest rates affect cryptocurrencies?',
+      'What macro factors move the crypto market?',
+      'How do Bitcoin halvings affect crypto prices?',
     ],
   },
   {
-    name: 'Strategy',
+    name: 'Crypto Strategy',
     questions: [
-      'Should I invest in index funds or stocks?',
-      'Is SIP better than lump-sum investing?',
-      'What is the best long-term investing strategy?',
-      'Should I invest in growth or value stocks?',
-      'What are the best dividend stocks in India?',
-      'Should I invest in ETFs or mutual funds?',
-      'How do I build passive income from stocks?',
+      'Should I invest in Bitcoin or altcoins?',
+      'Is DCA (Dollar Cost Averaging) better than lump-sum investing in crypto?',
+      'What is the best long-term crypto investing strategy?',
+      'Should I invest in DeFi tokens or established cryptocurrencies?',
+      'What are the best staking cryptocurrencies?',
+      'Should I invest in NFTs or cryptocurrencies?',
+      'How do I build passive income from crypto?',
     ],
   },
   {
-    name: 'Risk & Behavior',
+    name: 'Crypto Risk & Behavior',
     questions: [
-      'What should I do when my stocks fall?',
-      'Should I average down on losing stocks?',
-      'When should I sell a stock?',
-      'How do I avoid emotional investing?',
-      'What are the biggest mistakes retail investors make?',
-      'How do professional investors think differently?',
+      'What should I do when my crypto falls?',
+      'Should I average down on losing cryptocurrencies?',
+      'When should I sell a cryptocurrency?',
+      'How do I avoid emotional crypto investing?',
+      'What are the biggest mistakes crypto investors make?',
+      'How do I protect my crypto from hacks?',
     ],
   },
 ] as const;
@@ -109,7 +109,7 @@ const QUESTION_GROUPS = [
 const QUESTIONS = QUESTION_GROUPS.flatMap((group) => group.questions);
 
 const PLANS: PlanTier[] = ['STARTER', 'PRO', 'ELITE', 'ENTERPRISE'];
-const REGIONS: UpgradeRegion[] = ['US', 'IN'];
+const REGIONS: UpgradeRegion[] = ['US'];
 
 function estimateCost(tokens: number, plan: PlanTier, tier: QueryComplexity): number {
   const modelTier = PLAN_ROUTING_FACTS[plan][tier];
@@ -457,11 +457,11 @@ function formatUsd(amount: number): string {
 }
 
 function formatRegionCurrency(region: UpgradeRegion, amount: number): string {
-  return new Intl.NumberFormat(region === 'IN' ? 'en-IN' : 'en-US', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: region === 'IN' ? 'INR' : 'USD',
-    minimumFractionDigits: region === 'IN' ? 0 : 2,
-    maximumFractionDigits: region === 'IN' ? 0 : 2,
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 
@@ -959,18 +959,12 @@ function writeMarkdownReports(params: {
         'US Revenue',
         'US Gross Margin',
         'US Margin %',
-        'IN Revenue',
-        'IN Gross Margin',
-        'IN Margin %',
       ],
       financialModel.map((row) => [
         row.plan,
         formatRegionCurrency('US', row.projectedMonthlyRevenue.US),
         row.projectedMonthlyGrossMargin.US === null ? 'N/A' : formatRegionCurrency('US', row.projectedMonthlyGrossMargin.US),
         row.projectedMonthlyGrossMarginPct.US === null ? 'N/A' : `${row.projectedMonthlyGrossMarginPct.US.toFixed(1)}%`,
-        formatRegionCurrency('IN', row.projectedMonthlyRevenue.IN),
-        row.projectedMonthlyGrossMargin.IN === null ? 'N/A' : formatRegionCurrency('IN', row.projectedMonthlyGrossMargin.IN),
-        row.projectedMonthlyGrossMarginPct.IN === null ? 'N/A' : `${row.projectedMonthlyGrossMarginPct.IN.toFixed(1)}%`,
       ]),
     ),
     '',
@@ -1318,13 +1312,12 @@ async function runBenchmark() {
   }
 
   console.log('\n💰 FINANCIAL MODEL');
-  console.log('   Plan       | Eff. Monthly Q | Avg Cost/Q | Monthly Cost | US Margin | IN Margin');
-  console.log(`   ${'─'.repeat(90)}`);
+  console.log('   Plan       | Eff. Monthly Q | Avg Cost/Q | Monthly Cost | US Margin');
+  console.log(`   ${'─'.repeat(70)}`);
   for (const row of financialModel) {
     const usMargin = row.projectedMonthlyGrossMargin.US === null ? 'N/A' : formatRegionCurrency('US', row.projectedMonthlyGrossMargin.US);
-    const inMargin = row.projectedMonthlyGrossMargin.IN === null ? 'N/A' : formatRegionCurrency('IN', row.projectedMonthlyGrossMargin.IN);
     console.log(
-      `   ${row.plan.padEnd(10)} | ${String(row.effectiveMonthlyQueries).padEnd(14)} | ${formatUsd(row.avgCostPerQuery).padEnd(10)} | ${formatUsd(row.projectedMonthlyCost).padEnd(12)} | ${usMargin.padEnd(10)} | ${inMargin}`,
+      `   ${row.plan.padEnd(10)} | ${String(row.effectiveMonthlyQueries).padEnd(14)} | ${formatUsd(row.avgCostPerQuery).padEnd(10)} | ${formatUsd(row.projectedMonthlyCost).padEnd(12)} | ${usMargin.padEnd(10)}`,
     );
   }
 

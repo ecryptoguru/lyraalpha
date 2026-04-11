@@ -20,7 +20,7 @@ export async function GET(
 
     const { id } = await params;
     const region = req.nextUrl.searchParams.get("region") ?? undefined;
-    const data = await DiscoveryService.getClusteredStocks(id, region);
+    const data = await DiscoveryService.getClusteredAssets(id, region);
 
     if (!data) {
       return apiError("Sector not found", 404);

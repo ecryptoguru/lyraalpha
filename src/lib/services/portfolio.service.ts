@@ -223,8 +223,9 @@ export async function computeAndStorePortfolioHealth(portfolioId: string): Promi
         orderBy: { date: "desc" },
         select: { state: true },
       });
-    } catch {
+    } catch (error) {
       // Model may not exist in all environments; silently skip.
+      logger.debug({ err: error }, "MarketRegime model not available, skipping regime state");
     }
   }
   const portfolioIntelligence = buildPortfolioIntelligence({

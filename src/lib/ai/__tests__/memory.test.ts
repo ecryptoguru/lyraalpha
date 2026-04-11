@@ -196,8 +196,9 @@ describe("distillSessionNotes", () => {
     expect(mockPrisma.userMemoryNote.findMany).not.toHaveBeenCalled();
   });
 
-  it("skips when fewer than 4 user messages", async () => {
-    const shortMessages = mockMessages.slice(0, 4); // only 2 user turns
+  it("skips when fewer than 2 user messages", async () => {
+    // W6-FIX: Gate lowered from 4 to 2 — 1 user message should still be skipped
+    const shortMessages = mockMessages.slice(0, 2); // only 1 user turn
     await distillSessionNotes("user_abc123", shortMessages, "lyra");
     expect(mockGenerateText).not.toHaveBeenCalled();
   });
@@ -494,12 +495,11 @@ describe("distillSessionNotes — extraction quality snapshots", () => {
     expect(mockPrisma.$transaction).not.toHaveBeenCalled();
   });
 
-  it("does not fire when fewer than 4 user turns", async () => {
+  it("does not fire when fewer than 2 user turns", async () => {
+    // W6-FIX: Gate lowered from 4 to 2 — 1 user message should still be skipped
     const shortMessages = [
       { role: "user", content: "What is volatility?" },
       { role: "assistant", content: "Volatility measures price variation." },
-      { role: "user", content: "Thanks." },
-      { role: "assistant", content: "Anytime." },
     ];
     await distillSessionNotes("user_snap9", shortMessages, "lyra");
     expect(mockGenerateText).not.toHaveBeenCalled();

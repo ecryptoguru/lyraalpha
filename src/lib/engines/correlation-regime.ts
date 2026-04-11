@@ -5,6 +5,9 @@
 
 import { prisma } from "../prisma";
 import { Asset } from "@/generated/prisma/client";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger({ service: "correlation-regime" });
 
 export type CorrelationRegime =
   | "SYSTEMIC_STRESS" // High correlation + high volatility
@@ -24,7 +27,7 @@ export interface CorrelationMetrics {
 
 export interface SectorCorrelationScore {
   sectorId: string;
-  avgSectorCorrelation: number; // How correlated is stock to sector peers
+  avgSectorCorrelation: number; // How correlated is crypto asset to sector peers
   isPurePlay: boolean; // High correlation = pure play
   idiosyncraticScore: number; // Low correlation = idiosyncratic
 }
@@ -62,7 +65,7 @@ export async function calculateCorrelationRegime(
     assets = await prisma.asset.findMany({
       where: {
         correlationData: { not: null as never },
-        type: "STOCK",
+        type: "CRYPTO",
       },
       take: 100,
       orderBy: { lastPriceUpdate: "desc" },
@@ -121,7 +124,9 @@ export async function calculateCorrelationRegime(
         else if (delta < -0.05) trend = "FALLING";
       }
     }
-  } catch { /* non-critical — fall back to STABLE */ }
+  } catch (error) {
+    logger.debug({ err: error }, "Failed to calculate correlation trend (non-critical)");
+  }
 
   // ─── Regime classification (with SYSTEMIC_STRESS detection) ────────
   let regime: CorrelationRegime = "NORMAL";
@@ -139,7 +144,9 @@ export async function calculateCorrelationRegime(
       const volLabel = ctx?.volatility?.label;
       isHighVol = volLabel === "STRESS" || volLabel === "ELEVATED";
     }
-  } catch { /* non-critical */ }
+  } catch (error) {
+    logger.debug({ err: error }, "Failed to fetch volatility state for SYSTEMIC_STRESS detection (non-critical)");
+  }
 
   if (avgCorrelation > 0.7 && isHighVol) {
     regime = "SYSTEMIC_STRESS";
@@ -152,7 +159,7 @@ export async function calculateCorrelationRegime(
   } else if (avgCorrelation < 0.3) {
     regime = "IDIOSYNCRATIC";
     implications =
-      "Low correlation indicates stock-specific dynamics. Sector selection and stock-picking critical.";
+      "Low correlation indicates crypto-specific dynamics. Sector selection and asset selection critical.";
   } else if (trend === "RISING" && avgCorrelation > 0.45) {
     regime = "TRANSITIONING";
     implications =

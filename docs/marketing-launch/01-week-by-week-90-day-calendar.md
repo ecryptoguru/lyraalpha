@@ -19,14 +19,17 @@ Each week should:
 
 ## Strategy pillars
 
-- **Trust-led positioning** — market intelligence, risk, and clarity
-- **Content engine** — SEO + GEO + educational blog system
-- **Founder-led distribution** — X and LinkedIn as primary attention channels
-- **Community distribution** — Reddit and niche communities for authenticity
-- **Conversion system** — landing pages, lead magnets, email onboarding, and referral loops
-- **Partnership leverage** — newsletters, creators, fintech communities, and ecosystem partners
+- **Trust-led positioning** — market intelligence, risk, and clarity (critical given 96% crypto token failures in 2024-2025)
+- **Content engine** — SEO + GEO + educational blog system optimized for AI search visibility
+- **Founder-led distribution** — X and LinkedIn as primary attention channels with platform-native adaptation
+- **Community distribution** — Reddit (90/10 value-to-promotion discipline), Discord, and Telegram for authenticity
+- **Conversion system** — landing pages, lead magnets, email onboarding, and referral loops optimized for 7-9 touchpoint crypto user journey
+- **Partnership leverage** — newsletters, creators, crypto communities, and ecosystem partners
 - **Product-led loops** — shareable insights, referrals, onboarding, and ongoing email value
 - **SEO keyword routing** — use `50-SEO-IN.md` and `50-SEO-US.md` to map search intent into `100-SEO-pages.md`, blog posts, and tool pages
+- **GEO optimization** — structure content for AI answerability with clear headings, direct answers, and semantic depth
+- **E-E-A-T compliance** — Experience, Expertise, Authoritativeness, Trustworthiness for financial content
+- **Crypto-specific metrics** — on-chain transaction analysis, wallet behavior tracking, token holder distribution monitoring
 
 ## Launch phase model
 
@@ -34,13 +37,13 @@ Each week should:
 
 The first two weeks should create the minimum viable growth stack:
 
-- a clear ICP
-- a strong promise
-- a homepage with conversion-ready messaging
-- a blog engine with search and AI visibility structure
-- a basic social distribution engine
-- a measurable funnel
-- a lead magnet and email sequence
+- a clear ICP (crypto-native retail investors in India + US)
+- a strong promise (demonstrated utility over hype, addressing trust deficit)
+- a homepage with conversion-ready messaging and E-E-A-T signals (team bios, audit reports, transparency)
+- a blog engine with SEO + GEO structure optimized for AI answerability
+- a basic social distribution engine (platform-native content for X, LinkedIn, Discord, Telegram)
+- a measurable funnel with crypto-specific metrics (wallet connections, on-chain behavior)
+- a lead magnet and email sequence addressing 7-9 touchpoint journey
 
 ### Phase 2: Content and distribution launch (Weeks 3-4)
 
@@ -88,22 +91,23 @@ The final month should maximize:
 
 ### Key deliverables
 
-- finalize the primary ICP and secondary segments
+- finalize the primary ICP (crypto retail investors in India + US) and secondary segments
 - decide whether the launch CTA is signup, briefing, waitlist, or demo
-- write the one-line positioning statement
-- define 3 product value pillars
-- map the first 10 content topics
-- set up analytics, attribution, and conversion events
-- create the first version of the signup and lead capture pages
-- build social bios and consistent profile messaging
+- write the one-line positioning statement emphasizing trust and demonstrated utility
+- define 3 product value pillars (market intelligence, portfolio risk, regime awareness)
+- map the first 10 content topics with GEO optimization (question-based headings, direct answers)
+- set up analytics including crypto-specific metrics (wallet connections, on-chain behavior)
+- create the first version of the signup and lead capture pages with E-E-A-T signals
+- build social bios and consistent profile messaging across X, LinkedIn, Discord, Telegram
 
 ### Detailed execution checklist
 
-- homepage hero should answer: what is LyraAlpha, who is it for, and why now
+- homepage hero should answer: what is LyraAlpha, who is it for, and why now (crypto-specific context)
 - the CTA should be visible above the fold and repeated near proof sections
-- add a simple trust layer: founder bio, product claims, and a short explanation of the engine/AI split
-- create a reusable content brief template for all future blog posts
-- define a single weekly KPI dashboard before publishing starts
+- add E-E-A-T trust layer: founder bio, product claims, engine/AI split explanation, audit reports, transparency
+- create a reusable content brief template with GEO optimization requirements (clear structure, direct answers, semantic depth)
+- define a single weekly KPI dashboard including crypto-specific metrics before publishing starts
+- add schema markup (FAQ, article, how-to) for AI search visibility
 
 ### Success criteria
 
@@ -144,10 +148,12 @@ The final month should maximize:
   - examples
   - related links
   - CTA
-- build one lead magnet aligned to the core promise, not a generic fintech PDF
-- create onboarding emails that drive the first aha moment
-- make sure the signup path has low friction and no unnecessary fields
-- start collecting qualitative user questions from social and comments
+  - GEO optimization: direct answer at start, question-based headings, semantic depth
+  - Schema markup for AI visibility
+- build one lead magnet aligned to the core promise (crypto intelligence, not generic fintech)
+- create onboarding emails addressing 7-9 touchpoint journey with trust-building content
+- make sure the signup path has low friction and no unnecessary fields (crypto users are sophisticated)
+- start collecting qualitative user questions from social and comments (Reddit 90/10 value-first approach)
 
 ### Success criteria
 
@@ -179,15 +185,16 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- take every blog post and turn it into:
-  - 1 X thread
-  - 2 short X posts
-  - 1 LinkedIn post
-  - 1 LinkedIn comment angle
-  - 1 Reddit discussion angle if relevant
-- identify which headlines drive clicks vs which drive saves/shares
+- take every blog post and turn it into platform-native assets:
+  - 1 X thread (crypto-native tone, real-time commentary)
+  - 2 short X posts (market observation, chart screenshots)
+  - 1 LinkedIn post (links in comments, not post bodies)
+  - 1 LinkedIn carousel or document post
+  - 1 Reddit discussion angle (90/10 value-to-promotion discipline)
+  - 1 Discord/Telegram announcement (community-first, not promotional)
+- identify which headlines drive clicks vs which drive saves/shares (AI search visibility metrics)
 - capture social responses in a feedback doc
-- start tracking which distribution channels create activated users, not just visitors
+- start tracking which distribution channels create activated users (wallet connections), not just visitors
 
 ### Success criteria
 
@@ -217,11 +224,12 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- find the content type with the highest signup rate
-- find the social format with the highest engagement rate
-- find the CTA that converts best
-- build a small retargeting audience from readers and visitors
-- optimize the signup page to reduce hesitation
+- find the content type with the highest signup rate (wallet connections)
+- find the social format with the highest engagement rate (platform-native adaptation)
+- find the CTA that converts best (trust signals, not vanity metrics)
+- build a small retargeting audience from readers and visitors (crypto-native ad networks where permissible)
+- optimize the signup page to reduce hesitation (address 7-9 touchpoint journey)
+- track GEO performance: AI citation rate, AI overview appearances, AI search visibility metrics
 
 ### Success criteria
 
@@ -249,10 +257,12 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- referral incentive should be tied to value, not just vanity rewards
-- community participation should be useful, not promotional
-- build one easy sharing moment inside the product
+- referral incentive should be tied to value (asymmetric incentives for referrer/referee), not just vanity rewards
+- community participation should be useful, not promotional (Reddit 90/10 discipline, Discord 24/7 moderation)
+- build one easy sharing moment inside the product (shareable insights, not generic links)
 - add a simple invite prompt inside onboarding or briefing flows
+- implement scam prevention protocols and FUD management in community channels
+- establish clear community guidelines published and enforced consistently
 
 ### Success criteria
 
@@ -280,10 +290,12 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- add screenshots that show product clarity, not feature clutter
-- add quote cards to landing pages and social posts
-- turn one strong user quote into a broader proof story
-- reach out to partners with a very specific collaboration ask
+- add screenshots that show product clarity, not feature clutter (crypto-specific use cases)
+- add quote cards to landing pages and social posts (verifiable user outcomes)
+- turn one strong user quote into a broader proof story with metrics
+- reach out to partners with a very specific collaboration ask (cross-promotion, not generic)
+- add E-E-A-T signals: audit reports, team credentials, transparent roadmap
+- showcase demonstrated utility over hype-driven promises
 
 ### Success criteria
 
@@ -311,10 +323,12 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- the report should answer a specific market question
-- each chart or insight should be repurposed into social snippets
-- use the webinar to answer objections and explain the product better
+- the report should answer a specific market question with original crypto data
+- each chart or insight should be repurposed into social snippets (platform-native formats)
+- use the webinar to answer objections and explain the product better (address trust concerns)
 - tag or credit partners where appropriate to improve sharing behavior
+- optimize report for GEO: clear structure, direct answers, question-based headings
+- include on-chain transaction analysis and wallet behavior insights where applicable
 
 ### Success criteria
 
@@ -340,10 +354,12 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- create pages for high-intent terms like comparisons, alternatives, and use cases
-- add stronger CTAs for people already close to conversion
-- personalize outreach to people who interacted with content or live events
-- improve form copy, benefit bullets, and trust markers
+- create pages for high-intent terms like comparisons, alternatives, and use cases (crypto-specific)
+- add stronger CTAs for people already close to conversion (trust signals, clear value)
+- personalize outreach to people who interacted with content or live events (address 7-9 touchpoint journey)
+- improve form copy, benefit bullets, and trust markers (E-E-A-T compliance)
+- optimize for GEO: direct answers, semantic depth, structured data
+- track AI citation rate and AI overview appearances for these pages
 
 ### Success criteria
 
@@ -369,10 +385,12 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- make the partner ask very easy: repost, mention, email feature, or guest appearance
-- create a co-marketing asset that can live on both sides
-- turn the Q&A into clips and blog snippets
-- use the case study to reinforce the product promise
+- make the partner ask very easy: repost, mention, email feature, or guest appearance (crypto-native partners)
+- create a co-marketing asset that can live on both sides (demonstrated utility)
+- turn the Q&A into clips and blog snippets (platform-native formats)
+- use the case study to reinforce the product promise (verifiable outcomes)
+- ensure partner content includes E-E-A-T signals and transparency
+- track partner attribution through on-chain wallet connections where applicable
 
 ### Success criteria
 
@@ -398,10 +416,12 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- write more clearly than competitors, not louder than them
-- make the report citeable and easy to quote
-- use the funnel data to simplify the weakest step
-- clarify the CTA on every major page
+- write more clearly than competitors, not louder than them (trust over hype)
+- make the report citeable and easy to quote (GEO optimization for AI visibility)
+- use the funnel data to simplify the weakest step (address 7-9 touchpoint journey)
+- clarify the CTA on every major page (trust signals, clear value)
+- optimize for GEO: clear structure, direct answers, question-based headings, semantic depth
+- include crypto-specific metrics: on-chain analysis, wallet behavior, token holder distribution
 
 ### Success criteria
 
@@ -427,11 +447,13 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- summarize what worked by channel
-- summarize what converted best
-- identify which audience segment showed the strongest engagement
-- decide what to scale next
-- build the next 30-day plan from actual results
+- summarize what worked by channel (including crypto-specific metrics)
+- summarize what converted best (wallet connections, not just signups)
+- identify which audience segment showed the strongest engagement (India vs US, retail vs institutional)
+- decide what to scale next (based on trust and conversion quality, not vanity metrics)
+- build the next 30-day plan from actual results (including GEO performance, AI citation rates)
+- review E-E-A-T compliance and trust signals across all content
+- assess community health (Discord/Telegram moderation, Reddit 90/10 discipline)
 
 ### Success criteria
 

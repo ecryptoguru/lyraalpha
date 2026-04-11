@@ -21,7 +21,6 @@ vi.mock("@/lib/redis", () => ({
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     $queryRaw: vi.fn().mockResolvedValue([{ count: BigInt(5) }]),
-    $queryRawUnsafe: vi.fn().mockResolvedValue([]),
     $executeRaw: vi.fn(),
   },
 }));
@@ -69,7 +68,7 @@ describe("RAG Optimizations", () => {
 
   describe("#11 — Inline knowledge citations", () => {
     it("formats chunks with [KB: source > section] prefix", async () => {
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
         {
           id: "engines-chunk-001",
           content: "The trend engine measures directional price movement.",
@@ -92,7 +91,7 @@ describe("RAG Optimizations", () => {
     });
 
     it("deduplicates sources by file name", async () => {
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
         {
           id: "engines-chunk-001",
           content: "Chunk 1",
@@ -122,7 +121,7 @@ describe("RAG Optimizations", () => {
     });
 
     it("falls back to 'General' section when metadata missing", async () => {
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
         {
           id: "chunk-001",
           content: "Some content",
@@ -176,7 +175,7 @@ describe("RAG Optimizations", () => {
     it("warms cache in background on first query for an asset type", async () => {
       // First call: no cache exists
       mockGetCache.mockResolvedValue(null);
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
         {
           id: "chunk-1",
           content: "Stock analysis content",
@@ -198,7 +197,7 @@ describe("RAG Optimizations", () => {
 
     it("merges pre-cached chunks when query returns sparse results", async () => {
       // Simulate: query returns only 1 result, but cache has 3
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
         {
           id: "query-chunk-1",
           content: "Query-specific content",
@@ -233,7 +232,7 @@ describe("RAG Optimizations", () => {
 
     it("writes query-aware fast-path cache after full search", async () => {
       mockGetCache.mockResolvedValue(null);
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
         {
           id: "query-chunk-1",
           content: "Query-specific STOCK content",
@@ -254,7 +253,7 @@ describe("RAG Optimizations", () => {
     });
 
     it("does NOT attempt pre-cache for GLOBAL asset type", async () => {
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([]);
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
 
       await retrieveInstitutionalKnowledge("market overview", 3, "GLOBAL");
 
@@ -268,7 +267,7 @@ describe("RAG Optimizations", () => {
 
   describe("embedding cache", () => {
     it("caches query embeddings in Redis", async () => {
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([]);
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
 
       await retrieveInstitutionalKnowledge("test query", 3);
 
@@ -287,7 +286,7 @@ describe("RAG Optimizations", () => {
         return null;
       });
 
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([]);
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
 
       await retrieveInstitutionalKnowledge("test query", 3);
 
@@ -298,7 +297,7 @@ describe("RAG Optimizations", () => {
 
   describe("asset-type boosting", () => {
     it("sorts asset-type-relevant chunks to the top", async () => {
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([
         {
           id: "generic-chunk",
           content: "Generic market content",
@@ -324,7 +323,7 @@ describe("RAG Optimizations", () => {
 
   describe("similarity threshold", () => {
     it("returns empty when no chunks meet threshold", async () => {
-      vi.mocked(prisma.$queryRawUnsafe).mockResolvedValue([]);
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
 
       const result = await retrieveInstitutionalKnowledge("completely irrelevant query about cooking", 3);
 
@@ -336,7 +335,7 @@ describe("RAG Optimizations", () => {
 
   describe("error handling", () => {
     it("returns empty content on knowledge search failure", async () => {
-      vi.mocked(prisma.$queryRawUnsafe).mockRejectedValue(new Error("DB connection failed"));
+      vi.mocked(prisma.$queryRaw).mockRejectedValue(new Error("DB connection failed"));
 
       const result = await retrieveInstitutionalKnowledge("test", 3);
 

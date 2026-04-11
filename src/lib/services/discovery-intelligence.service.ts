@@ -11,11 +11,12 @@
  */
 
 import { prisma } from "@/lib/prisma";
-import { type AssetType, type ScoreType, Prisma } from "@/generated/prisma/client";
+import { type AssetType, type ScoreType, type Prisma } from "@/generated/prisma/client";
 import { computeDRS, type DRSInput, type DRSResult } from "@/lib/engines/discovery-relevance";
 import { generateHeadline, generateContext } from "@/lib/services/discovery-explanation";
 import { logger } from "@/lib/logger";
 import { invalidateCacheByPrefix } from "@/lib/redis";
+import { asPrismaJsonValue } from "@/lib/utils/json";
 
 const FEED_SIZE = 50;
 const TTL_HOURS = 48;
@@ -57,8 +58,8 @@ export async function computeDiscoveryFeed(): Promise<{ total: number; surfaced:
     },
   });
 
-  // Pre-filter: assets without scoreDynamics will always be suppressed (zero momentum)
-  const candidateAssets = assets.filter((a) => a.scoreDynamics != null);
+  // Pre-filter: assets without scoreDynamics are included but will have zero momentum
+  const candidateAssets = assets;
   logger.info(
     { total: assets.length, candidates: candidateAssets.length, skipped: assets.length - candidateAssets.length },
     "Discovery: fetched assets for DRS computation",
@@ -164,8 +165,8 @@ export async function computeDiscoveryFeed(): Promise<{ total: number; surfaced:
             archetype: r.archetype,
             headline: r.headline,
             context: r.context,
-            inflections: r.inflections.length > 0 ? (r.inflections as unknown as Prisma.InputJsonValue) : undefined,
-            scores: Object.keys(scoreMap).length > 0 ? (scoreMap as unknown as Prisma.InputJsonValue) : undefined,
+            inflections: r.inflections.length > 0 ? asPrismaJsonValue(r.inflections) as Prisma.InputJsonValue : undefined,
+            scores: Object.keys(scoreMap).length > 0 ? asPrismaJsonValue(scoreMap) as Prisma.InputJsonValue : undefined,
             price: assetData?.price ?? null,
             changePercent: assetData?.changePercent ?? null,
             currency: assetData?.currency ?? null,

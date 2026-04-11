@@ -4,7 +4,11 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster } from "sonner";
 import { OfflineBanner } from "@/components/pwa/offline-banner";
+import { validateEnv } from "@/lib/env/schema";
 import "./globals.css";
+
+// Validate environment variables at startup
+validateEnv();
 
 const inter = Inter({
   variable: "--font-inter",

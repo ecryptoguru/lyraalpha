@@ -17,8 +17,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "30");
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "30", 10) || 30));
     const skip = (page - 1) * limit;
 
     const typeParam = searchParams.get("type");
@@ -96,6 +96,60 @@ export async function GET(req: NextRequest) {
       ];
     }
 
+    // Columns shared across all asset types
+    const baseSelect = {
+      symbol: true,
+      name: true,
+      type: true,
+      sector: true,
+      price: true,
+      changePercent: true,
+      currency: true,
+      lastPriceUpdate: true,
+      marketCap: true,
+      volume: true,
+      oneYearChange: true,
+      fiftyTwoWeekHigh: true,
+      fiftyTwoWeekLow: true,
+      category: true,
+      metadata: true,
+      compatibilityScore: true,
+      compatibilityLabel: true,
+      assetGroup: true,
+      avgTrendScore: true,
+      avgMomentumScore: true,
+      avgVolatilityScore: true,
+      avgLiquidityScore: true,
+      avgSentimentScore: true,
+      avgTrustScore: true,
+    } as const;
+
+    // Stock/MF-specific columns (always null for CRYPTO)
+    const equitySelect = {
+      peRatio: true,
+      avgVolume: true,
+      dividendYield: true,
+      industryPe: true,
+      roe: true,
+      roce: true,
+      eps: true,
+      pegRatio: true,
+      priceToBook: true,
+      shortRatio: true,
+      expenseRatio: true,
+      nav: true,
+      yield: true,
+      morningstarRating: true,
+      openInterest: true,
+      fundHouse: true,
+      schemeType: true,
+    } as const;
+
+    const isCryptoOnly = typeParam?.toUpperCase() === "CRYPTO";
+    const assetSelect = isCryptoOnly
+      ? baseSelect
+      : { ...baseSelect, ...equitySelect };
+
     const [latestRegime, dbAssets, totalCount] = await Promise.all([
       prisma.marketRegime.findFirst({
         where: { region: regionParam },
@@ -107,49 +161,7 @@ export async function GET(req: NextRequest) {
         orderBy: { marketCap: { sort: "desc", nulls: "last" } },
         take: limit,
         skip: skip,
-        select: {
-          symbol: true,
-          name: true,
-          type: true,
-          sector: true,
-          price: true,
-          changePercent: true,
-          currency: true,
-          lastPriceUpdate: true,
-          marketCap: true,
-          peRatio: true,
-          volume: true,
-          avgVolume: true,
-          dividendYield: true,
-          industryPe: true,
-          oneYearChange: true,
-          roe: true,
-          roce: true,
-          eps: true,
-          fiftyTwoWeekHigh: true,
-          fiftyTwoWeekLow: true,
-          pegRatio: true,
-          priceToBook: true,
-          shortRatio: true,
-          expenseRatio: true,
-          nav: true,
-          yield: true,
-          morningstarRating: true,
-          category: true,
-          openInterest: true,
-          metadata: true,
-          fundHouse: true,
-          schemeType: true,
-          compatibilityScore: true,
-          compatibilityLabel: true,
-          assetGroup: true,
-          avgTrendScore: true,
-          avgMomentumScore: true,
-          avgVolatilityScore: true,
-          avgLiquidityScore: true,
-          avgSentimentScore: true,
-          avgTrustScore: true,
-        },
+        select: assetSelect,
       }),
       prisma.asset.count({
         where: whereInput
@@ -235,8 +247,7 @@ export async function GET(req: NextRequest) {
 
     const response = NextResponse.json(payload);
 
-    // 6. Add Cache-Control headers for institutional performance
-    // s-maxage=3600 (1 hour shared cache), stale-while-revalidate=59 (keep serving old while updating)
+    // 6. Browser never caches — Redis handles server-side caching (15 min TTL)
     response.headers.set(
       "Cache-Control",
       "private, no-store",

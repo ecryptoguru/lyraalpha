@@ -60,14 +60,9 @@ model Asset {
   exchange                String?
   description             String?
   marketCap               String?
-  peRatio                 Float?
   volume                  Float?
   avgVolume               Float?
-  dividendYield           Float?
-  industryPe              Float?
   oneYearChange           Float?
-  roe                     Float?
-  roce                    Float?
   technicalRating         String?
   analystRating           String?
   price                   Float?
@@ -77,13 +72,9 @@ model Asset {
   correlationData         Json?
   createdAt               DateTime             @default(now())
   updatedAt               DateTime             @updatedAt
-  eps                     Float?
   fiftyTwoWeekHigh        Float?
   fiftyTwoWeekLow         Float?
   metadata                Json?
-  pegRatio                Float?
-  priceToBook             Float?
-  shortRatio              Float?
   assetGroup              String?
   avgLiquidityScore       Float?
   avgMomentumScore        Float?
@@ -91,41 +82,21 @@ model Asset {
   avgTrendScore           Float?
   avgTrustScore           Float?
   avgVolatilityScore      Float?
-  bookValue               Float?
   category                String?
   compatibilityLabel      String?
   compatibilityScore      Float?
-  currency                String?              @default("USD")
-  expenseRatio            Float?
-  forwardPe               Float?
-  fundHouse               String?
-  heldPercentInsiders     Float?
-  heldPercentInstitutions Float?
-  morningstarRating       String?
-  nav                     Float?
+  currency                String?
   openInterest            Float?
-  operatingMargins        Float?
-  priceToSales            Float?
-  profitMargins           Float?
-  region                  String?              @default("US")
-  revenueGrowth           Float?
-  schemeType              String?
+  region                  String?
   scoreDynamics           Json?
   performanceData         Json?
   correlationRegime       Json?
   factorAlignment         Json?
   eventAdjustedScores     Json?
   signalStrength          Json?
-  financials              Json?
-  topHoldings             Json?
-  etfLookthrough          Json?
-  mfLookthrough           Json?
-  commodityIntelligence   Json? // { regimeProfile: {}, seasonality: {}, correlations: {}, structuralContext: {} }
-  cryptoIntelligence      Json? // { networkActivity: {}, holderStability: {}, liquidityRisk: {}, structuralRisk: {}, enhancedTrust: {} }
-  fundPerformanceHistory  Json?
-  scenarioData            Json? // { bullCase: {}, baseCase: {}, bearCase: {}, var5: number, es5: number, fragility: number }
+  cryptoIntelligence      Json?
+  scenarioData            Json?
   industry                String?
-  yield                   Float?
   scores                  AssetScore[]         @relation("AssetScores")
   evidence                Evidence[]           @relation("AssetEvidence")
   institutionalEvents     InstitutionalEvent[] @relation("AssetEvents")
@@ -434,7 +405,6 @@ model User {
   plan                 PlanTier              @default(STARTER)
   trialEndsAt          DateTime?
   stripeCustomerId     String?               @unique
-  razorpayCustomerId   String?               @unique
   credits              Int                   @default(50) // Current credit balance
   monthlyCreditsBalance Int                  @default(50)
   bonusCreditsBalance  Int                   @default(0)
@@ -644,7 +614,6 @@ model CreditPackage {
   name          String // e.g., "Starter Pack", "Pro Pack", "Elite Pack"
   credits       Int // Base credits in the pack
   bonusCredits  Int      @default(0) // Bonus credits (e.g., 20% extra)
-  priceInr      Int // Price in paise (e.g., 99900 = ₹999)
   priceUsd      Float // Price in USD
   stripePriceId String? // Stripe Price ID for one-time payment checkout
   isPopular     Boolean  @default(false) // Highlighted in UI
@@ -830,12 +799,7 @@ model WatchlistItem {
 }
 
 enum AssetType {
-  STOCK
-  ETF
   CRYPTO
-  COMMODITY
-  MUTUAL_FUND
-  IPO
 }
 
 enum EvidenceSourceType {
@@ -874,7 +838,6 @@ enum ScoreType {
 
 enum PaymentProvider {
   STRIPE
-  RAZORPAY
 }
 
 enum SubscriptionStatus {
@@ -887,8 +850,6 @@ enum SubscriptionStatus {
 
 enum UserPreferredRegion {
   US
-  IN
-  BOTH
 }
 
 enum UserExperienceLevel {
@@ -898,11 +859,7 @@ enum UserExperienceLevel {
 }
 
 enum UserInterest {
-  STOCKS
-  ETF
   CRYPTO
-  MUTUAL_FUNDS
-  COMMODITIES
 }
 
 enum CreditTransactionType {

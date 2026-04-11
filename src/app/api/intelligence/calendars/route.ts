@@ -12,7 +12,8 @@ export const dynamic = "force-dynamic";
 
 /**
  * GET /api/intelligence/calendars?type=earnings|economic|ipo
- * Returns calendar data synced by FinnhubSyncService and stored in Redis.
+ * Returns calendar data from Redis cache.
+ * Note: Traditional calendars (earnings, IPO, economic) not applicable to crypto assets.
  */
 export async function GET(request: Request) {
   try {
@@ -33,19 +34,19 @@ export async function GET(request: Request) {
 
     switch (type) {
       case "economic":
-        cacheKey = "finnhub:economic_calendar";
+        cacheKey = "calendar:economic";
         data = await getCache(cacheKey);
         break;
       case "ipo":
-        cacheKey = "finnhub:ipo_calendar";
+        cacheKey = "calendar:ipo";
         data = await getCache(cacheKey);
         break;
       case "market_news":
-        cacheKey = "finnhub:market_news";
+        cacheKey = "news:market";
         data = await getCache(cacheKey);
         break;
       default:
-        cacheKey = "finnhub:economic_calendar";
+        cacheKey = "calendar:economic";
         data = await getCache(cacheKey);
     }
 

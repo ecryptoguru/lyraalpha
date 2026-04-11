@@ -1,10 +1,9 @@
 import { US_SCENARIOS } from "./us";
-import { IN_SCENARIOS } from "./in";
 import type { ScenarioDefinition, ScenarioProxyPath, StressScenarioId, SupportedStressAssetType } from "./types";
 
 export * from "./types";
 
-export const ALL_SCENARIOS: ScenarioDefinition[] = [...US_SCENARIOS, ...IN_SCENARIOS];
+export const ALL_SCENARIOS: ScenarioDefinition[] = [...US_SCENARIOS];
 
 export const STRESS_SCENARIO_IDS = [...new Set(ALL_SCENARIOS.map((scenario) => scenario.id))] as StressScenarioId[];
 

@@ -21,11 +21,12 @@ interface VoiceSessionData {
   model: string;
   voice?: string;
   instructions?: string;
+  currentPage?: string;
 }
 
 // Ephemeral keys on OpenAI have ~60s TTL — use 55s to stay safe
 const SESSION_CACHE_TTL_MS = 55_000;
-// Auto-stop: seconds of silence after Myra finishes speaking a REAL (non-greeting) turn
+// Auto-stop: milliseconds of silence after Myra finishes speaking a REAL (non-greeting) turn
 // Keep this generous so the session doesn't end during normal thinking pauses.
 const SILENCE_TIMEOUT_MS = 45_000;
 // Closing phrases in Myra's response that signal a natural conversation end
@@ -55,12 +56,6 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
   // Deduplication — tracks ids we've already emitted as bubbles
   const emittedIds = useRef<Set<string>>(new Set());
 
-  // Greeting suppression
-  const greetingSeedId = useRef<string | null>(null);
-  // True during the greeting turn — suppresses its transcript bubble.
-  // IMPORTANT: must be cleared in response.output_audio_transcript.done BEFORE the !text check,
-  // otherwise an empty transcript event leaves it stuck true and suppresses all future bubbles.
-  const greetingActiveRef = useRef(false);
   // True until the greeting's response.done fires — prevents silence timer from starting too early
   const greetingResponsePendingRef = useRef(false);
 
@@ -74,11 +69,6 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
   const cleanupMedia = useCallback(() => {
     mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
     mediaStreamRef.current = null;
-    try {
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-    } catch {}
     try { inputWorkletRef.current?.disconnect(); } catch {}
     try { inputSourceRef.current?.disconnect(); } catch {}
     try { inputSilentGainRef.current?.disconnect(); } catch {}
@@ -105,8 +95,6 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
     if (active) { try { active.close(); } catch {} sessionRef.current = null; }
     if (pending && pending !== active) { try { pending.close(); } catch {} pendingSessionRef.current = null; }
     emittedIds.current.clear();
-    greetingSeedId.current = null;
-    greetingActiveRef.current = false;
     greetingResponsePendingRef.current = false;
     cleanupMedia();
   }, [cleanupMedia, clearSilenceTimer]);
@@ -126,7 +114,9 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
     const cached = sessionCacheRef.current;
     if (cached && Date.now() - cached.fetchedAt < SESSION_CACHE_TTL_MS) return;
     try {
-      const res = await fetch("/api/support/voice-session");
+      const page = typeof window !== "undefined" ? window.location.pathname : undefined;
+      const url = page ? `/api/support/voice-session?page=${encodeURIComponent(page)}` : "/api/support/voice-session";
+      const res = await fetch(url);
       if (!res.ok) return;
       const data: VoiceSessionData = await res.json();
       sessionCacheRef.current = { data, fetchedAt: Date.now() };
@@ -150,7 +140,9 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       const [sessionData, mediaStream] = await Promise.all([
         isCacheFresh
           ? Promise.resolve(cached!.data)
-          : fetch("/api/support/voice-session").then(async (res) => {
+          : fetch(typeof window !== "undefined"
+              ? `/api/support/voice-session?page=${encodeURIComponent(window.location.pathname)}`
+              : "/api/support/voice-session").then(async (res) => {
               if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
                 throw new Error((err as { error?: string }).error ?? `Session fetch failed (${res.status})`);
@@ -159,7 +151,52 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
               sessionCacheRef.current = { data, fetchedAt: Date.now() };
               return data;
             }),
-        navigator.mediaDevices.getUserMedia({ audio: true }).catch((micErr: unknown) => {
+        // Enumerate devices to find a real microphone. The browser may default
+        // to a virtual audio device (e.g. BlackHole on macOS) which produces
+        // silence unless audio is explicitly routed through it.
+        (async () => {
+          const VIRTUAL_KEYWORDS = ["blackhole", "soundflower", "vb-audio", "virtual", "cable", "loopback", "vb cable"];
+          const isVirtual = (label: string) =>
+            VIRTUAL_KEYWORDS.some((kw) => label.toLowerCase().includes(kw));
+
+          try {
+            // Need a temporary stream to get device labels (otherwise they're empty)
+            const tmpStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            tmpStream.getTracks().forEach((t) => t.stop());
+
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const audioInputs = devices.filter((d) => d.kind === "audioinput");
+
+            // Try to find a real (non-virtual) microphone
+            const realMic = audioInputs.find((d) => d.label && !isVirtual(d.label));
+            if (realMic) {
+              console.info(`[Myra voice] selecting real mic: ${realMic.label} (deviceId: ${realMic.deviceId.slice(0, 8)}…)`);
+              return navigator.mediaDevices.getUserMedia({
+                audio: {
+                  deviceId: { exact: realMic.deviceId },
+                  echoCancellation: true,
+                  noiseSuppression: false,
+                  autoGainControl: false,
+                },
+              });
+            }
+            // No real mic found — fall through to default
+            if (audioInputs.length > 0) {
+              console.warn(`[Myra voice] no real mic found among ${audioInputs.length} devices, using default (may be virtual)`);
+            }
+          } catch (e) {
+            console.warn("[Myra voice] device enumeration failed, using default:", e);
+          }
+
+          // Fallback: use default device with echoCancellation
+          return navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: false,
+              autoGainControl: false,
+            },
+          });
+        })().catch((micErr: unknown) => {
           const name = micErr instanceof Error ? (micErr as { name?: string }).name : "";
           if (name === "NotAllowedError" || name === "PermissionDeniedError")
             throw new Error("Microphone access denied — please allow microphone in your browser settings and try again");
@@ -176,7 +213,11 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       const { RealtimeAgent, RealtimeSession, OpenAIRealtimeWebSocket } = await import("@openai/agents/realtime");
       const voice = sessionData.voice ?? "marin";
 
-      const agent = new RealtimeAgent({ name: "Myra", voice });
+      const agent = new RealtimeAgent({
+        name: "Myra",
+        voice,
+        instructions: sessionData.instructions ?? "",
+      });
       mediaStreamRef.current = mediaStream;
       acquiredStream = null;
 
@@ -186,10 +227,17 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
         tracingDisabled: true,
         config: {
           outputModalities: ["audio"],
+          // Pass max_output_tokens via providerData since the SDK config type
+          // doesn't expose it. Caps each spoken reply at ~5-7 sentences,
+          // controlling audio output cost ($20/M tokens).
+          providerData: { max_output_tokens: 350 },
           audio: {
             input: {
               format: { type: "audio/pcm", rate: 24000 },
-              transcription: { model: "gpt-4o-mini-transcribe" },
+              transcription: {
+                model: "gpt-4o-mini-transcribe",
+                prompt: "Transcribe ONLY in English, Hinglish, or Hindi. NEVER output Urdu script or Urdu vocabulary — if the speech sounds like Urdu, transcribe it as Hindi instead. Preserve code-switching across English, Hinglish, and Hindi. Keep product names in English. If the speech mixes languages, keep the transcript in English, Hinglish, or Hindi only.",
+              },
               turnDetection: {
                 type: "semantic_vad",
                 eagerness: "medium",
@@ -203,18 +251,44 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
             },
           },
           voice,
-          instructions: sessionData.instructions ?? "",
         },
       });
 
       inputAudioCtxRef.current = new AudioContext({ sampleRate: 24_000 });
       outputAudioCtxRef.current = new AudioContext({ sampleRate: 24_000 });
+
+      // CRITICAL: Resume AudioContexts BEFORE using them. Browsers suspend
+      // AudioContexts created before user gesture — must explicitly resume.
       if (inputAudioCtxRef.current.state === "suspended") {
-        await inputAudioCtxRef.current.resume().catch(() => undefined);
+        await inputAudioCtxRef.current.resume();
       }
       if (outputAudioCtxRef.current.state === "suspended") {
-        await outputAudioCtxRef.current.resume().catch(() => undefined);
+        await outputAudioCtxRef.current.resume();
       }
+      console.info(
+        `[Myra voice] AudioContext sample rates — input: ${inputAudioCtxRef.current.sampleRate}, output: ${outputAudioCtxRef.current.sampleRate}`,
+      );
+
+      // Log MediaStream track state to verify mic is live
+      const micTrack = mediaStream.getAudioTracks()[0];
+      if (micTrack) {
+        console.info(
+          `[Myra voice] mic track — enabled: ${micTrack.enabled}, readyState: ${micTrack.readyState}, muted: ${micTrack.muted}, label: ${micTrack.label}`,
+        );
+        // Warn if the selected device looks like a virtual audio driver
+        // (BlackHole, Soundflower, VB-Audio, etc.) — these often produce
+        // silence unless audio is explicitly routed through them.
+        const label = micTrack.label.toLowerCase();
+        const virtualKeywords = ["blackhole", "soundflower", "vb-audio", "virtual", "cable", "loopback"];
+        if (virtualKeywords.some((kw) => label.includes(kw))) {
+          console.warn(
+            `[Myra voice] selected mic "${micTrack.label}" appears to be a virtual audio device — it may produce silence. Please select your real microphone in browser settings.`,
+          );
+        }
+      } else {
+        console.error("[Myra voice] no audio track in MediaStream!");
+      }
+
       nextPlayTimeRef.current = outputAudioCtxRef.current.currentTime;
 
       await inputAudioCtxRef.current.audioWorklet.addModule("/worklets/mic-processor.js");
@@ -223,13 +297,47 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       inputSourceRef.current = source;
       const worklet = new AudioWorkletNode(inputAudioCtxRef.current, "mic-processor");
       inputWorkletRef.current = worklet;
+      // Use a very small gain instead of 0 — some browsers optimize away
+      // the entire audio path when gain is exactly 0, causing the worklet
+      // to receive silence. 0.001 is inaudible but keeps the graph active.
       const silentGain = inputAudioCtxRef.current.createGain();
-      silentGain.gain.value = 0;
+      silentGain.gain.value = 0.001;
       inputSilentGainRef.current = silentGain;
+      let audioChunkCount = 0;
+      let audioRmsSum = 0;
+      let audioRmsCount = 0;
+      let silenceWarningShown = false;
       worklet.port.onmessage = (evt) => {
-        if (!sessionRef.current && !pendingSessionRef.current) return;
-        const pcm = floatToPcm16(new Float32Array(evt.data as ArrayBuffer));
-        session.sendAudio(pcm);
+        const activeSession = sessionRef.current ?? pendingSessionRef.current;
+        if (!activeSession) return;
+        const float32 = new Float32Array(evt.data as ArrayBuffer);
+        const pcm = floatToPcm16(float32);
+        activeSession.sendAudio(pcm);
+        audioChunkCount++;
+        // Compute RMS of the float32 samples to verify mic is producing real audio
+        let sumSq = 0;
+        for (let i = 0; i < float32.length; i++) sumSq += float32[i] * float32[i];
+        const rms = Math.sqrt(sumSq / float32.length);
+        audioRmsSum += rms;
+        audioRmsCount++;
+        if (audioChunkCount === 1) {
+          console.info(`[Myra voice] first audio chunk — rms: ${rms.toFixed(4)}, samples: ${float32.length}`);
+        } else if (audioChunkCount % 500 === 0) {
+          const avgRms = audioRmsSum / audioRmsCount;
+          console.info(`[Myra voice] audio chunk ${audioChunkCount} — avg rms: ${avgRms.toFixed(4)}, transport status: ${activeSession.transport?.status ?? "unknown"}`);
+          audioRmsSum = 0;
+          audioRmsCount = 0;
+          // After ~4s of audio (500 chunks × 128 samples / 24kHz), warn if mic is silent
+          if (avgRms < 0.001 && !silenceWarningShown) {
+            silenceWarningShown = true;
+            console.warn("[Myra voice] microphone is producing silence — check your mic selection in browser settings");
+            setErrorMessage("Microphone not detecting audio. Please check your mic selection in browser settings.");
+            // Auto-clear the error after 5s so the session can continue
+            setTimeout(() => {
+              if (stateRef.current === "active") setErrorMessage(null);
+            }, 5_000);
+          }
+        }
       };
       source.connect(worklet);
       worklet.connect(silentGain);
@@ -257,6 +365,23 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       session.on("transport_event", (event: Record<string, unknown>) => {
         const type = event.type;
 
+        // ── Diagnostic logging for key events ─────────────────────────────
+        if (type === "session.created" || type === "session.updated") {
+          console.info(`[Myra voice] ${type}`);
+        }
+        if (type === "response.created") {
+          console.info("[Myra voice] response.created — model is generating");
+        }
+        if (type === "input_audio_buffer.speech_started") {
+          console.info("[Myra voice] user speech detected (VAD)");
+        }
+        if (type === "input_audio_buffer.speech_stopped") {
+          console.info("[Myra voice] user speech ended (VAD)");
+        }
+        if (type === "error") {
+          console.error("[Myra voice] server error event:", event);
+        }
+
         // ── Silence auto-stop ──────────────────────────────────────────────
         if (type === "input_audio_buffer.speech_started") {
           // User started speaking — cancel silence timer
@@ -264,11 +389,9 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
         }
 
         if (type === "response.done") {
-          // Safety: always clear greetingActiveRef here in case
-          // response.output_audio_transcript.done never fired (e.g. empty transcript)
           const wasGreetingPending = greetingResponsePendingRef.current;
-          greetingActiveRef.current = false;
           greetingResponsePendingRef.current = false;
+          console.info(`[Myra voice] response.done (wasGreetingPending=${wasGreetingPending})`);
 
           // Don't start the silence timer for the opening greeting turn.
           // Only arm it after a real conversation response.
@@ -282,17 +405,11 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
 
         // ── Myra's spoken response ─────────────────────────────────────────
         if (type === "response.output_audio_transcript.done") {
-          // CRITICAL: clear greetingActiveRef BEFORE checking text.
-          // If text is empty and we return early first, the flag stays true
-          // forever and suppresses all future Myra bubbles.
-          const wasGreeting = greetingActiveRef.current;
-          greetingActiveRef.current = false;
-
           const itemId = typeof event.item_id === "string" ? event.item_id : `myra-${Date.now()}`;
           const text = typeof event.transcript === "string" ? event.transcript.trim() : "";
 
-          // Suppress the greeting bubble or empty transcript
-          if (wasGreeting || !text) return;
+          // Skip empty transcripts
+          if (!text) return;
 
           const key = `assistant:${itemId}`;
           if (emittedIds.current.has(key)) return;
@@ -315,7 +432,6 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
             typeof event.transcript === "string" ? event.transcript.trim() : "";
 
           if (!text || !itemId) return;
-          if (itemId === greetingSeedId.current) return;
 
           const key = `user:${itemId}`;
           if (emittedIds.current.has(key)) return;
@@ -351,8 +467,11 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
             : typeof rawErr === "string" ? rawErr
             : JSON.stringify(rawErr).slice(0, 200);
         console.error("[Myra voice] session error:", err);
+        // Reset greeting pending so silence timer works for future responses
+        greetingResponsePendingRef.current = false;
         setErrorMessage(msg ?? "Voice session error");
         setState("error");
+        try { session.close(); } catch {}
         if (sessionRef.current === session) sessionRef.current = null;
         if (pendingSessionRef.current === session) pendingSessionRef.current = null;
         cleanupMedia();
@@ -377,27 +496,65 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       setState("active");
 
       // ── Opening greeting ───────────────────────────────────────────────────
-      // Speak the exact opening line client-side so it is deterministic and
-      // does not depend on model phrasing.
-      const GREETING_ITEM_ID = "__myra_greeting_seed__";
-      greetingSeedId.current = GREETING_ITEM_ID;
-      greetingActiveRef.current = true;
+      // Trigger the model to speak its opening greeting via the Realtime API
+      // so it uses the same marin voice — no jarring browser TTS switch.
+      //
+      // CRITICAL: We must wait for the server to acknowledge session.updated
+      // before sending response.create. The session.update (with instructions)
+      // is sent during connect() but the server processes it asynchronously.
+      // If response.create arrives before instructions are applied, the model
+      // has no context for the greeting.
+      //
+      // We also pass an empty {} response object so the sequencer treats this
+      // as a manual request (manual=true), preventing it from coalescing with
+      // or blocking VAD-triggered auto-responses (semantic_vad create_response).
       greetingResponsePendingRef.current = true;
-      const openingStatement = "Hi, I am Myra. How can I help you today?";
-      onTranscriptRef.current({ id: GREETING_ITEM_ID, role: "assistant", text: openingStatement });
-      try {
-        if (typeof window !== "undefined" && "speechSynthesis" in window) {
-          window.speechSynthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(openingStatement);
-          utterance.lang = "en-IN";
-          utterance.rate = 0.98;
-          utterance.pitch = 1;
-          utterance.volume = 1;
-          window.speechSynthesis.speak(utterance);
+
+      const greetingFiredRef = { current: false };
+      const fireGreeting = () => {
+        if (greetingFiredRef.current) return;
+        greetingFiredRef.current = true;
+        try {
+          session.transport.requestResponse?.({});
+        } catch (e) {
+          console.warn("[Myra voice] greeting requestResponse failed:", e);
         }
-      } catch (speechErr) {
-        console.warn("[Myra voice] opening greeting speech synthesis failed:", speechErr);
-      }
+      };
+
+      // Listen for session.updated — the server has applied our instructions
+      const onTransportEvent = (event: Record<string, unknown>) => {
+        if (event.type === "session.updated") {
+          fireGreeting();
+        }
+      };
+      session.on("transport_event", onTransportEvent);
+
+      // Safety fallback: if session.updated doesn't arrive within 2s,
+      // fire the greeting anyway (the config was likely already applied).
+      const greetingTimeout = setTimeout(() => {
+        if (!greetingFiredRef.current) {
+          console.warn("[Myra voice] session.updated not received within 2s, firing greeting anyway");
+          fireGreeting();
+        }
+      }, 2_000);
+
+      // Safety: if greeting response.done never arrives within 8s, clear the
+      // pending flag so subsequent response.done events start the silence timer.
+      const greetingPendingTimeout = setTimeout(() => {
+        if (greetingResponsePendingRef.current) {
+          console.warn("[Myra voice] greeting response.done never received, clearing pending flag");
+          greetingResponsePendingRef.current = false;
+        }
+      }, 8_000);
+
+      // Clean up listener + timeouts when session closes
+      const origClose = session.close.bind(session);
+      session.close = () => {
+        clearTimeout(greetingTimeout);
+        clearTimeout(greetingPendingTimeout);
+        try { session.off("transport_event", onTransportEvent); } catch {}
+        origClose();
+      };
 
     } catch (err) {
       acquiredStream?.getTracks().forEach((t) => t.stop());

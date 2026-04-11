@@ -7,7 +7,11 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCache, redis, setCache } from "@/lib/redis";
+import { createLogger } from "@/lib/logger";
+import { safeJsonParse } from "@/lib/utils/json";
 import { Prisma } from "@/generated/prisma/client";
+
+const logger = createLogger({ service: "admin-service" });
 
 // ─── H5: Raw SQL Schema Dependencies ────────────────────────────────────────
 // All raw SQL queries in this file use Prisma.sql tagged templates (injection-safe)
@@ -1439,7 +1443,9 @@ export async function getUsageStats(range: UsageRange = "30d"): Promise<UsageSta
     })),
   };
 
-  await setCache(cacheKey, result, 30).catch(() => {});
+  await setCache(cacheKey, result, 30).catch((err) => {
+    logger.debug({ err }, "Failed to cache admin stats (non-critical)");
+  });
   return result;
 }
 
@@ -1542,8 +1548,8 @@ export async function getRegimeStats(): Promise<RegimeStats> {
   // Parse the freshest valid JSON context for the multiHorizon-shaped response
   let multiHorizon: RegimeStats["multiHorizon"] = null;
   if (latestRegimeWithContext?.context) {
-    try {
-      const ctx = JSON.parse(latestRegimeWithContext.context);
+    const ctx = safeJsonParse(latestRegimeWithContext.context);
+    if (ctx) {
       multiHorizon = {
         date: latestRegimeWithContext.date,
         current: ctx,
@@ -1554,7 +1560,7 @@ export async function getRegimeStats(): Promise<RegimeStats> {
         transitionDirection: "STABLE",
         region: latestRegimeWithContext.region,
       };
-    } catch { /* leave null */ }
+    }
   }
 
   // Count regime transitions in last 30 days

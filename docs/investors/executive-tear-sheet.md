@@ -5,7 +5,7 @@
 **LyraAlpha AI** is building the structured financial intelligence layer that retail investors in India and the US have never had — not more data, not another chatbot, but a system that turns fragmented market signals into consistent, institutional-quality reasoning at consumer scale.
 
 - **Category:** Financial intelligence / AI-native investing software
-- **Markets:** US + India — equities, ETFs, mutual funds, crypto, commodities
+- **Markets:** US + India — crypto assets
 - **Model:** Freemium SaaS with credit-governed usage, premium workflow upsell, and Enterprise packaging
 - **Status:** Live product. Premium workflows (Compare Assets, Shock Simulator, Portfolio Intelligence workspace) shipped and actively expanding.
 - **Core principle:** *The engines compute. The AI interprets.*
@@ -71,7 +71,7 @@ A generic LLM wrapper invents its analytical frame on every call. LyraAlpha AI's
 | **SAM** | ~$8–12B | Self-directed retail investors in US + India actively paying for tools |
 | **SOM (3-year)** | ~$50–150M ARR | Premium SaaS capture across India and US at current plan economics |
 
-**India alone:** 90M+ registered equity investors (NSE data), growing 15–20% annually. SIP investor base: 90M+ accounts. Fintech SaaS ARPU expanding rapidly as the demographic matures.
+**India alone:** 90M+ registered equity investors (NSE data) with growing crypto adoption, growing 15–20% annually. SIP investor base: 90M+ accounts. Fintech SaaS ARPU expanding rapidly as the demographic matures.
 
 **US:** 160M+ brokerage account holders. Premium investing tool ARPU of $150–600/year is well-established (Seeking Alpha, Koyfin, Danelfin comparables).
 
@@ -92,7 +92,7 @@ A generic LLM wrapper invents its analytical frame on every call. LyraAlpha AI's
 Not a gimmick stress-test widget. The current implementation includes:
 - selectable historical shock regimes across US and India contexts
 - hybrid direct + proxy replay when historical windows are incomplete
-- asset-type-aware mapping across equities, ETFs, crypto, commodities, mutual funds
+- asset-type-aware mapping for crypto assets
 - structured explanation payloads: transmission mechanisms, pressure points, dominant drivers, resilience themes, rationale
 - Lyra follow-up analysis translating replay output into hedge and resilience framing
 

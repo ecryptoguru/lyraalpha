@@ -28,6 +28,7 @@ import { EngineResult, OHLCV } from "../engines/types";
 import { MarketQuote } from "@/types/market-data";
 import { createLogger } from "@/lib/logger";
 import { createTimer, sanitizeError } from "@/lib/logger/utils";
+import { safeDeepClone } from "@/lib/utils/json";
 import { calculateCompatibility } from "../engines/compatibility";
 import { classifyAsset } from "../engines/grouping";
 import { SYNC_CONFIG } from "../engines/constants";
@@ -44,7 +45,6 @@ import {
 import { IntelligenceEventsService } from "./intelligence-events.service";
 import {
   getHistoryConfidence,
-  resolveFundamentalField,
   resolveSingleSourceField,
   type HistoryConfidence,
   type SourcedField,
@@ -101,19 +101,12 @@ if (EXTRA_SYMBOLS.length > 0) {
 // Pre-computed Set for O(1) dedup in resolveUniverse — avoids rebuilding on every sync cycle
 const DEFAULT_SYMBOLS_SET = new Set(DEFAULT_SYMBOLS);
 
-const FUNDAMENTALS_SLA_HOURS = 24 * 7;
-const CRYPTO_QUOTES_SLA_HOURS = 6;
-const LIQUIDITY_SLA_HOURS = 72;
-const CRYPTO_DEX_SLA_HOURS = 24;
-const HOLDINGS_SLA_HOURS = 24 * 30;
-const MF_HOLDINGS_SLA_HOURS = 24 * 45;
+const CRYPTO_QUOTES_SLA_HOURS = Number(process.env.CRYPTO_QUOTES_SLA_HOURS ?? 6);
+const LIQUIDITY_SLA_HOURS = Number(process.env.LIQUIDITY_SLA_HOURS ?? 72);
+const CRYPTO_DEX_SLA_HOURS = Number(process.env.CRYPTO_DEX_SLA_HOURS ?? 24);
 
 function asNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
-
-function hasString(value: unknown): value is string {
-  return typeof value === "string" && value.trim().length > 0;
 }
 
 function hoursSince(date: Date | string | null | undefined): number | null {
@@ -124,7 +117,11 @@ function hoursSince(date: Date | string | null | undefined): number | null {
 }
 
 function toJsonObject(value: unknown): Prisma.JsonObject {
-  return JSON.parse(JSON.stringify(value)) as Prisma.JsonObject;
+  const cloned = safeDeepClone(value);
+  if (!cloned) {
+    throw new Error("Failed to deep clone value for JSON object conversion");
+  }
+  return cloned as Prisma.JsonObject;
 }
 
 export class MarketSyncService {
@@ -192,9 +189,8 @@ export class MarketSyncService {
 
     // Split universe: crypto goes to CoinGecko, everything else to Yahoo
     const cryptoSymbols = symbols.filter(isCryptoSymbol);
-    // Exclude Indian MFs (synced via mfapi.in) and MCX IN commodities (synced via metals.dev)
-    const MCX_IN_SYMBOLS = new Set(["GOLD-MCX", "SILVER-MCX"]);
-    const nonCryptoSymbols = symbols.filter((s) => !isCryptoSymbol(s) && !s.startsWith("MF-") && !MCX_IN_SYMBOLS.has(s));
+    // Platform is crypto-only, so nonCryptoSymbols should be empty
+    const nonCryptoSymbols = symbols.filter((s) => !isCryptoSymbol(s));
 
     // Sync universe definitions (upserts Asset records with type + coingeckoId)
     const syncedAssets = await this.syncUniverse(symbols);
@@ -260,12 +256,11 @@ export class MarketSyncService {
             }
 
             const rawQuote = quotes.find((q) => q.symbol === symbol);
-            
+
             // Frequency Throttling: only fetch summary in daily window
-            // Extended modules (assetProfile, topHoldings, fundPerformance) only for US stocks & ETFs
-            const isUSEquityOrETF = !symbol.includes('.') && !symbol.endsWith('-USD') && !symbol.endsWith('=F') && !symbol.startsWith('MF-');
-            const summary = shouldFetchDeepInstitutional 
-              ? await fetchInstitutionalSummary(symbol, isUSEquityOrETF)
+            // Platform is crypto-only, so institutional summary not applicable for most assets
+            const summary = shouldFetchDeepInstitutional
+              ? await fetchInstitutionalSummary(symbol, false)
               : null;
 
             if (history === null || "error" in history || !rawQuote) {
@@ -299,7 +294,7 @@ export class MarketSyncService {
             // OR if essential metrics like ROE/PEG are missing and we have a deep sync window
             let effectiveSummary = summary;
             const needsDeepData = !asset?.pegRatio || !asset?.roe;
-            const needsExtended = isUSEquityOrETF && (!asset?.description || !asset?.topHoldings || !asset?.fundPerformanceHistory);
+            const needsExtended = false; // Platform is crypto-only, extended institutional data not applicable
             if (!effectiveSummary && (needsDeepData || needsExtended)) {
                // Use restricted fetch if not in daily window but data is missing
                effectiveSummary = await fetchInstitutionalSummary(symbol, needsExtended);
@@ -333,12 +328,7 @@ export class MarketSyncService {
               circulatingSupply: (getRawValue(rawQuote.circulatingSupply) as number) || (existingMetadata as Record<string, unknown>).circulatingSupply || null,
               maxSupply: (getRawValue(rawQuote.maxSupply) as number) || (existingMetadata as Record<string, unknown>).maxSupply || null,
               volume24Hr: (getRawValue(rawQuote.volume24Hr) as number) || (existingMetadata as Record<string, unknown>).volume24Hr || null,
-              // Asset Profile metadata (US stocks & ETFs only)
-              ...(isUSEquityOrETF && effectiveSummary?.assetProfile ? {
-                website: effectiveSummary.assetProfile.website || (existingMetadata as Record<string, unknown>).website || null,
-                fullTimeEmployees: effectiveSummary.assetProfile.fullTimeEmployees || (existingMetadata as Record<string, unknown>).fullTimeEmployees || null,
-                country: effectiveSummary.assetProfile.country || (existingMetadata as Record<string, unknown>).country || null,
-              } : {}),
+              // Asset Profile metadata (US stocks & ETFs only) - not applicable for crypto
             } as Record<string, unknown>;
 
             const metadataPatch = Object.entries(incomingMetadata).reduce<Record<string, unknown>>(
@@ -401,16 +391,7 @@ export class MarketSyncService {
               priceToSales: (getRawValue(details.priceToSales) as number) || null,
               updatedAt: new Date(),
 
-              // Extended data: only for US stocks & ETFs
-              ...(isUSEquityOrETF && effectiveSummary?.assetProfile?.longBusinessSummary ? {
-                description: effectiveSummary.assetProfile.longBusinessSummary,
-              } : {}),
-              ...(isUSEquityOrETF && effectiveSummary?.assetProfile?.industry ? {
-                industry: effectiveSummary.assetProfile.industry,
-              } : {}),
-              ...(isUSEquityOrETF && effectiveSummary?.assetProfile?.sector ? {
-                sector: effectiveSummary.assetProfile.sector,
-              } : {}),
+              // Extended data: only for US stocks & ETFs - not applicable for crypto
 
               // Extended data: ETF Top Holdings + Sector Weights
               ...(() => {
@@ -465,7 +446,8 @@ export class MarketSyncService {
             };
 
             // Fetch financial statements for US stocks & ETFs via fundamentalsTimeSeries API
-            if (isUSEquityOrETF && shouldFetchDeepInstitutional) {
+            // Not applicable for crypto-only platform
+            if (false && shouldFetchDeepInstitutional) {
               try {
                 const fundamentals = await fetchFundamentals(symbol);
                 if (fundamentals) {
@@ -528,7 +510,7 @@ export class MarketSyncService {
 
         // Legacy Yahoo intelligence sync is disabled by default.
         // Source-of-truth for intelligence domains is now:
-        // Finnhub + NewsData.io + India RSS via FinnhubSyncService.syncAll().
+        // NewsData.io + India RSS.
         if (shouldSyncLegacyYahooNews) {
           const SIX_HOURS_AGO = new Date(Date.now() - 6 * 60 * 60 * 1000);
           const recentNews = await prisma.institutionalEvent.findMany({
@@ -547,7 +529,7 @@ export class MarketSyncService {
           }
           await Promise.all(staleAssets.map(a => IntelligenceEventsService.syncNewsIntelligence(a.id, a.symbol)));
         } else {
-          logger.debug("Legacy Yahoo intelligence sync skipped (replaced by Finnhub/NewsData.io/India RSS)");
+          logger.debug("Legacy Yahoo intelligence sync skipped (replaced by NewsData.io/India RSS)");
         }
       }
     }
@@ -817,7 +799,7 @@ export class MarketSyncService {
               description: cgMetadata.description?.slice(0, 5000) || null,
               metadata: {
                 ...existingMeta,
-                coingecko: JSON.parse(JSON.stringify(cgMetadata)),
+                coingecko: toJsonObject(cgMetadata),
               } as Prisma.JsonObject,
             },
           });
@@ -831,7 +813,9 @@ export class MarketSyncService {
 
     // Invalidate cache for updated crypto assets
     await Promise.all(
-      cryptoSymbols.map((s) => AssetService.invalidateAsset(s).catch(() => {})),
+      cryptoSymbols.map((s) => AssetService.invalidateAsset(s).catch((err) => {
+        logger.debug({ err, symbol: s }, "Failed to invalidate asset cache (non-critical)");
+      })),
     );
 
     logger.info({
@@ -1120,8 +1104,8 @@ export class MarketSyncService {
     });
 
     if (hasRegimeShift) {
-      void MacroResearchService.invalidateSectorMappings(contextRegion).catch((err) => {
-        logger.warn({ err: sanitizeError(err), region: contextRegion }, "Macro sector cache invalidation failed");
+      void MacroResearchService.invalidate(contextRegion).catch((err: unknown) => {
+        logger.warn({ err: sanitizeError(err), region: contextRegion }, "Macro research cache invalidation failed");
       });
     }
 
@@ -1134,20 +1118,10 @@ export class MarketSyncService {
 
     // Hoist dynamic imports once before the hot loop — avoids repeated module resolution overhead
     const [
-      { ETFLookthroughEngine },
-      { ETFRiskEngine },
-      { CommodityIntelligenceEngine },
       { CryptoIntelligenceEngine },
-      { MFLookthroughEngine },
-      { MFRiskEngine },
       { calculateScenarios, computeRiskMetrics },
     ] = await Promise.all([
-      import("../engines/etf-lookthrough"),
-      import("../engines/etf-risk"),
-      import("../engines/commodity-intelligence"),
       import("../engines/crypto-intelligence"),
-      import("../engines/mf-lookthrough"),
-      import("../engines/mf-risk"),
       import("../engines/scenario-engine"),
     ]);
     
@@ -1208,7 +1182,7 @@ export class MarketSyncService {
           oneYearChange: asset.oneYearChange,
         });
         // Region-aware benchmark selection: Indian assets use Indian benchmarks
-        const isIndianAsset = asset.region === "IN" || asset.type === "MUTUAL_FUND";
+        const isIndianAsset = asset.region === "IN";
         const regionBenchmarks = isIndianAsset ? inBenchmarkHistories : usBenchmarkHistories;
         const correlations = calculateCorrelations(history, regionBenchmarks);
 
@@ -1252,8 +1226,7 @@ export class MarketSyncService {
         }
 
         // Pre-compute Factor Alignment (spider chart)
-        const isFundType = asset.type === "MUTUAL_FUND" || asset.type === "ETF";
-        const hasStandardFactors = !isFundType && factorProfile && "value" in factorProfile;
+        const hasStandardFactors = factorProfile && "value" in factorProfile;
         const factorAlignment = hasStandardFactors
           ? calculateFactorRegimeAlignment(factorProfile as FactorProfile, context.regime.label)
           : null;
@@ -1274,78 +1247,25 @@ export class MarketSyncService {
         });
 
         // Pre-compute Signal Strength (composite of all layers)
-        const finnhubFinancials = (assetMeta.finnhubFinancials as Record<string, unknown>) || {};
-        const finnhubUpdatedAt = (assetMeta.finnhubFinancialsSync as string) || null;
-        const yahooUpdatedAt = asset.lastPriceUpdate;
-
-        const peRatioField = resolveFundamentalField<number>({
-          expectedSource: "finnhub",
-          primarySource: "finnhub",
-          primaryValue: asNumber(finnhubFinancials.peRatio),
-          primaryUpdatedAt: finnhubUpdatedAt,
-          fallbackSource: "yahoo",
-          fallbackValue: asset.peRatio,
-          fallbackUpdatedAt: yahooUpdatedAt,
-          slaHours: FUNDAMENTALS_SLA_HOURS,
-          graceMultiplier: 2,
-        });
-        const roeField = resolveFundamentalField<number>({
-          expectedSource: "finnhub",
-          primarySource: "finnhub",
-          primaryValue: asNumber(finnhubFinancials.roe),
-          primaryUpdatedAt: finnhubUpdatedAt,
-          fallbackSource: "yahoo",
-          fallbackValue: asset.roe,
-          fallbackUpdatedAt: yahooUpdatedAt,
-          slaHours: FUNDAMENTALS_SLA_HOURS,
-          graceMultiplier: 2,
-        });
-        const operatingMarginsField = resolveFundamentalField<number>({
-          expectedSource: "finnhub",
-          primarySource: "finnhub",
-          primaryValue: asNumber(finnhubFinancials.operatingMargin),
-          primaryUpdatedAt: finnhubUpdatedAt,
-          fallbackSource: "yahoo",
-          fallbackValue: (assetMeta.operatingMargins as number) ?? null,
-          fallbackUpdatedAt: yahooUpdatedAt,
-          slaHours: FUNDAMENTALS_SLA_HOURS,
-          graceMultiplier: 2,
-        });
-        const revenueGrowthField = resolveFundamentalField<number>({
-          expectedSource: "finnhub",
-          primarySource: "finnhub",
-          primaryValue: asNumber(finnhubFinancials.revenueGrowth),
-          primaryUpdatedAt: finnhubUpdatedAt,
-          fallbackSource: "yahoo",
-          fallbackValue: (assetMeta.revenueGrowth as number) ?? null,
-          fallbackUpdatedAt: yahooUpdatedAt,
-          slaHours: FUNDAMENTALS_SLA_HOURS,
-          graceMultiplier: 2,
-        });
-
-        const fundamentalReliability: Record<string, SourcedField<number>> = {
-          peRatio: peRatioField,
-          roe: roeField,
-          operatingMargins: operatingMarginsField,
-          revenueGrowth: revenueGrowthField,
-        };
+        // Note: Traditional financial metrics (PE ratio, ROE, etc.) don't apply to crypto assets
+        const fundamentalReliability: Record<string, SourcedField<number>> = {};
         const reliabilityStats = {
           evaluated: Object.keys(fundamentalReliability).length,
           fallbacks: Object.values(fundamentalReliability).filter((f) => f.precedenceOverridden).length,
           unavailable: Object.values(fundamentalReliability).filter((f) => f.qualityTier === "unavailable").length,
         };
         const fundamentals: FundamentalData = {
-          peRatio: peRatioField.value,
-          industryPe: asset.industryPe,
-          pegRatio: asset.pegRatio,
-          priceToBook: asset.priceToBook,
-          roe: roeField.value,
-          roce: asset.roce,
+          peRatio: asset.peRatio ?? null,
+          industryPe: asset.industryPe ?? null,
+          pegRatio: asset.pegRatio ?? null,
+          priceToBook: asset.priceToBook ?? null,
+          roe: asset.roe ?? null,
+          roce: asset.roce ?? null,
           profitMargins: (assetMeta.profitMargins as number) ?? null,
-          operatingMargins: operatingMarginsField.value,
-          revenueGrowth: revenueGrowthField.value,
-          dividendYield: asset.dividendYield,
-          shortRatio: asset.shortRatio,
+          operatingMargins: (assetMeta.operatingMargins as number) ?? null,
+          revenueGrowth: (assetMeta.revenueGrowth as number) ?? null,
+          dividendYield: asset.dividendYield ?? null,
+          shortRatio: asset.shortRatio ?? null,
           heldPercentInstitutions: (assetMeta.heldPercentInstitutions as number) ?? null,
           targetMeanPrice: (assetMeta.targetMeanPrice as number) ?? null,
           currentPrice: asset.price,
@@ -1454,44 +1374,6 @@ export class MarketSyncService {
           createScore(ScoreType.TRUST, signals.trust),
         );
 
-        // ETF Lookthrough: compute decomposition + risk for ETF assets
-        let etfLookthroughData: Prisma.InputJsonValue | null = null;
-        if (asset.type === "ETF" && asset.topHoldings) {
-          try {
-            const topHoldingsJson = asset.topHoldings as Record<string, unknown>;
-            const lookthrough = await ETFLookthroughEngine.compute(
-              prisma,
-              asset.id,
-              topHoldingsJson as import("../engines/etf-lookthrough").TopHoldingsData,
-              (assetMeta.beta as number) ?? null,
-            );
-            if (lookthrough) {
-              const risk = ETFRiskEngine.compute({
-                lookthrough,
-                etfHistory: history,
-                expenseRatio: asset.expenseRatio,
-                etfAvgVolume: asset.volume ?? null,
-              });
-              etfLookthroughData = { ...lookthrough, risk } as unknown as Prisma.InputJsonValue;
-            }
-          } catch (err) {
-            logger.warn({ symbol, err: String(err) }, "ETF lookthrough computation failed");
-          }
-        }
-
-        // Commodity Intelligence: regime sensitivity, seasonality, correlations
-        let commodityIntelData: Prisma.InputJsonValue | null = null;
-        if (asset.type === "COMMODITY") {
-          try {
-            const result = await CommodityIntelligenceEngine.compute(prisma, asset.id, symbol);
-            if (result) {
-              commodityIntelData = result as unknown as Prisma.InputJsonValue;
-            }
-          } catch (err) {
-            logger.warn({ symbol, err: String(err) }, "Commodity intelligence computation failed");
-          }
-        }
-
         // Crypto Intelligence: network activity, holder stability, liquidity risk, structural risk, enhanced trust
         let cryptoIntelData: Prisma.InputJsonValue | null = null;
         let cryptoReliability: Record<string, SourcedField<number>> | null = null;
@@ -1566,101 +1448,6 @@ export class MarketSyncService {
             }, {})
           : null;
 
-        let mfReliability: Record<string, SourcedField<number>> | null = null;
-        if (asset.type === "MUTUAL_FUND") {
-          const topHoldingsMeta = (asset.topHoldings as Record<string, unknown> | null) || null;
-          const scrapedAt = topHoldingsMeta?._scrapedAt as string | undefined;
-          const holdingsFreshness = hoursSince(scrapedAt || asset.updatedAt);
-          const holdingsCount = Array.isArray(topHoldingsMeta?.holdings)
-            ? (topHoldingsMeta?.holdings as unknown[]).length
-            : null;
-          const aumCr = asNumber((assetMeta.aumCr as number | undefined) ?? (assetMeta.marketCap as number | undefined));
-          const expense = asNumber(asset.expenseRatio ?? (assetMeta.expenseRatioPct as number | undefined));
-
-          mfReliability = {
-            holdingsCoverage: resolveSingleSourceField<number>({
-              expectedSource: "moneycontrol",
-              source: "moneycontrol",
-              value: asNumber(holdingsCount),
-              freshnessHours: holdingsFreshness,
-              slaHours: MF_HOLDINGS_SLA_HOURS,
-            }),
-            aum: resolveSingleSourceField<number>({
-              expectedSource: "moneycontrol",
-              source: "moneycontrol",
-              value: aumCr,
-              freshnessHours: holdingsFreshness,
-              slaHours: MF_HOLDINGS_SLA_HOURS,
-            }),
-            expenseRatio: resolveSingleSourceField<number>({
-              expectedSource: "moneycontrol",
-              source: "moneycontrol",
-              value: expense,
-              freshnessHours: holdingsFreshness,
-              slaHours: MF_HOLDINGS_SLA_HOURS,
-            }),
-          };
-        }
-
-        let commodityReliability: Record<string, SourcedField<number>> | null = null;
-        if (asset.type === "COMMODITY") {
-          const commodityFreshness = hoursSince(asset.lastPriceUpdate);
-          const commodityMeta = (assetMeta as Record<string, unknown>) || {};
-          const rollContinuityProxy = hasString(commodityMeta.expireDate) ? 1 : null;
-
-          commodityReliability = {
-            frontMonthVolume: resolveSingleSourceField<number>({
-              expectedSource: "yahoo",
-              source: "yahoo",
-              value: asNumber(asset.volume),
-              freshnessHours: commodityFreshness,
-              slaHours: LIQUIDITY_SLA_HOURS,
-            }),
-            openInterest: resolveSingleSourceField<number>({
-              expectedSource: "yahoo",
-              source: "yahoo",
-              value: asNumber(asset.openInterest),
-              freshnessHours: commodityFreshness,
-              slaHours: LIQUIDITY_SLA_HOURS,
-            }),
-            rollContinuity: resolveSingleSourceField<number>({
-              expectedSource: "yahoo",
-              source: "yahoo",
-              value: rollContinuityProxy,
-              freshnessHours: commodityFreshness,
-              slaHours: HOLDINGS_SLA_HOURS,
-            }),
-          };
-        }
-
-        // MF Lookthrough: compute decomposition + risk for Mutual Fund assets
-        let mfLookthroughData: Prisma.InputJsonValue | null = null;
-        if (asset.type === "MUTUAL_FUND" && asset.topHoldings) {
-          try {
-            const topHoldingsJson = asset.topHoldings as Record<string, unknown>;
-            const lookthrough = await MFLookthroughEngine.compute(
-              prisma,
-              asset.id,
-              topHoldingsJson as import("../engines/mf-lookthrough").TopHoldingsData,
-              asset.category || "",
-              { rSquared: null, expenseRatio: asset.expenseRatio },
-            );
-            if (lookthrough) {
-              const mfAnalytics = (asset.metadata as Record<string, unknown>)?.mfAnalytics as Record<string, unknown> | undefined;
-              const risk = MFRiskEngine.compute({
-                lookthrough,
-                expenseRatio: asset.expenseRatio,
-                maxDrawdown: (mfAnalytics?.drawdown as number) ?? null,
-                rSquared: (mfAnalytics?.rSquared as number) ?? null,
-                alpha: (mfAnalytics?.alpha as number) ?? null,
-              });
-              mfLookthroughData = { ...lookthrough, risk } as unknown as Prisma.InputJsonValue;
-            }
-          } catch (err) {
-            logger.warn({ symbol, err: String(err) }, "MF lookthrough computation failed");
-          }
-        }
-
         return {
           symbol,
           data: {
@@ -1698,28 +1485,9 @@ export class MarketSyncService {
                       },
                     }
                   : {}),
-                ...(mfReliability
-                  ? {
-                      mutualFund: {
-                        fields: mfReliability,
-                        unavailableCount: Object.values(mfReliability).filter((f) => f.qualityTier === "unavailable").length,
-                      },
-                    }
-                  : {}),
-                ...(commodityReliability
-                  ? {
-                      commodity: {
-                        fields: commodityReliability,
-                        unavailableCount: Object.values(commodityReliability).filter((f) => f.qualityTier === "unavailable").length,
-                      },
-                    }
-                  : {}),
               },
               preliminaryScores: null,
             }),
-            ...(etfLookthroughData ? { etfLookthrough: etfLookthroughData } : {}),
-            ...(mfLookthroughData ? { mfLookthrough: mfLookthroughData } : {}),
-            ...(commodityIntelData ? { commodityIntelligence: commodityIntelData } : {}),
             ...(cryptoIntelData ? { cryptoIntelligence: cryptoIntelData } : {}),
             ...(scenarioData ? { scenarioData } : {}),
           },
@@ -1763,14 +1531,9 @@ export class MarketSyncService {
       const fallbackRate = fundamentalFallbacks / fundamentalFieldsEvaluated;
       logger.info({
         evaluated: fundamentalFieldsEvaluated,
-        fallbackCount: fundamentalFallbacks,
         unavailableCount: fundamentalUnavailable,
         fallbackRate,
       }, "Phase 1 fundamentals reliability summary");
-
-      if (fallbackRate > 0.2) {
-        logger.warn({ fallbackRate }, "Provider degradation detected: Finnhub fallback rate exceeded 20%");
-      }
     }
 
     for (const [provider, stats] of Object.entries(cryptoProviderStats)) {
@@ -1920,7 +1683,7 @@ export class MarketSyncService {
       await prisma.marketRegime.update({
         where: { id: latestRegimeForCorr.id },
         data: {
-          correlationMetrics: JSON.parse(JSON.stringify({ ...existingMetrics, crossSector: crossSectorCorr })),
+          correlationMetrics: toJsonObject({ ...existingMetrics, crossSector: crossSectorCorr }),
         },
       });
     }

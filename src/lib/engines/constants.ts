@@ -52,8 +52,6 @@ export const ENGINE_THRESHOLDS = {
     // Asset class scaling factors (K values)
     // Higher K = more tolerance for volatility
     CRYPTO_DIVISOR: 8, // 8% move = 100 score
-    EQUITY_DIVISOR: 4, // 4% move = 100 score
-    COMMODITY_DIVISOR: 6, // 6% move = 100 score
 
     // Risk levels
     LOW_RISK: 30,

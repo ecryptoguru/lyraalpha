@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
+
 import {
   FlaskConical,
   TrendingUp,
@@ -12,7 +13,8 @@ import {
 
 import { PageHeader, StatChip } from "@/components/dashboard/page-header";
 import { SectionErrorBoundary } from "@/components/error-boundary";
-import { MacroResearchService } from "@/lib/services/macro-research.service";
+import { US_SECTOR_SENSITIVITY } from "@/lib/macro/sector-sensitivity/us";
+import { IN_SECTOR_SENSITIVITY } from "@/lib/macro/sector-sensitivity/in";
 import type { SectorImpact } from "@/lib/macro/types";
 
 const IMPACT_STYLES: Record<SectorImpact, { bg: string; text: string; label: string }> = {
@@ -21,19 +23,33 @@ const IMPACT_STYLES: Record<SectorImpact, { bg: string; text: string; label: str
   neutral:  { bg: "border-white/10       bg-card/60",        text: "text-muted-foreground", label: "Neutral"  },
 };
 
+export const dynamic = "force-dynamic";
+
 const LYRA_PROMPTS_CRYPTO = [
   "What does the current BTC dominance trend mean for altcoins?",
   "Which crypto sectors benefit most from today's on-chain activity?",
   "How does the current fear & greed index affect DeFi tokens?",
 ];
 
+const ON_CHAIN_METRICS = [
+  { label: "BTC Dominance", value: "54.2%", sub: "Market cap share", icon: Bitcoin, color: "amber" as const },
+  { label: "Active Addresses", value: "1.4M", sub: "24h network activity", icon: Activity, color: "emerald" as const },
+  { label: "DeFi TVL", value: "$92B", sub: "Total value locked", icon: BarChart3, color: "primary" as const },
+  { label: "Whale Activity", value: "+18%", sub: "Large holder inflows", icon: TrendingUp, color: "emerald" as const },
+] as const;
+
+const METRIC_COLORS = {
+  amber: { border: "border-amber-500/20", bg: "bg-amber-500/5", icon: "text-amber-400" },
+  emerald: { border: "border-emerald-500/20", bg: "bg-emerald-500/5", icon: "text-emerald-400" },
+  primary: { border: "border-primary/20", bg: "bg-primary/5", icon: "text-primary" },
+} as const;
+
 export default async function MacroResearchPage() {
   const cookieStore = await cookies();
   const region = cookieStore.get("user_region_preference")?.value === "IN" ? "IN" as const : "US" as const;
 
-  const { snapshot, sectors } = await MacroResearchService.getData(region);
+  const sectors = region === "IN" ? IN_SECTOR_SENSITIVITY : US_SECTOR_SENSITIVITY;
 
-  const lyraPrompts = LYRA_PROMPTS_CRYPTO;
   const tailwinds   = sectors.filter((s) => s.impact === "tailwind").length;
   const headwinds   = sectors.filter((s) => s.impact === "headwind").length;
 
@@ -63,38 +79,20 @@ export default async function MacroResearchPage() {
         <section className="animate-slide-up-fade animation-delay-100 space-y-3">
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">On-chain Metrics</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-            <div className="rounded-3xl border border-amber-500/20 bg-amber-500/5 p-4 flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-tight">BTC Dominance</p>
-                <Bitcoin className="h-5 w-5 text-amber-400" />
-              </div>
-              <p className="text-2xl font-bold tabular-nums leading-none text-foreground">52.4%</p>
-              <p className="text-[9px] text-muted-foreground/70 leading-tight">Market cap share</p>
-            </div>
-            <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-4 flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-tight">Active Addresses</p>
-                <Activity className="h-5 w-5 text-emerald-400" />
-              </div>
-              <p className="text-2xl font-bold tabular-nums leading-none text-foreground">1.2M</p>
-              <p className="text-[9px] text-muted-foreground/70 leading-tight">24h network activity</p>
-            </div>
-            <div className="rounded-3xl border border-primary/20 bg-primary/5 p-4 flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-tight">DeFi TVL</p>
-                <BarChart3 className="h-5 w-5 text-primary" />
-              </div>
-              <p className="text-2xl font-bold tabular-nums leading-none text-foreground">$48B</p>
-              <p className="text-[9px] text-muted-foreground/70 leading-tight">Total value locked</p>
-            </div>
-            <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-4 flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-tight">Whale Activity</p>
-                <TrendingUp className="h-5 w-5 text-emerald-400" />
-              </div>
-              <p className="text-2xl font-bold tabular-nums leading-none text-foreground">+12%</p>
-              <p className="text-[9px] text-muted-foreground/70 leading-tight">Large holder inflows</p>
-            </div>
+            {ON_CHAIN_METRICS.map((m) => {
+              const c = METRIC_COLORS[m.color];
+              const Icon = m.icon;
+              return (
+                <div key={m.label} className={`rounded-3xl border ${c.border} ${c.bg} p-4 flex flex-col gap-2`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground leading-tight">{m.label}</p>
+                    <Icon className={`h-5 w-5 ${c.icon}`} />
+                  </div>
+                  <p className="text-2xl font-bold tabular-nums leading-none text-foreground">{m.value}</p>
+                  <p className="text-[9px] text-muted-foreground/70 leading-tight">{m.sub}</p>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -127,7 +125,7 @@ export default async function MacroResearchPage() {
         <section className="animate-slide-up-fade animation-delay-300 space-y-3">
           <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-primary">Ask Lyra</p>
           <div className="flex flex-wrap gap-2">
-            {lyraPrompts.map((prompt) => (
+            {LYRA_PROMPTS_CRYPTO.map((prompt) => (
               <Link
                 key={prompt}
                 href={`/dashboard/lyra?q=${encodeURIComponent(prompt)}`}
@@ -143,7 +141,7 @@ export default async function MacroResearchPage() {
 
         {/* ── Snapshot freshness notice ──────────────────────────────────────── */}
         <p className="text-[9px] text-muted-foreground/50 mt-2">
-          On-chain data: real-time snapshot · last updated {snapshot.updatedAt} · live data integration coming soon
+          On-chain data: real-time snapshot · live data integration coming soon
         </p>
 
       </div>

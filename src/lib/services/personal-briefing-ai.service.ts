@@ -7,6 +7,7 @@ import type { PersonalBriefingResponse } from "@/lib/services/personal-briefing.
 import { getCache, setCache } from "@/lib/redis";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
+import { safeJsonParse } from "@/lib/utils/json";
 
 const logger = createLogger({ service: "personal-briefing-ai" });
 
@@ -140,9 +141,9 @@ JSON SHAPE:
   });
 
   const cleaned = result.text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  const parsed = JSON.parse(cleaned) as Partial<PersonalBriefingAIMemo>;
+  const parsed = safeJsonParse<Partial<PersonalBriefingAIMemo>>(cleaned);
 
-  if (!parsed.headline || !parsed.summary || !parsed.focus || !parsed.nextAction) {
+  if (!parsed || !parsed.headline || !parsed.summary || !parsed.focus || !parsed.nextAction) {
     throw new Error("Invalid personal briefing AI memo format");
   }
 
@@ -173,7 +174,9 @@ export class PersonalBriefingAiService {
     try {
       const memo = await generateMemo(args);
       if (!memo) return null;
-      await setCache(key, memo, CACHE_TTL_SECONDS).catch(() => {});
+      await setCache(key, memo, CACHE_TTL_SECONDS).catch((err) => {
+        logger.debug({ err: sanitizeError(err), userId }, "Failed to cache personal briefing AI memo (non-critical)");
+      });
       return memo;
     } catch (error) {
       logger.warn({ err: sanitizeError(error), userId }, "Personal briefing AI memo generation failed; using fallback");

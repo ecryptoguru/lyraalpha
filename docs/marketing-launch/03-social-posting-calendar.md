@@ -2,15 +2,15 @@
 
 ## Objective
 
-Build audience, credibility, and product demand through founder-led distribution.
+Build audience, credibility, and product demand through founder-led distribution for crypto-native investors.
 
 The goal is not just reach. The goal is:
 
-- familiarity
-- trust
-- repeated exposure
-- direct site visits
-- signups and activations
+- familiarity (addressing 96% crypto token failures trust deficit)
+- trust (demonstrated utility over hype)
+- repeated exposure (7-9 touchpoint crypto user journey)
+- direct site visits (wallet connections, not just page views)
+- signups and activations (crypto-specific metrics)
 - partner attention
 
 ## Core distribution rule
@@ -30,19 +30,36 @@ A single strong idea should become:
 
 ### X / Twitter
 
-- 2-3 posts per day
-- 3-4 threads per week
-- 15-20 meaningful comments per day on relevant accounts
+- 2-3 posts per day (crypto-native tone, real-time commentary)
+- 3-4 threads per week (market observation, chart screenshots)
+- 15-20 meaningful comments per day on relevant crypto accounts
 - 1 chart or screenshot post every 1-2 days
-- 1 founder insight post every day
+- 1 founder insight post every day (trust over hype)
 
 ### LinkedIn
 
-- 4 brand posts per week
-- 3 founder posts per week
+- 4 brand posts per week (links in comments, not post bodies)
+- 3 founder posts per week (thought leadership, platform-native)
 - 1 carousel or document post per week
-- daily comments on fintech, investing, and SaaS posts
-- 1 product proof or lesson post every week
+- daily comments on crypto, fintech, investing, and SaaS posts
+- 1 product proof or lesson post every week (demonstrated utility)
+
+### Discord / Telegram
+
+- 24/7 moderation coverage (distributed moderator teams)
+- Clear community guidelines published and enforced consistently
+- Scam prevention protocols identifying and removing fraudulent actors immediately
+- FUD management responding to misinformation with facts
+- Holder-exclusive channels rewarding token ownership
+- Governance forums enabling protocol decision participation
+
+### Reddit
+
+- 90/10 value-to-promotion discipline (non-negotiable)
+- Daily comments in crypto communities (r/cryptocurrency, r/defi, r/CryptoCurrency)
+- Value-first posts answering questions, sharing insights
+- No promotional posts without substantial educational content
+- Community vetting and technical discussion participation
 
 ## Content strategy by platform
 
@@ -50,23 +67,44 @@ A single strong idea should become:
 
 Best for:
 
-- fast market commentary
-- contrarian takes
-- chart-based observations
-- build-in-public updates
-- founder voice
-- threads that compress complexity into useful insight
+- fast crypto market commentary (real-time)
+- contrarian takes (trust over hype)
+- chart-based observations (crypto-specific)
+- build-in-public updates (transparency)
+- founder voice (authenticity)
+- threads that compress complexity into useful insight (demonstrated utility)
 
 ### LinkedIn
 
 Best for:
 
-- trust
-- professional authority
-- educational frameworks
-- product positioning
-- customer pain storytelling
-- partner and investor visibility
+- trust (E-E-A-T compliance)
+- professional authority (crypto expertise)
+- educational frameworks (platform-native)
+- product positioning (demonstrated utility)
+- customer pain storytelling (7-9 touchpoint journey)
+- partner and investor visibility (crypto ecosystem)
+
+### Discord / Telegram
+
+Best for:
+
+- community engagement (24/7 coverage)
+- governance participation (protocol decisions)
+- support and technical assistance (crypto-specific)
+- holder-exclusive content (token ownership)
+- developer ecosystem (builder support)
+- regional channels (global time zones)
+
+### Reddit
+
+Best for:
+
+- trust-building (90/10 value-to-promotion)
+- technical discussion (community vetting)
+- in-depth analysis (crypto research)
+- community vetting (on-chain verification)
+- authentic engagement (no promotional spam)
 
 ## SEO-driven social mapping
 
@@ -74,28 +112,28 @@ Use social to amplify the same search themes that power the blog and SEO pages.
 
 ### India-first keyword themes to social-post
 
-- stock market basics and beginner intent
+- crypto market basics and beginner intent
 - multibagger and discovery searches
 - portfolio tracker and portfolio management
-- stock screener India and stock research tools
-- broker / demat comparison terms
-- AI stock analysis with India context
+- crypto screener India and crypto research tools
+- exchange / wallet comparison terms
+- AI crypto analysis with India context
 
 ### US-first keyword themes to social-post
 
-- stock market and news queries
-- best stocks to buy now and discovery searches
-- portfolio tracker and stock screener intent
-- brokerage and trading platform comparisons
-- investing strategy and ETF intent
-- AI investing and stock analysis tools
+- crypto market and news queries
+- best crypto to buy now and discovery searches
+- portfolio tracker and crypto screener intent
+- exchange and trading platform comparisons
+- investing strategy and crypto intent
+- AI investing and crypto analysis tools
 
 ### Shared SEO themes to amplify
 
-- stock analysis
+- crypto analysis
 - portfolio tracker
-- stock screener
-- AI stock analysis
+- crypto screener
+- AI crypto analysis
 - portfolio risk
 - market regime and macro interpretation
 - comparison and alternatives pages
@@ -112,29 +150,29 @@ If a post performs well on X or LinkedIn, turn it into one of the following with
 
 ## X content buckets
 
-- Market observation
-- Regime shift commentary
-- Chart screenshots
-- Product screenshots
-- Build-in-public updates
-- Founder lessons
-- Short educational threads
-- “what changed today” summaries
-- portfolio risk commentary
-- briefing snippets
+- Market observation (crypto-specific)
+- Regime shift commentary (market intelligence)
+- Chart screenshots (on-chain data)
+- Product screenshots (demonstrated utility)
+- Build-in-public updates (transparency)
+- Founder lessons (trust over hype)
+- Short educational threads (crypto education)
+- "what changed today" summaries (market intelligence)
+- Portfolio risk commentary (7-9 touchpoint journey)
+- Briefing snippets (regime awareness)
 
 ## LinkedIn content buckets
 
-- Thought leadership
-- Product lessons
-- Market education
-- Customer pain points
-- Launch progress
-- Mini case studies
-- Carousels with frameworks
-- Founder reflections
-- product strategy posts
-- trust / credibility posts
+- Thought leadership (crypto expertise)
+- Product lessons (demonstrated utility)
+- Market education (trust-led positioning)
+- Customer pain points (7-9 touchpoint journey)
+- Launch progress (transparency)
+- Mini case studies (verifiable outcomes)
+- Carousels with frameworks (educational)
+- Founder reflections (authenticity)
+- Product strategy posts (E-E-A-T compliance)
+- Trust / credibility posts (addressing token failures)
 
 ## Social narrative pillars
 
@@ -270,29 +308,36 @@ Show real progress, real usage, and real learning.
 
 ## CTA rules
 
-- X: CTA only after value is delivered
-- LinkedIn: CTA should be softer and trust-driven
-- Never sound salesy on Reddit-style insights
-- Use one clear action per post
+- X: CTA only after value is delivered (trust over hype)
+- LinkedIn: CTA should be softer and trust-driven (links in comments)
+- Reddit: 90/10 value-to-promotion discipline (never salesy)
+- Discord/Telegram: Community-first, not promotional
+- Use one clear action per post (crypto-specific)
 - Match CTA to intent: briefing, signup, lead magnet, demo, or reply
+- Address 7-9 touchpoint journey context
+- Emphasize demonstrated utility over hype-driven promises
 
 ## Hook formulas
 
 ### X hooks
 
-- “Most people misunderstand ___.”
-- “If you’re tracking ___, you’re probably missing ___.”
-- “Here’s what changed today that actually matters.”
-- “The real problem isn’t ___, it’s ___.”
-- “This is the simplest way to think about ___.”
+- "Most crypto investors misunderstand ___."
+- "If you're tracking ___, you're probably missing ___."
+- "Here's what changed in crypto markets today that actually matters."
+- "The real problem isn't ___, it's ___."
+- "This is the simplest way to think about ___."
+- "96% of crypto tokens fail because ___."
+- "Demonstrated utility beats hype every time."
 
 ### LinkedIn hooks
 
-- “We kept seeing the same problem, so we built ___.”
-- “A better way to think about ___.”
-- “What we learned while building LyraAlpha.”
-- “Why this matters for investors and fintech teams.”
-- “The most useful framework I’ve seen for ___.”
+- "We kept seeing the same problem in crypto, so we built ___."
+- "A better way to think about ___."
+- "What we learned while building LyraAlpha for crypto investors."
+- "Why this matters for crypto investors and fintech teams."
+- "The most useful framework I've seen for ___."
+- "Trust is the scarcest resource in crypto."
+- "E-E-A-T compliance for financial content matters."
 
 ## Repurposing workflow
 
@@ -310,32 +355,41 @@ Each blog post should become:
 
 ### Daily comment targets
 
-- 10-15 thoughtful comments on X
-- 5-10 thoughtful comments on LinkedIn
-- 1-3 useful comments on Reddit or communities
+- 10-15 thoughtful comments on X (crypto accounts)
+- 5-10 thoughtful comments on LinkedIn (crypto/fintech)
+- 1-3 useful comments on Reddit (90/10 value-to-promotion)
+- 5-10 community interactions on Discord/Telegram (support, not promotional)
 
 ### Comment style
 
-- add context
-- answer questions
-- use examples
-- avoid generic praise
-- avoid dropping links unless directly relevant
+- Add context (crypto-specific)
+- Answer questions (demonstrated expertise)
+- Use examples (on-chain data, verifiable)
+- Avoid generic praise (authentic engagement)
+- Avoid dropping links unless directly relevant
+- Reddit: 90/10 value-to-promotion discipline
+- Discord/Telegram: helpful, not promotional
+- X: real-time commentary, crypto-native tone
+- LinkedIn: professional, platform-native
 
 ## Measurement
 
 Weekly social review should track:
 
-- impressions
-- engagement rate
-- follower growth
-- profile visits
-- site clicks
-- assisted signups
-- comments and saves
-- best-performing hooks
-- best-performing CTA types
+- Impressions (vanity metric, secondary)
+- Engagement rate (quality over quantity)
+- Follower growth (crypto community quality)
+- Profile visits (curiosity vs intent)
+- Site clicks (wallet connections preferred)
+- Assisted signups (crypto-specific metrics)
+- Comments and saves (AI citation potential)
+- Best-performing hooks (trust signals)
+- Best-performing CTA types (conversion quality)
+- AI citation rate (GEO performance)
+- Community health (Discord/Telegram moderation)
+- Reddit 90/10 compliance (discipline adherence)
+- On-chain behavior tracking (wallet connections)
 
 ## Optimization rule
 
-Double down on the post format that drives the most qualified site visits or signups, not just the most likes.
+Double down on the post format that drives the most qualified site visits or signups (wallet connections), not just the most likes. Optimize for trust and conversion quality, not reach alone. Measure outcomes tied to growth, retention, and pipeline (crypto-specific metrics).

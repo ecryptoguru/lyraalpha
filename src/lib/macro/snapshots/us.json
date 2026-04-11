@@ -1,46 +1,46 @@
 {
   "region": "US",
-  "updatedAt": "2025-03-24",
+  "updatedAt": "2026-04-10",
   "indicators": [
     {
       "id": "gdp",
       "label": "GDP Growth",
-      "value": "2.8%",
+      "value": "2.4%",
       "direction": "up",
-      "context": "Q4 2024 annualized",
-      "updatedAt": "2025-03-24"
+      "context": "Q1 2026 annualized",
+      "updatedAt": "2026-04-10"
     },
     {
       "id": "cpi",
       "label": "Inflation (CPI)",
-      "value": "3.1%",
+      "value": "2.7%",
       "direction": "down",
-      "context": "Feb 2025 YoY",
-      "updatedAt": "2025-03-24"
+      "context": "Mar 2026 YoY",
+      "updatedAt": "2026-04-10"
     },
     {
       "id": "fed",
       "label": "Fed Rate",
-      "value": "5.25%",
-      "direction": "flat",
-      "context": "Policy hold — Mar 2025",
-      "updatedAt": "2025-03-24"
+      "value": "4.75%",
+      "direction": "down",
+      "context": "Policy cut — Mar 2026",
+      "updatedAt": "2026-04-10"
     },
     {
       "id": "unemployment",
       "label": "Unemployment",
-      "value": "3.9%",
+      "value": "4.1%",
       "direction": "up",
-      "context": "Feb 2025",
-      "updatedAt": "2025-03-24"
+      "context": "Mar 2026",
+      "updatedAt": "2026-04-10"
     },
     {
       "id": "trade",
       "label": "Trade Balance",
-      "value": "-$68B",
+      "value": "-$72B",
       "direction": "down",
-      "context": "Jan 2025 deficit",
-      "updatedAt": "2025-03-24"
+      "context": "Feb 2026 deficit",
+      "updatedAt": "2026-04-10"
     }
   ]
 }

@@ -153,7 +153,7 @@ describe("POST /api/webhooks/clerk", () => {
 
   // ── user.created ─────────────────────────────────────────────────────────────
 
-  it("creates a STARTER user when user.created has non-admin email", async () => {
+  it("creates an ELITE user with 500 bonus credits on user.created", async () => {
     const event = makeUserEvent("user.created");
     mockVerify.mockReturnValue(event);
     const { POST } = await import("./route");
@@ -161,14 +161,14 @@ describe("POST /api/webhooks/clerk", () => {
     expect(res.status).toBe(200);
     expect(mockPrisma.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ plan: "STARTER" }),
+        create: expect.objectContaining({ plan: "ELITE", credits: 500, bonusCreditsBalance: 500 }),
       }),
     );
   });
 
   // ── user.created — admin elevation ────────────────────────────────────────
 
-  it("elevates admin email to ELITE plan on user.created", async () => {
+  it("admin email also gets ELITE plan + 500 bonus credits on user.created", async () => {
     const event = makeUserEvent("user.created", {
       email_addresses: [{ id: "ea_1", email_address: "admin@lyraalpha.com" }],
     });
@@ -178,7 +178,7 @@ describe("POST /api/webhooks/clerk", () => {
     expect(res.status).toBe(200);
     expect(mockPrisma.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ plan: "ELITE" }),
+        create: expect.objectContaining({ plan: "ELITE", credits: 500 }),
       }),
     );
   });

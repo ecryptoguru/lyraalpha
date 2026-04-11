@@ -1,4 +1,3 @@
-
 import { prisma } from "@/lib/prisma";
 import { 
   calculateMultiHorizonRegime,
@@ -6,7 +5,7 @@ import {
 } from "@/lib/engines/multi-horizon-regime";
 import { MarketContextSnapshot } from "@/lib/engines/market-regime";
 import { unstable_cache } from "next/cache";
-
+import { safeJsonParse } from "@/lib/utils/json";
 
 /**
  * Get dashboard multi-horizon data.
@@ -23,12 +22,8 @@ export const getDashboardMultiHorizon = async (region: string = "US") => {
 
   if (!latestRow?.context) return null;
 
-  let current: MarketContextSnapshot;
-  try {
-    current = JSON.parse(latestRow.context) as MarketContextSnapshot;
-  } catch {
-    return null;
-  }
+  const current = safeJsonParse<MarketContextSnapshot>(latestRow.context);
+  if (!current) return null;
 
   // Enrich with multi-horizon if enough history exists
   const multiHorizon = await calculateMultiHorizonRegime(region);

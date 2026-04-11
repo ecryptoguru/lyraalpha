@@ -1,6 +1,10 @@
 import { selectModules, isEducationalQuery } from "./modules";
 import { buildHumanizerGuidance } from "./humanizer";
 
+// W1-FIX: Prompt version constant — bump this when making material prompt changes.
+// Logged in onFinish so output quality can be correlated with prompt versions after the fact.
+export const PROMPT_VERSION = "2026-04-11-v1";
+
 // ─── Asset-Type-Specific Analytical Guidance ───
 // The AI operates on a crypto-native universe focused on on-chain analysis
 const ASSET_TYPE_GUIDANCE: Record<string, string> = {

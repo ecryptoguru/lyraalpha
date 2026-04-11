@@ -5,7 +5,8 @@ import { useAdminAICosts } from "@/hooks/use-admin";
 import { Loader2, ShieldAlert, Brain, Zap, Database, TrendingUp, Mic } from "lucide-react";
 import {
   estimateVoiceSessionCost,
-  REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION,
+  REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE,
+  REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE,
   REALTIME_VOICE_DEFAULT_TEXT_INPUT_TOKENS,
   REALTIME_VOICE_DEFAULT_TEXT_OUTPUT_TOKENS_PER_MINUTE,
   REALTIME_VOICE_PRICING,
@@ -304,7 +305,7 @@ export default function AdminAICostsPage() {
 
             {/* Assumptions note */}
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              Assumptions: ~{REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION} audio tokens/min per direction · 50/50 user/Myra speaking split · {REALTIME_VOICE_DEFAULT_TEXT_INPUT_TOKENS.toLocaleString()} text tokens for system instructions · {REALTIME_VOICE_DEFAULT_TEXT_OUTPUT_TOKENS_PER_MINUTE} text output tokens/min for transcripts.
+              Assumptions: ~{REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE} audio input tokens/min · {REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE} audio output tokens/min · {REALTIME_VOICE_DEFAULT_TEXT_INPUT_TOKENS.toLocaleString()} text tokens for system instructions · {REALTIME_VOICE_DEFAULT_TEXT_OUTPUT_TOKENS_PER_MINUTE} text output tokens/min for transcripts.
             </p>
 
             {/* Per-session estimates */}

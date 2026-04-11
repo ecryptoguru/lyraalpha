@@ -2,10 +2,12 @@ import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
+import { safeJsonParse } from "@/lib/utils/json";
 import { sendBrevoEmail } from "@/lib/email/brevo";
 import { normalizeNotificationPreferences } from "@/lib/notification-preferences";
 import type { DashboardHomeData } from "@/lib/services/dashboard-home.service";
 import type { WeeklyIntelligenceReport } from "@/lib/services/weekly-intelligence-report.service";
+import type { PushSubscription as WebPushSubscription } from "web-push";
 
 const logger = createLogger({ service: "intelligence-notifications" });
 
@@ -269,8 +271,13 @@ export async function deliverIntelligenceNotification(userId: string, event: Int
   if (prefs.pushNotifications && user.preferences?.pushSubscriptionJson) {
     try {
       const webpush = await getWebPush();
+      const subscription = safeJsonParse<WebPushSubscription>(user.preferences.pushSubscriptionJson);
+      if (!subscription) {
+        logger.warn({ userId }, "Invalid push subscription JSON");
+        return { pushSent: false, emailSent, stored: false, suppressed: false };
+      }
       await webpush.sendNotification(
-        JSON.parse(user.preferences.pushSubscriptionJson),
+        subscription,
         JSON.stringify({
           title: event.title,
           body: event.body,

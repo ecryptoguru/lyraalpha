@@ -41,6 +41,19 @@ async function sendWebhookAlert(payload: {
   const webhookUrl = process.env.AI_ALERT_WEBHOOK_URL;
   if (!webhookUrl) return; // no webhook configured — log-only mode
 
+  // R8-FIX: Validate webhook URL — must be HTTPS and a well-formed URL.
+  // Prevents data leakage to arbitrary endpoints from misconfigured or compromised env vars.
+  try {
+    const parsed = new URL(webhookUrl);
+    if (parsed.protocol !== "https:") {
+      logger.warn({ protocol: parsed.protocol }, "AI alert webhook URL must use HTTPS — skipping delivery");
+      return;
+    }
+  } catch {
+    logger.warn({ webhookUrl: webhookUrl.slice(0, 50) }, "AI alert webhook URL is invalid — skipping delivery");
+    return;
+  }
+
   // Cooldown: suppress duplicate alerts within 15 min
   const ck = cooldownKey(payload.alert);
   const cooling = await getCache<boolean>(ck).catch(() => null);

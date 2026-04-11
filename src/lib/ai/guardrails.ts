@@ -5,7 +5,7 @@ export const INJECTION_PATTERNS: RegExp[] = [
   /ignore\s+(?:previous|all|above|prior|your)\s+instructions?/i,
   /disregard\s+(?:previous|all|above|prior|your)\s+instructions?/i,
   /you\s+are\s+now\s+(?:a|an|the)?\s*(?:different|new|another|unrestricted)/i,
-  /act\s+as\s+(?:if\s+you\s+(?:are|were)|a|an)\s+(?:different|unrestricted|jailbroken|evil|dan)/i,
+  /act\s+as\s+(?:if\s+you\s+(?:are|were)\s+(?:a\s+|an\s+|the\s+)?|a\s+|an\s+)(?:different|unrestricted|jailbroken|evil|dan)/i,
   /(?:system|assistant|user):\s*you\s+(?:are|must|should|will)/i,
   /\[INST\]|\[\/INST\]|<\|im_start\|>|<\|im_end\|>/,  // Llama/ChatML instruction tokens
   /do\s+anything\s+now|dan\s+mode|jailbreak/i,

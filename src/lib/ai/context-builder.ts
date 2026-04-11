@@ -373,29 +373,6 @@ export function buildCompressedContext(
     if (opts.tier === "COMPLEX" && (assetType === "STOCK" || assetType === "ETF") && enrich.metadata) {
       const meta = enrich.metadata as Record<string, unknown>;
 
-      // Analyst Consensus
-      const analyst = meta.finnhubAnalyst as { recommendations?: { consensus?: string; strongBuy?: number; buy?: number; hold?: number; sell?: number }; priceTarget?: { mean?: number; high?: number; low?: number } } | undefined;
-      if (analyst?.recommendations) {
-        const r = analyst.recommendations;
-        const aParts = [`Consensus:${r.consensus || "N/A"}`];
-        if (r.strongBuy != null) aParts.push(`StrongBuy:${r.strongBuy}`);
-        if (r.buy != null) aParts.push(`Buy:${r.buy}`);
-        if (r.hold != null) aParts.push(`Hold:${r.hold}`);
-        if (r.sell != null) aParts.push(`Sell:${r.sell}`);
-        lines.push(`[ANALYST_CONSENSUS] ${aParts.join(" | ")}`);
-      }
-      if (analyst?.priceTarget?.mean != null) {
-        const pt = analyst.priceTarget;
-        const ptParts = [`Mean:${cs}${pt.mean!.toFixed(0)}`];
-        if (pt.high != null) ptParts.push(`High:${cs}${pt.high.toFixed(0)}`);
-        if (pt.low != null) ptParts.push(`Low:${cs}${pt.low.toFixed(0)}`);
-        if (pd?.price) {
-          const upside = ((pt.mean! - pd.price) / pd.price * 100);
-          ptParts.push(`Upside:${upside >= 0 ? "+" : ""}${upside.toFixed(1)}%`);
-        }
-        lines.push(`[PRICE_TARGET] ${ptParts.join(" | ")}`);
-      }
-
       // Insider Sentiment
       const insider = meta.insiderSentiment as { signal?: string; avgMSPR?: number; totalShareChange6m?: number } | undefined;
       if (insider?.signal) {
@@ -403,44 +380,6 @@ export function buildCompressedContext(
         if (insider.avgMSPR != null) iParts.push(`MSPR:${insider.avgMSPR.toFixed(3)}`);
         if (insider.totalShareChange6m != null) iParts.push(`NetShares6m:${insider.totalShareChange6m.toLocaleString()}`);
         lines.push(`[INSIDER_SENTIMENT] ${iParts.join(" | ")}`);
-      }
-
-      // News Sentiment (Finnhub)
-      const fhSent = meta.finnhubSentiment as { companyNewsScore?: number; bullishPercent?: number; bearishPercent?: number; buzz?: number } | undefined;
-      if (fhSent?.companyNewsScore != null) {
-        const sParts = [`NewsScore:${fhSent.companyNewsScore.toFixed(2)}`];
-        if (fhSent.bullishPercent != null) sParts.push(`Bull:${fhSent.bullishPercent.toFixed(0)}%`);
-        if (fhSent.bearishPercent != null) sParts.push(`Bear:${fhSent.bearishPercent.toFixed(0)}%`);
-        if (fhSent.buzz != null) sParts.push(`Buzz:${fhSent.buzz.toFixed(2)}`);
-        lines.push(`[NEWS_SENTIMENT] ${sParts.join(" | ")}`);
-      }
-
-      // Finnhub Financials
-      const fhFin = meta.finnhubFinancials as Record<string, number | null | undefined> | undefined;
-      const valHasRoe = enrich.roe != null;
-      const finHasDE = enrich.financials?.debtToEquity != null;
-      if (fhFin) {
-        const fParts: string[] = [];
-        if (!valHasRoe && fhFin.roe != null) fParts.push(`ROE:${fhFin.roe.toFixed(1)}%`);
-        if (fhFin.roa != null) fParts.push(`ROA:${fhFin.roa.toFixed(1)}%`);
-        if (fhFin.grossMargin != null) fParts.push(`GrossM:${fhFin.grossMargin.toFixed(1)}%`);
-        if (fhFin.epsGrowth != null) fParts.push(`EPSGrowth:${fhFin.epsGrowth.toFixed(1)}%`);
-        if (fhFin.revenueGrowth != null) fParts.push(`RevGrowth:${fhFin.revenueGrowth.toFixed(1)}%`);
-        if (fhFin.beta != null) fParts.push(`Beta:${fhFin.beta.toFixed(2)}`);
-        if (!finHasDE && fhFin.debtToEquity != null) fParts.push(`D/E:${fhFin.debtToEquity.toFixed(1)}`);
-        if (fParts.length > 0) lines.push(`[FINNHUB_FINANCIALS] ${fParts.join(" | ")}`);
-      }
-
-      // Peers
-      const peers = meta.finnhubPeers as string[] | undefined;
-      if (peers?.length) {
-        const mentionedSet = new Set((opts.mentionedSymbols || []).map(s => s.toUpperCase()));
-        const filteredPeers = peers
-          .filter(p => !mentionedSet.has(p.toUpperCase()))
-          .slice(0, 5);
-        if (filteredPeers.length > 0) {
-          lines.push(`[PEERS] ${filteredPeers.join(", ")}`);
-        }
       }
     }
 

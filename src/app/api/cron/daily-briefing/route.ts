@@ -14,7 +14,7 @@ export const preferredRegion = "bom1";
 
 /**
  * POST /api/cron/daily-briefing
- * Generates daily AI briefings for US and IN markets (runs once daily).
+ * Generates daily AI briefings for crypto market (runs once daily).
  */
 export async function POST(request: Request) {
   return withCronAuthAndLogging(
@@ -30,10 +30,7 @@ export async function POST(request: Request) {
           logger.warn({ err: sanitizeError(err) }, "Narrative warm failed (non-blocking)")
         );
 
-        await Promise.all([
-          MacroResearchService.refreshDaily("US"),
-          MacroResearchService.refreshDaily("IN"),
-        ]);
+        await MacroResearchService.refreshDaily("US");
 
         return NextResponse.json({
           success: true,
@@ -56,16 +53,12 @@ export async function GET(request: Request) {
     request,
     { logger, job: "daily-briefing-status" },
     async () => {
-      const [us, india] = await Promise.all([
-        DailyBriefingService.getBriefingStatus("US"),
-        DailyBriefingService.getBriefingStatus("IN"),
-      ]);
+      const us = await DailyBriefingService.getBriefingStatus("US");
 
       return NextResponse.json({
         success: true,
         status: {
           us,
-          in: india,
         },
         timestamp: new Date().toISOString(),
       });

@@ -2,119 +2,124 @@
 
 ## Goal
 
-Build trust, distribution, and third-party credibility for LyraAlpha.
+Build trust, distribution, and third-party credibility for LyraAlpha (addressing 96% crypto token failures trust deficit).
 
 This document is meant to turn outreach into a repeatable growth channel, not a one-off manual task. Every outreach motion should create one of these outcomes:
 
 - a mention
-- a backlink
+- a backlink (quality over quantity)
 - a collaboration
 - a warm introduction
 - a live appearance
-- a credible third-party validation asset
+- a credible third-party validation asset (E-E-A-T compliance)
 
-The strongest outreach assets should be based on the same keyword clusters that drive the SEO roadmap, especially the regional themes in `50-SEO-IN.md` and `50-SEO-US.md`.
+The strongest outreach assets should be based on the same keyword clusters that drive the SEO roadmap, especially the regional themes in `50-SEO-IN.md` and `50-SEO-US.md` (crypto-specific).
 
 ## Outreach philosophy
 
-LyraAlpha is a fintech SaaS product. That means trust matters as much as distribution.
+LyraAlpha is a crypto-native financial intelligence product. That means trust matters as much as distribution (demonstrated utility over hype).
 
 The best outreach is:
 
-- specific
-- data-backed
-- audience-aware
-- low-friction
+- specific (crypto-specific context)
+- data-backed (original crypto data)
+- audience-aware (crypto-native investors)
+- low-friction (7-9 touchpoint journey)
 - easy to forward internally
 - useful even if the recipient does not promote it immediately
+- E-E-A-T compliant (experience, expertise, authoritativeness, trustworthiness)
 
 ## Outreach categories
 
-### 1) Fintech newsletters
+### 1) Crypto newsletters and fintech newsletters
 
 #### Target types
 
-- investing newsletters
-- fintech newsletters
-- startup newsletters
-- India market newsletters
-- US retail investing newsletters
-- AI-in-finance newsletters
-- operator newsletters with finance audiences
+- Crypto investing newsletters
+- Crypto market analysis newsletters
+- Fintech newsletters
+- Startup newsletters
+- India crypto market newsletters
+- US retail crypto investing newsletters
+- AI-in-crypto newsletters
+- Operator newsletters with crypto audiences
+- Exchange newsletters (where relevant)
 
 #### Why this matters
 
-Newsletters are one of the fastest ways to borrow trust and get highly qualified readers.
+Newsletters are one of the fastest ways to borrow trust and get highly qualified crypto-native readers.
 
 A good newsletter placement can produce:
 
-- traffic
-- backlinks
-- signups
-- social mentions
-- subsequent AI citations
-- brand recall
+- Traffic (wallet connections)
+- Backlinks (quality over quantity)
+- Signups (crypto-specific)
+- Social mentions
+- Subsequent AI citations (GEO performance)
+- Brand recall (trust signal)
 
 #### Best pitch angles
 
-- original data
-- market intelligence insights
-- portfolio risk trends
-- AI and investing education
-- keyword-backed reports that map to high-intent search demand
-- SEO landing pages or tool pages that can be co-promoted
-- daily market briefing excerpts
-- original research or benchmark charts
+- Original crypto data
+- Crypto market intelligence insights
+- Portfolio risk trends (7-9 touchpoint journey)
+- AI and crypto investing education
+- Keyword-backed reports that map to high-intent search demand (crypto-specific)
+- SEO landing pages or tool pages that can be co-promoted (GEO-optimized)
+- Daily crypto market briefing excerpts
+- Original research or benchmark charts (on-chain analysis)
 
 #### Content formats they like
 
-- short expert commentary
-- a visual chart or framework
-- a clear takeaway they can forward to their audience
-- a practical resource their readers can use right away
-- a keyword-based market report that can also support a blog or tool page
+- Short expert commentary (crypto expertise)
+- A visual chart or framework (on-chain data)
+- A clear takeaway they can forward to their audience (demonstrated utility)
+- A practical resource their readers can use right away (crypto intelligence)
+- A keyword-based market report that can also support a blog or tool page (GEO-optimized)
 
 #### Example hooks
 
-- “We published an original market-risk insight your readers can reuse.”
-- “We built a briefing framework that helps investors understand regime shifts faster.”
-- “We have a data-backed chart your audience can quote.”
+- “We published an original crypto market-risk insight your readers can reuse.”
+- “We built a briefing framework that helps crypto investors understand regime shifts faster.”
+- “We have a data-backed chart with on-chain analysis your audience can quote.”
+- “Trust is the scarcest resource in crypto - we're addressing the 96% token failure rate.”
 
 ---
 
-### 2) Finance creators and analysts
+### 2) Crypto creators and analysts
 
 #### Target types
 
-- X analysts
-- LinkedIn finance creators
-- YouTube market educators
-- newsletter operators
-- investing educators
-- market commentary accounts
-- portfolio and trading educators
+- X crypto analysts
+- LinkedIn crypto finance creators
+- YouTube crypto market educators
+- Crypto newsletter operators
+- Crypto investing educators
+- Crypto market commentary accounts
+- Crypto portfolio and trading educators
+- On-chain analysis creators
 
 #### Why this matters
 
-Creators can turn one good insight into repeated exposure across a relevant audience.
+Crypto creators can turn one good insight into repeated exposure across a relevant audience.
 
 They can also help with:
 
-- trust transfer
-- social proof
-- follower growth
-- audience education
-- top-of-funnel awareness
+- Trust transfer (addressing 96% token failures)
+- Social proof (demonstrated utility)
+- Follower growth (crypto community quality)
+- Audience education (crypto-specific)
+- Top-of-funnel awareness
 
 #### Best pitch angles
 
-- co-created content
-- guest insights
-- data-backed commentary
-- exclusive early access for audience
-- a keyword-targeted research asset that can later become an SEO page
-- a walkthrough of a useful market framework
-- a creator-friendly chart, thread, or visual summary
+- Co-created content (platform-native)
+- Guest insights (crypto expertise)
+- Data-backed commentary (on-chain analysis)
+- Exclusive early access for audience (trust signals)
+- A keyword-targeted research asset that can later become an SEO page (GEO-optimized)
+- A walkthrough of a useful crypto market framework
+- A creator-friendly chart, thread, or visual summary (AI citation potential)
 
 #### Collaboration formats
 
@@ -126,86 +131,92 @@ They can also help with:
 
 ---
 
-### 3) Communities
+### 3) Crypto communities
 
 #### Target types
 
-- investing communities
-- fintech communities
-- startup communities
-- Reddit communities
-- product communities
-- India market groups
-- finance forums
-- professional Slack / Discord / WhatsApp groups
+- Crypto investing communities
+- Crypto fintech communities
+- Startup communities
+- Reddit crypto communities (r/cryptocurrency, r/defi, r/CryptoCurrency)
+- Discord crypto communities (24/7 moderation, scam prevention)
+- Telegram crypto groups (FUD management)
+- India crypto market groups
+- Crypto finance forums
+- Professional Slack / Discord / WhatsApp groups (crypto-specific)
 
 #### Why this matters
 
-Communities can create trust faster than broad channels if you participate correctly.
+Crypto communities can create trust faster than broad channels if you participate correctly (90/10 value-to-promotion discipline).
 
 They are especially useful for:
 
-- early feedback
-- product validation
-- discovery of objections
-- sharing useful resources
-- learning the audience’s language
+- Early feedback (crypto-specific)
+- Product validation (demonstrated utility)
+- Discovery of objections (trust concerns)
+- Sharing useful resources (crypto intelligence)
+- Learning the audience's language (crypto-native)
+- Community vetting (on-chain verification)
 
 #### Best pitch angles
 
-- educational resource
-- market insight thread
-- free tool or report
-- AMA or live briefing
-- checklist, guide, or framework
-- “here’s what we learned” post
-- a tool page, answer page, or comparison page that the community can reference
+- Educational resource (crypto intelligence)
+- Market insight thread (crypto-specific)
+- Free tool or report (demonstrated utility)
+- AMA or live briefing (addressing trust concerns)
+- Checklist, guide, or framework (E-E-A-T compliant)
+- "Here's what we learned" post (transparency)
+- A tool page, answer page, or comparison page that the community can reference (GEO-optimized)
 
 #### Community rules
 
-- lead with usefulness
-- never over-promote
-- disclose affiliation when appropriate
-- answer questions clearly and directly
-- use your first few interactions to give, not ask
+- Lead with usefulness (90/10 value-to-promotion discipline)
+- Never over-promote (demonstrated utility over hype)
+- Disclose affiliation when appropriate (transparency)
+- Answer questions clearly and directly (crypto expertise)
+- Use your first few interactions to give, not ask (trust-building)
+- Reddit: 90/10 value-to-promotion discipline (non-negotiable)
+- Discord/Telegram: 24/7 moderation, scam prevention, FUD management
 
 ---
 
-### 4) Ecosystem partners
+### 4) Crypto ecosystem partners
 
 #### Target types
 
-- brokers
-- fintech tools
-- data providers
-- analytics platforms
-- finance apps
-- startup accelerators
-- investor communities
-- creator networks
-- AI or research workflow tools
+- Crypto exchanges
+- Crypto fintech tools
+- Crypto data providers
+- Crypto analytics platforms
+- Crypto finance apps
+- Crypto startup accelerators
+- Crypto investor communities
+- Crypto creator networks
+- AI or crypto research workflow tools
+- Wallet providers (where relevant)
+- DeFi protocols (where relevant)
 
 #### Why this matters
 
-Partnerships create credibility and access to audience overlap.
+Crypto partnerships create credibility and access to audience overlap (addressing 96% token failures trust deficit).
 
 They can also produce:
 
-- integration stories
-- co-marketing campaigns
-- referral traffic
-- webinars
-- partner validation assets
+- Integration stories (demonstrated utility)
+- Co-marketing campaigns (crypto-native)
+- Referral traffic (wallet connections)
+- Webinars (addressing trust concerns)
+- Partner validation assets (E-E-A-T compliance)
 
 #### Best pitch angles
 
-- co-marketing
-- integration storytelling
-- joint webinars
-- user education
-- SEO-page cross-linking or co-branded landing pages
-- shared research
-- partner-specific content asset
+- Co-marketing (crypto-native)
+- Integration storytelling (demonstrated utility)
+- Joint webinars (addressing trust concerns)
+- User education (crypto intelligence)
+- SEO-page cross-linking or co-branded landing pages (GEO-optimized)
+- Shared research (original crypto data)
+- Partner-specific content asset (E-E-A-T compliant)
 
 #### Good partnership outcomes
 
@@ -218,40 +229,42 @@ They can also produce:
 
 ---
 
-### 5) PR / media
+### 5) Crypto PR / media
 
 #### Target types
 
-- fintech journalists
-- startup press
-- AI in finance writers
-- market research editors
-- India/US business media
-- product-led growth publications
-- no-code / SaaS publications where relevant
+- Crypto fintech journalists
+- Crypto startup press
+- AI in crypto writers
+- Crypto market research editors
+- India/US crypto business media
+- Product-led growth publications
+- No-code / SaaS publications where relevant
+- CoinDesk, The Block, Cointelegraph (where relevant)
+- Regional crypto media outlets
 
 #### Why this matters
 
-PR provides credibility and can support both SEO and GEO.
+Crypto PR provides credibility and can support both SEO and GEO (addressing 96% token failures trust deficit).
 
 It helps with:
 
-- backlinks
-- authority
-- brand legitimacy
-- AI visibility
-- investor confidence
-- partner trust
+- Backlinks (quality over quantity)
+- Authority (E-E-A-T compliance)
+- Brand legitimacy (demonstrated utility)
+- AI visibility (GEO performance)
+- Investor confidence (trust signals)
+- Partner trust (crypto ecosystem)
 
 #### Best pitch angles
 
-- founder story
-- market report
-- product launch
-- original benchmark data
-- keyword-led research on investor intent, market behavior, or tool comparisons
-- new product capability
-- category trend commentary
+- Founder story (transparency, authenticity)
+- Crypto market report (original data)
+- Product launch (demonstrated utility over hype)
+- Original benchmark data (on-chain analysis)
+- Keyword-led research on crypto investor intent, market behavior, or tool comparisons (crypto-specific)
+- New product capability (AI in crypto)
+- Category trend commentary (trust-led positioning)
 
 ---
 
@@ -261,42 +274,42 @@ It helps with:
 
 People who already have some interaction with the brand:
 
-- commented on content
-- replied to social posts
-- attended a live session
-- opened an email
-- visited the site repeatedly
-- already know the category
+- Commented on content (crypto communities)
+- Replied to social posts (platform-native)
+- Attended a live session (webinars, AMAs)
+- Opened an email (trust-building)
+- Visited the site repeatedly (wallet connection interest)
+- Already know the crypto intelligence category
 
 ### Cold prospects
 
 People who are relevant but have no prior interaction:
 
-- newsletters that fit the audience
-- creators with the right followers
-- community owners
-- editors and journalists
-- adjacent ecosystem partners
+- Crypto newsletters that fit the audience
+- Crypto creators with the right followers
+- Crypto community owners (Discord/Telegram/Reddit)
+- Crypto editors and journalists
+- Adjacent crypto ecosystem partners
 
 ### Partner-ready prospects
 
 People or organizations with high trust value and high audience fit:
 
-- creators with a consistent audience
-- newsletters with strong open rates
-- communities with active engagement
-- fintech ecosystem brands
-- analysts or operators with credibility
+- Crypto creators with a consistent audience
+- Crypto newsletters with strong open rates
+- Crypto communities with active engagement (24/7 moderation)
+- Crypto ecosystem brands (demonstrated utility)
+- Crypto analysts or operators with credibility (E-E-A-T compliant)
 
 ### Prioritization rule
 
 Prioritize prospects by this order:
 
-1. audience fit
-2. trust transfer potential
-3. ease of collaboration
-4. speed to publish or feature
-5. long-term relationship value
+1. Crypto audience fit
+2. Trust transfer potential (addressing 96% token failures)
+3. Ease of collaboration (platform-native)
+4. Speed to publish or feature
+5. Long-term relationship value (demonstrated utility)
 
 ---
 
@@ -327,11 +340,11 @@ For each prospect, capture:
 
 Every outreach message should include:
 
-- why this is relevant now
-- what their audience gets
-- what is unique or data-backed
-- a low-friction next step
-- one easy way to say yes
+- Why this is relevant now (crypto-specific context)
+- What their audience gets (crypto intelligence)
+- What is unique or data-backed (original crypto data, on-chain analysis)
+- A low-friction next step (7-9 touchpoint journey)
+- One easy way to say yes (trust signals)
 
 ### Step 4: Follow up intelligently
 
@@ -349,50 +362,52 @@ Use follow-up to:
 
 ## Suggested outreach angles
 
-- “We built a market intelligence tool that simplifies regime shifts for investors.”
-- “We’re publishing original insights on portfolio fragility and watchlist drift.”
-- “We’d love to share a practical framework your audience can use immediately.”
-- “We have an original research angle on how investors interpret market signals.”
-- “We created a briefing that helps investors see the market faster.”
-- “We can provide a clean chart or framework your audience can quote.”
+- “We built a crypto market intelligence tool that simplifies regime shifts for investors.”
+- “We're publishing original insights on portfolio fragility and watchlist drift (7-9 touchpoint journey).”
+- “We'd love to share a practical framework your crypto audience can use immediately.”
+- “We have an original research angle on how crypto investors interpret market signals.”
+- “We created a briefing that helps crypto investors see the market faster.”
+- “We can provide a clean chart or framework with on-chain analysis your audience can quote.”
+- “Trust is the scarcest resource in crypto - we're addressing the 96% token failure rate.”
+- “Demonstrated utility beats hype every time in crypto marketing.”
 
 ## Outreach message template
 
 ### Short outreach template
 
-> Hi [Name] — I’m reaching out because your audience may find this useful.
+> Hi [Name] — I'm reaching out because your crypto audience may find this useful.
 >
-> We built LyraAlpha, a financial intelligence product focused on market regime clarity, portfolio risk, and daily briefing workflows.
+> We built LyraAlpha, a crypto-native financial intelligence product focused on market regime clarity, portfolio risk, and daily briefing workflows.
 >
-> We recently published [specific data / insight / report]. I think it could be a fit for your audience because it explains [specific reason].
+> We recently published [specific crypto data / insight / report with on-chain analysis]. I think it could be a fit for your audience because it explains [specific reason].
 >
-> If useful, I can send a short summary, chart, or guest-ready version.
+> If useful, I can send a short summary, chart, or guest-ready version (GEO-optimized for AI visibility).
 >
 > Best,
 > [Name]
 
 ### Creator collaboration template
 
-> Hi [Name] — I like how you explain [topic] in a practical way.
+> Hi [Name] — I like how you explain [crypto topic] in a practical way.
 >
-> We’re building LyraAlpha and we think your audience would benefit from a short, data-backed angle on [topic].
+> We're building LyraAlpha and we think your crypto audience would benefit from a short, data-backed angle on [topic] (with on-chain analysis).
 >
 > I can send:
 >
-> - a chart
-> - a thread outline
-> - a short guest commentary
-> - a live briefing idea
+> - A chart (crypto-specific)
+> - A thread outline (platform-native)
+> - A short guest commentary (crypto expertise)
+> - A live briefing idea (addressing trust concerns)
 >
-> If it helps, I can make this very lightweight for you.
+> If it helps, I can make this very lightweight for you (demonstrated utility over hype).
 
 ### Newsletter pitch template
 
-> Hi [Name] — I’m sharing a short, original insight that may be relevant for your readers.
+> Hi [Name] — I'm sharing a short, original crypto insight that may be relevant for your readers.
 >
-> We published [title], which explains [what it covers] and includes [data/chart/framework].
+> We published [title], which explains [what it covers] and includes [crypto data/chart/framework with on-chain analysis].
 >
-> If you’re open, I’d love to offer a short summary or a contributor note you can include in an upcoming issue.
+> If you're open, I'd love to offer a short summary or a contributor note you can include in an upcoming issue (GEO-optimized for AI visibility).
 
 ---
 
@@ -400,34 +415,34 @@ Use follow-up to:
 
 Before outreach starts, prepare:
 
-- founder bio
-- product one-liner
-- short company description
-- 3 customer use cases
+- Founder bio (crypto experience, E-E-A-T signals)
+- Product one-liner (crypto-specific)
+- Short company description (demonstrated utility over hype)
+- 3 crypto customer use cases (verifiable outcomes)
 - 1 boilerplate paragraph
-- screenshots
-- original data chart
-- launch announcement
-- FAQ page
-- keyword map summary for India and US search intent
-- list of the top SEO pages that can be used in outreach
-- one-pager PDF
-- partner-safe short description
-- media-ready headshots if needed
-- a clean page for external linking
+- Screenshots (crypto-specific use cases)
+- Original data chart (on-chain analysis)
+- Launch announcement (trust-led positioning)
+- FAQ page (crypto-specific)
+- Keyword map summary for India and US search intent (crypto-specific)
+- List of the top SEO pages that can be used in outreach (GEO-optimized)
+- One-pager PDF (E-E-A-T compliant)
+- Partner-safe short description (crypto-native)
+- Media-ready headshots if needed
+- A clean page for external linking (with schema markup)
 
 ## Partnership ideas
 
-- co-host a webinar with a finance creator
-- guest post on a fintech newsletter
-- share a downloadable market briefing report
-- cross-promote in a community newsletter
-- create a joint benchmark or research note
-- create a co-branded SEO landing page around a high-intent keyword cluster
-- offer a partner-specific version of a tool or answer page
-- run a joint live session on market interpretation
-- exchange product mentions in a relevant ecosystem
-- create a partner-exclusive briefing or report excerpt
+- Co-host a webinar with a crypto finance creator
+- Guest post on a crypto fintech newsletter
+- Share a downloadable crypto market briefing report
+- Cross-promote in a crypto community newsletter
+- Create a joint benchmark or research note (original crypto data)
+- Create a co-branded SEO landing page around a high-intent keyword cluster (GEO-optimized)
+- Offer a partner-specific version of a tool or answer page (crypto-specific)
+- Run a joint live session on crypto market interpretation
+- Exchange product mentions in a relevant crypto ecosystem
+- Create a partner-exclusive briefing or report excerpt (demonstrated utility)
 
 ## Outreach operating rhythm
 
@@ -498,19 +513,23 @@ This keeps outreach aligned to the page roadmap instead of drifting away from th
 
 By day 90, aim for:
 
-- 5-10 newsletter mentions
-- 5-10 partner cross-posts
-- 2-3 live collaborations
-- 10+ quality backlinks
-- 1-2 media features or quotes
-- 3-5 recurring creator or partner relationships
-- at least 1 repeat collaboration that can be reused
+- 5-10 crypto newsletter mentions
+- 5-10 crypto partner cross-posts
+- 2-3 live collaborations (webinars, AMAs)
+- 10+ quality backlinks (crypto-native)
+- 1-2 crypto media features or quotes
+- 3-5 recurring crypto creator or partner relationships
+- At least 1 repeat collaboration that can be reused
+- AI citation rate improvement (GEO performance)
+- On-chain wallet attribution where applicable
 
 ## Quality rules
 
-- choose fewer, better partners
-- never ask for a promotion without making the asset easy to use
-- make collaboration ideas specific
-- avoid generic SaaS-style outreach language
-- always tell the recipient why their audience should care
-- prioritize long-term trust over one-time placement
+- Choose fewer, better crypto partners (quality over quantity)
+- Never ask for a promotion without making the asset easy to use (demonstrated utility)
+- Make collaboration ideas specific (crypto-specific)
+- Avoid generic SaaS-style outreach language (crypto-native)
+- Always tell the recipient why their audience should care (crypto intelligence)
+- Prioritize long-term trust over one-time placement (addressing 96% token failures)
+- Ensure E-E-A-T compliance in all outreach (experience, expertise, authoritativeness, trustworthiness)
+- Optimize all shared assets for GEO (AI answerability, direct answers, semantic depth)

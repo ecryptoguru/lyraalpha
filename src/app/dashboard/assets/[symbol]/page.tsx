@@ -12,27 +12,13 @@ import { InstitutionalOwnership } from "@/components/analytics/institutional-own
 import { PerformanceMatrix } from "@/components/analytics/performance-matrix";
 import { EventImpactBadge } from "@/components/ui/EventImpactBadge";
 import { RegimeBadge } from "@/components/ui/RegimeBadge";
-// RiskMetricsCard content merged into Performance Metrics section for MFs
 import { NSEIntelligence } from "@/components/analytics/nse-intelligence";
 import { CompanyProfile } from "@/components/analytics/company-profile";
 import { FinancialHighlights } from "@/components/analytics/financial-highlights";
-import { ETFHoldings } from "@/components/analytics/etf-holdings";
-import { ETFLookthroughSnapshot } from "@/components/analytics/etf-lookthrough-snapshot";
-import { ETFRiskCard } from "@/components/analytics/etf-risk-card";
-import { ETFBehavioralProfile } from "@/components/analytics/etf-behavioral-profile";
-import { MFLookthroughSnapshot } from "@/components/analytics/mf-lookthrough-snapshot";
-import { MFRiskCard } from "@/components/analytics/mf-risk-card";
-import { MFBehavioralProfileCard } from "@/components/analytics/mf-behavioral-profile";
-import { CommodityRegimeProfile } from "@/components/analytics/commodity-regime-profile";
-import { CommoditySeasonalCard } from "@/components/analytics/commodity-seasonal-card";
-import { CommodityCorrelationCard } from "@/components/analytics/commodity-correlation-card";
-import { CommodityStructuralContext } from "@/components/analytics/commodity-structural-context";
-import { MCXPriceCard } from "@/components/analytics/mcx-price-card";
 import { ScenarioAnalysisCard } from "@/components/stocks/scenario-analysis-card";
 import { SameSectorMovers } from "@/components/dashboard/same-sector-movers";
 import dynamic from "next/dynamic";
 import { AssetAnalyticsResponse, ScoreDynamics, EventImpact } from "@/types/analytics";
-import { MFAnalyticsResult } from "@/lib/engines/mutual-fund-analytics";
 import { cn, computeRangePositionPercent, formatCompactNumber, formatPrice, getCurrencyConfig, resolveAnalyticsSyncError } from "@/lib/utils";
 import { getFriendlySymbol } from "@/lib/format-utils";
 import { BackButton } from "@/components/ui/back-button";
@@ -171,37 +157,6 @@ const AnalystTargetGauge = dynamic(
     ),
   },
 );
-
-function CommodityIntelSection({ ci }: { ci: Record<string, unknown> }) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-      {ci.regimeProfile ? (
-        <CommodityRegimeProfile
-          regimeProfile={ci.regimeProfile as unknown as import("@/lib/engines/commodity-intelligence").RegimeProfile}
-        />
-      ) : null}
-      {ci.seasonality ? (
-        <CommoditySeasonalCard
-          seasonality={ci.seasonality as unknown as import("@/lib/engines/commodity-intelligence").SeasonalPattern}
-        />
-      ) : null}
-      {ci.correlations ? (
-        <CommodityCorrelationCard
-          correlations={ci.correlations as unknown as import("@/lib/engines/commodity-intelligence").CorrelationProfile}
-        />
-      ) : null}
-      {ci.structuralContext ? (
-        <CommodityStructuralContext
-          context={ci.structuralContext as unknown as {
-            cluster: string; supplyContext: string; demandDrivers: string;
-            geopoliticalSensitivity: string; storageCost: string;
-            inflationHedge: boolean; safeHavenCandidate: boolean; seasonalNotes: string;
-          }}
-        />
-      ) : null}
-    </div>
-  );
-}
 
 export default function AssetPage({
   params,
@@ -383,8 +338,6 @@ export default function AssetPage({
     keyRisks,
     summaryCards,
     assetShare,
-    hasMeaningfulEtfLookthrough,
-    hasMeaningfulMfLookthrough,
     hasMeaningfulSignalStrength,
     hasMeaningfulPerformanceSection,
     latestPrice,
@@ -1279,23 +1232,6 @@ export default function AssetPage({
                     <TechnicalMetric label="1Y Return" value={performance?.returns?.["1Y"] != null ? `${performance.returns["1Y"] > 0 ? "+" : ""}${performance.returns["1Y"].toFixed(2)}%` : "—"} tooltip="Total return over the last 1 year." />
                   </div>
                 )}
-
-                {analyticsComputed.commodityIntelligence != null && (
-                  <CommodityIntelSection ci={analyticsComputed.commodityIntelligence} />
-                )}
-
-                {/* MCX India Intelligence card (shown for all commodities that have MCX metadata) */}
-                {analyticsComputed.metadata && (
-                  <MCXPriceCard
-                    metadata={analyticsComputed.metadata as Record<string, unknown>}
-                    assetName={analyticsComputed.name}
-                    spotPriceUsd={analyticsComputed.price}
-                    symbol={analyticsComputed.symbol ?? symbol}
-                    fiftyTwoWeekHigh={analyticsComputed.technicalMetrics?.fiftyTwoWeekHigh ?? null}
-                    fiftyTwoWeekLow={analyticsComputed.technicalMetrics?.fiftyTwoWeekLow ?? null}
-                    className="mt-4"
-                  />
-                )}
               </>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -1373,77 +1309,6 @@ export default function AssetPage({
             cgMeta={cgMeta}
             currencyRegion={currencyRegion}
           />
-          {/* ETF Lookthrough Intelligence — ETF Only */}
-          {analyticsComputed.type === "ETF" && hasMeaningfulEtfLookthrough && (
-            <div className="space-y-4 pt-4">
-              <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-sky-500" />
-                Lookthrough Intelligence
-              </h3>
-              {(() => {
-                const lt = analyticsComputed.etfLookthrough as Record<string, unknown>;
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <ETFLookthroughSnapshot
-                      lookthrough={lt as unknown as import("@/lib/engines/etf-lookthrough").ETFLookthroughResult}
-                    />
-                    {lt.risk ? (
-                      <div className="space-y-5">
-                        <ETFRiskCard
-                          risk={lt.risk as unknown as import("@/lib/engines/etf-risk").ETFRiskResult}
-                        />
-                        <ETFBehavioralProfile
-                          profile={lt.behavioral as import("@/lib/engines/etf-lookthrough").BehavioralProfile}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-
-          {/* MF Lookthrough Intelligence — Mutual Fund Only */}
-          {analyticsComputed.type === "MUTUAL_FUND" && hasMeaningfulMfLookthrough && (
-            <div className="space-y-4 pt-4">
-              <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-sky-500" />
-                Fund Lookthrough Intelligence
-              </h3>
-              {(() => {
-                const lt = analyticsComputed.mfLookthrough as Record<string, unknown>;
-                return (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <MFLookthroughSnapshot
-                      lookthrough={lt as unknown as import("@/lib/engines/mf-lookthrough").MFLookthroughResult}
-                    />
-                    {lt.risk ? (
-                      <div className="space-y-5">
-                        <MFRiskCard
-                          risk={lt.risk as unknown as import("@/lib/engines/mf-risk").MFRiskResult}
-                        />
-                        <MFBehavioralProfileCard
-                          profile={lt.behavioral as import("@/lib/engines/mf-lookthrough").MFBehavioralProfile}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-
-          {/* ETF Holdings & Fund Performance — ETF Only */}
-          {analyticsComputed.type === "ETF" && (
-            analyticsComputed.topHoldings || analyticsComputed.fundPerformanceHistory
-          ) && (
-            <ETFHoldings
-              topHoldings={analyticsComputed.topHoldings as Record<string, unknown> | undefined}
-              fundPerformance={analyticsComputed.fundPerformanceHistory as Record<string, unknown> | undefined}
-              currencySymbol={currencySymbol}
-              region={currencyRegion}
-            />
-          )}
 
           {/* Institutional Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
@@ -1538,65 +1403,9 @@ export default function AssetPage({
                 currencySymbol={currencySymbol}
                 region={currencyRegion}
               />
-
-              {/* MF Risk & CAGR — merged into Performance Metrics */}
-              {analyticsComputed.type === "MUTUAL_FUND" && analyticsComputed.factorData?.mfAnalytics && (() => {
-                const mfa = analyticsComputed.factorData.mfAnalytics as MFAnalyticsResult;
-                const getReturnColor = (val: number | null) =>
-                  val === null ? "text-muted-foreground" : val > 0 ? "text-green-500" : val < 0 ? "text-red-500" : "text-muted-foreground";
-                return (
-                  <div className="bg-card/60 backdrop-blur-2xl border shadow-xl p-6 rounded-3xl border-border/30 dark:border-white/5 space-y-6">
-                    {/* CAGR Returns */}
-                    <div>
-                      <h4 className="text-[10px] uppercase font-bold text-muted-foreground/60 mb-3 tracking-widest flex items-center gap-2">
-                        <TrendingUp className="h-3 w-3 text-primary" />
-                        Annualized Returns (CAGR)
-                      </h4>
-                      <div className="grid grid-cols-3 gap-3">
-                        {([["1Y", "1 Year"], ["3Y", "3 Years"], ["5Y", "5 Years"]] as const).map(([key, label]) => (
-                          <div key={key} className="flex flex-col gap-1 p-3 rounded-2xl bg-card/40 border border-border/30 dark:border-white/5">
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">{label}</span>
-                            <span className={`text-lg font-bold font-mono ${getReturnColor(mfa.returns[key])}`}>
-                              {mfa.returns[key] !== null ? `${mfa.returns[key]}%` : "N/A"}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="h-px bg-border/40 w-full" />
-
-                    {/* Technical Risk Analysis */}
-                    <div>
-                      <h4 className="text-[10px] uppercase font-bold text-muted-foreground/60 mb-3 tracking-widest flex items-center gap-2">
-                        <Activity className="h-3 w-3 text-orange-500" />
-                        Risk Analysis
-                      </h4>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="flex flex-col gap-1 p-3 rounded-2xl bg-card/40 border border-border/30 dark:border-white/5">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Standard Deviation</span>
-                          <span className="text-lg font-bold font-mono text-orange-500">{mfa.risk.volatility}%</span>
-                        </div>
-                        <div className="flex flex-col gap-1 p-3 rounded-2xl bg-card/40 border border-border/30 dark:border-white/5">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Beta</span>
-                          <span className="text-lg font-bold font-mono text-amber-500">{mfa.risk.beta}</span>
-                        </div>
-                        <div className="flex flex-col gap-1 p-3 rounded-2xl bg-card/40 border border-border/30 dark:border-white/5">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Sharpe Ratio</span>
-                          <span className="text-lg font-bold font-mono text-amber-500">{mfa.risk.sharpe}</span>
-                        </div>
-                        <div className="flex flex-col gap-1 p-3 rounded-2xl bg-card/40 border border-border/30 dark:border-white/5">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">R-Squared</span>
-                          <span className="text-lg font-bold font-mono text-amber-500">{mfa.risk.rSquared}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
             </div>
           )}
-          
+
           {/* Score Dynamics Grid (Relocated) */}
           {analytics?.scoreDynamics && (
             <div className="space-y-4 pt-4">

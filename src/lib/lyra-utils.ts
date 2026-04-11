@@ -1,4 +1,5 @@
 import { createLogger } from "@/lib/logger";
+import { safeJsonParse } from "@/lib/utils/json";
 
 const logger = createLogger({ service: "lyra-parser" });
 
@@ -83,26 +84,29 @@ function extractInlineRelatedQuestions(text: string): { cleanedText: string; rel
 function extractSignalChip(text: string): { chip?: SignalChip; cleanedText: string } {
   const match = /<!--SIGNALS:(\{[^}]+\})-->/.exec(text);
   if (!match) return { cleanedText: text };
-  try {
-    const raw = JSON.parse(match[1]) as Record<string, unknown>;
-    const verdict = raw.verdict;
-    const confidence = raw.confidence;
-    const flags = raw.flags;
-    if (
-      (verdict === "BULLISH" || verdict === "BEARISH" || verdict === "NEUTRAL") &&
-      (confidence === "HIGH" || confidence === "MEDIUM" || confidence === "LOW") &&
-      Array.isArray(flags)
-    ) {
-      const chip: SignalChip = {
-        verdict,
-        confidence,
-        flags: (flags as unknown[]).filter((f): f is string => typeof f === "string").slice(0, 3),
-      };
-      return { chip, cleanedText: text.replace(match[0], "").trimStart() };
-    }
-  } catch {
+
+  const raw = safeJsonParse<Record<string, unknown>>(match[1]);
+  if (!raw) {
     logger.warn("Signal chip parse failed — malformed JSON in SIGNALS comment");
+    return { cleanedText: text.replace(match[0], "").trimStart() };
   }
+
+  const verdict = raw.verdict;
+  const confidence = raw.confidence;
+  const flags = raw.flags;
+  if (
+    (verdict === "BULLISH" || verdict === "BEARISH" || verdict === "NEUTRAL") &&
+    (confidence === "HIGH" || confidence === "MEDIUM" || confidence === "LOW") &&
+    Array.isArray(flags)
+  ) {
+    const chip: SignalChip = {
+      verdict,
+      confidence,
+      flags: (flags as unknown[]).filter((f): f is string => typeof f === "string").slice(0, 3),
+    };
+    return { chip, cleanedText: text.replace(match[0], "").trimStart() };
+  }
+
   return { cleanedText: text.replace(match[0], "").trimStart() };
 }
 
@@ -123,14 +127,9 @@ export function parseLyraMessage(content: string): ParsedLyraResponse {
   if (text.includes(":::LYRA_TOOL_RESULTS:::")) {
     const parts = text.split(":::LYRA_TOOL_RESULTS:::");
     text = parts[0].trim();
-    try {
-      // Tool results are expected before sources if both are present
-      const rawResults = parts[1].split(":::LYRA_SOURCES:::")[0].trim();
-      if (rawResults) {
-        toolResults = JSON.parse(rawResults);
-      }
-    } catch (e) {
-      logger.warn({ err: e }, "Tool results parse failed");
+    const rawResults = parts[1].split(":::LYRA_SOURCES:::")[0].trim();
+    if (rawResults) {
+      toolResults = safeJsonParse<ToolResult[]>(rawResults) ?? [];
     }
   }
 
@@ -141,13 +140,9 @@ export function parseLyraMessage(content: string): ParsedLyraResponse {
     if (text === content) {
       text = parts[0].trim();
     }
-    try {
-      const potentialJson = parts[parts.length - 1].trim();
-      if (potentialJson) {
-        sources = JSON.parse(potentialJson);
-      }
-    } catch (e) {
-      logger.warn({ err: e }, "Sources parse failed");
+    const potentialJson = parts[parts.length - 1].trim();
+    if (potentialJson) {
+      sources = safeJsonParse<Source[]>(potentialJson) ?? [];
     }
   }
 

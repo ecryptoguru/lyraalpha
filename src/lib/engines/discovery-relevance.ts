@@ -87,18 +87,9 @@ const DEFAULT_WEIGHTS: WeightConfig = {
   structuralSignal: 0.10,
 };
 
-function getWeightsForType(type: AssetType): WeightConfig {
-  // ETFs have structural signal from lookthrough; others redistribute to other components
-  if (type === "ETF") return DEFAULT_WEIGHTS;
-
-  // No structural signal for non-ETF types — redistribute 0.10 proportionally
-  return {
-    scoreInflection: 0.333,
-    peerDivergence: 0.278,
-    regimeRelevance: 0.222,
-    sentimentShift: 0.167,
-    structuralSignal: 0.0,
-  };
+function getWeightsForType(): WeightConfig {
+  // Platform is crypto-only; use default weights for all assets
+  return DEFAULT_WEIGHTS;
 }
 
 // ─── Suppression Lists ──────────────────────────────────────────────────────
@@ -227,34 +218,12 @@ function computeSentimentShift(
 }
 
 /**
- * Structural Signal: type-gated.
- * ETF: concentration anomaly + lookthrough match rate.
- * Others: 0 (weight redistributed).
+ * Structural Signal: platform is crypto-only.
+ * ETF lookthrough not applicable for crypto assets.
  */
-function computeStructuralSignal(
-  type: AssetType,
-  etfLookthrough: DRSInput["etfLookthrough"],
-): number {
-  if (type !== "ETF" || !etfLookthrough) return 0;
-
-  let score = 0;
-
-  // High concentration = structural concern worth surfacing
-  if (etfLookthrough.concentration) {
-    const { hhi, level } = etfLookthrough.concentration;
-    if (level === "high") score += 60;
-    else if (level === "moderate") score += 30;
-    else score += hhi * 100; // low HHI still has some signal
-  }
-
-  // Low match rate = lookthrough quality concern
-  if (etfLookthrough.lookthroughScores) {
-    const { matchRate } = etfLookthrough.lookthroughScores;
-    if (matchRate < 50) score += 30;
-    else if (matchRate < 70) score += 15;
-  }
-
-  return clamp(score, 0, 100);
+function computeStructuralSignal(): number {
+  // Platform is crypto-only; ETF lookthrough not applicable
+  return 0;
 }
 
 // ─── Archetype Detection ────────────────────────────────────────────────────
@@ -298,7 +267,7 @@ function checkSuppression(
   drs: number,
 ): { suppressed: boolean; reason?: string } {
   const region = (input.region ?? "US").toUpperCase();
-  const noiseThreshold = region === "IN" ? 18 : 25;
+  const noiseThreshold = region === "IN" ? 18 : 15;
   const staleHours = 72; // 3 days for both US and IN (now that NSE sync works)
 
   // DRS below threshold → noise
@@ -330,14 +299,14 @@ function checkSuppression(
 // ─── Main DRS Computation ───────────────────────────────────────────────────
 
 export function computeDRS(input: DRSInput): Omit<DRSResult, "headline" | "context"> {
-  const weights = getWeightsForType(input.type);
+  const weights = getWeightsForType();
 
   // Compute each component
   const { score: inflectionScore, inflections } = computeScoreInflection(input.scoreDynamics);
   const peerScore = computePeerDivergence(input.latestScores, input.peerMedians);
   const regimeScore = computeRegimeRelevance(input.regimeAlignment);
   const sentimentScore = computeSentimentShift(input.scoreDynamics);
-  const structuralScore = computeStructuralSignal(input.type, input.etfLookthrough);
+  const structuralScore = computeStructuralSignal();
 
   // Weighted sum
   const drs = clamp(

@@ -15,6 +15,8 @@ export const getDashboardViewer = cache(async (): Promise<DashboardViewer> => {
   const { userId } = await auth();
 
   if (!userId) {
+    // When auth bypass is active, userId should be a real ELITE user from auth.ts
+    // If it's still null here, return STARTER as fallback
     return {
       userId: null,
       plan: "STARTER",

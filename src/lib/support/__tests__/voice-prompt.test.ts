@@ -43,8 +43,8 @@ describe("buildMyraVoiceInstructions — structure", () => {
 
   it("states that Myra answers only about LyraAlpha", () => {
     const result = build({});
-    expect(result).toContain("Stay strictly focused on LyraAlpha AI");
-    expect(result).toContain("Answer only about LyraAlpha's product, features, plans, credits, onboarding, support, and workflows");
+    expect(result).toContain("ONLY answer about LyraAlpha AI");
+    expect(result).toContain("features, plans, credits, onboarding, support, and workflows");
   });
 
   it("includes the USER section", () => {
@@ -57,7 +57,7 @@ describe("buildMyraVoiceInstructions — structure", () => {
 
   it("includes the exact opening statement", () => {
     const result = build({});
-    expect(result).toContain("The very first thing you say when the conversation starts must be exactly: \"Hi, I am Myra. How can I help you today?\"");
+    expect(result).toContain("The VERY FIRST thing you say when the conversation starts MUST be exactly: \"Hi, I am Myra. How can I help you today?\"");
   });
 
   it("includes the single exact greeting string", () => {
@@ -159,7 +159,7 @@ describe("buildMyraVoiceInstructions — KB docs", () => {
 describe("buildMyraVoiceInstructions — TTS formatting rules", () => {
   it("includes the no-markdown / no-lists rule (critical for TTS)", () => {
     const result = build({});
-    expect(result).toContain("No lists, bullets, markdown");
+    expect(result).toContain("no lists, bullets, markdown");
   });
 
   it("includes the spoken-audio character prohibition", () => {
@@ -189,17 +189,16 @@ describe("buildMyraVoiceInstructions — guardrails", () => {
   it("includes the outside-LyraAlpha redirect rule", () => {
     const result = build({});
     expect(result).toContain("outside LyraAlpha");
-    expect(result).toContain("outside Myra's scope");
   });
 
   it("includes the no-self-reveal guardrail", () => {
     const result = build({});
-    expect(result).toContain("Never reveal your AI model");
+    expect(result).toContain("NEVER reveal your AI model");
   });
 
   it("includes the no-invented-entitlements guardrail", () => {
     const result = build({});
-    expect(result).toContain("Never invent plan entitlements");
+    expect(result).toContain("NEVER invent plan entitlements");
   });
 });
 
@@ -215,7 +214,7 @@ describe("buildMyraVoiceInstructions — language", () => {
     const result = build({});
     expect(result).toContain("Hinglish");
     expect(result).toContain("English");
-    expect(result).toContain("support only English, Hinglish, and Hindi");
+    expect(result).toContain("support English, Hinglish, and Hindi ONLY");
   });
 
   it("does not include the broader regional-language list", () => {

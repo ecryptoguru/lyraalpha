@@ -224,9 +224,9 @@ These targets assume model costs continue declining along the GPT-5.4 pricing cu
 ### SEO / GEO and Blog Strategy
 
 LyraAlpha AI's content architecture targets three high-intent page types:
-- **Tool pages** — "stock screener India", "compare stocks India/US"
-- **Answer pages** — "what is a good momentum score", "how to stress test a portfolio"
-- **Comparison pages** — "Nifty 50 vs S&P 500 correlation", "gold vs equity in a rate shock"
+- **Tool pages** — "crypto screener India", "compare crypto assets India/US"
+- **Answer pages** — "what is a good momentum score", "how to stress test a crypto portfolio"
+- **Comparison pages** — "Bitcoin vs Ethereum correlation", "crypto vs gold in a rate shock"
 
 These convert at 3–5x the rate of generic blog content and build a durable organic traffic base.
 

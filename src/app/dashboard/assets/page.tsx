@@ -9,18 +9,9 @@ import { MarketAssetCard } from "@/components/dashboard/market/MarketAssetCard";
 import { AssetSearchInput } from "@/components/dashboard/asset-search-input";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Check,
   Loader2,
   Search,
-  Filter,
   Activity,
-  ChevronDown,
   Lock,
   Sparkles,
   ArrowRight,
@@ -52,12 +43,6 @@ import {
 } from "@/components/error-boundary";
 import { TopMoversSection, TopMoverItem } from "@/components/dashboard/market/TopMoversSection";
 import { PageHeader, StatChip } from "@/components/dashboard/page-header";
-
-declare global {
-  interface Window {
-    __AssetFilterState?: string;
-  }
-}
 
 interface AssetState {
   symbol: string;
@@ -141,24 +126,7 @@ export default function AssetsPage() {
     () => false,
   );
   // Deferred search query removed as we now use AssetSearchInput which has its own dropdown
-  
-  // Use a module-level variable to persist state across client-side navigation
-  // This resets on page reload (browser refresh) but stays during SPA navigation
-  const [selectedType, setSelectedType] = useState<string>("ALL");
-  const [filterRegion, setFilterRegion] = useState<string>(region);
 
-  // Reset filter when region changes (state-based, no effect or ref needed)
-  if (filterRegion !== region) {
-    setFilterRegion(region);
-    if (selectedType !== "ALL") setSelectedType("ALL");
-  }
-
-  // Sync state to global variable whenever it changes
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.__AssetFilterState = selectedType;
-    }
-  }, [selectedType]);
   const [isRegimeSortActive, setIsRegimeSortActive] = useState(false);
   const [successfulActionsCount] = useState(() => {
     if (typeof window === "undefined") return 0;
@@ -408,41 +376,6 @@ export default function AssetsPage() {
         {/* Filter & Command Bar */}
         <motion.div className="flex flex-col gap-2 sm:gap-3 z-10">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "h-9 sm:h-10 px-3 sm:px-4 border-white/5 rounded-2xl gap-2 font-bold uppercase text-[9px] sm:text-[10px] tracking-widest flex-1 md:flex-none transition-all cursor-pointer hover:bg-muted/50",
-                    selectedType !== "ALL"
-                      ? "bg-primary/5 border-primary/20 text-primary opacity-100"
-                      : "opacity-60 hover:opacity-100",
-                  )}
-                >
-                  <Filter className="h-4 w-4" />
-                  Type: {selectedType === "ALL" ? "All" : selectedType}
-                  <ChevronDown className="h-3 w-3 opacity-40" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="start"
-                className="w-48 rounded-3xl border border-white/10 bg-card/70 p-1 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl"
-              >
-                {["ALL", "CRYPTO"].map((type) => (
-                  <DropdownMenuItem
-                    key={type}
-                    onClick={() => setSelectedType(type)}
-                    className="flex items-center justify-between rounded-2xl px-3 py-2 text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-primary/10 hover:text-primary transition-colors"
-                  >
-                    {type}
-                    {selectedType === type && (
-                      <Check className="h-3.5 w-3.5 text-primary" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             <div className="flex items-center gap-2 flex-1 md:flex-none">
               <Button
                 variant="outline"
@@ -544,13 +477,11 @@ export default function AssetsPage() {
                   >
                     <h3 className="text-2xl md:text-3xl font-bold tracking-tight leading-tight">
                       <span className="premium-gradient-text">
-                        {selectedType === "CRYPTO" ? "Crypto Intelligence" : `${selectedType} Coverage`}
+                        Crypto Intelligence
                       </span>
                     </h3>
                     <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
-                      {selectedType === "CRYPTO"
-                        ? "On-chain data, DeFi metrics, and network signals across 50+ tokens."
-                        : `Full ${selectedType.toLowerCase()} coverage with scoring, signals, and factor analysis.`}
+                      On-chain data, DeFi metrics, and network signals across 50+ tokens.
                     </p>
                   </motion.div>
                 </div>
@@ -599,7 +530,7 @@ export default function AssetsPage() {
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
-                      onClick={() => setSelectedType("ALL")}
+                      onClick={() => router.back()}
                       className="px-4 py-2.5 rounded-2xl text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-all cursor-pointer"
                     >
                       Go back

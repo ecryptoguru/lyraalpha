@@ -65,11 +65,25 @@ export const REALTIME_VOICE_PRICING: VoicePricing = {
   textOutputPerMillion: 2.40,
 };
 
-// Audio token assumption for the Realtime API voice channel.
-// 100 audio tokens/min per direction is a conservative baseline for a
-// typical support call. gpt-realtime-mini bills audio natively at $10/M
-// input and $20/M output — there is no separate transcription model.
-export const REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION = 100;
+// Audio token rates for the Realtime API voice channel.
+// Per OpenAI's official docs (developers.openai.com/api/docs/guides/realtime-costs):
+//   - User audio input:    1 token per 100ms → 600 tokens/min continuous
+//   - Assistant audio out: 1 token per 50ms  → 1,200 tokens/min continuous
+//
+// With semantic VAD and a 50/50 speaking split, each party speaks ~30s per
+// minute of session time. Effective rates per minute of SESSION:
+//   - Audio input:  300 tokens/min of session (600 × 0.5)
+//   - Audio output:  600 tokens/min of session (1,200 × 0.5)
+// gpt-realtime-mini bills audio natively at $10/M input and $20/M output.
+export const REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE = 300;
+export const REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE = 600;
+
+// Continuous (100% duty) rates — useful for worst-case estimates.
+export const REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE_CONTINUOUS = 600;
+export const REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE_CONTINUOUS = 1_200;
+
+// Legacy alias kept for backward compat with admin dashboard import.
+export const REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION = REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE;
 
 // Measured prompt size for the optimised Myra voice prompt.
 // Static prefix (870) + typical 3-doc KB block (~50) + user ctx (~17) = ~937.
@@ -82,10 +96,10 @@ export const REALTIME_VOICE_DEFAULT_TEXT_INPUT_TOKENS = 937;
 // This portion is cache-eligible — billed at $0.06/M instead of $0.60/M.
 export const REALTIME_VOICE_STATIC_PREFIX_TOKENS = 870;
 
-// Hard cap set in the session config (max_output_tokens = 300).
+// Hard cap set in the session config (max_output_tokens = 350).
 // Caps each spoken reply at ~5-7 sentences — complete answers without cuts.
 // Audio output is $20/M — the most expensive token type.
-export const REALTIME_VOICE_MAX_RESPONSE_OUTPUT_TOKENS = 300;
+export const REALTIME_VOICE_MAX_RESPONSE_OUTPUT_TOKENS = 350;
 
 // Text output tokens per minute: transcribed Myra replies billed as text.
 // At the 150-token reply cap, 10 turns/3-min session ≈ 500 tokens/session
@@ -224,8 +238,8 @@ export function estimateVoiceSessionCost(
   cachedTextInputTokens = 0,
 ): VoiceCostBreakdown {
   const minutes = Math.max(0, durationSeconds) / 60;
-  const audioInputTokens = Math.round(minutes * REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION);
-  const audioOutputTokens = Math.round(minutes * REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION);
+  const audioInputTokens = Math.round(minutes * REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE);
+  const audioOutputTokens = Math.round(minutes * REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE);
   const textOutputTokens = Math.round(minutes * REALTIME_VOICE_DEFAULT_TEXT_OUTPUT_TOKENS_PER_MINUTE);
   return calculateVoiceCost({
     audioInputTokens,

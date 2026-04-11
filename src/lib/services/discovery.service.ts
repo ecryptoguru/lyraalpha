@@ -3,6 +3,8 @@ import {
   Sector,
   InclusionType,
   EvidenceSourceType,
+  AssetType,
+  ScoreType,
   Prisma,
 } from "@/generated/prisma/client";
 import { CryptoMappingDTO } from "../types/discovery.dto";
@@ -11,39 +13,55 @@ import { MarketContextSnapshot } from "@/lib/engines/market-regime";
 import { getLatestSectorRegime } from "@/lib/engines/sector-regime";
 import { DISCOVERY, SECTOR_REGIME } from "@/lib/engines/constants";
 import { createLogger } from "@/lib/logger";
+import { safeJsonParse } from "@/lib/utils/json";
 
 const logger = createLogger({ service: "discovery-service" });
 
 export type Tier = "Strong" | "Moderate" | "Emerging" | "Peripheral";
 
-export type AssetMappingWithRelations = Prisma.StockSectorGetPayload<{
-  include: {
-    asset: {
-      select: {
-        symbol: true;
-        name: true;
-        type: true;
-        currency: true;
-        marketCap: true;
-        peRatio: true;
-        oneYearChange: true;
-        technicalRating: true;
-        analystRating: true;
-        metadata: true;
-        scores: {
-          take: 6;
-          orderBy: { date: "desc" };
-          select: { type: true; value: true };
-        };
-      };
-    };
-    EvidenceReference: {
-      select: { sourceType: true; title: true; url: true; excerpt: true };
-    };
+export type AssetMappingWithRelations = {
+  id: string;
+  sectorId: string;
+  assetId: string;
+  isActive: boolean;
+  inclusionType: InclusionType;
+  inclusionReason: string | null;
+  eligibilityScore: number;
+  relevanceScore: number;
+  freshnessScore: number;
+  strengthScore: number;
+  densityScore: number;
+  behaviorScore: number;
+  confidence: number;
+  lastValidatedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  asset: {
+    symbol: string;
+    name: string;
+    type: AssetType;
+    currency: string | null;
+    marketCap: string | null;
+    peRatio: number | null;
+    oneYearChange: number | null;
+    technicalRating: string | null;
+    analystRating: string | null;
+    metadata: Prisma.JsonValue;
+    scores: {
+      type: ScoreType;
+      value: number;
+    }[];
   };
-}>;
+  EvidenceReference: {
+    sourceType: EvidenceSourceType;
+    title: string;
+    url: string | null;
+    excerpt: string | null;
+  }[];
+  sector?: Sector;
+};
 
-export interface ClusteredStocks {
+export interface ClusteredAssets {
   sector: Sector;
   marketContext?: MarketContextSnapshot;
   sectorRegime?: {
@@ -54,8 +72,10 @@ export interface ClusteredStocks {
     rotationMomentum: number;
     leadershipScore: number;
   };
-  tiers: {
-    [key in Tier]: AssetMappingWithRelations[];
+  tiers: Record<Tier, AssetMappingWithRelations[]>;
+  metadata: {
+    totalAssets: number;
+    avgDrift: number;
   };
 }
 
@@ -123,12 +143,12 @@ export class DiscoveryService {
   };
 
   /**
-   * Fetches stocks for a specific sector and clusters them into tiers.
+   * Fetches assets for a specific sector and clusters them into tiers.
    */
-  static async getClusteredStocks(
+  static async getClusteredAssets(
     sectorSlug: string,
     region?: string,
-  ): Promise<ClusteredStocks | null> {
+  ): Promise<ClusteredAssets | null> {
     const cacheKey = `discovery:sector:${sectorSlug}:${region ?? "all"}`;
     return withCache(
       cacheKey,
@@ -147,17 +167,13 @@ export class DiscoveryService {
 
         let marketContext: MarketContextSnapshot | undefined;
         if (latestRegime?.context) {
-          try {
-            marketContext = JSON.parse(latestRegime.context);
-            if (marketContext && !marketContext.lastUpdated) {
-              marketContext.lastUpdated = latestRegime.date.toISOString();
-            }
-          } catch (e) {
-            logger.warn({ err: e }, "Failed to parse market regime context");
+          marketContext = safeJsonParse<MarketContextSnapshot>(latestRegime.context) ?? undefined;
+          if (marketContext && !marketContext.lastUpdated) {
+            marketContext.lastUpdated = latestRegime.date.toISOString();
           }
         }
 
-        let sectorRegime: ClusteredStocks["sectorRegime"];
+        let sectorRegime: ClusteredAssets["sectorRegime"];
         try {
           const regimeData = await getLatestSectorRegime(sector.id);
           if (regimeData) {
@@ -207,7 +223,7 @@ export class DiscoveryService {
           orderBy: { eligibilityScore: "desc" },
         });
 
-        const clustered: ClusteredStocks = {
+        const clustered: ClusteredAssets = {
           sector,
           marketContext,
           sectorRegime,
@@ -216,6 +232,10 @@ export class DiscoveryService {
             Moderate: [],
             Emerging: [],
             Peripheral: [],
+          },
+          metadata: {
+            totalAssets: stockMappings.length,
+            avgDrift: 0,
           },
         };
 

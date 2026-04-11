@@ -3,6 +3,7 @@ import { getGpt54Model } from "@/lib/ai/service";
 import { buildHumanizerGuidance } from "@/lib/ai/prompts/humanizer";
 import { generateText } from "ai";
 import { createLogger } from "@/lib/logger";
+import { safeJsonParse } from "@/lib/utils/json";
 
 const logger = createLogger({ service: "trending-question-service" });
 
@@ -93,9 +94,9 @@ Return ONLY a JSON array of 6 objects with this structure:
         .replace(/```\n?/g, "")
         .replace(/\.NS\b/g, "")
         .trim();
-      const newQuestions = JSON.parse(cleanedResponse);
+      const newQuestions = safeJsonParse<{ question: string; category: string }[]>(cleanedResponse);
 
-      if (!Array.isArray(newQuestions) || newQuestions.length === 0) {
+      if (!newQuestions || !Array.isArray(newQuestions) || newQuestions.length === 0) {
         throw new Error("Invalid question format from AI");
       }
 

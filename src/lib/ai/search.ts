@@ -4,6 +4,7 @@ import { getCache, setCache } from "@/lib/redis";
 import { createHash } from "crypto";
 import { tavily } from "@tavily/core";
 import { alertIfWebSearchOutage } from "./alerting";
+import { INJECTION_PATTERNS } from "./guardrails";
 
 // ── Circuit Breaker ───────────────────────────────────────────────────────────
 // Tracks consecutive failures so one structured event fires per outage window.
@@ -62,16 +63,8 @@ function getTavilyClient(): ReturnType<typeof tavily> | null {
 }
 
 // ── Prompt-injection sanitizer ────────────────────────────────────────────────
-const INJECTION_PATTERNS: RegExp[] = [
-  /ignore\s+(?:previous|all|above|prior|your)\s+instructions?/i,
-  /disregard\s+(?:previous|all|above|prior|your)\s+instructions?/i,
-  /you\s+are\s+now\s+(?:a|an|the)?\s*(?:different|new|another|unrestricted)/i,
-  /act\s+as\s+(?:if\s+you\s+(?:are|were)\s+(?:a\s+|an\s+|the\s+)?|a\s+|an\s+)(?:different|unrestricted|jailbroken|evil|dan)/i,
-  /(?:system|assistant|user):\s*you\s+(?:are|must|should|will)/i,
-  /\[INST\]|\[\/INST\]|<\|im_start\|>|<\|im_end\|>/i,
-  /do\s+anything\s+now|dan\s+mode|jailbreak/i,
-  /pretend\s+(?:you\s+(?:are|have\s+no)|there\s+are\s+no)\s+(?:restrictions?|rules?|guidelines?)/i,
-];
+// B2-FIX: INJECTION_PATTERNS imported from guardrails.ts — single source of truth.
+// Previously duplicated here, which risked pattern drift if guardrails were updated.
 
 function sanitizeSnippet(text: string): string {
   const lines = text

@@ -2,14 +2,14 @@
 
 ## Content goal
 
-Create a blog system that drives SEO, GEO, trust, and conversion.
+Create a blog system that drives SEO, GEO, trust, and conversion for crypto-native investors.
 
 The blog should do four jobs at the same time:
 
-- attract qualified organic traffic
-- become citeable for AI search and generative answers
-- teach users how to think about the product category
-- move readers toward signup, briefing access, or trial activation
+- attract qualified organic traffic (crypto-specific search intent)
+- become citeable for AI search and generative answers (GEO optimization)
+- teach users how to think about crypto market intelligence and portfolio risk
+- move readers toward signup, briefing access, or trial activation (7-9 touchpoint journey)
 
 ## Publishing rhythm
 
@@ -23,24 +23,28 @@ The blog should do four jobs at the same time:
 
 Every post should include:
 
-- one clear question or promise in the title
-- a direct answer in the first 2-3 paragraphs
-- a clean H1/H2 structure
+- one clear question or promise in the title (question-based for GEO)
+- a direct answer in the first 2-3 paragraphs (AI answerability)
+- a clean H1/H2 structure with semantic depth
 - at least one table, checklist, framework, or visual concept
 - one concrete takeaway readers can act on
-- one CTA tied to the post intent
+- one CTA tied to the post intent (trust signals, not vanity)
 - internal links to relevant pillar pages and product pages
+- E-E-A-T signals: author expertise, citations, transparency
+- Schema markup (FAQ, article, how-to) for AI visibility
+- Crypto-specific context and examples
 
 ## Topic clusters
 
-- Market regime and macro interpretation
-- Portfolio risk and drawdown
-- Watchlists and alerts
-- AI for investing and research
-- Fintech product education
-- Comparison and alternatives pages
-- Daily briefing and signal interpretation
-- GEO / AI-search visibility for fintech brands
+- Market regime and macro interpretation (crypto-specific)
+- Portfolio risk and drawdown (7-9 touchpoint journey context)
+- Watchlists and alerts (on-chain behavior tracking)
+- AI for crypto investing and research (LLM optimization)
+- Crypto product education (trust-led positioning)
+- Comparison and alternatives pages (crypto-native)
+- Daily briefing and signal interpretation (market intelligence)
+- GEO / AI-search visibility for crypto brands (generative engine optimization)
+- E-E-A-T compliance for financial content (experience, expertise, authoritativeness, trustworthiness)
 
 ## Keyword mapping workflow
 
@@ -62,30 +66,30 @@ Every article, tool page, or comparison page should be mapped to one of these ou
 
 ### India-first keyword themes
 
-- stock market basics and beginner searches
+- crypto market basics and beginner searches
 - multibagger and discovery queries
 - portfolio tracker and portfolio management
-- stock screener India and stock research tools
-- broker and demat comparison terms
+- crypto screener India and crypto research tools
+- exchange and wallet comparison terms
 - market crash and market timing questions
-- AI stock analysis with India context
+- AI crypto analysis with India context
 
 ### US-first keyword themes
 
-- stock market and news queries
-- best stocks to buy now and discovery searches
-- portfolio tracker and stock screener intent
-- brokerage and trading platform comparisons
-- investing strategy and ETF intent
-- AI investing and stock analysis tools
+- crypto market and news queries
+- best crypto to buy now and discovery searches
+- portfolio tracker and crypto screener intent
+- exchange and trading platform comparisons
+- investing strategy and crypto intent
+- AI investing and crypto analysis tools
 - question-based market research pages
 
 ### Shared themes
 
-- stock analysis
+- crypto analysis
 - portfolio tracker
-- stock screener
-- AI stock analysis
+- crypto screener
+- AI crypto analysis
 - portfolio risk
 - market regime and macro interpretation
 - comparison and alternatives pages
@@ -176,8 +180,8 @@ Examples:
 
 ### Week 4
 
-13. Best AI Tools for Stock Research: A Fintech Buyer’s Guide
-14. How to Build an Investing Workflow Around Daily Market Briefings
+13. Best AI Tools for Crypto Research: A Fintech Buyer's Guide
+14. How to Build an Investing Workflow Around Daily Crypto Market Briefings
 15. Why Same-Sector Movers Matter More Than Random Price Action
 16. LyraAlpha for Active Investors: Use Cases That Save Time
 
@@ -334,14 +338,18 @@ Ask for one specific action:
 
 ## SEO/GEO content rules
 
-- Use clear H1 and H2 structure
-- Put the answer in the first 2-3 paragraphs
-- Add definition boxes and FAQs
-- Include statistics, tables, and examples
-- Use consistent entity language: market intelligence, regime analysis, portfolio risk, daily briefing
+- Use clear H1 and H2 structure with question-based headings for GEO
+- Put the answer in the first 2-3 paragraphs (AI answerability)
+- Add definition boxes and FAQs with schema markup
+- Include statistics, tables, and examples (crypto-specific data)
+- Use consistent entity language: crypto market intelligence, regime analysis, portfolio risk, daily briefing
 - Add internal links between pillar pages and product pages
-- Write sections so they can be quoted by AI systems without losing meaning
-- Avoid vague filler like “in today’s fast-paced world”
+- Write sections so they can be quoted by AI systems without losing meaning (semantic depth)
+- Avoid vague filler like "in today's fast-paced world"
+- Optimize for direct answers and clear structure (GEO principles)
+- Include related terms and concepts for semantic optimization
+- Build topical authority through comprehensive coverage
+- Demonstrate expertise and credibility for E-E-A-T compliance
 
 ## Conversion focus by content type
 

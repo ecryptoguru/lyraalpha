@@ -85,14 +85,26 @@ function safeParseNotes(raw: string): MemoryNote[] {
     const cleaned = raw.trim().replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     const parsed = JSON.parse(cleaned);
     if (!Array.isArray(parsed)) return [];
-    return parsed
-      .filter((n): n is MemoryNote =>
-        n && typeof n.text === "string" && Array.isArray(n.keywords),
-      )
-      .map((n) => ({
-        text: n.text.slice(0, MAX_NOTE_LENGTH),
-        keywords: n.keywords.filter((k: unknown) => typeof k === "string").slice(0, 8),
-      }));
+    const valid: MemoryNote[] = [];
+    let droppedCount = 0;
+    for (const n of parsed) {
+      if (n && typeof n.text === "string" && Array.isArray(n.keywords)) {
+        valid.push({
+          text: n.text.slice(0, MAX_NOTE_LENGTH),
+          keywords: n.keywords.filter((k: unknown) => typeof k === "string").slice(0, 8),
+        });
+      } else {
+        droppedCount++;
+      }
+    }
+    // R2-FIX: Log when items are dropped due to invalid shape — detects nano output degradation
+    if (droppedCount > 0) {
+      logger.warn(
+        { droppedCount, totalItems: parsed.length, validItems: valid.length, rawPreview: raw.slice(0, 200) },
+        "Memory: partially-parsed notes — some items dropped due to invalid shape",
+      );
+    }
+    return valid;
   } catch {
     return [];
   }
@@ -135,8 +147,8 @@ async function callNano(prompt: string): Promise<string> {
  * Extract durable notes from session messages and merge them into global memory.
  * Single nano call (combined distill + consolidate) — previously two sequential calls.
  * Fires async, non-blocking — call with .catch(() => {}).
- * Gated: real Clerk IDs only, ≥4 user messages.
- * R5: Caller is responsible for debouncing (multiples-of-4 gate in service.ts).
+ * Gated: real Clerk IDs only, ≥2 user messages (W6-FIX: lowered from 4 to align with service.ts debounce).
+ * R5: Caller is responsible for debouncing (multiples-of-2 gate in service.ts).
  * R8: Distributed Redis lock prevents concurrent write races.
  */
 export async function distillSessionNotes(
@@ -146,7 +158,10 @@ export async function distillSessionNotes(
 ): Promise<void> {
   if (!userId.startsWith("user_")) return;
   const userMessages = messages.filter((m) => m.role === "user");
-  if (userMessages.length < 4) return;
+  // W6-FIX: Lowered from 4 to 2 to align with service.ts debounce (multiples of 2).
+  // Previously, turn 2 had only 2 user messages — below the gate — so first actual
+  // distillation happened at turn 4. This missed early preference capture from short sessions.
+  if (userMessages.length < 2) return;
 
   // R8: Distributed lock — prevents concurrent distillation races when two rapid responses
   // both qualify. Uses SET NX (set-if-not-exists) for true mutual exclusion.
@@ -213,7 +228,9 @@ export async function distillSessionNotes(
     logger.warn({ err: sanitizeError(err), userId, source }, "Memory distillation failed — skipping");
   } finally {
     // Release lock after work completes (TTL=60s is the safety net if this never fires)
-    setCache(lockKey, "", 1).catch(() => {});
+    setCache(lockKey, "", 1).catch((err) => {
+      logger.debug({ err, lockKey }, "Failed to release memory lock (non-critical)");
+    });
   }
 }
 

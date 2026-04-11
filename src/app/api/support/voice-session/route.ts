@@ -20,7 +20,7 @@ const VOICE_SESSION_FETCH_TIMEOUT_MS = 8_000;
 
 const OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime";
 
-export async function GET() {
+export async function GET(request: Request) {
   const { userId } = await auth();
   if (!userId) return apiError("Unauthorized", 401);
 
@@ -57,13 +57,14 @@ export async function GET() {
             type: "realtime",
             model: VOICE_MODEL,
             output_modalities: ["audio"],
+            max_output_tokens: 350,
             audio: {
               input: {
                 format: { type: "audio/pcm", rate: 24000 },
                 transcription: {
                   model: "gpt-4o-mini-transcribe",
                   prompt:
-                    "Transcribe only English, Hinglish, and Hindi. Preserve code-switching across those three languages, keep product names in English, and never output Urdu or any other language. If the speech mixes languages, keep the transcript in English, Hinglish, or Hindi only.",
+                    "Transcribe ONLY in English, Hinglish, or Hindi. NEVER output Urdu script or Urdu vocabulary — if the speech sounds like Urdu, transcribe it as Hindi instead. Preserve code-switching across English, Hinglish, and Hindi. Keep product names in English. If the speech mixes languages, keep the transcript in English, Hinglish, or Hindi only.",
                 },
                 turn_detection: {
                   type: "semantic_vad",
@@ -126,10 +127,14 @@ export async function GET() {
     }
 
     // Build instructions after both DB and token are ready — no extra latency
+    // Extract current page from query param for contextual responses
+    const pageParam = new URL(request.url).searchParams.get("page") || undefined;
+
     const instructions = buildMyraVoiceInstructions(
       {
         plan: userPlan,
         credits: userRecord?.credits ?? undefined,
+        currentPage: pageParam,
         globalNotes: globalNotes || undefined,
       },
       kbDocs,

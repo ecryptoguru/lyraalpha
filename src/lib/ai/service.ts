@@ -3,8 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { AI_CONFIG, getSharedAISdkClient, getTierConfig, HISTORY_CAPS, getGpt54Deployment, getTargetOutputTokens, type Gpt54Role } from "./config";
 import { resolveGptDeployment } from "./orchestration";
 import { getUserPlan, normalizePlanTier } from "@/lib/middleware/plan-gate";
-import { BUILD_LYRA_REFERENCE_EXAMPLE, BUILD_LYRA_STATIC_PROMPT } from "./prompts/system";
+import { BUILD_LYRA_REFERENCE_EXAMPLE, BUILD_LYRA_STATIC_PROMPT, PROMPT_VERSION } from "./prompts/system";
 import { validateInput } from "./guardrails";
+import { scrubPII } from "./pii-scrub";
 import { LyraContext } from "@/lib/engines/types";
 // currentUser removed — user creation now handled by Clerk webhook (src/app/api/webhooks/clerk/route.ts)
 import {
@@ -29,7 +30,7 @@ import { redis, getCache, setCache } from "@/lib/redis";
 import { compressKnowledgeContext } from "./compress";
 import { distillSessionNotes, getGlobalNotes, getSessionNotes } from "./memory";
 import { validateOutput, logValidationResult } from "./output-validation";
-import { applyCostCeiling } from "./cost-ceiling";
+import { applyCostCeiling, recordEstimationAccuracy } from "./cost-ceiling";
 import { recordFallbackResult, alertIfDailyCostExceeded, recordLatencyViolation } from "./alerting";
 import {
   logModelCacheEvent,
@@ -50,6 +51,17 @@ import {
 } from "./lyra-cache";
 
 const logger = createLogger({ service: "lyra-ai" });
+
+// ─── Emergency asset fallback list (used when DB/cache unavailable) ─────────
+// This is a conservative fallback to ensure the app remains functional during
+// database or cache degradation. Should be kept in sync with major crypto assets.
+export const EMERGENCY_ASSET_FALLBACK = [
+  "BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "USDT-USD", "USDC-USD",
+  "XRP-USD", "ADA-USD", "DOGE-USD", "DOT-USD",
+] as const;
+
+// ─── Conversation history constants ─────────────────────────────────────────
+export const RECENT_RAW = 2; // Last 1 user + 1 assistant messages always sent raw (uncompressed)
 
 // ─── Daily token spend caps (per-user, per-UTC-day) ─────────────────────
 // Protects against runaway API cost from: infinite loop clients, compromised tokens,
@@ -108,19 +120,24 @@ async function incrementDailyTokens(userId: string, tokens: number): Promise<num
 
 /** Check whether the user has headroom remaining for this request.
  *  Reads from the same atomic hash field used by incrementDailyTokens.
- *  On Redis failure, returns a conservative non-zero sentinel (half of STARTER cap)
- *  so the daily cap remains partially enforceable even during Redis degradation. */
-async function getDailyTokensUsed(userId: string): Promise<number> {
+ *  On Redis failure, returns 0 (allow traffic) — blocking users during Redis
+ *  outages is worse than potentially exceeding the daily cap. */
+async function getDailyTokensUsed(userId: string, userPlan: string): Promise<number> {
   try {
     const stats = await redis.hgetall("lyra:daily_tokens_v2");
     const field = `${userId}:${todayUtc()}`;
     const raw = stats?.[field];
     return raw ? Number(raw) : 0;
   } catch {
-    // Conservative fallback: treat as 25k tokens used so the cap still bites for
-    // STARTER (cap=50k) but does not block PRO/ELITE who have higher headroom.
-    logger.warn({ userId }, "getDailyTokensUsed: Redis error — using conservative fallback count");
-    return 25_000;
+    // R1-FIX: On Redis failure, return 0 (allow traffic) instead of a percentage of the cap.
+    // The daily cap is a secondary backstop; blocking users during Redis outages is worse
+    // than potentially exceeding the cap. The cap will be re-evaluated on the next request
+    // once Redis recovers.
+    logger.warn(
+      { userId, userPlan },
+      "getDailyTokensUsed: Redis error — assuming 0 tokens used (allow traffic)",
+    );
+    return 0;
   }
 }
 
@@ -171,7 +188,7 @@ async function getAvailableAssetSymbols(): Promise<string[]> {
     }
     
     logger.error("Using emergency hardcoded fallback — asset list may be incomplete");
-    return ["BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "USDT-USD", "USDC-USD", "XRP-USD", "ADA-USD", "DOGE-USD", "DOT-USD"];
+    return [...EMERGENCY_ASSET_FALLBACK];
   }
 }
 
@@ -354,8 +371,18 @@ export async function generateLyraStream(
 
   logger.debug({ query }, "Extracted query from message");
 
-  // 1. Guardrail Check
+  // 1. Guardrail Check + PII Scrubbing
   // Apply guardrails to ALL messages (not just last) to prevent API injection attacks via conversation history
+  // B3-FIX: Scrub PII from user messages in-place before they enter the LLM context or logs
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    if (msg.role === "user" && typeof msg.content === "string" && msg.content) {
+      const { scrubbed } = scrubPII(msg.content);
+      if (scrubbed !== msg.content) {
+        messages[i] = { ...msg, content: scrubbed };
+      }
+    }
+  }
   for (const msg of messages) {
     const msgContent = typeof msg.content === "string" ? msg.content : "";
     if (!msgContent) continue;
@@ -525,7 +552,7 @@ export async function generateLyraStream(
   let lockAcquired = false;
   try {
     const nx = await (redis as unknown as { set(k: string, v: string, opts: { nx: boolean; ex: number }): Promise<string | null> })
-      .set(inFlightKey, "1", { nx: true, ex: 30 });
+      .set(inFlightKey, "1", { nx: true, ex: 60 });
     lockAcquired = nx === "OK";
   } catch {
     // Redis unavailable — allow the request through rather than blocking all users.
@@ -548,7 +575,7 @@ export async function generateLyraStream(
     const effectiveCaps = await getEffectiveDailyTokenCaps();
     const cap = effectiveCaps[userPlan] ?? effectiveCaps.PRO;
     if (isFinite(cap)) {
-      const used = await getDailyTokensUsed(userId);
+      const used = await getDailyTokensUsed(userId, userPlan);
       if (used >= cap) {
         logger.warn({ userId, userPlan, used, cap }, "Daily token cap exceeded");
         throw new Error(`Daily usage limit reached for your plan. Your quota resets at midnight UTC. Upgrade to increase your limit.`);
@@ -632,8 +659,7 @@ export async function generateLyraStream(
             peRatio: true, priceToBook: true, roe: true, eps: true,
             dividendYield: true, marketCap: true, metadata: true, type: true, region: true,
             description: true, industry: true, sector: true,
-            financials: deepFields, topHoldings: deepFields, etfLookthrough: deepFields,
-            mfLookthrough: deepFields, commodityIntelligence: deepFields,
+            financials: deepFields, topHoldings: deepFields,
             cryptoIntelligence: deepFields, fundPerformanceHistory: deepFields,
             category: true, fundHouse: true, nav: true, currency: true,
             coingeckoId: true,
@@ -662,9 +688,6 @@ export async function generateLyraStream(
               sector: asset.sector,
               financials: asset.financials as Record<string, unknown> | null,
               topHoldings: asset.topHoldings as Record<string, unknown> | null,
-              etfLookthrough: asset.etfLookthrough as Record<string, unknown> | null,
-              mfLookthrough: asset.mfLookthrough as Record<string, unknown> | null,
-              commodityIntelligence: asset.commodityIntelligence as Record<string, unknown> | null,
               cryptoIntelligence: asset.cryptoIntelligence as Record<string, unknown> | null,
               fundPerformanceHistory: asset.fundPerformanceHistory as Record<string, unknown> | null,
               category: asset.category,
@@ -920,7 +943,9 @@ export async function generateLyraStream(
                 crossSectorContext = truncateAtSentence(crossSectorContext, 420);
               }
             }
-          } catch { /* non-critical */ }
+          } catch (error) {
+            logger.debug({ err: sanitizeError(error) }, "Failed to fetch cross-sector context (non-critical)");
+          }
         })()
       );
     }
@@ -963,7 +988,9 @@ export async function generateLyraStream(
             if (responseMode === "compare" || responseMode === "stress-test") {
               historicalAnalogContext = truncateAtSentence(historicalAnalogContext, 450);
             }
-          } catch { /* non-critical */ }
+          } catch (error) {
+            logger.debug({ err: sanitizeError(error) }, "Failed to fetch historical analogs (non-critical)");
+          }
         })()
       );
     }
@@ -1182,7 +1209,6 @@ logRetrievalMetric({
   const planHistoryCap = HISTORY_CAPS[userPlan] ?? 4;
 
   // Split into: recent (always sent raw) vs older (compress if present)
-  const RECENT_RAW = 2; // last 1 user + 1 assistant always go raw
   const cappedMessages = messagesWithExample.length > planHistoryCap
     ? messagesWithExample.slice(-planHistoryCap)
     : [...messagesWithExample];
@@ -1315,6 +1341,16 @@ logRetrievalMetric({
   const effectiveDeployment = resolveGptDeployment(tierConfig.gpt54Role);
   const effectiveModel = getSharedAISdkClient().responses(effectiveDeployment);
 
+  // B1-FIX: Enforce latency budget with AbortController — prevents indefinite hangs.
+  // Budget × 1.5 gives the model grace to finish a nearly-complete stream without
+  // cutting off responses that are just barely over budget.
+  const latencyAbortController = new AbortController();
+  const latencyAbortTimeoutMs = tierConfig.latencyBudgetMs * 1.5;
+  const latencyAbortTimer = setTimeout(() => {
+    logger.warn({ tier, budgetMs: tierConfig.latencyBudgetMs, abortMs: latencyAbortTimeoutMs }, "Latency budget exceeded — aborting stream");
+    latencyAbortController.abort();
+  }, latencyAbortTimeoutMs);
+
   try {
     const result = streamText({
       model: effectiveModel,
@@ -1322,6 +1358,7 @@ logRetrievalMetric({
       system: staticPrompt,
       ...(hasTools ? { tools: tierTools } : {}),
       maxOutputTokens: getTargetOutputTokens(tierConfig),
+      abortSignal: latencyAbortController.signal,
       providerOptions: {
         openai: {
           textVerbosity: "high",
@@ -1330,23 +1367,30 @@ logRetrievalMetric({
         },
       },
       onFinish: async ({ text, usage }) => {
+        // B1-FIX: Clear the abort timer once the stream finishes naturally
+        clearTimeout(latencyAbortTimer);
+
         // AI SDK exposes cachedInputTokens and reasoningTokens at top level
+        // Use runtime validation with safe number extraction
         const usageAny = usage as Record<string, unknown>;
-        const cachedTokens = (usageAny.cachedInputTokens as number) ?? 0;
-        const reasoningTokens = (usageAny.reasoningTokens as number) ?? 0;
-        const inputTokens = usage.inputTokens ?? 0;
-        const outputTokens = usage.outputTokens ?? 0;
-        const tokensUsed = usage.totalTokens ?? (inputTokens + outputTokens);
+        const cachedTokens = Number.isFinite(usageAny.cachedInputTokens) ? (usageAny.cachedInputTokens as number) : 0;
+        const reasoningTokens = Number.isFinite(usageAny.reasoningTokens) ? (usageAny.reasoningTokens as number) : 0;
+        const inputTokens = Number.isFinite(usage.inputTokens) ? usage.inputTokens ?? 0 : 0;
+        const outputTokens = Number.isFinite(usage.outputTokens) ? usage.outputTokens ?? 0 : 0;
+        const totalTokens = Number.isFinite(usage.totalTokens) ? usage.totalTokens : (inputTokens + outputTokens);
+        const tokensUsed = Number.isFinite(totalTokens) ? totalTokens : (inputTokens + outputTokens);
+        const safeTokensUsed = tokensUsed as number;
         const durationMs = timer.end();
         const tokenReport = {
           tokens: tokensUsed,
-          inputTokens,
-          outputTokens,
+          inputTokens: inputTokens ?? 0,
+          outputTokens: outputTokens ?? 0,
           cachedTokens,
-          noCacheTokens: inputTokens - cachedTokens,
+          noCacheTokens: (inputTokens ?? 0) - cachedTokens,
           reasoningTokens,
           tier,
           reasoningEffort: gptReasoningEffort,
+          promptVersion: PROMPT_VERSION,
           duration: timer.endFormatted(),
           durationMs,
         };
@@ -1359,6 +1403,10 @@ logRetrievalMetric({
 
         // Increment daily token counter (fire-and-forget — never blocks response path)
         incrementDailyTokens(userId, usage.totalTokens ?? (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)).catch(() => {});
+
+        // W3-FIX: Record cost ceiling estimation accuracy — compare estimated vs actual input tokens.
+        // This was defined but never called, leaving estimation accuracy unmonitored.
+        recordEstimationAccuracy(costCeiling.estimatedInputTokens, inputTokens, tier).catch(() => {});
 
         try {
           logModelRouting({
@@ -1411,7 +1459,7 @@ logRetrievalMetric({
           text || "",
           effectiveDeployment,
           {
-            tokensUsed,
+            tokensUsed: safeTokensUsed,
             inputTokens,
             outputTokens,
             cachedInputTokens: cachedTokens,
@@ -1454,6 +1502,9 @@ logRetrievalMetric({
     logger.info({ tier }, "Stream initiated successfully");
     return { result, sources: finalSources, remainingCredits, contextTruncated: costCeiling.exceeded };
   } catch (primaryError: unknown) {
+    // B1-FIX: Clear latency abort timer — primary path failed, no need to keep the timer running
+    clearTimeout(latencyAbortTimer);
+
     logger.error(
       { err: sanitizeError(primaryError), userId, tier, primaryDeployment: effectiveDeployment },
       "Primary model generation failed — attempting nano fallback",
@@ -1466,6 +1517,13 @@ logRetrievalMetric({
       throw primaryError; // nano already failed — nothing left to try
     }
 
+    // B1-FIX: Separate abort controller for fallback — shorter timeout since nano is faster
+    const fallbackAbortController = new AbortController();
+    const fallbackAbortTimer = setTimeout(() => {
+      logger.warn({ tier }, "Nano fallback latency exceeded — aborting");
+      fallbackAbortController.abort();
+    }, 15_000); // 15s — nano should be much faster than primary
+
     try {
       const fallbackModel = getSharedAISdkClient().responses(nanoDeployment);
       const fallbackResult = streamText({
@@ -1473,6 +1531,7 @@ logRetrievalMetric({
         messages: finalMessages,
         system: staticPrompt,
         maxOutputTokens: 1200,
+        abortSignal: fallbackAbortController.signal,
         providerOptions: {
           openai: {
             textVerbosity: "high" as const,
@@ -1480,6 +1539,8 @@ logRetrievalMetric({
           },
         },
         onFinish: async ({ text, usage }) => {
+          // B1-FIX: Clear fallback abort timer once stream finishes naturally
+          clearTimeout(fallbackAbortTimer);
           const durationMs = timer.end();
           logModelRouting({
             model: nanoDeployment,
@@ -1501,6 +1562,17 @@ logRetrievalMetric({
             storeConversationLog(userId, query, text, nanoDeployment,
               { tokensUsed: usage.totalTokens ?? 0 }, tier, messages.length, true,
             ).catch((e: unknown) => logger.error({ err: sanitizeError(e) }, "Fallback log failed"));
+
+            // R5-FIX: Validate fallback output — previously skipped, creating a blind spot
+            // in the validation failure rate alert. Fallback responses are lower quality
+            // and more likely to fail section checks, so monitoring them is critical.
+            const fallbackValidation = validateOutput(
+              text, tier, userPlan,
+              tier === "SIMPLE" && isEduCacheable,
+              responseMode,
+              resolvedAssetType,
+            );
+            logValidationResult(fallbackValidation);
           }
         },
       });

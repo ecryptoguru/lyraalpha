@@ -86,13 +86,17 @@ beforeEach(() => {
   stubFetch();
 });
 
+function mockRequest(url = "http://localhost/api/support/voice-session") {
+  return new Request(url);
+}
+
 describe("GET /api/support/voice-session", () => {
   // ─── Auth / guard checks ───────────────────────────────────────────────────
 
   it("401 when unauthenticated", async () => {
     mockAuth.mockResolvedValueOnce({ userId: null });
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ error: "Unauthorized" });
   });
@@ -100,7 +104,7 @@ describe("GET /api/support/voice-session", () => {
   it("403 when plan is STARTER", async () => {
     mockGetUserPlan.mockResolvedValueOnce("STARTER");
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(403);
     expect(await res.json()).toEqual({ error: "Voice requires a PRO or higher plan" });
   });
@@ -108,7 +112,7 @@ describe("GET /api/support/voice-session", () => {
   it("403 when plan is unknown", async () => {
     mockGetUserPlan.mockResolvedValueOnce("FREE");
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(403);
   });
 
@@ -116,14 +120,14 @@ describe("GET /api/support/voice-session", () => {
     const limitResponse = new Response(JSON.stringify({ error: "Too Many Requests" }), { status: 429 });
     mockRateLimitChat.mockResolvedValueOnce({ response: limitResponse });
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(429);
   });
 
   it("500 when OPENAI_API_KEY is missing", async () => {
     process.env.OPENAI_API_KEY = "";
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(500);
     expect(await res.json()).toEqual({ error: "OpenAI key not configured" });
   });
@@ -132,7 +136,7 @@ describe("GET /api/support/voice-session", () => {
 
   it("returns a clean session payload without leaking instructions (value shape)", async () => {
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     const body = (await res.json()) as {
       mode: string;
       ephemeralKey: string;
@@ -154,7 +158,7 @@ describe("GET /api/support/voice-session", () => {
 
   it("builds instructions from user context and includes them in the response", async () => {
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
 
     expect(mockBuildMyraVoiceInstructions).toHaveBeenCalledWith(
       expect.objectContaining({ plan: "PRO", credits: 42, globalNotes: "global notes" }),
@@ -167,7 +171,7 @@ describe("GET /api/support/voice-session", () => {
 
   it("sends correct body to client_secrets: session wrapper with type+model+voice, no instructions", async () => {
     const { GET } = await loadRoute();
-    await GET();
+    await GET(mockRequest());
 
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     const payload = JSON.parse(init.body as string) as {
@@ -175,15 +179,17 @@ describe("GET /api/support/voice-session", () => {
         type: string;
         model?: string;
         output_modalities?: string[];
+        max_output_tokens?: number;
         audio?: { input?: { format?: { type?: string; rate?: number }; transcription?: { model?: string; prompt?: string }; turn_detection?: { type?: string } }; output?: { format?: { type?: string; rate?: number }; voice?: string } };
         instructions?: string;
       };
     };
     expect(payload.session.type).toBe("realtime");
     expect(payload.session.model).toBe("gpt-realtime-mini");
+    expect(payload.session.max_output_tokens).toBe(350);
     expect(payload.session.audio?.input?.format).toEqual({ type: "audio/pcm", rate: 24000 });
-    expect(payload.session.audio?.input?.transcription?.prompt).toContain("Transcribe only English, Hinglish, and Hindi");
-    expect(payload.session.audio?.input?.transcription?.prompt).toContain("never output Urdu or any other language");
+    expect(payload.session.audio?.input?.transcription?.prompt).toContain("Transcribe ONLY in English, Hinglish, or Hindi");
+    expect(payload.session.audio?.input?.transcription?.prompt).toContain("NEVER output Urdu script or Urdu vocabulary");
     expect(payload.session.audio?.output?.voice).toBe("marin");
     expect(payload.session.audio?.output?.format).toEqual({ type: "audio/pcm", rate: 24000 });
     expect(payload.session.output_modalities).toEqual(["audio"]);
@@ -198,7 +204,7 @@ describe("GET /api/support/voice-session", () => {
       }),
     );
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     const body = (await res.json()) as { ephemeralKey: string };
     expect(res.status).toBe(200);
     expect(body.ephemeralKey).toBe("cs_token_abc");
@@ -207,7 +213,7 @@ describe("GET /api/support/voice-session", () => {
   it("works when user has no credits (credits is null)", async () => {
     mockFindUnique.mockResolvedValueOnce({ credits: null });
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(200);
     expect(mockBuildMyraVoiceInstructions).toHaveBeenCalledWith(
       expect.objectContaining({ credits: undefined }),
@@ -218,7 +224,7 @@ describe("GET /api/support/voice-session", () => {
   it("works when globalNotes is empty string — omitted from context", async () => {
     mockGetGlobalNotes.mockResolvedValueOnce("");
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(200);
     expect(mockBuildMyraVoiceInstructions).toHaveBeenCalledWith(
       expect.objectContaining({ globalNotes: undefined }),
@@ -235,7 +241,7 @@ describe("GET /api/support/voice-session", () => {
       { content: "doc-5" },
     ]);
     const { GET } = await loadRoute();
-    await GET();
+    await GET(mockRequest());
     expect(mockBuildMyraVoiceInstructions).toHaveBeenCalledWith(
       expect.any(Object),
       ["doc-1", "doc-2", "doc-3"],
@@ -245,14 +251,14 @@ describe("GET /api/support/voice-session", () => {
   it("accepts ELITE plan", async () => {
     mockGetUserPlan.mockResolvedValueOnce("ELITE");
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(200);
   });
 
   it("accepts ENTERPRISE plan", async () => {
     mockGetUserPlan.mockResolvedValueOnce("ENTERPRISE");
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(200);
   });
 
@@ -263,7 +269,7 @@ describe("GET /api/support/voice-session", () => {
       new Response("Unauthorized", { status: 401 }),
     );
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(502);
     expect(await res.json()).toEqual({ error: "Voice session token generation failed" });
   });
@@ -273,7 +279,7 @@ describe("GET /api/support/voice-session", () => {
       new Response("Bad Gateway", { status: 502 }),
     );
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(502);
   });
 
@@ -283,7 +289,7 @@ describe("GET /api/support/voice-session", () => {
       headers: { "content-type": "application/json" },
     }));
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(502);
   });
 
@@ -293,7 +299,7 @@ describe("GET /api/support/voice-session", () => {
       headers: { "content-type": "application/json" },
     }));
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(502);
   });
 
@@ -302,20 +308,20 @@ describe("GET /api/support/voice-session", () => {
       new DOMException("The operation was aborted.", "AbortError"),
     ) as never);
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(502);
   });
 
   it("502 when fetch throws a generic network error", async () => {
     vi.stubGlobal("fetch", fetchMock.mockRejectedValue(new Error("ECONNREFUSED")) as never);
     const { GET } = await loadRoute();
-    const res = await GET();
+    const res = await GET(mockRequest());
     expect(res.status).toBe(502);
   });
 
   it("sends Authorization Bearer header to OpenAI", async () => {
     const { GET } = await loadRoute();
-    await GET();
+    await GET(mockRequest());
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     const headers = init.headers as Record<string, string>;
@@ -325,10 +331,30 @@ describe("GET /api/support/voice-session", () => {
 
   it("sends POST to the OpenAI client_secrets endpoint", async () => {
     const { GET } = await loadRoute();
-    await GET();
+    await GET(mockRequest());
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe("https://api.openai.com/v1/realtime/client_secrets");
     expect(init.method).toBe("POST");
+  });
+
+  it("passes page query param to buildMyraVoiceInstructions as currentPage", async () => {
+    const { GET } = await loadRoute();
+    const res = await GET(mockRequest("http://localhost/api/support/voice-session?page=%2Fdashboard%2Fportfolio"));
+    expect(res.status).toBe(200);
+    expect(mockBuildMyraVoiceInstructions).toHaveBeenCalledWith(
+      expect.objectContaining({ currentPage: "/dashboard/portfolio" }),
+      expect.any(Array),
+    );
+  });
+
+  it("omits currentPage when no page query param is provided", async () => {
+    const { GET } = await loadRoute();
+    const res = await GET(mockRequest());
+    expect(res.status).toBe(200);
+    expect(mockBuildMyraVoiceInstructions).toHaveBeenCalledWith(
+      expect.objectContaining({ currentPage: undefined }),
+      expect.any(Array),
+    );
   });
 });

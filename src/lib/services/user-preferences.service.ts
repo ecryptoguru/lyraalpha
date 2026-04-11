@@ -8,7 +8,7 @@ import {
   type NotificationPreferencePayload,
 } from "@/lib/notification-preferences";
 
-export const DEFAULT_INTERESTS = ["STOCKS", "ETF"] as const;
+export const DEFAULT_INTERESTS = ["CRYPTO"] as const;
 export const DEFAULT_DASHBOARD_MODE = "simple" as const;
 
 export function buildDefaultUserPreferenceData(userId: string) {

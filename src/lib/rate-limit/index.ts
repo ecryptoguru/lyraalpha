@@ -29,7 +29,8 @@ async function shouldBypassRateLimit(): Promise<boolean> {
         ?? headerStore.get("x-skip-auth")
         ?? headerStore.get("SKIP_AUTH"),
     );
-  } catch {
+  } catch (error) {
+    logger.warn({ err: sanitizeError(error) }, "Failed to check rate limit bypass headers");
     return false;
   }
 }

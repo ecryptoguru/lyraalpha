@@ -9,6 +9,7 @@ import { Source } from "@/lib/lyra-utils";
 import { chunkMarkdownFile } from "./chunker";
 import { createLogger } from "@/lib/logger";
 import { INJECTION_PATTERNS } from "./guardrails";
+import { scrubPIIString } from "./pii-scrub";
 import { recordRagResult } from "./alerting";
 
 const logger = createLogger({ service: "rag" });
@@ -633,15 +634,16 @@ class PrismaVectorStore {
     type KnowledgeResult = { id: string; content: string; metadata: Record<string, unknown>; similarity: number };
 
     try {
-      // Security: $queryRawUnsafe is safe here because vectorString, limit(k), and threshold 
-      // are passed as parameterized positional arguments ($1, $2, $3) instead of string interpolation.
-      const results = await prisma.$queryRawUnsafe<KnowledgeResult[]>(`
-        SELECT id, content, metadata, 1 - (embedding <=> $1::vector) as similarity
+      // R6-FIX: Use $queryRaw with Prisma.sql for type-safe parameterized queries.
+      // $queryRawUnsafe bypasses Prisma's SQL injection protection entirely.
+      // Prisma.sql ensures all values are properly parameterized at the driver level.
+      const results = await prisma.$queryRaw<KnowledgeResult[]>`
+        SELECT id, content, metadata, 1 - (embedding <=> ${vectorString}::vector) as similarity
         FROM "KnowledgeDoc"
-        WHERE 1 - (embedding <=> $1::vector) >= $3
-        ORDER BY embedding <=> $1::vector ASC
-        LIMIT $2;
-      `, vectorString, RAG_CONFIG.knowledgeTopK, RAG_CONFIG.similarityThresholdDefault);
+        WHERE 1 - (embedding <=> ${vectorString}::vector) >= ${RAG_CONFIG.similarityThresholdDefault}
+        ORDER BY embedding <=> ${vectorString}::vector ASC
+        LIMIT ${RAG_CONFIG.knowledgeTopK};
+      `;
 
       const docs: Document[] = results.map((r) => ({
         id: r.id, content: r.content, metadata: r.metadata, similarity: r.similarity,
@@ -705,14 +707,15 @@ class PrismaVectorStore {
     };
 
     try {
-      // Retrieve top-k chunks above similarity threshold
-      const results = await prisma.$queryRawUnsafe<KnowledgeResult[]>(`
-        SELECT id, content, metadata, 1 - (embedding <=> $1::vector) as similarity
+      // R6-FIX: Use $queryRaw with Prisma.sql for type-safe parameterized queries.
+      const similarityThreshold = getSimilarityThreshold(tier);
+      const results = await prisma.$queryRaw<KnowledgeResult[]>`
+        SELECT id, content, metadata, 1 - (embedding <=> ${vectorString}::vector) as similarity
         FROM "KnowledgeDoc"
-        WHERE 1 - (embedding <=> $1::vector) >= $3
-        ORDER BY embedding <=> $1::vector ASC
-        LIMIT $2;
-      `, vectorString, k, getSimilarityThreshold(tier));
+        WHERE 1 - (embedding <=> ${vectorString}::vector) >= ${similarityThreshold}
+        ORDER BY embedding <=> ${vectorString}::vector ASC
+        LIMIT ${k};
+      `;
 
       // If assetType provided, boost relevant chunks to the top
       if (assetType && assetType !== "GLOBAL") {
@@ -864,6 +867,28 @@ class PrismaVectorStore {
     conversationLength: number = 1,
     wasFallback: boolean = false,
   ) {
+    // Security: Enforce length limits to prevent storage abuse
+    
+    if (input.length > MAX_INPUT_LENGTH) {
+      logger.warn(
+        { userId, inputLength: input.length, maxLength: MAX_INPUT_LENGTH },
+        "Input exceeds maximum length, truncating",
+      );
+      input = input.slice(0, MAX_INPUT_LENGTH);
+    }
+    
+    if (output.length > MAX_OUTPUT_LENGTH) {
+      logger.warn(
+        { userId, outputLength: output.length, maxLength: MAX_OUTPUT_LENGTH },
+        "Output exceeds maximum length, truncating",
+      );
+      output = output.slice(0, MAX_OUTPUT_LENGTH);
+    }
+
+    // B3-FIX: Scrub PII before storing in DB — prevents email/phone/user-id leaks in logs
+    input = scrubPIIString(input);
+    output = scrubPIIString(output);
+
     const id = randomUUID();
     const shouldQueueEmbedding = conversationLength >= 3;
     const combinedText = `User: ${input}\nLyra: ${output}`;
@@ -945,9 +970,10 @@ function truncateForContext(text: string, maxWords: number): string {
   return words.slice(0, maxWords).join(" ") + "…";
 }
 
-// ─── Collision-resistant hash for cache keys (SHA-256, truncated to 16 hex chars) ───
-function hashText(text: string): string {
-  return createHash("sha256").update(text).digest("hex").slice(0, 16);
+// ─── Collision-resistant hash for cache keys (SHA-256, truncated to 24 hex chars) ───
+// 24 hex chars = 96 bits, significantly reducing collision probability vs 16 chars (64 bits)
+export function hashText(text: string): string {
+  return createHash("sha256").update(text).digest("hex").slice(0, 24);
 }
 
 function normalizeCacheQuery(text: string): string {
@@ -965,6 +991,10 @@ function chunkArray<T>(items: T[], size: number): T[][] {
 
 // ─── Exports ───
 export const vectorStore = new PrismaVectorStore();
+
+// ─── Security constants ───────────────────────────────────────────────────────
+export const MAX_INPUT_LENGTH = 50000; // ~10k words - prevents storage abuse
+export const MAX_OUTPUT_LENGTH = 100000; // ~20k words - prevents storage abuse
 
 export async function retrieveContext(query: string): Promise<string> {
   const { content } = await retrieveInstitutionalKnowledge(query);

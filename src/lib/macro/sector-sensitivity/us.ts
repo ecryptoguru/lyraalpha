@@ -1,15 +1,16 @@
 import type { SectorSensitivity } from "../types";
 
 export const US_SECTOR_SENSITIVITY: SectorSensitivity[] = [
-  { sector: "Technology",       icon: "💻", impact: "tailwind",  driver: "Rate hold + AI capex cycle" },
-  { sector: "Financials",       icon: "🏦", impact: "tailwind",  driver: "Higher-for-longer supports NIM" },
-  { sector: "Energy",           icon: "⚡", impact: "neutral",   driver: "OPEC+ cuts offset by demand softness" },
-  { sector: "Healthcare",       icon: "🏥", impact: "tailwind",  driver: "Defensive rotation + aging demographics" },
-  { sector: "Consumer Disc.",   icon: "🛍️", impact: "headwind",  driver: "Sticky inflation compresses margins" },
-  { sector: "Industrials",      icon: "🏗️", impact: "tailwind",  driver: "Reshoring + infrastructure spend" },
-  { sector: "Utilities",        icon: "🔌", impact: "headwind",  driver: "Rate sensitivity pressures valuation" },
-  { sector: "Real Estate",      icon: "🏢", impact: "headwind",  driver: "High rates weigh on cap rates" },
-  { sector: "Materials",        icon: "⛏️", impact: "neutral",   driver: "China demand uncertainty" },
-  { sector: "Comm. Services",   icon: "📡", impact: "tailwind",  driver: "Ad cycle recovery + streaming growth" },
-  { sector: "Consumer Staples", icon: "🛒", impact: "neutral",   driver: "Defensive but margin pressure ongoing" },
+  { sector: "Layer 1",        icon: "⛓️", impact: "tailwind",  driver: "BTC dominance rising + L1 fee recovery" },
+  { sector: "DeFi",           icon: "🏦", impact: "tailwind",  driver: "TVL growth + yield farming resurgence" },
+  { sector: "AI & ML",        icon: "🤖", impact: "tailwind",  driver: "AI agent integration + compute demand" },
+  { sector: "RWA Tokenization",icon: "📜", impact: "tailwind",  driver: "Institutional onboarding + compliance clarity" },
+  { sector: "Layer 2",        icon: "⚡", impact: "neutral",   driver: "Scaling adoption offset by L1 fee compression" },
+  { sector: "Gaming (GameFi)", icon: "�", impact: "headwind",  driver: "User retention challenges + token inflation" },
+  { sector: "NFTs",           icon: "🎨", impact: "headwind",  driver: "Volume decline + speculative fatigue" },
+  { sector: "Meme Coins",     icon: "🐸", impact: "headwind",  driver: "Hype-driven + extreme volatility risk" },
+  { sector: "Privacy Coins",  icon: "🔒", impact: "neutral",   driver: "Regulatory uncertainty + ZK tech adoption" },
+  { sector: "Stablecoins",    icon: "�", impact: "tailwind",  driver: "Payment adoption + regulatory frameworks" },
+  { sector: "ZK Proofs",      icon: "�", impact: "neutral",   driver: "Tech maturing but ecosystem still early" },
+  { sector: "DEX",            icon: "🔄", impact: "tailwind",  driver: "On-chain volume growth + MEV redistribution" },
 ];

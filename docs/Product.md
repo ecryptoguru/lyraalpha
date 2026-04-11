@@ -2,19 +2,19 @@
 
 > **The engines compute. The AI interprets.**
 
-LyraAlpha AI is not another finance chatbot. It is the structured intelligence layer that sits between fragmented market data and real investor decisions — built on deterministic computation, not pattern-matched guesswork.
+LyraAlpha AI is not another crypto finance chatbot. It is the structured intelligence layer that sits between fragmented crypto market data and real crypto investor decisions — built on deterministic computation, not pattern-matched guesswork.
 
 Live product. Shipped workflows. US and India, simultaneously.
 
 ---
 
-## The problem every investor runs into
+## The problem every crypto investor runs into
 
-Retail investors in 2026 have more data than at any point in history — prices, charts, fundamentals, screeners, on-chain metrics, news feeds, and now AI summaries coming from every direction. The most common experience is still confusion.
+Retail crypto investors in 2026 have more data than at any point in history — prices, charts, on-chain metrics, DeFi analytics, protocol data, screeners, news feeds, and now AI summaries coming from every direction. The most common experience is still confusion.
 
-Generic AI finance tools make this worse. They put a large language model in a financial wrapper and call it analysis. The outputs sound confident. They are not trustworthy. There is no deterministic backbone, no stable analytical framework, and no accountability when the model invents a metric it should have computed.
+Generic AI crypto tools make this worse. They put a large language model in a crypto wrapper and call it analysis. The outputs sound confident. They are not trustworthy. There is no deterministic backbone, no stable analytical framework, and no accountability when the model invents a metric it should have computed.
 
-The gap is not between investors and data. It is between data and judgment.
+The gap is not between crypto investors and data. It is between data and judgment.
 
 That is what LyraAlpha AI is built to close.
 
@@ -24,14 +24,15 @@ That is what LyraAlpha AI is built to close.
 
 ### Layer 1 — The engine
 
-Before any AI speaks, the platform's proprietary engines compute structured market context:
+Before any AI speaks, the platform's proprietary engines compute structured crypto market context:
 
 - DSE Scores: Trend, Momentum, Volatility, Liquidity, Trust, Sentiment
-- Market Regime: multi-horizon framing across macro, sector, and asset levels
+- Crypto Market Regime: multi-horizon framing across macro, sector, and asset levels
 - ARCS: Asset-Regime Compatibility Score
 - Score Dynamics: velocity and directional signals on how scores are moving
-- Stress scenarios: deterministic replay against historical windows
+- Stress scenarios: deterministic replay against historical crypto windows
 - Portfolio engines: health, fragility, benchmark, Monte Carlo, allocation analysis
+- On-chain metrics: protocol data, DeFi analytics, network signals
 
 The model never invents the analytical structure. It interprets what the engines already computed.
 
@@ -39,39 +40,39 @@ The model never invents the analytical structure. It interprets what the engines
 
 Two purpose-built agents, each with a hard domain boundary:
 
-- **Lyra** — market intelligence: score explanation, regime-aware analysis, premium workflow output, cross-asset reasoning, portfolio interpretation
+- **Lyra** — crypto market intelligence: score explanation, regime-aware analysis, premium workflow output, cross-asset reasoning, portfolio interpretation
 - **Myra** — platform support: product guidance, plan and credit help, onboarding, feature navigation
 
-The separation keeps market analysis and support behavior isolated, easier to govern, and easier to trust. It also keeps costs lower — Myra never runs on the full model.
+The separation keeps crypto market analysis and support behavior isolated, easier to govern, and easier to trust. It also keeps costs lower — Myra never runs on the full model.
 
 **Myra is now available on the public landing page** — unauthenticated visitors receive full AI-driven answers about the product, waitlist, early access, and how LyraAlpha works. No sign-in required. This is fully operational via the `/api/support/public-chat` endpoint.
 
 ### Layer 3 — The workflows
 
-Premium intelligence experiences built on structured engine computation:
+Premium intelligence experiences built on structured crypto engine computation:
 
-- **Compare Assets** — cross-sector synthesis across up to 4 assets simultaneously
+- **Compare Crypto Assets** — cross-sector synthesis across up to 4 crypto assets simultaneously
 - **Shock Simulator** — stress-scenario replay with Lyra hedge interpretation
-- **Portfolio Intelligence Workspace** — health, fragility, benchmark, Monte Carlo, regime alignment, holdings heatmap in sequence
-- **Asset Intelligence Pages** — scored, regime-aware, Lyra-interpreted per-asset views
+- **Crypto Portfolio Intelligence Workspace** — health, fragility, benchmark, Monte Carlo, regime alignment, holdings heatmap in sequence
+- **Asset Intelligence Pages** — scored, regime-aware, Lyra-interpreted per-crypto-asset views
 - **Public Blog** — structured intelligence content at `/blog`, with category pages, RSS feed, OG share cards, and reading progress. Fed by the AMI 2.0 marketing agent via a secure webhook bridge. Weekly digest delivered every Monday to opted-in subscribers.
 
 These are workflow products. Not chat with more tokens.
 
 ---
 
-## Why investors choose LyraAlpha AI over alternatives
+## Why crypto investors choose LyraAlpha AI over alternatives
 
-**vs. screeners (Screener.in, Finviz, Stock Analysis)**
-Screeners have good data and no synthesis. Users still have to figure out what the numbers mean. LyraAlpha AI tells them — grounded in the same structured data.
+**vs. crypto screeners (CoinGecko, CoinMarketCap, Messari)**
+Screeners have good data and no synthesis. Users still have to figure out what the numbers mean. LyraAlpha AI tells them — grounded in the same structured crypto data.
 
-**vs. generic AI chatbots (ChatGPT Finance, Perplexity Finance)**
+**vs. generic AI crypto chatbots (ChatGPT Crypto, Perplexity Crypto)**
 Fluent outputs, no deterministic backbone. LyraAlpha AI's model receives computed engine context before generating a single word. It cannot hallucinate a Trend score because that score was computed before the model was called.
 
-**vs. robo-advisors (Groww, Zerodha Coin, Betterment)**
+**vs. robo-advisors (Coinbase, Binance Auto-Invest)**
 Portfolio automation, not analytical intelligence. A different job entirely. LyraAlpha AI sharpens judgment before decisions are made — it does not automate execution.
 
-**vs. niche AI tools (Danelfin, Kavout)**
+**vs. niche AI crypto tools (Santiment, Glassnode)**
 US-only, narrow coverage, no premium workflow depth, no portfolio layer. LyraAlpha AI covers crypto assets across US and India, first-class.
 
 ---
@@ -96,13 +97,13 @@ Compare Assets, Shock Simulator, and Portfolio Intelligence are built on structu
 
 Not adapted. Built natively for both from the start.
 
-- Separate EOD sync pipelines for NSE/BSE and US exchanges
-- INR and USD pricing, number formatting, and market context throughout
-- India-aware stress scenarios in Shock Simulator
-- Broker connectivity for Indian brokers (Zerodha-style) and US aggregator paths
-- RBI policy context and India-specific macro regime framing
+- Separate EOD sync pipelines for crypto markets in both regions
+- INR and USD pricing, number formatting, and crypto market context throughout
+- India-aware crypto stress scenarios in Shock Simulator
+- Broker connectivity for Indian brokers (Zerodha-style) and US aggregator paths for crypto portfolios
+- RBI policy context and India-specific crypto macro regime framing
 
-India has 90M+ registered equity investors growing at 15-20% annually, with crypto adoption accelerating. Almost no premium analytical product is built natively for that market. LyraAlpha AI is.
+India has 90M+ registered equity investors growing at 15-20% annually, with crypto adoption accelerating. Almost no premium crypto analytical product is built natively for that market. LyraAlpha AI is.
 
 ### Credit economics that scale with analytical value
 
@@ -164,7 +165,7 @@ Each tier has a natural upgrade trigger built into the product experience:
 
 ---
 
-## Lyra — the market intelligence agent
+## Lyra — the crypto market intelligence agent
 
 > "Lyra doesn't guess. She interprets what the engines already computed, then tells you what it means in plain language."
 
@@ -172,7 +173,7 @@ Each tier has a natural upgrade trigger built into the product experience:
 
 ### What Lyra is
 
-Lyra is not a general-purpose chatbot given a finance persona. She is a purpose-built AI agent with one job: turn structured market data into clear, regime-aware analysis that an investor can actually act on.
+Lyra is not a general-purpose chatbot given a crypto persona. She is a purpose-built AI agent with one job: turn structured crypto market data into clear, regime-aware analysis that a crypto investor can actually act on.
 
 Every response flows through a pipeline that resolves the user's plan, classifies the query by complexity, runs safety checks, assembles context from RAG knowledge, conversation memory, price data, cross-sector signals, and live web research in parallel — scans every retrieved chunk for injection patterns — then streams the response under a strict output contract. If the primary model fails, the pipeline falls back to nano automatically. Users never see the error.
 
@@ -182,44 +183,44 @@ No blocking calls. No invented structure. Every analysis built on computed conte
 
 ### What Lyra can do
 
-**Regime-aware market analysis**
+**Regime-aware crypto market analysis**
 
-Lyra reads every asset within its current market regime — macro, sector, and asset-level simultaneously. A bullish momentum score means something different in a risk-off regime than in a broad risk-on environment. Lyra makes that distinction explicit every time, because ignoring regime context is one of the most common ways investors misread a signal.
+Lyra reads every crypto asset within its current crypto market regime — macro, sector, and asset-level simultaneously. A bullish momentum score means something different in a risk-off regime than in a broad risk-on environment. Lyra makes that distinction explicit every time, because ignoring regime context is one of the most common ways crypto investors misread a signal.
 
 **Multi-asset cross-sector synthesis**
 
-With Compare Assets (Elite and above), Lyra analyzes up to 4 assets across sectors at once — divergence, correlation, relative regime alignment, and opportunity framing in a single response. This used to require a Bloomberg terminal and an analyst. Now it takes a prompt.
+With Compare Crypto Assets (Elite and above), Lyra analyzes up to 4 crypto assets across sectors at once — divergence, correlation, relative regime alignment, and opportunity framing in a single response. This used to require a Bloomberg terminal and an analyst. Now it takes a prompt.
 
 **Shock Simulator interpretation**
 
-The Shock Simulator runs a deterministic stress replay first — direct historical data where it exists, hybrid proxy where it does not. Lyra then interprets the structured output: what the scenario revealed about each asset's pressure points, which assets showed genuine resilience versus which recovered on macro tailwinds, and how to think about hedging given the current regime.
+The Shock Simulator runs a deterministic stress replay first — direct historical data where it exists, hybrid proxy where it does not. Lyra then interprets the structured output: what the scenario revealed about each crypto asset's pressure points, which assets showed genuine resilience versus which recovered on macro tailwinds, and how to think about hedging given the current regime.
 
 Lyra is not guessing the stress narrative. She is interpreting a computation-backed payload.
 
-**Portfolio intelligence**
+**Crypto portfolio intelligence**
 
-Lyra reads a portfolio as a system, not a list of positions:
+Lyra reads a crypto portfolio as a system, not a list of positions:
 
 - Regime alignment across the whole book
-- Fragility: which positions add risk concentration
+- Fragility: which crypto positions add risk concentration
 - Benchmark comparison and drawdown context
 - Holdings P&L with regime-aware score overlays
 - Monte Carlo scenario framing
-- Score velocity signals on individual positions
+- Score velocity signals on individual crypto positions
 
 **Score explanation**
 
-Any DSE score — Trend, Momentum, Volatility, Liquidity, Trust, Sentiment — can be explained in depth: what drove it, how it is moving, what it means for this asset type, and how it compares to peers in the same sector. Every explanation is grounded in computed values, not pattern-matched from training data.
+Any DSE score — Trend, Momentum, Volatility, Liquidity, Trust, Sentiment — can be explained in depth: what drove it, how it is moving, what it means for this crypto asset type, and how it compares to peers in the same sector. Every explanation is grounded in computed values, not pattern-matched from training data.
 
 **Conversation memory (PRO and above)**
 
-Lyra remembers past analytical context, prior questions, and portfolio context across sessions. Users build analytical continuity rather than re-explaining their situation every time they open the app.
+Lyra remembers past analytical context, prior questions, and crypto portfolio context across sessions. Users build analytical continuity rather than re-explaining their situation every time they open the app.
 
 **Live research augmentation (Elite and Enterprise)**
 
 On recency-sensitive queries, Lyra pulls live web research to complement RAG-retrieved platform knowledge. Protocol metrics, macro shifts, and policy signals are woven into the response, not appended as a footnote.
 
-**Full asset class coverage**
+**Full crypto asset class coverage**
 
 - Crypto: on-chain signals, crypto-regime framing, protocol metrics, DeFi analytics
 
@@ -358,13 +359,13 @@ Next.js 16 App Router with React 19, streaming-first with no blocking response p
 
 ## In one sentence
 
-For investors: LyraAlpha AI is a live, revenue-generating financial intelligence product with a defensible architecture, dual-market coverage, and a commercial model that improves margin as engagement deepens.
+For crypto investors: LyraAlpha AI is a live, revenue-generating crypto intelligence product with a defensible architecture, dual-market coverage, and a commercial model that improves margin as engagement deepens.
 
-For users: Ask Lyra anything about your portfolio or the markets. She will tell you what it means — backed by computation, not a confident guess. Ask Myra anything about the platform — from the landing page before you sign in, to every support question after.
+For users: Ask Lyra anything about your crypto portfolio or the crypto markets. She will tell you what it means — backed by computation, not a confident guess. Ask Myra anything about the platform — from the landing page before you sign in, to every support question after.
 
 For engineers: The model interprets what deterministic engines already computed. That is not a prompt trick. That is the architecture.
 
 ---
 
-*LyraAlpha AI — Financial Intelligence, Not Financial Noise*
+*LyraAlpha AI — Crypto Intelligence, Not Crypto Noise*
 *Version 2.0 · March 2026*

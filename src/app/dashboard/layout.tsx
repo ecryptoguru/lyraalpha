@@ -31,6 +31,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
 
   // Auth gate — middleware already blocks unauthenticated requests but handle null userId
   // defensively in case the middleware is mis-configured or bypassed in tests.
+  // Allow access when auth bypass is active (userId will be a real ELITE user from auth.ts)
   if (!viewer.userId) {
     redirect("/sign-in");
   }

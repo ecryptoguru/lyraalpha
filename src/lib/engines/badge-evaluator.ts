@@ -84,7 +84,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     name: "ETF Transparency",
     description: "Knows how to look through the ETF wrapper to understand what you actually own.",
     icon: "Layers",
-    category: "etf",
+    category: "crypto",
     isEliteOnly: false,
     requiredModules: [
       "etf-lookthrough-basics",

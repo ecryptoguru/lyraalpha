@@ -4,10 +4,9 @@ import { IN_SECTOR_SENSITIVITY } from "@/lib/macro/sector-sensitivity/in";
 import usSnapshot from "@/lib/macro/snapshots/us.json";
 import inSnapshot from "@/lib/macro/snapshots/in.json";
 import { withCache, delCache } from "@/lib/redis";
-import { macroResearchCacheKey, macroResearchSectorCacheKey } from "@/lib/cache-keys";
+import { macroResearchCacheKey } from "@/lib/cache-keys";
 
 const RESEARCH_SNAPSHOT_TTL_SECONDS = 24 * 60 * 60;
-const RESEARCH_SECTOR_TTL_SECONDS = 7 * 24 * 60 * 60;
 
 function normalizeRegion(region: string): "US" | "IN" {
   return region === "IN" ? "IN" : "US";
@@ -17,7 +16,7 @@ function buildSnapshot(region: "US" | "IN"): MacroSnapshot {
   return (region === "IN" ? inSnapshot : usSnapshot) as MacroSnapshot;
 }
 
-function buildSectorSensitivity(region: "US" | "IN"): SectorSensitivity[] {
+function getSectorSensitivity(region: "US" | "IN"): SectorSensitivity[] {
   return region === "IN" ? IN_SECTOR_SENSITIVITY : US_SECTOR_SENSITIVITY;
 }
 
@@ -31,25 +30,14 @@ async function getCachedSnapshot(region: "US" | "IN"): Promise<MacroSnapshot> {
   return cached ?? buildSnapshot(region);
 }
 
-async function getCachedSectorSensitivity(region: "US" | "IN"): Promise<SectorSensitivity[]> {
-  const cached = await withCache(
-    macroResearchSectorCacheKey(region),
-    async () => buildSectorSensitivity(region),
-    RESEARCH_SECTOR_TTL_SECONDS,
-  );
-
-  return cached ?? buildSectorSensitivity(region);
-}
-
 export class MacroResearchService {
   static async getData(region: string): Promise<MacroResearchData> {
     const normalizedRegion = normalizeRegion(region);
-    const [snapshot, sectors] = await Promise.all([
+    const [snapshot] = await Promise.all([
       getCachedSnapshot(normalizedRegion),
-      getCachedSectorSensitivity(normalizedRegion),
     ]);
 
-    return { snapshot, sectors };
+    return { snapshot, sectors: getSectorSensitivity(normalizedRegion) };
   }
 
   static async refreshDaily(region: string): Promise<MacroResearchData> {
@@ -63,17 +51,9 @@ export class MacroResearchService {
     await delCache(macroResearchCacheKey(normalizedRegion));
   }
 
-  static async invalidateSectorMappings(region: string): Promise<void> {
-    const normalizedRegion = normalizeRegion(region);
-    await delCache(macroResearchSectorCacheKey(normalizedRegion));
-  }
-
   static async invalidate(region: string): Promise<void> {
     const normalizedRegion = normalizeRegion(region);
-    await Promise.all([
-      this.invalidateSnapshot(normalizedRegion),
-      this.invalidateSectorMappings(normalizedRegion),
-    ]);
+    await this.invalidateSnapshot(normalizedRegion);
   }
 
   static async invalidateAll(): Promise<void> {
