@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { randomBytes } from "crypto";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { CoinGeckoService } from "@/lib/services/coingecko.service";
 import { createLogger } from "@/lib/logger";
