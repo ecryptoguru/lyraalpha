@@ -1,0 +1,111 @@
+<svg width="1800" height="560" viewBox="0 0 1800 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="lockupBg" x1="62" y1="82" x2="384" y2="410" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="0.56" stop-color="#0B1325"/>
+      <stop offset="1" stop-color="#07101D"/>
+    </linearGradient>
+    <radialGradient id="lockupGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(320 118) rotate(126) scale(250 290)">
+      <stop stop-color="#22D3EE" stop-opacity="0.34"/>
+      <stop offset="0.56" stop-color="#38BDF8" stop-opacity="0.09"/>
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="signalGradient" x1="104" y1="104" x2="398" y2="398" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F59E0B"/>
+      <stop offset="0.46" stop-color="#F97316"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="wordGradient" x1="458" y1="150" x2="1334" y2="344" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="0.62" stop-color="#16243A"/>
+      <stop offset="1" stop-color="#1E3A5F"/>
+    </linearGradient>
+    <radialGradient id="nodeGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) rotate(90) scale(18)">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="0.44" stop-color="#D7F5FF" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#A5F3FC" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="badgeGradient" x1="0" y1="0" x2="184" y2="92" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F59E0B"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="40" y="80" width="360" height="360" rx="92" fill="url(#lockupBg)"/>
+  <rect x="41" y="81" width="358" height="358" rx="91" stroke="rgba(148, 163, 184, 0.16)" stroke-width="2"/>
+  <rect x="40" y="80" width="360" height="360" rx="92" fill="url(#lockupGlow)"/>
+
+  <path d="M108 280C108 214 162 160 228 160C279 160 323 191 344 237" stroke="url(#signalGradient)" stroke-opacity="0.34" stroke-width="3" stroke-linecap="round"/>
+  <path d="M90 302C108 363 165 408 231 408C293 408 348 372 369 316" stroke="url(#signalGradient)" stroke-opacity="0.3" stroke-width="3" stroke-linecap="round"/>
+
+  <path d="M132 180V338H282" stroke="url(#signalGradient)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g stroke="url(#signalGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M100 304L152 236L220 268L286 212L340 244"/>
+    <path d="M152 236L166 168"/>
+    <path d="M220 268L220 372"/>
+    <path d="M286 212L336 170"/>
+    <path d="M286 212L296 322"/>
+    <path d="M220 372L296 322L352 308"/>
+    <path d="M166 168L336 170"/>
+  </g>
+
+  <g filter="url(#softGlow)">
+    <g transform="translate(100 304)">
+      <circle r="14" fill="url(#nodeGlow)"/>
+      <circle r="4.2" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(152 236)">
+      <circle r="13" fill="url(#nodeGlow)"/>
+      <circle r="4" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(166 168)">
+      <circle r="12" fill="url(#nodeGlow)"/>
+      <circle r="4" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(220 268)">
+      <circle r="18" fill="url(#nodeGlow)"/>
+      <circle r="5.6" fill="#FFFFFF"/>
+    </g>
+    <g transform="translate(220 372)">
+      <circle r="13" fill="url(#nodeGlow)"/>
+      <circle r="4" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(286 212)">
+      <circle r="14" fill="url(#nodeGlow)"/>
+      <circle r="4.3" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(296 322)">
+      <circle r="13" fill="url(#nodeGlow)"/>
+      <circle r="4" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(336 170)">
+      <circle r="12" fill="url(#nodeGlow)"/>
+      <circle r="4" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(340 244)">
+      <circle r="12" fill="url(#nodeGlow)"/>
+      <circle r="4" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(352 308)">
+      <circle r="11" fill="url(#nodeGlow)"/>
+      <circle r="3.8" fill="#F8FAFC"/>
+    </g>
+  </g>
+
+  <text x="470" y="304" fill="url(#wordGradient)" font-family="Arial, Helvetica, sans-serif" font-size="178" font-weight="700" letter-spacing="-6">LyraAlpha</text>
+
+  <g transform="translate(1366 168)">
+    <rect width="184" height="92" rx="46" fill="url(#badgeGradient)"/>
+    <text x="49" y="64" fill="#FFF8ED" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="700" letter-spacing="6">AI</text>
+  </g>
+
+  <text x="474" y="376" fill="#64748B" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="600" letter-spacing="12">CRYPTO INTELLIGENCE</text>
+</svg>

@@ -113,17 +113,17 @@ export async function BlogSidebar({ post }: Props) {
       ) : (
         <div className="relative overflow-hidden rounded-2xl border border-amber-400/20 bg-amber-400/5 p-5">
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-amber-400/40 to-transparent" />
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-amber-400/70">
-            Early access open
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-teal-400/70">
+            Beta · Free access
           </p>
           <p className="mt-2 text-sm font-medium leading-6 text-white/70">
-            The platform that computes before it speaks. Join the waitlist.
+            The platform that computes before it speaks. Try it free during Beta.
           </p>
           <Link
-            href="/#waitlist"
+            href="/sign-up"
             className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 font-mono text-[10px] font-bold text-slate-950 transition-all hover:bg-amber-300"
           >
-            Claim Early Access
+            Start Free Beta
           </Link>
         </div>
       )}

@@ -105,8 +105,8 @@ export default function AiPortfolioAnalyzerPage() {
         "The health score, fragility index, and Monte Carlo simulation are all computed by deterministic engines. Lyra interprets the output, she doesn't produce it.",
         "This bridges directly into Shock Simulator, Market Narratives, and Lyra research — the surfaces that close the gap between diagnosis and decision.",
       ]}
-      ctaLabel="Join Waitlist"
-      ctaHref="/#join-waitlist"
+      ctaLabel="Start Beta Free"
+      ctaHref="/sign-up"
       relatedTools={[
         { title: "Demo Portfolio", description: "See the full portfolio intelligence suite in action on a sample US portfolio before connecting your own.", href: "/tools/demo-portfolio" },
         { title: "Market Narrative Tracker", description: "Check whether your portfolio risk is tied to the dominant market story.", href: "/tools/market-narrative-tracker" },

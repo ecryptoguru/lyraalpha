@@ -4,7 +4,7 @@ import { BookOpen, GitMerge, LineChart, Lock, ShieldCheck, Zap } from "lucide-re
 
 import { LandingReveal } from "@/components/landing/LandingReveal";
 import { ScrollToSectionButton } from "@/components/landing/scroll-to-section-button";
-import { PRELAUNCH_WAITLIST_SECTION_ID } from "@/lib/config/prelaunch";
+import { SIGNUP_SECTION_ID } from "@/lib/config/prelaunch";
 
 interface FeatureCardProps {
   title: string;
@@ -233,10 +233,10 @@ export function Features() {
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <ScrollToSectionButton
                 variant="outline"
-                targetId={PRELAUNCH_WAITLIST_SECTION_ID}
+                targetId={SIGNUP_SECTION_ID}
                 className="rounded-full border-white/12 bg-white/4 px-6 min-h-[38px] font-bold text-white/75 backdrop-blur-sm transition-all hover:border-amber-400/30 hover:bg-amber-400/8 hover:text-white"
               >
-                Join Waitlist
+                Sign Up Free
               </ScrollToSectionButton>
             </div>
           </div>

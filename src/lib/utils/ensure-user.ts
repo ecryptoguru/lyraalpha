@@ -44,8 +44,8 @@ export async function ensureUserExists(userId: string): Promise<void> {
     }
   }
 
-  // All new users start as STARTER. Upgrade plans manually via the admin dashboard.
-  const createPlanTier = "STARTER";
+  // All new users start as ELITE during Beta.
+  const createPlanTier = "ELITE";
 
   // If we couldn't fetch a real email from Clerk and the row already exists,
   // do NOT risk overwriting any data (plan/email) with placeholders.
@@ -56,7 +56,7 @@ export async function ensureUserExists(userId: string): Promise<void> {
   try {
     await prisma.user.upsert({
       where: { id: userId },
-      create: { id: userId, email, credits: 50, plan: createPlanTier, updatedAt: new Date() },
+      create: { id: userId, email, credits: 300, plan: createPlanTier, updatedAt: new Date() },
       update: {
         // Only update email if it's still a placeholder
         ...(email !== `${userId}@pending.com`

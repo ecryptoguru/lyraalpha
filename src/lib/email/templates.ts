@@ -8,10 +8,14 @@ export function buildWelcomeEmail({ firstName }: WelcomeEmailInput) {
   const safeName = firstName?.trim() || "there";
 
   return {
-    subject: "Welcome to LyraAlpha AI — your onboarding starts now",
+    subject: "Welcome to LyraAlpha AI — your ELITE Beta access is ready",
     text: `Hi ${safeName},
 
-Welcome to LyraAlpha AI.
+Welcome to LyraAlpha AI Beta.
+
+Your account is set up with:
+- ELITE plan access (full feature set)
+- 300 beta credits to explore the platform
 
 Start here:
 1) Complete onboarding wizard
@@ -23,8 +27,13 @@ Open dashboard: ${APP_URL}/dashboard
 - Team LyraAlpha AI`,
     html: `
       <div style="font-family: Inter, Arial, sans-serif; color: #111827; line-height: 1.6;">
-        <h2 style="margin-bottom: 8px;">Welcome to LyraAlpha AI, ${safeName}.</h2>
+        <h2 style="margin-bottom: 8px;">Welcome to LyraAlpha AI Beta, ${safeName}.</h2>
         <p style="margin-top: 0;">Institutional-grade intelligence with retail clarity.</p>
+        <div style="background: #fef3c7; border: 1px solid #fcd34d; padding: 14px 16px; border-radius: 10px; margin: 16px 0;">
+          <p style="margin: 0; font-size: 13px; font-weight: 700; color: #92400e;">Your Beta access includes:</p>
+          <p style="margin: 6px 0 0; font-size: 13px; color: #78350f;">&#10003; ELITE plan — full feature access</p>
+          <p style="margin: 4px 0 0; font-size: 13px; color: #78350f;">&#10003; 300 beta credits to explore the platform</p>
+        </div>
         <ol>
           <li>Complete your onboarding wizard</li>
           <li>Ask Lyra your first market question</li>

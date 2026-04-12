@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { ArrowRight, Brain, CheckCircle2, TrendingUp, XCircle, Zap } from "lucide-react";
 import { ScrollToSectionButton } from "@/components/landing/scroll-to-section-button";
-import { PRELAUNCH_WAITLIST_SECTION_ID } from "@/lib/config/prelaunch";
+import { SIGNUP_SECTION_ID } from "@/lib/config/prelaunch";
 
 // ─── Panel 1: Market Noise ────────────────────────────────────────────────────
 
@@ -176,7 +176,7 @@ function PanelClarity() {
           </div>
           <div className="border-t border-white/8 px-5 py-4">
             <ScrollToSectionButton
-              targetId={PRELAUNCH_WAITLIST_SECTION_ID}
+              targetId={SIGNUP_SECTION_ID}
               className="w-full justify-center rounded-xl border border-amber-400/25 bg-amber-400/10 py-2.5 font-mono text-sm font-bold text-amber-400 transition-all hover:bg-amber-400/18 hover:text-amber-300"
             >
               Get This Intelligence

@@ -105,8 +105,8 @@ export default function AiStockAnalysisPage() {
         "Every score is computed by deterministic engines. Lyra interprets the output, she doesn't generate it from training data alone.",
         "This surface connects into Market Narratives, Compare Assets, and Lyra research — so the analysis doesn't stop at a brief.",
       ]}
-      ctaLabel="Join Waitlist"
-      ctaHref="/#join-waitlist"
+      ctaLabel="Start Beta Free"
+      ctaHref="/sign-up"
       relatedTools={[
         { title: "AI Investment Research", description: "Ask cross-asset questions before narrowing down to one name.", href: "/tools/ai-investment-research" },
         { title: "Market Narrative Tracker", description: "Check whether the asset setup is part of the dominant market story.", href: "/tools/market-narrative-tracker" },

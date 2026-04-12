@@ -1,0 +1,93 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="84" y1="78" x2="434" y2="436" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0F172A"/>
+      <stop offset="0.56" stop-color="#0B1325"/>
+      <stop offset="1" stop-color="#07101D"/>
+    </linearGradient>
+    <radialGradient id="bgGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(370 118) rotate(128) scale(272 324)">
+      <stop stop-color="#22D3EE" stop-opacity="0.34"/>
+      <stop offset="0.55" stop-color="#38BDF8" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="signalGradient" x1="116" y1="102" x2="412" y2="404" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F59E0B"/>
+      <stop offset="0.46" stop-color="#F97316"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <radialGradient id="nodeGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) rotate(90) scale(22)">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="0.42" stop-color="#D7F5FF" stop-opacity="0.94"/>
+      <stop offset="1" stop-color="#A5F3FC" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="url(#bgGradient)"/>
+  <rect x="33" y="33" width="446" height="446" rx="111" stroke="rgba(148, 163, 184, 0.16)" stroke-width="2"/>
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="url(#bgGlow)"/>
+
+  <path d="M116 276C116 194 183 128 265 128C328 128 383 166 409 223" stroke="url(#signalGradient)" stroke-opacity="0.34" stroke-width="3" stroke-linecap="round"/>
+  <path d="M92 302C113 377 184 432 266 432C343 432 409 387 433 319" stroke="url(#signalGradient)" stroke-opacity="0.3" stroke-width="3" stroke-linecap="round"/>
+
+  <path d="M144 150V346H330" stroke="url(#signalGradient)" stroke-width="21" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g stroke="url(#signalGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M104 304L166 222L248 260L328 194L392 232"/>
+    <path d="M166 222L184 134"/>
+    <path d="M248 260L248 388"/>
+    <path d="M328 194L386 138"/>
+    <path d="M328 194L340 330"/>
+    <path d="M248 388L340 330L414 312"/>
+    <path d="M184 134L386 138"/>
+  </g>
+
+  <g filter="url(#softGlow)">
+    <g transform="translate(104 304)">
+      <circle r="17" fill="url(#nodeGlow)"/>
+      <circle r="5" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(166 222)">
+      <circle r="15" fill="url(#nodeGlow)"/>
+      <circle r="4.5" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(184 134)">
+      <circle r="14" fill="url(#nodeGlow)"/>
+      <circle r="4.5" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(248 260)">
+      <circle r="21" fill="url(#nodeGlow)"/>
+      <circle r="6.5" fill="#FFFFFF"/>
+    </g>
+    <g transform="translate(248 388)">
+      <circle r="15" fill="url(#nodeGlow)"/>
+      <circle r="4.5" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(328 194)">
+      <circle r="16" fill="url(#nodeGlow)"/>
+      <circle r="5" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(340 330)">
+      <circle r="15" fill="url(#nodeGlow)"/>
+      <circle r="4.5" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(386 138)">
+      <circle r="14" fill="url(#nodeGlow)"/>
+      <circle r="4.5" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(392 232)">
+      <circle r="14" fill="url(#nodeGlow)"/>
+      <circle r="4.5" fill="#F8FAFC"/>
+    </g>
+    <g transform="translate(414 312)">
+      <circle r="13" fill="url(#nodeGlow)"/>
+      <circle r="4" fill="#F8FAFC"/>
+    </g>
+  </g>
+</svg>

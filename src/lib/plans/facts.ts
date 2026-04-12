@@ -100,10 +100,10 @@ export function buildMyraPlatformFacts(): string {
 
 export function buildPublicMyraPlatformFacts(): string {
   return [
-    "- **Myra on landing**: public prelaunch support assistant — available to all visitors before sign-in for waitlist, onboarding, product coverage, and access questions",
+    "- **Myra on landing**: public Beta support assistant — available to all visitors before sign-in for Beta access, onboarding, product coverage, and plan questions",
     "- **Audience**: public site visitors are not assumed to be signed in; do not describe them as being on Starter, Pro, Elite, or Enterprise unless they explicitly say so",
-    "- **Waitlist**: joining the waitlist is the main public onboarding path during prelaunch; direct visitors to [join the waitlist](/#join-waitlist)",
-    "- **Early access**: waitlist users may receive limited early access before launch; do not promise a specific plan tier or immediate entitlement",
+    "- **Beta access**: sign-up is the main public onboarding path; all new users get ELITE plan + 300 credits free during Beta; direct visitors to [sign up free](/sign-up)",
+    "- **Beta entitlement**: Beta users receive ELITE plan access and 300 credits immediately on sign-up — no card, no invite required",
     "- **Asset coverage**: LyraAlpha covers crypto tokens with on-chain analysis, DeFi metrics, and network signals",
     "- **Lyra Intel**: the AI financial analyst lives inside the authenticated product; guide public visitors to [sign up](/sign-up) or [sign in](/sign-in) to access it",
     "- **Plans summary (generic)**: STARTER is free (50 credits/mo); PRO is $14.99/mo (500 credits); ELITE is $39.99/mo (1,500 credits + premium tools: Compare Assets, Shock Simulator); ENTERPRISE is custom — explain these if asked without assuming which plan the visitor is on",

@@ -243,21 +243,21 @@ export default function ToolsPage() {
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_50%_50%,rgba(245,158,11,0.06),transparent_70%)]" />
               <div className="relative flex flex-col items-center gap-5 text-center sm:flex-row sm:justify-between sm:text-left">
                 <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-amber-300/70">
-                    Early access · Limited spots
+                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-teal-300/70">
+                    Beta · Free ELITE access
                   </p>
                   <h2 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
                     Ready to stop guessing?
                   </h2>
                   <p className="mt-2 max-w-lg text-sm leading-7 text-white/55">
-                    Join the early access waitlist. Priority pricing locked for early members. US and India markets. No credit card required.
+                    Free Beta access. ELITE plan. 300 credits. No card required. Crypto, US and India markets.
                   </p>
                 </div>
                 <Link
-                  href="/#join-waitlist"
+                  href="/sign-up"
                   className="group shrink-0 inline-flex items-center gap-2.5 rounded-full border border-amber-400/30 bg-amber-400 px-8 py-4 font-mono text-sm font-bold text-slate-950 shadow-[0_0_40px_rgba(245,158,11,0.3)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-[0_0_60px_rgba(245,158,11,0.45)]"
                 >
-                  Claim Early Access
+                  Start Free Beta
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Link>
               </div>

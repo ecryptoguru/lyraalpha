@@ -15,18 +15,18 @@ import { Navbar } from "@/components/layout/Navbar";
 export const metadata: Metadata = {
   title: "LyraAlpha AI | The AI that computes before it speaks",
   description:
-    "The only financial intelligence platform that grounds every AI response in deterministic engine computation. Lyra interprets what the engines computed — never invents. Crypto-native market intelligence. Join the early access waitlist.",
+    "The only financial intelligence platform that grounds every AI response in deterministic engine computation. Lyra interprets what the engines computed — never invents. Crypto-native market intelligence. Free Beta access — ELITE plan, 300 credits, no card required.",
   openGraph: {
     title: "LyraAlpha AI | The AI that computes before it speaks",
     description:
-      "Stop guessing. Start knowing. AI-grounded crypto intelligence for on-chain analysis, DeFi metrics, and network signals. Early access waitlist open.",
+      "Stop guessing. Start knowing. AI-grounded crypto intelligence for on-chain analysis, DeFi metrics, and network signals. Free Beta — ELITE plan, 300 credits, sign up free.",
     images: ["/og-image.png"],
   },
   twitter: {
     card: "summary_large_image",
     title: "LyraAlpha AI | The AI that computes before it speaks",
     description:
-      "Stop guessing. Start knowing. AI-grounded crypto intelligence for on-chain analysis, DeFi metrics, and network signals. Early access waitlist open.",
+      "Stop guessing. Start knowing. AI-grounded crypto intelligence for on-chain analysis, DeFi metrics, and network signals. Free Beta — ELITE plan, 300 credits, sign up free.",
     images: ["/og-image.png"],
   },
 };
@@ -64,7 +64,7 @@ const APP_SCHEMA = {
     "@type": "Offer",
     price: "0",
     priceCurrency: "USD",
-    description: "Free waitlist — early access cohort",
+    description: "Free Beta — ELITE plan access, 300 credits, no credit card required",
   },
   description:
     "The only financial intelligence platform that grounds every AI response in deterministic engine computation. Lyra interprets what the engines computed for crypto markets.",

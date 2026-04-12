@@ -1,1 +1,1 @@
-export const PRELAUNCH_WAITLIST_SECTION_ID = "waitlist";
+export const SIGNUP_SECTION_ID = "get-started";

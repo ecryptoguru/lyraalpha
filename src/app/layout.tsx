@@ -34,6 +34,11 @@ export const metadata: Metadata = {
   description: "Decode market signals with AI that understands context. Real-time analysis for Equities, Crypto and Commodities with Institutional Grade Retail Clarity.",
   manifest: "/manifest.webmanifest",
   icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
     apple: "/icons/apple-touch-icon.png",
   },
   appleWebApp: {

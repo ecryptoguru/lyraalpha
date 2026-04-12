@@ -96,8 +96,8 @@ export default function AiInvestmentResearchPage() {
         "Lyra's tiered routing means simple questions are fast and cheap; complex ELITE-tier queries get full model depth with reasoning.",
         "Every Lyra response can bridge directly into portfolio intelligence, market narratives, or asset analysis — the system doesn't strand you at the answer.",
       ]}
-      ctaLabel="Join Waitlist"
-      ctaHref="/#join-waitlist"
+      ctaLabel="Start Beta Free"
+      ctaHref="/sign-up"
       relatedTools={[
         { title: "AI Portfolio Analyzer", description: "Take the research answer back into your holdings when the question is about current exposure.", href: "/tools/ai-portfolio-analyzer" },
         { title: "Market Narrative Tracker", description: "Check whether Lyra's scenario matches the dominant market story right now.", href: "/tools/market-narrative-tracker" },

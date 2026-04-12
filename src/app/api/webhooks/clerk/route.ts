@@ -83,9 +83,9 @@ export async function POST(req: Request) {
         const lastName = data.last_name || undefined;
 
         const isAdmin = isPrivilegedEmail(email);
-        // All new sign-ups get ELITE plan + 500 bonus credits
+        // All new sign-ups get ELITE plan + 300 beta credits
         const plan = "ELITE" as const;
-        const SIGNUP_BONUS_CREDITS = 500;
+        const SIGNUP_BONUS_CREDITS = 300;
 
         await prisma.user.upsert({
           where: { id: data.id },
@@ -123,7 +123,7 @@ export async function POST(req: Request) {
                 data.id,
                 SIGNUP_BONUS_CREDITS,
                 "BONUS" as never,
-                "Sign-up bonus — welcome to LyraAlpha!",
+                "Beta sign-up bonus — welcome to LyraAlpha!",
                 undefined,
                 { countTowardEarned: false }, // already counted in upsert
               );

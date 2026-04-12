@@ -12,8 +12,8 @@ interface ChatMessage {
 
 const QUICK_REPLIES = [
   "What is LyraAlpha AI?",
-  "How do I join the waitlist?",
-  "What do waitlisted users get?",
+  "How does ELITE Beta work?",
+  "What are the 300 credits for?",
   "What assets are covered?",
 ];
 
@@ -164,9 +164,9 @@ export function PublicMyraPanel({
 
         <div className="relative shrink-0 border-b border-amber-200/70 bg-amber-50/80 px-5 py-3 dark:border-white/8 dark:bg-amber-300/6">
           <span className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 dark:text-white/56">
-            Ask about early access, waitlist benefits or
-            <Link href="/#join-waitlist" className="font-bold text-amber-600 transition-colors hover:text-amber-500 dark:text-amber-100 dark:hover:text-white">
-              join the waitlist →
+            Ask about Beta access, ELITE plan or
+            <Link href="/sign-up" className="font-bold text-amber-600 transition-colors hover:text-amber-500 dark:text-amber-100 dark:hover:text-white">
+              sign up free →
             </Link>
           </span>
         </div>
@@ -178,9 +178,9 @@ export function PublicMyraPanel({
                 <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full border border-amber-300/30 bg-amber-50 text-amber-500 shadow-[0_10px_30px_rgba(245,158,11,0.12)] dark:border-amber-300/18 dark:bg-amber-300/8 dark:text-amber-200 dark:shadow-[0_10px_30px_rgba(245,158,11,0.08)]">
                   <Sparkles className="h-8 w-8" />
                 </div>
-                <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Ask before launch.</p>
+                <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Ask about Beta access.</p>
                 <p className="px-4 text-sm font-medium leading-relaxed text-slate-500 dark:text-white/52">
-                  I can explain how the waitlist works, what early access includes, which assets are covered and how LyraAlpha works before public launch.
+                  I can explain how the Beta works, what ELITE access includes, which assets are covered and how LyraAlpha works.
                 </p>
               </div>
               <div className="grid grid-cols-1 gap-2.5">
@@ -249,7 +249,7 @@ export function PublicMyraPanel({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-              placeholder="Ask about the waitlist, free early access or coverage..."
+              placeholder="Ask about Beta access, ELITE plan or coverage..."
               className="flex-1 rounded-full border border-slate-200/80 bg-white px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-amber-300/50 focus:outline-none focus:ring-1 focus:ring-amber-300/18 dark:border-white/10 dark:bg-white/3 dark:text-white dark:placeholder:text-white/28 dark:focus:border-amber-300/28"
             />
             <button
@@ -263,7 +263,7 @@ export function PublicMyraPanel({
           <div className="mt-2 flex items-center justify-center">
             <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/90 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-slate-400 dark:border-white/8 dark:bg-white/3 dark:text-white/46">
               <Sparkles className="h-2.5 w-2.5 text-amber-600 dark:text-amber-200/70" />
-              Waitlist users get free limited early access before launch
+              Beta users get free ELITE access with 300 credits
             </span>
           </div>
         </div>

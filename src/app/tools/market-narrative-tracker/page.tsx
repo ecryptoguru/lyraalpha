@@ -105,8 +105,8 @@ export default function MarketNarrativeTrackerPage() {
         "Narrative strength scoring tells you whether to lean into the current trend or position for the next regime shift.",
         "Routes directly into Multibagger Radar for aligned names, portfolio intelligence for exposure checks, and Lyra for cross-asset scenario framing.",
       ]}
-      ctaLabel="Join Waitlist"
-      ctaHref="/#join-waitlist"
+      ctaLabel="Start Beta Free"
+      ctaHref="/sign-up"
       relatedTools={[
         { title: "AI Portfolio Analyzer", description: "Check whether your holdings are already concentrated in the dominant narrative.", href: "/tools/ai-portfolio-analyzer" },
         { title: "AI Investment Research", description: "Take the narrative into Lyra for deeper cross-asset scenario analysis.", href: "/tools/ai-investment-research" },

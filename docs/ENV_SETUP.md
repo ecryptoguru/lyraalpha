@@ -19,6 +19,10 @@ Required env vars:
 - `NEXT_PUBLIC_CLERK_SIGN_UP_URL`
 - `NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL`
 - `NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL`
+- `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL`
+- `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL`
+
+> **Production**: Set these to full URLs (e.g. `https://lyraalpha.xyz/sign-in`). For local dev, use `http://localhost:3000/sign-in`.
 
 #### 2. Stripe Billing
 Used for checkout, subscriptions, pricing, and billing webhooks.
@@ -76,12 +80,13 @@ Required env vars:
 - `QSTASH_TOKEN`
 - `QSTASH_CURRENT_SIGNING_KEY`
 - `QSTASH_NEXT_SIGNING_KEY`
+- `CRON_SECRET` — Bearer token for cron job auth. Generate with `openssl rand -hex 32`.
 
 #### 8. Voice session signing and realtime config
 Used for Myra voice session security and media settings.
 
 Required env vars:
-- `VOICE_SESSION_SECRET`
+- `VOICE_SESSION_SECRET` — signing key for voice session tokens. Generate with `openssl rand -hex 32`.
 - `VOICE_STT_MODEL`
 - `VOICE_TTS_MODEL`
 - `NEXT_PUBLIC_APP_URL`
@@ -128,7 +133,7 @@ Required env vars:
 
 ### 14. CoinGlass
 Used for crypto derivatives data: open interest, funding rates, liquidations.
-⚠️ **No free tier** — minimum is Hobbyist at $29/mo (30 req/min).
+⚠️ **No free tier** — minimum is Hobbyist at $29/mo (30 req/min). **Currently deferred** — not integrated yet.
 
 Required env vars:
 - `COINGLASS_API_KEY`

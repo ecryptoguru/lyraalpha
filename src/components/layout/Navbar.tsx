@@ -25,13 +25,13 @@ export function Navbar() {
             <span className="truncate text-sm font-bold tracking-tight text-slate-900 sm:text-base dark:text-white">
               LyraAlpha AI
             </span>
-            <span className="hidden rounded-full border border-amber-300/30 bg-amber-50 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.24em] text-amber-600 sm:inline-flex dark:border-amber-300/18 dark:bg-amber-300/8 dark:text-amber-100/75">
-              Pre-launch
+            <span className="hidden rounded-full border border-teal-400/30 bg-teal-50 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.24em] text-teal-700 sm:inline-flex dark:border-teal-400/25 dark:bg-teal-400/10 dark:text-teal-300">
+              Beta
             </span>
           </div>
-          {/* Mobile: Pre-launch badge below name — -ml-0.5 compensates for border visual offset */}
-          <span className="-ml-0.5 mt-0.5 inline-flex sm:hidden rounded-full border border-amber-300/30 bg-amber-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.22em] text-amber-600 dark:border-amber-300/18 dark:bg-amber-300/8 dark:text-amber-100/75">
-            Pre-launch
+          {/* Mobile: Beta badge below name */}
+          <span className="-ml-0.5 mt-0.5 inline-flex sm:hidden rounded-full border border-teal-400/30 bg-teal-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.22em] text-teal-700 dark:border-teal-400/25 dark:bg-teal-400/10 dark:text-teal-300">
+            Beta
           </span>
           <p className="hidden mt-1.5 text-[10px] uppercase tracking-[0.3em] text-slate-400 sm:block dark:text-white/35">
             Market intelligence for conviction
@@ -41,10 +41,13 @@ export function Navbar() {
 
       <div className="flex items-center gap-2 sm:gap-3">
         <NavbarLinks />
-        <div className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.26em] text-slate-500 lg:flex dark:border-white/8 dark:bg-white/3 dark:text-white/42">
-          <Sparkles className="h-3.5 w-3.5 text-amber-600 dark:text-amber-200" />
-          Waitlist open
-        </div>
+        <Link
+          href="/sign-up"
+          className="hidden items-center gap-2 rounded-full border border-teal-400/30 bg-teal-50/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.26em] text-teal-700 transition-colors hover:bg-teal-100 lg:flex dark:border-teal-400/20 dark:bg-teal-400/8 dark:text-teal-300 dark:hover:bg-teal-400/12"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          Sign Up Free
+        </Link>
         <NavbarAuthControlsSlot />
       </div>
     </NavbarSurface>

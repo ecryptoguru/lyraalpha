@@ -1,13 +1,8 @@
-"use client";
-
-import { Check, Loader2, Mail, ShieldCheck, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { Check, ShieldCheck, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 import { LandingReveal } from "@/components/landing/LandingReveal";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { PRELAUNCH_WAITLIST_SECTION_ID } from "@/lib/config/prelaunch";
+import { SIGNUP_SECTION_ID } from "@/lib/config/prelaunch";
 
 const roadmapQuarters = [
   {
@@ -142,128 +137,83 @@ function RoadmapSection() {
   );
 }
 
-const waitlistBenefits = [
-  "Priority access before public launch — guaranteed first in line",
-  "Lock your plan at pre-launch pricing, never available after launch",
-  "Direct route to Portfolio Intelligence, Lyra, and Narratives when access opens",
+const betaBenefits = [
+  "ELITE plan access — full feature set, free during Beta",
+  "300 credits on sign-up — no card, no trial expiry",
+  "Direct access to Portfolio Intelligence, Lyra, and Narratives",
 ] as const;
 
-const waitlistSignals = [
-  { label: "Access type",   value: "Priority early access · limited cohort",   accent: "amber" },
-  { label: "Pricing lock",  value: "Pre-launch rates — never offered again",     accent: "teal"  },
-  { label: "Email policy",  value: "Access updates only. Zero marketing noise.", accent: "default" },
+const betaSignals = [
+  { label: "Access type",  value: "Open Beta · no invite required",        accent: "teal"    },
+  { label: "Your plan",    value: "ELITE — free for all beta users",        accent: "amber"   },
+  { label: "Credits",      value: "300 credits · ready on day one",         accent: "default" },
 ] as const;
 
 export function WaitlistSection() {
   return (
     <>
       <RoadmapSection />
-      <WaitlistFormSection />
+      <BetaSignupSection />
     </>
   );
 }
 
-function WaitlistFormSection() {
-  const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [isError, setIsError] = useState(false);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!email.trim()) return;
-
-    setIsSubmitting(true);
-    setMessage(null);
-    setIsError(false);
-
-    try {
-      const response = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          firstName,
-          source: "landing_page_prelaunch_premium",
-        }),
-      });
-
-      const payload = await response.json();
-      if (!response.ok) {
-        setIsError(true);
-        setMessage(payload.error || "Unable to join waitlist right now.");
-      } else {
-        setEmail("");
-        setFirstName("");
-        setMessage("You're in. We'll reach out when your access opens. Check your inbox for confirmation.");
-      }
-    } catch {
-      setIsError(true);
-      setMessage("Unable to join waitlist right now.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
+function BetaSignupSection() {
   return (
     <section
-      id={PRELAUNCH_WAITLIST_SECTION_ID}
+      id={SIGNUP_SECTION_ID}
       className="relative bg-[#040816] px-4 py-24 sm:px-6 sm:py-28"
       suppressHydrationWarning
     >
-      {/* Ambient amber glow */}
-      <div className="pointer-events-none absolute inset-x-0 top-1/3 h-80 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(245,158,11,0.08),transparent_65%)] blur-2xl" />
+      <div className="pointer-events-none absolute inset-x-0 top-1/3 h-80 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(20,184,166,0.07),transparent_65%)] blur-2xl" />
       <div className="pointer-events-none absolute inset-0 obsidian-grid opacity-25" />
 
       <div className="container relative z-10 mx-auto max-w-7xl px-0">
         <LandingReveal>
           <div className="overflow-hidden rounded-3xl border border-white/8 bg-white/2 backdrop-blur-sm">
-            {/* Top amber scan line */}
-            <div className="h-px w-full bg-linear-to-r from-transparent via-amber-400/60 to-transparent" />
+            <div className="h-px w-full bg-linear-to-r from-transparent via-teal-400/60 to-transparent" />
 
             <div className="grid xl:grid-cols-[1.1fr_0.9fr]">
               {/* Left: info panel */}
               <div className="p-7 sm:p-10">
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-amber-400/25 bg-amber-400/8 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-amber-400">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
-                    Limited cohort open
+                  <span className="inline-flex items-center gap-2 rounded-full border border-teal-400/25 bg-teal-400/8 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal-400" />
+                    Beta · Open Access
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-400/20 bg-teal-400/6 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-teal-300/80">
-                    <Sparkles className="h-3 w-3 text-teal-400" />
-                    Closes when full
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/6 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-amber-300/80">
+                    <Sparkles className="h-3 w-3 text-amber-400" />
+                    Free ELITE plan
                   </span>
                 </div>
 
                 <h2 className="mt-6 max-w-2xl text-4xl font-light tracking-[-0.05em] text-white sm:text-5xl lg:text-6xl">
-                  Join now.
-                  <span className="block text-amber-400">Early members get more — always.</span>
+                  Start free.
+                  <span className="block text-teal-400">ELITE access, day one.</span>
                 </h2>
                 <p className="mt-6 max-w-xl text-base leading-8 text-white/45 sm:text-lg">
-                  This is a limited early access cohort. Priority position, pre-launch pricing lock,
-                  and first access to every new feature as we ship. The waitlist closes when the
-                  cohort is full.
+                  LyraAlpha is now open for Beta. Sign up and instantly unlock ELITE plan features,
+                  300 credits, and full access to the platform — no credit card, no invite required.
                 </p>
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                  {waitlistSignals.map((signal) => (
+                  {betaSignals.map((signal) => (
                     <div
                       key={signal.label}
                       className={`rounded-2xl border p-4 ${
-                        signal.accent === "amber"
-                          ? "border-amber-400/18 bg-amber-400/5"
-                          : signal.accent === "teal"
-                          ? "border-teal-400/15 bg-teal-400/4"
+                        signal.accent === "teal"
+                          ? "border-teal-400/18 bg-teal-400/5"
+                          : signal.accent === "amber"
+                          ? "border-amber-400/15 bg-amber-400/4"
                           : "border-white/8 bg-white/2.5"
                       }`}
                     >
                       <p
                         className={`font-mono text-[10px] font-bold uppercase tracking-[0.28em] ${
-                          signal.accent === "amber"
-                            ? "text-amber-400/60"
-                            : signal.accent === "teal"
-                            ? "text-teal-400/55"
+                          signal.accent === "teal"
+                            ? "text-teal-400/60"
+                            : signal.accent === "amber"
+                            ? "text-amber-400/55"
                             : "text-white/30"
                         }`}
                       >
@@ -277,7 +227,7 @@ function WaitlistFormSection() {
                 </div>
 
                 <div className="mt-8 space-y-3">
-                  {waitlistBenefits.map((benefit) => (
+                  {betaBenefits.map((benefit) => (
                     <div
                       key={benefit}
                       className="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/2.5 px-4 py-4"
@@ -291,104 +241,72 @@ function WaitlistFormSection() {
                 </div>
               </div>
 
-              {/* Right: form panel */}
+              {/* Right: CTA panel */}
               <div className="relative border-t border-white/8 bg-white/2 px-6 py-8 sm:px-8 sm:py-10 xl:border-l xl:border-t-0">
-                <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-amber-400/4 via-transparent to-teal-400/3" />
-                {/* Teal glow corner */}
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-teal-400/4 via-transparent to-amber-400/3" />
                 <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-teal-400/8 blur-2xl" />
 
                 <LandingReveal delay={120}>
                   <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/3 p-6 shadow-[0_24px_64px_rgba(0,0,0,0.3)] sm:p-7">
-                    {/* Top teal bar */}
                     <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-teal-400/50 to-transparent" />
 
                     <div className="flex items-center justify-between gap-3 border-b border-white/8 pb-5">
                       <div>
                         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.32em] text-white/30">
-                          Limited cohort · closes when full
+                          Beta · Free ELITE access
                         </p>
                         <p className="mt-2 text-lg font-semibold tracking-tight text-white">
-                          Secure your priority position
+                          Create your free account
                         </p>
                       </div>
-                      <div className="landing-float-fast rounded-full border border-amber-400/20 bg-amber-400/8 p-3 text-amber-400">
+                      <div className="landing-float-fast rounded-full border border-teal-400/20 bg-teal-400/8 p-3 text-teal-400">
                         <Sparkles className="h-4 w-4" />
                       </div>
                     </div>
 
-                    <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-                      <div className="space-y-2">
-                        <label htmlFor="waitlist-firstname" className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-white/38">
-                          First name
-                        </label>
-                        <Input
-                          id="waitlist-firstname"
-                          value={firstName}
-                          onChange={(event) => setFirstName(event.target.value)}
-                          placeholder="Your first name"
-                          autoComplete="given-name"
-                          className="h-12 rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-white/22 focus:border-amber-400/40 focus:ring-amber-400/15"
-                        />
+                    <div className="mt-6 space-y-4">
+                      <div className="grid grid-cols-3 gap-3">
+                        {[
+                          { label: "Plan", value: "ELITE", color: "text-teal-400" },
+                          { label: "Credits", value: "300", color: "text-amber-400" },
+                          { label: "Card", value: "None", color: "text-white/60" },
+                        ].map((item) => (
+                          <div key={item.label} className="rounded-2xl border border-white/8 bg-white/2 px-3 py-3 text-center">
+                            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-white/30">{item.label}</p>
+                            <p className={`mt-1.5 text-base font-bold ${item.color}`}>{item.value}</p>
+                          </div>
+                        ))}
                       </div>
 
-                      <div className="space-y-2">
-                        <label htmlFor="waitlist-email" className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-white/38">
-                          Email address
-                        </label>
-                        <Input
-                          id="waitlist-email"
-                          type="email"
-                          value={email}
-                          onChange={(event) => setEmail(event.target.value)}
-                          placeholder="you@example.com"
-                          autoComplete="email"
-                          className="h-12 rounded-2xl border-white/10 bg-white/5 text-white placeholder:text-white/22 focus:border-amber-400/40 focus:ring-amber-400/15"
-                          required
-                        />
-                      </div>
-
-                      <Button
-                        type="submit"
-                        className="h-12 w-full rounded-2xl bg-amber-400 font-bold text-slate-950 shadow-[0_8px_30px_rgba(245,158,11,0.25)] transition-all hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-[0_14px_45px_rgba(245,158,11,0.35)]"
-                        disabled={isSubmitting || !email.trim()}
+                      <Link
+                        href="/sign-up"
+                        className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-amber-400 font-bold text-slate-950 shadow-[0_8px_30px_rgba(245,158,11,0.25)] transition-all hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-[0_14px_45px_rgba(245,158,11,0.35)]"
                       >
-                        {isSubmitting ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          <Mail className="mr-2 h-4 w-4" />
-                        )}
-                        Claim My Early Access
-                      </Button>
-
-                      {message ? (
-                        <p className={`font-mono text-sm ${isError ? "text-rose-400" : "text-teal-400"}`}>
-                          {message}
-                        </p>
-                      ) : null}
+                        <Sparkles className="h-4 w-4" />
+                        Start Free — Get ELITE Access
+                      </Link>
 
                       <div className="rounded-2xl border border-white/8 bg-white/2 px-4 py-4 text-sm leading-7 text-white/40">
                         <div className="flex items-center gap-2 text-white/60">
                           <ShieldCheck className="h-4 w-4 text-teal-400" />
                           <span className="font-mono text-[10px] uppercase tracking-wide">
-                            Launch updates only
+                            No card · No catch · Cancel anytime
                           </span>
                         </div>
                         <p className="mt-2 font-mono text-[11px] leading-6">
-                          Already approved?{" "}
-                          <Link href="/sign-in" className="underline underline-offset-2 hover:text-white/70 transition-colors">
-                            Sign in with your invite
-                          </Link>{" "}
-                          to enter the product directly.
+                          Already have an account?{" "}
+                          <Link href="/sign-in" className="underline underline-offset-2 transition-colors hover:text-white/70">
+                            Sign in here
+                          </Link>
                         </p>
                       </div>
-                    </form>
+                    </div>
                   </div>
                 </LandingReveal>
               </div>
             </div>
 
-            {/* Bottom teal bar */}
-            <div className="h-px w-full bg-linear-to-r from-transparent via-teal-400/40 to-transparent" />
+            <div className="h-px w-full bg-linear-to-r from-transparent via-amber-400/40 to-transparent" />
           </div>
         </LandingReveal>
       </div>
