@@ -431,12 +431,12 @@ export class MarketSyncService {
         // Source-of-truth for intelligence domains is now:
         // NewsData.io + India RSS.
         if (shouldSyncLegacyYahooNews) {
-          const SIX_HOURS_AGO = new Date(Date.now() - 6 * 60 * 60 * 1000);
+          const TWELVE_HOURS_AGO = new Date(Date.now() - 12 * 60 * 60 * 1000);
           const recentNews = await prisma.institutionalEvent.findMany({
             where: {
               assetId: { in: batch.map(a => a.id) },
               type: "NEWS",
-              date: { gte: SIX_HOURS_AGO },
+              date: { gte: TWELVE_HOURS_AGO },
             },
             select: { assetId: true },
             distinct: ["assetId"],
@@ -444,7 +444,7 @@ export class MarketSyncService {
           const freshNewsIds = new Set(recentNews.map(n => n.assetId));
           const staleAssets = batch.filter(a => !freshNewsIds.has(a.id));
           if (staleAssets.length < batch.length) {
-            logger.debug({ skipped: batch.length - staleAssets.length, syncing: staleAssets.length }, "News: skipping assets with fresh news (<6h)");
+            logger.debug({ skipped: batch.length - staleAssets.length, syncing: staleAssets.length }, "News: skipping assets with fresh news (<12h)");
           }
           await Promise.all(staleAssets.map(a => IntelligenceEventsService.syncNewsIntelligence(a.id, a.symbol)));
         } else {
@@ -712,13 +712,47 @@ export class MarketSyncService {
           const cgMetadata = CoinGeckoService.transformDetailToMetadata(detail);
           const existingMeta = freshMetaMap.get(symbol) || {};
 
+          // Derive top-level enrichment fields from detail data (zero extra API calls)
+          const devData = detail.developer_data;
+          const commData = detail.community_data;
+
+          // technicalRating: composite of developer + community health → label
+          let techScore = 50; // neutral default
+          if (devData) {
+            const issueCloseRate = devData.total_issues > 0 ? devData.closed_issues / devData.total_issues : 0.5;
+            const commitActivity = Math.min(1, devData.commit_count_4_weeks / 200);
+            const starScore = Math.min(1, devData.stars / 10000);
+            const forkScore = Math.min(1, devData.forks / 2000);
+            techScore = Math.round((issueCloseRate * 20 + commitActivity * 30 + starScore * 25 + forkScore * 25));
+          }
+          const techLabel = techScore >= 70 ? "STRONG_BUY" : techScore >= 55 ? "BUY" : techScore >= 45 ? "NEUTRAL" : techScore >= 30 ? "SELL" : "STRONG_SELL";
+
+          // analystRating: derived from sentiment votes → label
+          const upPct = detail.sentiment_votes_up_percentage ?? 50;
+          const analystLabel = upPct >= 75 ? "STRONG_BUY" : upPct >= 60 ? "BUY" : upPct >= 40 ? "NEUTRAL" : upPct >= 25 ? "SELL" : "STRONG_SELL";
+
+          // Institutional proxy: approximate from watchlist + reddit + telegram engagement
+          const watchlist = detail.watchlist_portfolio_users ?? 0;
+          const redditSubs = commData?.reddit_subscribers ?? 0;
+          const telegramUsers = commData?.telegram_channel_user_count ?? 0;
+          const socialReach = watchlist + redditSubs + (telegramUsers ?? 0);
+          const instProxy = Math.min(1, socialReach / 500000); // normalize to 0-1
+
+          // TVL data from market_data (available but not persisted anywhere yet)
+          const tvl = detail.market_data?.total_value_locked ?? null;
+          const mcapToTvl = detail.market_data?.mcap_to_tvl_ratio ?? null;
+
           await prisma.asset.update({
             where: { symbol },
             data: {
               description: cgMetadata.description?.slice(0, 5000) || null,
+              technicalRating: techLabel,
+              analystRating: analystLabel,
               metadata: {
                 ...existingMeta,
                 coingecko: toJsonObject(cgMetadata),
+                institutionalProxy: instProxy,
+                ...(tvl !== null ? { tvl, mcapToTvlRatio: mcapToTvl } : {}),
               } as Prisma.JsonObject,
             },
           });
@@ -1356,6 +1390,70 @@ export class MarketSyncService {
           }
         }
 
+        // CoinGlass derivatives enrichment — DEFERRED until API key is purchased (no free tier)
+        // To activate: set COINGLASS_API_KEY in .env and uncomment the block below
+        // let coinglassOi: number | null = null;
+        // if (asset.type === "CRYPTO") {
+        //   try {
+        //     const { CoinGlassService } = await import("./coinglass.service");
+        //     const derivatives = await CoinGlassService.getDerivativesSummary(symbol);
+        //     if (derivatives.openInterest || derivatives.fundingRate || derivatives.liquidation) {
+        //       assetMeta.coinglass = { ... } as Record<string, unknown>;
+        //       coinglassOi = derivatives.openInterest?.openInterest ?? null;
+        //     }
+        //   } catch (err) {
+        //     logger.debug({ symbol, err: String(err) }, "CoinGlass enrichment skipped");
+        //   }
+        // }
+
+        // Messari financials enrichment (protocol revenue, P/S, tokenomics)
+        let messariFinancials: Record<string, unknown> | null = null;
+        if (asset.type === "CRYPTO" && asset.coingeckoId) {
+          try {
+            const { MessariService } = await import("./messari.service");
+            const slug = MessariService.symbolToSlug(symbol);
+            const [metrics, profile] = await Promise.all([
+              MessariService.getAssetMetrics(slug).catch(() => null),
+              MessariService.getAssetProfile(slug).catch(() => null),
+            ]);
+
+            if (metrics || profile) {
+              assetMeta.messari = {
+                ...(metrics ? {
+                  revenue: metrics.revenue,
+                  revenueChangeYtd: metrics.revenueChangeYtd,
+                  psRatio: metrics.psRatio,
+                  peRatio: metrics.peRatio,
+                  yield: metrics.yield,
+                  inflationRate: metrics.inflationRate,
+                  unlockSchedule: metrics.unlockSchedule,
+                } : {}),
+                ...(profile ? {
+                  sector: profile.sector,
+                  category: profile.category,
+                  governanceType: profile.governanceType,
+                  tokenUseCases: profile.tokenUseCases,
+                  consensusMechanism: profile.consensusMechanism,
+                } : {}),
+                lastUpdated: new Date().toISOString(),
+              } as Record<string, unknown>;
+
+              if (metrics?.revenue != null || metrics?.psRatio != null) {
+                messariFinancials = {
+                  revenue: metrics.revenue,
+                  revenueChangeYtd: metrics.revenueChangeYtd,
+                  psRatio: metrics.psRatio,
+                  peRatio: metrics.peRatio,
+                  yield: metrics.yield,
+                  inflationRate: metrics.inflationRate,
+                };
+              }
+            }
+          } catch (err) {
+            logger.debug({ symbol, err: String(err) }, "Messari enrichment skipped");
+          }
+        }
+
         const cryptoReliabilityStats: Record<string, { evaluated: number; unavailable: number }> | null = cryptoReliability
           ? Object.values(cryptoReliability).reduce<Record<string, { evaluated: number; unavailable: number }>>((acc, field) => {
               const provider = field.expectedSource;
@@ -1408,6 +1506,8 @@ export class MarketSyncService {
             }),
             ...(cryptoIntelData ? { cryptoIntelligence: cryptoIntelData } : {}),
             ...(scenarioData ? { scenarioData } : {}),
+            // CoinGlass: add ...(coinglassOi != null ? { openInterest: coinglassOi } : {}) when activated
+            ...(messariFinancials ? { financials: messariFinancials as unknown as Prisma.InputJsonValue } : {}),
           },
           reliabilityStats,
           cryptoReliabilityStats,

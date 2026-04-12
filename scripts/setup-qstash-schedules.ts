@@ -46,8 +46,8 @@ type ScheduleEntry = {
 // ─────────────────────────────────────────────────────────────────────────────
 const SCHEDULES: ScheduleEntry[] = [
   { path: "/api/cron/us-eod-crypto-sync",      cron: "45 21 * * 1-5", retries: 3 },
-  { path: "/api/cron/crypto-sync",        cron: "0 */8 * * *",   retries: 3 },
-  { path: "/api/cron/news-sync",          cron: "0 */6 * * *",   retries: 3 },
+  { path: "/api/cron/crypto-sync",        cron: "0 */12 * * *",   retries: 3 },
+  { path: "/api/cron/news-sync",          cron: "0 */12 * * *",   retries: 3 },
   { path: "/api/cron/daily-briefing",     cron: "0 7 * * *",     retries: 3 },
   { path: "/api/cron/trending-questions", cron: "0 11 * * *",    retries: 3 },
   { path: "/api/cron/reengagement",       cron: "0 9 * * *",     retries: 2 },

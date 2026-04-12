@@ -95,7 +95,11 @@ export async function getDiscoveryFeedData({
         isSuppressed: false,
         ...(typeFilter !== "all" && { assetType: typeFilter.toUpperCase() as "CRYPTO" }),
         asset: {
-          region,
+          // Crypto assets are global (region: null) and should appear in all region views
+          OR: [
+            { region },
+            { region: null },
+          ],
         },
       };
 

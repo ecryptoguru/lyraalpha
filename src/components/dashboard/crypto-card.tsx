@@ -10,6 +10,29 @@ import {
   Info,
   SquareArrowOutUpRight,
 } from "lucide-react";
+
+/** Map rating labels to human-readable display */
+function formatRatingLabel(rating: string): string {
+  const map: Record<string, string> = {
+    STRONG_BUY: "Strong Buy",
+    BUY: "Buy",
+    NEUTRAL: "Neutral",
+    SELL: "Sell",
+    STRONG_SELL: "Strong Sell",
+    Bullish: "Bullish",
+    Bearish: "Bearish",
+  };
+  return map[rating] || rating || "—";
+}
+
+/** Map rating labels to Tailwind color classes */
+function getRatingColor(rating: string): string {
+  const bullish = ["STRONG_BUY", "BUY", "Bullish"];
+  const bearish = ["STRONG_SELL", "SELL", "Bearish"];
+  if (bullish.includes(rating)) return "text-emerald-400";
+  if (bearish.includes(rating)) return "text-rose-400";
+  return "text-amber-400";
+}
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
@@ -315,17 +338,17 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
                  
             />
            
-            <MetricItem 
-                label="Technical" 
-                value={data.technicalRating} 
-                valueClassName={
-                    data.technicalRating === "Bullish"
-                    ? "text-emerald-400"
-                    : data.technicalRating === "Bearish"
-                        ? "text-rose-400"
-                        : "text-amber-400"
-                }
-                border 
+            <MetricItem
+                label="Technical"
+                value={formatRatingLabel(data.technicalRating)}
+                valueClassName={getRatingColor(data.technicalRating)}
+                border
+            />
+             <MetricItem
+                label="Analyst"
+                value={formatRatingLabel(data.analystRating)}
+                valueClassName={getRatingColor(data.analystRating)}
+                border
             />
              <MetricItem label="Confidence" value={`${data.confidence}%`} border />
         </div>

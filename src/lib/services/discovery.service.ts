@@ -193,7 +193,7 @@ export class DiscoveryService {
           where: {
             sectorId: sector.id,
             isActive: true,
-            ...(region ? { asset: { region } } : {}),
+            ...(region ? { asset: { OR: [{ region }, { region: null }] } } : {}),
           },
           include: {
             asset: {
@@ -333,13 +333,14 @@ export class DiscoveryService {
    */
   static async getAllSectors(region?: string) {
     const regionKey = region || "all";
-    const cacheKey = `discovery:sectors:${regionKey}`;
+    const cacheKey = `discovery:sectors:v2:${regionKey}`;
 
     return withCache(
       cacheKey,
       async () => {
+        // Crypto assets are global (region: null) and should appear in all region views
         const assetRegionFilter = region
-          ? { asset: { region } }
+          ? { asset: { OR: [{ region }, { region: null }] } }
           : {};
 
         const sectors = await prisma.sector.findMany({
@@ -349,7 +350,7 @@ export class DiscoveryService {
                 stockSectors: {
                   some: {
                     isActive: true,
-                    asset: { region },
+                    asset: { OR: [{ region }, { region: null }] },
                   },
                 },
               }
@@ -417,11 +418,15 @@ export class DiscoveryService {
             sectorsPromise,
             prisma.asset.findMany({
               where: {
-                OR: [
-                  { name: { contains: query, mode: "insensitive" } },
-                  { symbol: { contains: query, mode: "insensitive" } },
+                AND: [
+                  {
+                    OR: [
+                      { name: { contains: query, mode: "insensitive" } },
+                      { symbol: { contains: query, mode: "insensitive" } },
+                    ],
+                  },
+                  ...(region ? [{ OR: [{ region }, { region: null }] }] : []),
                 ],
-                ...(region ? { region } : {}),
               },
               select: { name: true, symbol: true, type: true, sector: true },
               orderBy: { marketCap: { sort: "desc", nulls: "last" } },
@@ -447,7 +452,7 @@ export class DiscoveryService {
             where: {
               isActive: true,
               AND: [
-                ...(region ? [{ asset: { region } }] : []),
+                ...(region ? [{ asset: { OR: [{ region }, { region: null }] } }] : []),
                 {
                   OR: [
                     { asset: { name: { contains: query, mode: "insensitive" } } },

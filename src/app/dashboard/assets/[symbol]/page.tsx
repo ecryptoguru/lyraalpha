@@ -66,6 +66,19 @@ import {
 } from "./asset-page-render-sections";
 import { AssetPageSectionHeader } from "./asset-page-section-header";
 
+/** Format rating labels like STRONG_BUY → "Strong Buy" for display */
+function formatRatingDisplay(rating: string | null | undefined): string {
+  if (!rating) return "—";
+  const map: Record<string, string> = {
+    STRONG_BUY: "Strong Buy",
+    BUY: "Buy",
+    NEUTRAL: "Neutral",
+    SELL: "Sell",
+    STRONG_SELL: "Strong Sell",
+  };
+  return map[rating] || rating;
+}
+
 const staggerContainer = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.1 } },
@@ -960,6 +973,26 @@ export default function AssetPage({
                   )}
                   <TechnicalMetric label="From 52W High" value={analyticsComputed.technicalMetrics?.distanceFrom52WHigh != null ? `${Number(analyticsComputed.technicalMetrics.distanceFrom52WHigh).toFixed(1)}%` : "—"} tooltip="Distance from 52-week high. Negative means below the high." />
                   <TechnicalMetric label="1Y Return" value={performance?.returns?.["1Y"] != null ? `${performance.returns["1Y"] > 0 ? "+" : ""}${performance.returns["1Y"].toFixed(2)}%` : "—"} tooltip="Total return over the last 1 year." />
+                  <TechnicalMetric label="Technical" value={formatRatingDisplay(analyticsComputed.technicalMetrics?.technicalRating)} tooltip="Composite rating from developer activity, community health, and code quality. Derived from CoinGecko on-chain data." />
+                  <TechnicalMetric label="Analyst" value={formatRatingDisplay(analyticsComputed.technicalMetrics?.analystRating)} tooltip="Community sentiment rating from CoinGecko vote data. Bullish = majority vote up, Bearish = majority vote down." />
+                  {(analyticsComputed.metadata?.messari as Record<string, unknown> | undefined)?.revenue != null && (
+                    <TechnicalMetric label="Protocol Revenue" value={formatCompactNumber((analyticsComputed.metadata?.messari as Record<string, unknown>).revenue as number, { symbol: currencySymbol, region: currencyRegion })} tooltip="Annualized protocol revenue from Messari research data." />
+                  )}
+                  {(analyticsComputed.metadata?.messari as Record<string, unknown> | undefined)?.psRatio != null && (
+                    <TechnicalMetric label="P/S Ratio" value={`${((analyticsComputed.metadata?.messari as Record<string, unknown>).psRatio as number).toFixed(2)}x`} tooltip="Price-to-Sales ratio from Messari. Lower may indicate undervaluation." />
+                  )}
+                  {(analyticsComputed.metadata?.messari as Record<string, unknown> | undefined)?.yield != null && (
+                    <TechnicalMetric label="Staking Yield" value={`${(((analyticsComputed.metadata?.messari as Record<string, unknown>).yield as number) * 100).toFixed(2)}%`} tooltip="Annual staking yield from Messari. Income earned by participating in network security." />
+                  )}
+                  {(analyticsComputed.metadata?.messari as Record<string, unknown> | undefined)?.inflationRate != null && (
+                    <TechnicalMetric label="Inflation Rate" value={`${(((analyticsComputed.metadata?.messari as Record<string, unknown>).inflationRate as number) * 100).toFixed(2)}%`} tooltip="Annual token inflation rate from Messari. Higher inflation dilutes existing holders." />
+                  )}
+                  {(analyticsComputed.metadata?.tvl as number | undefined) != null && (
+                    <TechnicalMetric label="TVL" value={formatCompactNumber(analyticsComputed.metadata?.tvl as number, { symbol: currencySymbol, region: currencyRegion })} tooltip="Total Value Locked — capital deposited in DeFi protocols. Key metric for DeFi projects." />
+                  )}
+                  {(analyticsComputed.metadata?.institutionalProxy as number | undefined) != null && (
+                    <TechnicalMetric label="Inst. Interest" value={`${((analyticsComputed.metadata?.institutionalProxy as number) * 100).toFixed(1)}%`} tooltip="Proxy for institutional interest based on watchlist, Reddit, and Telegram engagement." />
+                  )}
                 </div>
 
                 {(cgMeta?.ath || cgMeta?.atl) && (

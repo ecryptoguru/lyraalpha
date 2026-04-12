@@ -16,8 +16,9 @@ const logger = createLogger({ service: "coingecko" });
 const BASE_URL = "https://api.coingecko.com/api/v3";
 const API_KEY = process.env.COINGECKO_API_KEY || "";
 
-// Demo tier: ~30 requests/minute
-const RATE_LIMIT_DELAY_MS = 2100; // ~28 req/min with safety margin
+// Demo tier: ~30 requests/minute (official docs: "varies depending on traffic")
+// Using 2100ms → ~28 req/min with safety margin for traffic spikes
+const RATE_LIMIT_DELAY_MS = 2100;
 const MAX_RETRIES = 3;
 
 // Cache TTLs (seconds)

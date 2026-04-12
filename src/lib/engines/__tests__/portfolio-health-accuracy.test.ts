@@ -64,9 +64,9 @@ describe("Portfolio Health — diversification score", () => {
     // diversification = 93.75*0.6 + 93.75*0.4 = 93.75
     const result = computePortfolioHealth([
       make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance" }),
-      make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "Crypto" }),
-      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Energy" }),
+      make({ symbol: "B", weight: 0.25, type: "EQUITY", sector: "Finance" }),
+      make({ symbol: "C", weight: 0.25, type: "ETF", sector: "Crypto" }),
+      make({ symbol: "D", weight: 0.25, type: "COMMODITY", sector: "Energy" }),
     ]);
     expect(result.dimensions.diversificationScore).toBeCloseTo(93.75, 0);
   });
@@ -90,7 +90,7 @@ describe("Portfolio Health — diversification score", () => {
   it("all same sector → sectorHHI = 1.0 → sectorScore = 0", () => {
     const result = computePortfolioHealth([
       make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.5, type: "EQUITY", sector: "Tech" }),
     ]);
     // typeHHI = 0.5 → typeScore = clamp(0.5*125) = 62.5
     // sectorHHI = 1.0 → sectorScore = 0
@@ -230,17 +230,19 @@ describe("Portfolio Health — quality score", () => {
     expect(withPenalty.dimensions.qualityScore).toBeCloseTo(32, 0);
   });
 
-  it("COMMODITY with liquidity < 30 applies 5-point penalty", () => {
-    const withPenalty = computePortfolioHealth([
-      make({ symbol: "A", weight: 1, type: "CRYPTO", avgTrustScore: 70, avgLiquidityScore: 20 }),
+  it("low liquidity reduces quality score (no COMMODITY-specific penalty in source)", () => {
+    // Source only has CRYPTO+trust<40 penalty; no COMMODITY+liquidity penalty exists
+    const lowLiquidity = computePortfolioHealth([
+      make({ symbol: "A", weight: 1, type: "COMMODITY", avgTrustScore: 70, avgLiquidityScore: 20 }),
     ]);
-    const withoutPenalty = computePortfolioHealth([
-      make({ symbol: "A", weight: 1, type: "CRYPTO", avgTrustScore: 70, avgLiquidityScore: 50 }),
+    const highLiquidity = computePortfolioHealth([
+      make({ symbol: "A", weight: 1, type: "COMMODITY", avgTrustScore: 70, avgLiquidityScore: 50 }),
     ]);
-    // composite(liq=20) = 70*0.6+20*0.4 = 50, penalty=5 → 45
+    // composite(liq=20) = 70*0.6+20*0.4 = 50, no COMMODITY penalty → 50
     // composite(liq=50) = 70*0.6+50*0.4 = 62, no penalty → 62
-    expect(withPenalty.dimensions.qualityScore).toBeCloseTo(45, 0);
-    expect(withoutPenalty.dimensions.qualityScore).toBeCloseTo(62, 0);
+    expect(lowLiquidity.dimensions.qualityScore).toBeLessThan(highLiquidity.dimensions.qualityScore);
+    expect(lowLiquidity.dimensions.qualityScore).toBeCloseTo(50, 0);
+    expect(highLiquidity.dimensions.qualityScore).toBeCloseTo(62, 0);
   });
 
   it("quality composite formula: trust*0.6 + liquidity*0.4", () => {
@@ -344,9 +346,9 @@ describe("Portfolio Health — correlation score", () => {
     // 4 holdings: 4 types vs 1 type — with 4 holdings the clamp ceiling is not hit
     const fourTypes = computePortfolioHealth([
       make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance" }),
-      make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "Crypto" }),
-      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Energy" }),
+      make({ symbol: "B", weight: 0.25, type: "EQUITY", sector: "Finance" }),
+      make({ symbol: "C", weight: 0.25, type: "ETF", sector: "Crypto" }),
+      make({ symbol: "D", weight: 0.25, type: "COMMODITY", sector: "Energy" }),
     ]);
     const oneType = computePortfolioHealth([
       make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),

@@ -175,9 +175,9 @@ describe("plan-gate", () => {
       expect(canAccessAssetType("ENTERPRISE", "CRYPTO")).toBe(true);
     });
 
-    it("allows CRYPTO for all plans", () => {
-      expect(canAccessAssetType("STARTER", "CRYPTO")).toBe(true);
-      expect(canAccessAssetType("PRO", "CRYPTO")).toBe(true);
+    it("allows non-CRYPTO types for all plans", () => {
+      expect(canAccessAssetType("STARTER", "EQUITY")).toBe(true);
+      expect(canAccessAssetType("PRO", "ETF")).toBe(true);
     });
   });
 

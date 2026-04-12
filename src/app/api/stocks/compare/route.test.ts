@@ -233,7 +233,7 @@ describe("GET /api/stocks/compare", () => {
   it("returns plan restriction error for inaccessible asset type", async () => {
     vi.mocked(AssetService.getAssetBySymbol)
       .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD" }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD", type: "CRYPTO" }) as any);
+      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD", type: "CRYPTO" }) as any);
     vi.mocked(canAccessAssetType)
       .mockReturnValueOnce(true)
       .mockReturnValueOnce(false);
@@ -241,8 +241,8 @@ describe("GET /api/stocks/compare", () => {
     const res = await GET(makeRequest("BTC-USD,ETH-USD"));
     expect(res.status).toBe(200);
     const json = await res.json();
-    const btc = json.assets.find((a: any) => a.symbol === "BTC-USD");
-    expect(btc.error).toBe("Plan restriction");
+    const eth = json.assets.find((a: any) => a.symbol === "ETH-USD");
+    expect(eth.error).toBe("Plan restriction");
   });
 
   // ── Null / Missing Fields ─────────────────────────────────────────────────

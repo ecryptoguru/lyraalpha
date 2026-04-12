@@ -87,7 +87,7 @@ export async function GET(
     // 1. Fetch asset first (single query) - get region + full data in one call
     const assetWithRegion = await prisma.asset.findUnique({
       where: { symbol: upperSymbol },
-      select: { region: true, ...analyticsAssetSelect }
+      select: analyticsAssetSelect
     });
 
     if (!assetWithRegion) {
@@ -279,17 +279,17 @@ export async function GET(
     if (!precomputedSignal || !precomputedSignal.score) {
       const meta = (currentAsset.metadata || {}) as Record<string, unknown>;
       const fundamentals: FundamentalData = {
-        peRatio: currentAsset.peRatio,
-        industryPe: currentAsset.industryPe,
-        pegRatio: currentAsset.pegRatio,
-        priceToBook: currentAsset.priceToBook,
-        roe: currentAsset.roe,
-        roce: currentAsset.roce,
+        peRatio: (meta.peRatio as number) ?? null,
+        industryPe: (meta.industryPe as number) ?? null,
+        pegRatio: (meta.pegRatio as number) ?? null,
+        priceToBook: (meta.priceToBook as number) ?? null,
+        roe: (meta.roe as number) ?? null,
+        roce: (meta.roce as number) ?? null,
         profitMargins: (meta.profitMargins as number) ?? null,
         operatingMargins: (meta.operatingMargins as number) ?? null,
         revenueGrowth: (meta.revenueGrowth as number) ?? null,
-        dividendYield: currentAsset.dividendYield,
-        shortRatio: currentAsset.shortRatio,
+        dividendYield: (meta.dividendYield as number) ?? null,
+        shortRatio: (meta.shortRatio as number) ?? null,
         heldPercentInstitutions: (meta.heldPercentInstitutions as number) ?? null,
         targetMeanPrice: (meta.targetMeanPrice as number) ?? null,
         currentPrice: currentAsset.price,
@@ -335,26 +335,15 @@ export async function GET(
       events,
       technicalMetrics: {
         marketCap: currentAsset.marketCap,
-        peRatio: currentAsset.peRatio,
         volume: currentAsset.volume,
         avgVolume: currentAsset.avgVolume,
-        dividendYield: currentAsset.dividendYield,
-        industryPe: currentAsset.industryPe,
         oneYearChange: currentAsset.oneYearChange,
-        roe: currentAsset.roe,
-        roce: currentAsset.roce,
-        eps: currentAsset.eps,
         fiftyTwoWeekHigh: performance.range52W.high || currentAsset.fiftyTwoWeekHigh,
         fiftyTwoWeekLow: performance.range52W.low || currentAsset.fiftyTwoWeekLow,
-        pegRatio: currentAsset.pegRatio,
-        priceToBook: currentAsset.priceToBook,
-        shortRatio: currentAsset.shortRatio,
-        expenseRatio: currentAsset.expenseRatio,
-        nav: currentAsset.nav,
-        yield: currentAsset.yield,
-        morningstarRating: currentAsset.morningstarRating,
         category: currentAsset.category,
         openInterest: currentAsset.openInterest,
+        technicalRating: currentAsset.technicalRating,
+        analystRating: currentAsset.analystRating,
         distanceFrom52WHigh: performance.range52W.distanceFromHigh,
         distanceFrom52WLow: performance.range52W.distanceFromLow,
       },
@@ -364,10 +353,6 @@ export async function GET(
       description: currentAsset.description || null,
       industry: currentAsset.industry || null,
       sector: currentAsset.sector || null,
-      fundHouse: currentAsset.fundHouse || null,
-      financials: currentAsset.financials || null,
-      topHoldings: currentAsset.topHoldings || null,
-      fundPerformanceHistory: currentAsset.fundPerformanceHistory || null,
     };
 
     if (!fresh) {

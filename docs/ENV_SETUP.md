@@ -126,6 +126,20 @@ Used for web search / research augmentation.
 Required env vars:
 - `TAVILY_API_KEY`
 
+### 14. CoinGlass
+Used for crypto derivatives data: open interest, funding rates, liquidations.
+⚠️ **No free tier** — minimum is Hobbyist at $29/mo (30 req/min).
+
+Required env vars:
+- `COINGLASS_API_KEY`
+
+### 15. Messari
+Used for crypto fundamentals: protocol revenue, P/S ratios, tokenomics, governance.
+Free tier: 20 req/min, 1000 req/day (no key). Free account with key: 30 req/min, 2000 req/day.
+
+Required env vars:
+- `MESSARI_API_KEY`
+
 ## Runtime flags and operational settings
 
 These are not external services, but they should be reviewed during the fork setup.

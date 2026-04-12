@@ -61,6 +61,8 @@ export interface AssetAnalytics {
     morningstarRating: string | null;
     category: string | null;
     openInterest?: number | null;
+    technicalRating?: string | null;
+    analystRating?: string | null;
     [key: string]: unknown;
   };
   performance?: {

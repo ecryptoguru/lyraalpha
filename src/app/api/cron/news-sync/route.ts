@@ -11,7 +11,7 @@ export const preferredRegion = "bom1";
 
 /**
  * POST /api/cron/news-sync
- * Crypto news sync (every 6 hours):
+ * Crypto news sync (every 12 hours):
  * - NewsData.io crypto endpoint
  */
 export async function POST(request: Request) {

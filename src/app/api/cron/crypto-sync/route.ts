@@ -11,7 +11,7 @@ export const preferredRegion = "bom1";
 
 /**
  * POST /api/cron/crypto-sync
- * Crypto sync (every 6 hours):
+ * Crypto sync (every 12 hours):
  * - Market data via CoinGecko
  * - Crypto news via NewsData.io
  */

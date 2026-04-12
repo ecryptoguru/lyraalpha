@@ -79,12 +79,16 @@ export async function GET(request: NextRequest) {
       eventFilter.severity = severity;
     }
 
+    // Crypto assets are global (region: null) and should appear in all region views
+    const assetRegionFilter = {
+      OR: [
+        { region, ...(assetType ? { type: assetType } : {}) },
+        { region: null, ...(assetType ? { type: assetType } : {}) },
+      ],
+    };
     const where: Prisma.InstitutionalEventWhereInput = {
       ...eventFilter,
-      asset: {
-        region,
-        ...(assetType ? { type: assetType } : {}),
-      },
+      asset: assetRegionFilter,
     };
 
     const [events, availableTypeGroups] = await withTimeout(
@@ -114,7 +118,7 @@ export async function GET(request: NextRequest) {
         prisma.asset.groupBy({
           by: ["type"],
           where: {
-            region,
+            OR: [{ region }, { region: null }],
             institutionalEvents: {
               some: eventFilter,
             },

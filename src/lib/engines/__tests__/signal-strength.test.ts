@@ -154,12 +154,6 @@ describe("calculateSignalStrength", () => {
   });
 
   describe("Asset-Type-Aware Weighting", () => {
-    it("CRYPTO uses 40% DSE weight", () => {
-      const result = calculateSignalStrength(buildInput({ assetType: "CRYPTO" }));
-      expect(result.weights.dse).toBe(0.40);
-      expect(result.weights.fundamental).toBe(0.20);
-    });
-
     it("CRYPTO uses 55% DSE weight and 0% fundamental", () => {
       const result = calculateSignalStrength(buildInput({ assetType: "CRYPTO" }));
       expect(result.weights.dse).toBe(0.55);
@@ -196,7 +190,7 @@ describe("calculateSignalStrength", () => {
   });
 
   describe("Fundamental Layer", () => {
-    it("strong fundamentals boost crypto signal", () => {
+    it("fundamentals do NOT boost CRYPTO signal (0% weight)", () => {
       const withFundamentals = calculateSignalStrength(buildInput({
         fundamentals: {
           peRatio: 15,
@@ -213,7 +207,8 @@ describe("calculateSignalStrength", () => {
         },
       }));
       const withoutFundamentals = calculateSignalStrength(buildInput());
-      expect(withFundamentals.breakdown.fundamental).toBeGreaterThan(withoutFundamentals.breakdown.fundamental);
+      // CRYPTO has fundamental weight = 0, so fundamentals cannot affect the composite
+      expect(withFundamentals.breakdown.fundamental).toBe(withoutFundamentals.breakdown.fundamental);
     });
 
     it("fundamentals are neutral (50) for CRYPTO regardless of data", () => {
@@ -228,14 +223,15 @@ describe("calculateSignalStrength", () => {
       expect(result.breakdown.fundamental).toBe(50);
     });
 
-    it("analyst upside > 20% produces high analyst score", () => {
+    it("analyst upside > 20% does NOT boost CRYPTO fundamental (0% weight)", () => {
       const result = calculateSignalStrength(buildInput({
         fundamentals: {
           targetMeanPrice: 180,
           currentPrice: 100,
         },
       }));
-      expect(result.breakdown.fundamental).toBeGreaterThan(50);
+      // CRYPTO fundamental weight is 0 — analyst upside doesn't affect composite
+      expect(result.breakdown.fundamental).toBe(50);
     });
   });
 

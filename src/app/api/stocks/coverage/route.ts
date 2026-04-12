@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const cacheKey = `coverage:v2:${regionParam}:${typeParam || "ALL"}:${query || ""}:${page}:${limit}:${plan}`;
+    const cacheKey = `coverage:v3:${regionParam}:${typeParam || "ALL"}:${query || ""}:${page}:${limit}:${plan}`;
 
     if (!fresh) {
       const cached = await getCache(cacheKey);
@@ -76,9 +76,13 @@ export async function GET(req: NextRequest) {
     // 2. Fetch assets with Server-Side Filtering
     // GOLD-MCX and SILVER-MCX are proper IN region assets (region="IN", currency="INR")
     // US commodities remain region="US" — fully separate.
+    // Crypto assets are global (region: null) and should appear in all region views.
     const whereInput: Prisma.AssetWhereInput = {
       lastPriceUpdate: { not: null },
-      region: regionParam,
+      OR: [
+        { region: regionParam },
+        { region: null },
+      ],
     };
 
     if (typeParam && typeParam !== "ALL") {
@@ -150,12 +154,17 @@ export async function GET(req: NextRequest) {
       ? baseSelect
       : { ...baseSelect, ...equitySelect };
 
-    const [latestRegime, dbAssets, totalCount] = await Promise.all([
+    const [latestRegimeForRegion, latestRegimeUS, dbAssets, totalCount] = await Promise.all([
       prisma.marketRegime.findFirst({
         where: { region: regionParam },
         orderBy: { date: "desc" },
         select: { context: true, date: true, state: true },
       }),
+      regionParam !== "US" ? prisma.marketRegime.findFirst({
+        where: { region: "US" },
+        orderBy: { date: "desc" },
+        select: { context: true, date: true, state: true },
+      }) : Promise.resolve(null),
       prisma.asset.findMany({
         where: whereInput,
         orderBy: { marketCap: { sort: "desc", nulls: "last" } },
@@ -168,28 +177,9 @@ export async function GET(req: NextRequest) {
       }),
     ]);
 
-    // 3. Construct Market Context
-    if (!latestRegime || !latestRegime.context) {
-      return NextResponse.json(
-        { error: "Market Regime Not Initialized" }, 
-        { status: 503 }
-      );
-    }
+    // 3. Construct Market Context — fall back to US regime or full defaults if no regime exists
+    const latestRegime = latestRegimeForRegion ?? latestRegimeUS;
 
-    let marketContextData: Record<string, unknown> = {};
-    try {
-      marketContextData = JSON.parse(latestRegime.context);
-    } catch {
-      logger.warn({ regimeId: latestRegime.state }, "Failed to parse regime context as JSON, falling back to defaults");
-      marketContextData = {
-        regime: { label: latestRegime.state || "Neutral", drivers: ["Context unavailable"], confidence: 50 },
-        volatility: { label: "Normal", drivers: ["Context unavailable"], confidence: 50 },
-        risk: { label: "Neutral", drivers: ["Context unavailable"], confidence: 50 },
-        breadth: { label: "Neutral", drivers: ["Context unavailable"], confidence: 50 },
-        liquidity: { label: "Normal", drivers: ["Context unavailable"], confidence: 50 }
-      };
-    }
-    
     // Ensure the structure is correct even if JSON parsed but was missing objects
     const createFallback = (obj: unknown, defaultLabel: string) => {
       if (typeof obj === "string") return { label: obj, drivers: [obj], confidence: 50 };
@@ -197,13 +187,24 @@ export async function GET(req: NextRequest) {
       return { label: defaultLabel, drivers: ["Not available"], confidence: 50 };
     };
 
+    let marketContextData: Record<string, unknown> = {};
+    if (latestRegime?.context) {
+      try {
+        marketContextData = JSON.parse(latestRegime.context);
+      } catch {
+        logger.warn({ regimeId: latestRegime.state }, "Failed to parse regime context as JSON, falling back to defaults");
+      }
+    } else {
+      logger.info({ region: regionParam }, "No market regime found — returning default context");
+    }
+
     const marketContext = {
-       regime: createFallback(marketContextData.regime, latestRegime.state || "Neutral"),
+       regime: createFallback(marketContextData.regime, latestRegime?.state || "Initializing"),
        volatility: createFallback(marketContextData.volatility, "Normal"),
        risk: createFallback(marketContextData.risk, "Neutral"),
        breadth: createFallback(marketContextData.breadth, "Neutral"),
        liquidity: createFallback(marketContextData.liquidity, "Normal"),
-       lastUpdated: latestRegime.date
+       lastUpdated: latestRegime?.date ?? null,
     };
 
     // 4. Transform to expected UI format
@@ -238,7 +239,7 @@ export async function GET(req: NextRequest) {
         total: totalCount,
         hasMore,
       },
-      lastSync: latestRegime.date,
+      lastSync: latestRegime?.date ?? null,
     };
 
     if (!fresh) {
