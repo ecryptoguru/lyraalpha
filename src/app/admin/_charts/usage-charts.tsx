@@ -9,8 +9,7 @@ const TOOLTIP_STYLE = { background: "hsl(222 47% 8%)", border: "1px solid hsl(21
 const TICK = { fontSize: 10, fill: "hsl(215 20% 65%)" };
 
 const TYPE_COLORS: Record<string, string> = {
-  STOCK: "#3b82f6", ETF: "#22c55e", CRYPTO: "#f59e0b",
-  MUTUAL_FUND: "#0ea5e9", COMMODITY: "#ef4444",
+  CRYPTO: "#f59e0b",
 };
 const REGION_COLORS: Record<string, string> = { US: "#3b82f6", IN: "#f59e0b", BOTH: "#22c55e" };
 const PLAN_COLORS: Record<string, string> = { STARTER: "#64748b", PRO: "#3b82f6", ELITE: "#f59e0b", ENTERPRISE: "#22c55e" };

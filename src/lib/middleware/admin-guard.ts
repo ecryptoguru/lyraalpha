@@ -25,10 +25,6 @@ export async function requireAdmin(): Promise<
 
   const { userId } = await appAuth();
 
-  if (isAuthBypassEnabled() && userId === "test-user-id") {
-    return { authorized: true, userId };
-  }
-
   if (!userId) {
     return {
       authorized: false,

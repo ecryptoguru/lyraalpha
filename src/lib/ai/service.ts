@@ -1,6 +1,6 @@
 import { streamText } from "ai";
 import { prisma } from "@/lib/prisma";
-import { AI_CONFIG, getSharedAISdkClient, getTierConfig, HISTORY_CAPS, getGpt54Deployment, getTargetOutputTokens, type Gpt54Role } from "./config";
+import { AI_CONFIG, getSharedAISdkClient, getTierConfig, HISTORY_CAPS, getGpt54Deployment, getTargetOutputTokens, type Gpt54Role, type QueryComplexity } from "./config";
 import { resolveGptDeployment } from "./orchestration";
 import { getUserPlan, normalizePlanTier } from "@/lib/middleware/plan-gate";
 import { BUILD_LYRA_REFERENCE_EXAMPLE, BUILD_LYRA_STATIC_PROMPT, PROMPT_VERSION } from "./prompts/system";
@@ -31,7 +31,7 @@ import { compressKnowledgeContext } from "./compress";
 import { distillSessionNotes, getGlobalNotes, getSessionNotes } from "./memory";
 import { validateOutput, logValidationResult } from "./output-validation";
 import { applyCostCeiling, recordEstimationAccuracy } from "./cost-ceiling";
-import { recordFallbackResult, alertIfDailyCostExceeded, recordLatencyViolation } from "./alerting";
+import { recordFallbackResult, alertIfDailyCostExceeded, recordLatencyViolation, isFallbackMitigationActive } from "./alerting";
 import {
   logModelCacheEvent,
   logModelRouting,
@@ -124,9 +124,8 @@ async function incrementDailyTokens(userId: string, tokens: number): Promise<num
  *  outages is worse than potentially exceeding the daily cap. */
 async function getDailyTokensUsed(userId: string, userPlan: string): Promise<number> {
   try {
-    const stats = await redis.hgetall("lyra:daily_tokens_v2");
     const field = `${userId}:${todayUtc()}`;
-    const raw = stats?.[field];
+    const raw = await redis.hget("lyra:daily_tokens_v2", field);
     return raw ? Number(raw) : 0;
   } catch {
     // R1-FIX: On Redis failure, return 0 (allow traffic) instead of a percentage of the cap.
@@ -162,9 +161,7 @@ async function getAvailableAssetSymbols(): Promise<string[]> {
   const cached = await getCache<string[]>(ASSET_SYMBOLS_CACHE_KEY);
   if (cached) return cached;
 
-  // Try stale cache as fallback before hitting DB (graceful degradation)
   const STALE_CACHE_KEY = `${ASSET_SYMBOLS_CACHE_KEY}:stale`;
-  const staleCached = await getCache<string[]>(STALE_CACHE_KEY).catch(() => null);
 
   try {
     const assets = await prisma.asset.findMany({
@@ -181,7 +178,8 @@ async function getAvailableAssetSymbols(): Promise<string[]> {
   } catch (error) {
     logger.error({ err: sanitizeError(error) }, "Failed to fetch asset symbols from DB");
     
-    // Return stale cache if available before falling back to hardcoded
+    // Only read stale cache on DB failure — avoids wasted Redis call on happy path
+    const staleCached = await getCache<string[]>(STALE_CACHE_KEY).catch(() => null);
     if (staleCached && staleCached.length > 0) {
       logger.warn({ count: staleCached.length }, "Using stale asset symbols cache as fallback");
       return staleCached;
@@ -256,11 +254,12 @@ async function resolveAssetFromShortQuery(
   const normalizedLower = normalized.toLowerCase();
   const normalizedUpper = normalized.toUpperCase();
   const escapedQuery = normalizedLower.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // Pre-compile word boundary regex once — used for all 25 candidates
   const wordBoundaryRe = new RegExp(`\\b${escapedQuery}\\b`, "i");
 
   try {
     // Single query covering exact, prefix, and contains matches — avoids a second serial round-trip.
-    // `contains` is included so longer names like "Reliance Industries" match "Reliance".
+    // `contains` is included so longer names like "Bitcoin" match partial queries.
     const orClauses: object[] = [
       { symbol: { equals: normalizedUpper, mode: "insensitive" } },
       { name: { equals: normalized, mode: "insensitive" } },
@@ -834,7 +833,7 @@ export async function generateLyraStream(
               } else {
                 const peers = await prisma.asset.findMany({
                   where: {
-                    type: (resolvedAssetType !== "GLOBAL" ? resolvedAssetType : undefined) as import("@/generated/prisma/client").AssetType | undefined,
+                    type: (resolvedAssetType !== "GLOBAL" ? resolvedAssetType : undefined) as "CRYPTO" | undefined,
                     symbol: { not: resolvedSymbol },
                   },
                   orderBy: { marketCap: "desc" },
@@ -916,9 +915,9 @@ export async function generateLyraStream(
     }
 
     // Task 5: Cross-Sector Correlation — only for macro/sector/global queries, not all COMPLEX
-    // Avoids DB query + token cost for asset-specific COMPLEX queries like "How is NVDA doing?"
+    // Avoids DB query + token cost for asset-specific COMPLEX queries like "How is BTC-USD doing?"
     const isCrossSectorQuery = resolvedSymbol === "GLOBAL" || isMacroDetected ||
-      /\b(?:sector|regime|macro|cross[- ]asset|market|rotation|inflation|recession|rate|fed|rbi|ecb)\b/i.test(query);
+      /\b(?:sector|regime|macro|cross[- ](?:asset|chain)|market|rotation|inflation|recession|rate|fed|rbi|ecb)\b/i.test(query);
     if (tierConfig.crossSectorEnabled && isCrossSectorQuery) {
       parallelTasks.push(
         (async () => {
@@ -1022,7 +1021,7 @@ logRetrievalMetric({
 
 // C2: Only overwrite resolvedAssetType when enrichment actually returned a type.
   // On the macro path assetEnrichment is undefined — blindly reading ?.type resets
-  // a correctly DB-resolved type (e.g. STOCK from resolveAssetFromShortQuery) back to "GLOBAL".
+  // a correctly DB-resolved type (e.g. CRYPTO from resolveAssetFromShortQuery) back to "GLOBAL".
   if (assetEnrichment?.type) {
     resolvedAssetType = assetEnrichment.type as string;
   } else if (!resolvedAssetType || resolvedAssetType === "GLOBAL") {
@@ -1338,7 +1337,16 @@ logRetrievalMetric({
   // Use the tier-appropriate GPT-5.4 deployment (nano/mini/full) from tierConfig.
   // This is the primary cost lever: Starter SIMPLE → nano ($0.20/M) vs full ($2.50/M).
   // Declared before the try so the catch block can reference it for the nano fallback check.
-  const effectiveDeployment = resolveGptDeployment(tierConfig.gpt54Role);
+  // MIT-1: When fallback mitigation is active (fallback rate > 15%), override to nano
+  // to avoid cascading failures against a degraded primary model.
+  const mitigationActive = await isFallbackMitigationActive().catch(() => false);
+  let effectiveDeployment: string;
+  if (mitigationActive && tierConfig.gpt54Role !== "lyra-nano") {
+    effectiveDeployment = resolveGptDeployment("lyra-nano");
+    logger.warn({ tier, originalRole: tierConfig.gpt54Role }, "Fallback mitigation active — overriding to nano deployment");
+  } else {
+    effectiveDeployment = resolveGptDeployment(tierConfig.gpt54Role);
+  }
   const effectiveModel = getSharedAISdkClient().responses(effectiveDeployment);
 
   // B1-FIX: Enforce latency budget with AbortController — prevents indefinite hangs.
@@ -1357,7 +1365,7 @@ logRetrievalMetric({
       messages: finalMessages,
       system: staticPrompt,
       ...(hasTools ? { tools: tierTools } : {}),
-      maxOutputTokens: getTargetOutputTokens(tierConfig),
+      maxOutputTokens: getTargetOutputTokens(tierConfig, tier as QueryComplexity),
       abortSignal: latencyAbortController.signal,
       providerOptions: {
         openai: {

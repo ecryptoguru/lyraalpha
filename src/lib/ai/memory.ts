@@ -3,8 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { getSharedAISdkClient, getGpt54Deployment } from "./config";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
-import { redis, setCache } from "@/lib/redis";
+import { redis } from "@/lib/redis";
 import { logMemoryEvent } from "./monitoring";
+import { INJECTION_PATTERNS } from "./guardrails";
+import { z } from "zod";
 
 const logger = createLogger({ service: "lyra-memory" });
 
@@ -80,19 +82,47 @@ If no durable notes exist (new or old), return: []`;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+// Z-1: Zod schema for memory note validation — catches malformed nano output
+// that could silently corrupt the user's memory store.
+const MemoryNoteSchema = z.object({
+  text: z.string().max(MAX_NOTE_LENGTH),
+  keywords: z.array(z.string()).max(8),
+});
+
+const MemoryNotesArraySchema = z.array(MemoryNoteSchema).max(MAX_GLOBAL_NOTES);
+
 function safeParseNotes(raw: string): MemoryNote[] {
   try {
     const cleaned = raw.trim().replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
     const parsed = JSON.parse(cleaned);
     if (!Array.isArray(parsed)) return [];
+
+    // Z-1: Use Zod schema validation — provides structured error details
+    // and catches edge cases the manual check missed (e.g. empty strings,
+    // non-string keywords, notes exceeding MAX_NOTE_LENGTH).
+    const result = MemoryNotesArraySchema.safeParse(parsed);
+    if (result.success) return result.data;
+
+    // Zod validation failed — fall back to manual per-item extraction
+    // so we don't lose ALL notes if only some are malformed.
+    // Validate raw data first to detect what's actually wrong, then sanitize.
     const valid: MemoryNote[] = [];
     let droppedCount = 0;
     for (const n of parsed) {
-      if (n && typeof n.text === "string" && Array.isArray(n.keywords)) {
-        valid.push({
-          text: n.text.slice(0, MAX_NOTE_LENGTH),
-          keywords: n.keywords.filter((k: unknown) => typeof k === "string").slice(0, 8),
-        });
+      // Try raw validation first — tells us what's actually malformed
+      const rawResult = MemoryNoteSchema.safeParse(n);
+      if (rawResult.success) {
+        valid.push(rawResult.data);
+        continue;
+      }
+      // Raw failed — try to salvage by sanitizing (truncate text, filter keywords)
+      const sanitized = {
+        text: typeof n?.text === "string" ? n.text.slice(0, MAX_NOTE_LENGTH) : "",
+        keywords: Array.isArray(n?.keywords) ? n.keywords.filter((k: unknown) => typeof k === "string").slice(0, 8) : [],
+      };
+      const sanitizedResult = MemoryNoteSchema.safeParse(sanitized);
+      if (sanitizedResult.success && sanitizedResult.data.text.length > 0) {
+        valid.push(sanitizedResult.data);
       } else {
         droppedCount++;
       }
@@ -100,7 +130,7 @@ function safeParseNotes(raw: string): MemoryNote[] {
     // R2-FIX: Log when items are dropped due to invalid shape — detects nano output degradation
     if (droppedCount > 0) {
       logger.warn(
-        { droppedCount, totalItems: parsed.length, validItems: valid.length, rawPreview: raw.slice(0, 200) },
+        { droppedCount, totalItems: parsed.length, validItems: valid.length, zodError: result.error.issues.slice(0, 3), rawPreview: raw.slice(0, 200) },
         "Memory: partially-parsed notes — some items dropped due to invalid shape",
       );
     }
@@ -193,7 +223,16 @@ export async function distillSessionNotes(
     const globalNotes: MemoryNote[] = globalRows.map((r) => ({ text: r.text, keywords: r.keywords }));
 
     const conversationText = messagesToText(messages.slice(-16), source);
-    const prompt = buildCombinedPrompt(conversationText, globalNotes, source);
+    // R3-FIX: Scan conversation text for injection patterns before passing to nano.
+    // A crafted user message could inject instructions into the distillation prompt,
+    // persisting manipulated notes that influence all future sessions.
+    // Drop lines that match any injection pattern — same approach as search.ts sanitizeSnippet.
+    const sanitizedConvText = conversationText
+      .normalize("NFKC") // R2-FIX: defeat Unicode homoglyph evasion
+      .split("\n")
+      .filter((line) => !INJECTION_PATTERNS.some((p) => p.test(line)))
+      .join("\n");
+    const prompt = buildCombinedPrompt(sanitizedConvText, globalNotes, source);
     const raw = await callNano(prompt);
     const updatedNotes = safeParseNotes(raw);
 
@@ -227,8 +266,10 @@ export async function distillSessionNotes(
     logMemoryEvent({ userId, source, outcome: "failed", latencyMs: Date.now() - distillStart });
     logger.warn({ err: sanitizeError(err), userId, source }, "Memory distillation failed — skipping");
   } finally {
-    // Release lock after work completes (TTL=60s is the safety net if this never fires)
-    setCache(lockKey, "", 1).catch((err) => {
+    // Release lock after work completes (TTL=90s is the safety net if this never fires)
+    // R2-FIX: Use redis.del() instead of setCache — setCache always overwrites,
+    // which can delete a different owner's lock if they acquired it after our TTL expired.
+    redis.del(lockKey).catch((err) => {
       logger.debug({ err, lockKey }, "Failed to release memory lock (non-critical)");
     });
   }

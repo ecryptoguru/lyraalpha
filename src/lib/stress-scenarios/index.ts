@@ -19,26 +19,6 @@ function normalizeType(assetType: string): SupportedStressAssetType {
   return "CRYPTO";
 }
 
-function looksLikeGold(symbol: string, name?: string | null, category?: string | null) {
-  const haystack = `${symbol} ${name ?? ""} ${category ?? ""}`.toLowerCase();
-  return haystack.includes("gold") || haystack.includes("bullion");
-}
-
-function looksLikeOil(symbol: string, name?: string | null, category?: string | null) {
-  const haystack = `${symbol} ${name ?? ""} ${category ?? ""}`.toLowerCase();
-  return haystack.includes("oil") || haystack.includes("energy") || haystack.includes("crude");
-}
-
-function looksLikeBanking(symbol: string, name?: string | null, sector?: string | null, category?: string | null) {
-  const haystack = `${symbol} ${name ?? ""} ${sector ?? ""} ${category ?? ""}`.toLowerCase();
-  return haystack.includes("bank") || haystack.includes("financial") || haystack.includes("finserv") || haystack.includes("finance");
-}
-
-function looksLikeTech(symbol: string, name?: string | null, sector?: string | null, category?: string | null) {
-  const haystack = `${symbol} ${name ?? ""} ${sector ?? ""} ${category ?? ""}`.toLowerCase();
-  return haystack.includes("tech") || haystack.includes("software") || haystack.includes("internet") || haystack.includes("semiconductor") || haystack.includes("nasdaq");
-}
-
 function pickProxy(paths: ScenarioProxyPath[], candidates: string[]) {
   for (const candidate of candidates) {
     const found = paths.find((path) => path.proxy === candidate);
@@ -53,7 +33,6 @@ export function getBestProxyPath(
   scenario: ScenarioDefinition,
   assetType: string,
   symbol: string,
-  options?: { name?: string | null; sector?: string | null; category?: string | null },
 ): ScenarioProxyPath {
   const paths = scenario.proxyPaths;
   const normalizedType = normalizeType(assetType);
@@ -66,31 +45,13 @@ export function getBestProxyPath(
 
   if (scenario.region === "US") {
     if (normalizedType === "CRYPTO") {
-      return pickProxy(paths, ["BTC-USD", "QQQ", "SPY"]);
+      return pickProxy(paths, ["BTC-USD", "ETH-USD", "SOL-USD"]);
     }
-    if (looksLikeGold(symbol, options?.name, options?.category)) {
-      return pickProxy(paths, ["GLD", "TLT", "SPY"]);
-    }
-    if (looksLikeOil(symbol, options?.name, options?.category)) {
-      return pickProxy(paths, ["SPY", "IWM", "QQQ"]);
-    }
-    if (looksLikeTech(symbol, options?.name, options?.sector, options?.category)) {
-      return pickProxy(paths, ["QQQ", "SPY", "IWM"]);
-    }
-    return pickProxy(paths, ["SPY", "IWM", "QQQ"]);
+    return pickProxy(paths, ["BTC-USD", "ETH-USD", "SOL-USD"]);
   }
 
   if (scenario.region === "IN") {
-    if (looksLikeGold(symbol, options?.name, options?.category) || symbol.toUpperCase() === "GOLDBEES.NS") {
-      return pickProxy(paths, ["GOLDBEES.NS", "NIFTYBEES.NS", "BANKBEES.NS"]);
-    }
-    if (looksLikeBanking(symbol, options?.name, options?.sector, options?.category) || symbol.toUpperCase() === "BANKBEES.NS") {
-      return pickProxy(paths, ["BANKBEES.NS", "NIFTYBEES.NS", "GOLDBEES.NS"]);
-    }
-    if (looksLikeTech(symbol, options?.name, options?.sector, options?.category)) {
-      return pickProxy(paths, ["NIFTYBEES.NS", "BANKBEES.NS"]);
-    }
-    return pickProxy(paths, ["NIFTYBEES.NS", "BANKBEES.NS", "GOLDBEES.NS"]);
+    return pickProxy(paths, ["BTC-USD", "ETH-USD", "SOL-USD"]);
   }
 
   return paths[0];
@@ -100,15 +61,11 @@ export function getBestProxyPath(
 // Beta = asset_annualized_vol / proxy_annualized_vol, clamped to [0.2, 2.5].
 // Proxy annualized vols are approximate historical averages for each asset class.
 const PROXY_ANNUALIZED_VOLS: Record<string, number> = {
-  "SPY":        0.18,
-  "QQQ":        0.24,
-  "IWM":        0.23,
-  "GLD":        0.15,
-  "TLT":        0.14,
   "BTC-USD":    0.75,
-  "NIFTYBEES.NS": 0.20,
-  "BANKBEES.NS":  0.26,
-  "GOLDBEES.NS":  0.16,
+  "ETH-USD":    0.80,
+  "SOL-USD":    0.90,
+  "BNB-USD":    0.70,
+  "XRP-USD":    0.85,
 };
 
 export function estimateBeta(

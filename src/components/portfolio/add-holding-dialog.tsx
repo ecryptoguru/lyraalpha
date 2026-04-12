@@ -199,7 +199,7 @@ export function AddHoldingDialog({ portfolioId, region, onAdd, onClose }: AddHol
                   value={symbolInput}
                   onChange={(e) => handleSymbolChange(e.target.value)}
                   onFocus={() => { if (symbolInput.length >= 1) setShowDropdown(true); }}
-                  placeholder="Search AAPL, MSFT, NIFTY50…"
+                  placeholder="Search BTC-USD, ETH-USD, SOL-USD…"
                   className={cn(
                     "pl-9 pr-9 text-sm font-medium",
                     errors.symbol && "border-red-400/50",

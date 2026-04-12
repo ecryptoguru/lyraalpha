@@ -17,6 +17,7 @@ describe("Scenario Engine", () => {
     value: 40,
     growth: 70,
     momentum: 65,
+    volatility: 65,
     lowVol: 35,
   };
 
@@ -123,6 +124,7 @@ describe("Scenario Engine", () => {
       value: 70,
       growth: 20,
       momentum: 25,
+      volatility: 25,
       lowVol: 75,
     };
 
@@ -138,6 +140,7 @@ describe("Scenario Engine", () => {
       value: 20,
       growth: 80,
       momentum: 75,
+      volatility: 75,
       lowVol: 25,
     };
 

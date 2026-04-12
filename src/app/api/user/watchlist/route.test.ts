@@ -44,20 +44,20 @@ describe("/api/user/watchlist normalization", () => {
 
     const req = new Request("http://localhost/api/user/watchlist", {
       method: "POST",
-      body: JSON.stringify({ symbol: " aapl ", region: "US" }),
+      body: JSON.stringify({ symbol: " btc-usd ", region: "US" }),
     });
 
     const res = await POST(req as NextRequest);
     expect(res.status).toBe(201);
 
     expect(prisma.asset.findUnique).toHaveBeenCalledWith({
-      where: { symbol: "AAPL" },
+      where: { symbol: "BTC-USD" },
       select: { id: true, region: true },
     });
 
     expect(prisma.watchlistItem.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ symbol: "AAPL" }),
+        create: expect.objectContaining({ symbol: "BTC-USD" }),
       }),
     );
   });
@@ -67,7 +67,7 @@ describe("/api/user/watchlist normalization", () => {
 
     const req = new Request("http://localhost/api/user/watchlist", {
       method: "DELETE",
-      body: JSON.stringify({ symbol: " aapl " }),
+      body: JSON.stringify({ symbol: " btc-usd " }),
     });
 
     const res = await DELETE(req as NextRequest);
@@ -75,7 +75,7 @@ describe("/api/user/watchlist normalization", () => {
 
     // Code uses deleteMany with nested asset filter (no findUnique call)
     expect(prisma.watchlistItem.deleteMany).toHaveBeenCalledWith({
-      where: { userId: "user_123", asset: { symbol: "AAPL" } },
+      where: { userId: "user_123", asset: { symbol: "BTC-USD" } },
     });
   });
 });

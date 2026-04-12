@@ -33,6 +33,7 @@ vi.mock("@/lib/redis", () => ({
   getCache: vi.fn().mockResolvedValue(null),
   redis: {
     set: vi.fn().mockResolvedValue("OK"), // returns "OK" = lock acquired, null = lock held
+    del: vi.fn().mockResolvedValue(1),
   },
 }));
 
@@ -107,12 +108,12 @@ describe("getGlobalNotes", () => {
 
   it("returns formatted bullet list when notes exist", async () => {
     mockPrisma.userMemoryNote.findMany.mockResolvedValue([
-      { id: "1", text: "Frequently researches RELIANCE and BTC", keywords: ["assets"] },
-      { id: "2", text: "Prefers macro context over individual stock analysis", keywords: ["style"] },
+      { id: "1", text: "Frequently researches BTC-USD and ETH-USD", keywords: ["assets"] },
+      { id: "2", text: "Prefers macro context over individual token analysis", keywords: ["style"] },
     ]);
     const result = await getGlobalNotes("user_abc123", "lyra");
-    expect(result).toContain("- Frequently researches RELIANCE and BTC");
-    expect(result).toContain("- Prefers macro context over individual stock analysis");
+    expect(result).toContain("- Frequently researches BTC-USD and ETH-USD");
+    expect(result).toContain("- Prefers macro context over individual token analysis");
   });
 
   it("queries with correct userId, source, scope", async () => {
@@ -149,10 +150,10 @@ describe("getSessionNotes", () => {
 
   it("returns formatted session notes", async () => {
     mockPrisma.userMemoryNote.findMany.mockResolvedValue([
-      { id: "1", text: "Currently researching NVDA earnings impact", keywords: ["nvda"] },
+      { id: "1", text: "Currently researching SOL-USD momentum trends", keywords: ["sol-usd"] },
     ]);
     const result = await getSessionNotes("user_abc123", "lyra");
-    expect(result).toContain("- Currently researching NVDA earnings impact");
+    expect(result).toContain("- Currently researching SOL-USD momentum trends");
   });
 
   it("queries with scope = session", async () => {
@@ -180,12 +181,12 @@ describe("consolidateMemory", () => {
 
 describe("distillSessionNotes", () => {
   const mockMessages = [
-    { role: "user", content: "What is the FCF yield for RELIANCE?" },
-    { role: "assistant", content: "RELIANCE FCF yield is approximately 3.2%..." },
-    { role: "user", content: "Compare RELIANCE with HDFCBANK on P/E" },
-    { role: "assistant", content: "RELIANCE P/E is 25x vs HDFCBANK at 22x..." },
-    { role: "user", content: "What is the sector rotation trend?" },
-    { role: "assistant", content: "Sector rotation is moving toward defensive..." },
+    { role: "user", content: "What is the TVL for ETH-USD?" },
+    { role: "assistant", content: "ETH-USD TVL is approximately $32B..." },
+    { role: "user", content: "Compare BTC-USD with ETH-USD on momentum" },
+    { role: "assistant", content: "BTC-USD momentum is 85 vs ETH-USD at 72..." },
+    { role: "user", content: "What is the token rotation trend?" },
+    { role: "assistant", content: "Token rotation is moving toward DeFi..." },
     { role: "user", content: "What are the risks of this strategy?" },
     { role: "assistant", content: "Key risks include macro headwinds..." },
   ];
@@ -220,7 +221,7 @@ describe("distillSessionNotes", () => {
   it("calls nano exactly once (combined distill+consolidate — not two sequential calls)", async () => {
     mockPrisma.userMemoryNote.findMany.mockResolvedValue([]);
     mockGenerateText.mockResolvedValue({
-      text: '[{"text":"Frequently researches RELIANCE and HDFCBANK","keywords":["reliance","hdfcbank"]}]',
+      text: '[{"text":"Frequently researches BTC-USD and ETH-USD","keywords":["btc-usd","eth-usd"]}]',
     });
     await distillSessionNotes("user_abc123", mockMessages, "lyra");
     expect(mockGenerateText).toHaveBeenCalledTimes(1);
@@ -229,7 +230,7 @@ describe("distillSessionNotes", () => {
   it("writes updated global notes via transaction when nano returns valid JSON", async () => {
     mockPrisma.userMemoryNote.findMany.mockResolvedValue([]);
     mockGenerateText.mockResolvedValue({
-      text: '[{"text":"Frequently researches RELIANCE","keywords":["reliance"]}]',
+      text: '[{"text":"Frequently researches BTC-USD","keywords":["btc-usd"]}]',
     });
     await distillSessionNotes("user_abc123", mockMessages, "lyra");
     expect(mockPrisma.$transaction).toHaveBeenCalled();
@@ -280,7 +281,7 @@ describe("buildCompressedContext — memory blocks", () => {
   it("injects [USER_PROFILE] when globalNotes provided and tier is not SIMPLE", async () => {
     const { buildCompressedContext } = await import("../context-builder");
     const result = buildCompressedContext(
-      { symbol: "AAPL", assetType: "STOCK", scores: {} },
+      { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
       {
         globalNotes: "- Prefers macro context\n- Risk-averse signals detected",
         tier: "MODERATE",
@@ -294,7 +295,7 @@ describe("buildCompressedContext — memory blocks", () => {
   it("does NOT inject [USER_PROFILE] for SIMPLE tier", async () => {
     const { buildCompressedContext } = await import("../context-builder");
     const result = buildCompressedContext(
-      { symbol: "AAPL", assetType: "STOCK", scores: {} },
+      { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
       {
         globalNotes: "- Prefers macro context",
         tier: "SIMPLE",
@@ -306,20 +307,20 @@ describe("buildCompressedContext — memory blocks", () => {
   it("injects [SESSION_CONTEXT] when sessionNotes provided and tier is not SIMPLE", async () => {
     const { buildCompressedContext } = await import("../context-builder");
     const result = buildCompressedContext(
-      { symbol: "AAPL", assetType: "STOCK", scores: {} },
+      { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
       {
-        sessionNotes: "- Currently researching NVDA earnings",
+        sessionNotes: "- Currently researching SOL-USD momentum",
         tier: "COMPLEX",
       },
     );
     expect(result).toContain("[SESSION_CONTEXT]");
-    expect(result).toContain("- Currently researching NVDA earnings");
+    expect(result).toContain("- Currently researching SOL-USD momentum");
   });
 
   it("does NOT inject [SESSION_CONTEXT] when sessionNotes is empty", async () => {
     const { buildCompressedContext } = await import("../context-builder");
     const result = buildCompressedContext(
-      { symbol: "AAPL", assetType: "STOCK", scores: {} },
+      { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
       {
         sessionNotes: "",
         tier: "MODERATE",
@@ -331,9 +332,9 @@ describe("buildCompressedContext — memory blocks", () => {
   it("does NOT inject [SESSION_CONTEXT] in compare mode", async () => {
     const { buildCompressedContext } = await import("../context-builder");
     const result = buildCompressedContext(
-      { symbol: "AAPL", assetType: "STOCK", scores: {} },
+      { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
       {
-        sessionNotes: "- Researching NVDA",
+        sessionNotes: "- Researching SOL-USD",
         tier: "MODERATE",
         responseMode: "compare",
       },
@@ -346,7 +347,7 @@ describe("buildCompressedContext — memory blocks", () => {
     // 400-char note — should be truncated to 300 in compare mode
     const note = `- ${"x".repeat(380)}`;
     const result = buildCompressedContext(
-      { symbol: "AAPL", assetType: "STOCK", scores: {} },
+      { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
       { globalNotes: note, tier: "MODERATE", responseMode: "compare" },
     );
     // Should include the profile header but not the full 380-char note
@@ -358,7 +359,7 @@ describe("buildCompressedContext — memory blocks", () => {
   it("does NOT inject [USER_PROFILE] for SIMPLE tier even with globalNotes", async () => {
     const { buildCompressedContext } = await import("../context-builder");
     const result = buildCompressedContext(
-      { symbol: "AAPL", assetType: "STOCK", scores: {} },
+      { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
       { globalNotes: "- Prefers macro", tier: "SIMPLE" },
     );
     expect(result).not.toContain("[USER_PROFILE]");
@@ -374,12 +375,12 @@ describe("distillSessionNotes — extraction quality snapshots", () => {
   const mockLogMemoryEvent = logMemoryEvent as ReturnType<typeof vi.fn>;
 
   const fourTurnMessages = [
-    { role: "user", content: "What's your view on NVDA momentum?" },
-    { role: "assistant", content: "NVDA shows strong trend (T:85) with decelerating momentum (M:62)." },
-    { role: "user", content: "How does that compare to AMD?" },
-    { role: "assistant", content: "AMD has lower trend (T:71) but stronger momentum (M:79)." },
-    { role: "user", content: "I prefer Indian stocks like RELIANCE for my core holdings." },
-    { role: "assistant", content: "Noted — RELIANCE.NS has strong FII inflow and RBI sensitivity." },
+    { role: "user", content: "What's your view on SOL-USD momentum?" },
+    { role: "assistant", content: "SOL-USD shows strong trend (T:85) with decelerating momentum (M:62)." },
+    { role: "user", content: "How does that compare to AVAX-USD?" },
+    { role: "assistant", content: "AVAX-USD has lower trend (T:71) but stronger momentum (M:79)." },
+    { role: "user", content: "I prefer L1 tokens like BTC-USD for my core holdings." },
+    { role: "assistant", content: "Noted — BTC-USD has strong institutional inflow and macro sensitivity." },
     { role: "user", content: "What risk regime are we in globally?" },
     { role: "assistant", content: "RISK_OFF — VIX elevated, USD strengthening, defensive rotation." },
   ];
@@ -392,8 +393,8 @@ describe("distillSessionNotes — extraction quality snapshots", () => {
 
   it("extracts valid notes from a real conversation and writes to DB", async () => {
     const nanoOutput = JSON.stringify([
-      { text: "Prefers Indian stocks (RELIANCE.NS) as core holdings", keywords: ["india", "reliance"] },
-      { text: "Interested in momentum divergence between NVDA and AMD", keywords: ["nvda", "amd", "momentum"] },
+      { text: "Prefers L1 tokens (BTC-USD) as core holdings", keywords: ["layer1", "btc-usd"] },
+      { text: "Interested in momentum divergence between SOL-USD and AVAX-USD", keywords: ["sol-usd", "avax-usd", "momentum"] },
     ]);
     mockGenerateText.mockResolvedValue({ text: nanoOutput });
 

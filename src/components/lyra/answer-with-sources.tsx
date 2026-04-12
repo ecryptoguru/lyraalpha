@@ -8,7 +8,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, memo, lazy, Suspense, useEffect, useMemo } from "react";
-const StockChart = lazy(() => import("./stock-chart").then(m => ({ default: m.StockChart })));
+const CryptoChart = lazy(() => import("./crypto-chart").then(m => ({ default: m.CryptoChart })));
 import { FinancialTable } from "./financial-table";
 import {
   Source,
@@ -218,7 +218,7 @@ export const AnswerWithSources = memo(function AnswerWithSources({
                 return (
                   <div key={idx} className="space-y-6 mb-6">
                     <Suspense fallback={<div className="h-48 animate-pulse rounded-xl bg-muted" />}>
-                      <StockChart symbol={stockResult.symbol} />
+                      <CryptoChart symbol={stockResult.symbol} />
                     </Suspense>
                     <FinancialTable
                       title="Valuation Metrics"

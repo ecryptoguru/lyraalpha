@@ -23,23 +23,21 @@ export { normalizePlanTier };
 
 export type EliteFeature =
   | "discovery_feed"
-  | "etf_lookthrough"
-  | "mf_lookthrough"
+  | "portfolio_lookthrough"
   | "crypto_onchain"
-  | "commodity_intelligence"
+  | "macro_intelligence"
   | "learning_modules"
-  | "commodity_correlations"
+  | "macro_correlations"
   | "xp_multiplier"
   | "portfolio_count";
 
 const PLAN_LIMITS: Record<EliteFeature, Record<PlanTier, number>> = {
   discovery_feed:          { STARTER: 5,  PRO: 15, ELITE: 100, ENTERPRISE: 100 },
-  etf_lookthrough:         { STARTER: 1,  PRO: 1,  ELITE: 3,   ENTERPRISE: 3 },   // 0=basic, 1=holdings+sectors, 3=full
-  mf_lookthrough:          { STARTER: 1,  PRO: 1,  ELITE: 3,   ENTERPRISE: 3 },
+  portfolio_lookthrough:   { STARTER: 1,  PRO: 1,  ELITE: 3,   ENTERPRISE: 3 },   // 0=basic, 1=holdings+sectors, 3=full
   crypto_onchain:          { STARTER: 1,  PRO: 1,  ELITE: 3,   ENTERPRISE: 3 },
-  commodity_intelligence:  { STARTER: 1,  PRO: 1,  ELITE: 3,   ENTERPRISE: 3 },
+  macro_intelligence:      { STARTER: 1,  PRO: 1,  ELITE: 3,   ENTERPRISE: 3 },
   learning_modules:        { STARTER: 1,  PRO: 2,  ELITE: 3,   ENTERPRISE: 3 },   // 1=fundamentals, 2=+intermediate, 3=all
-  commodity_correlations:  { STARTER: 0,  PRO: 3,  ELITE: 10,  ENTERPRISE: 10 },  // number of correlations shown
+  macro_correlations:      { STARTER: 0,  PRO: 3,  ELITE: 10,  ENTERPRISE: 10 },  // number of correlations shown
   xp_multiplier:           { STARTER: 1,  PRO: 1.25, ELITE: 1.5, ENTERPRISE: 1.5 },
   portfolio_count:         { STARTER: 1,  PRO: 3,  ELITE: 20,  ENTERPRISE: 20 },
 };

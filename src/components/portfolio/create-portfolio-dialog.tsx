@@ -102,7 +102,7 @@ export function CreatePortfolioDialog({ region, onClose, onCreate }: CreatePortf
               id="portfolio-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Long-term equity + ETF mix"
+              placeholder="Long-term L1 + DeFi mix"
               className="text-sm"
               maxLength={500}
             />

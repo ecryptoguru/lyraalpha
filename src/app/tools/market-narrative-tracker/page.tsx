@@ -64,7 +64,7 @@ export default function MarketNarrativeTrackerPage() {
         {
           label: "Regime awareness",
           thisTool: "Identifies whether the market is in a risk-on, risk-off, rotation, or consolidation regime — and updates as it shifts. Every asset score is interpreted in this context.",
-          alternative: "No regime classification. Individual stock and sector moves are reported without market-structure context.",
+          alternative: "No regime classification. Individual asset and sector moves are reported without market-structure context.",
         },
         {
           label: "Decision path",
@@ -91,8 +91,8 @@ export default function MarketNarrativeTrackerPage() {
           answer: "Yes. LyraAlpha tracks market narratives for both US and India markets. India-specific narratives — RBI policy, FII flow dynamics, rupee regime, domestic vs export sector rotations — are tracked alongside US macro narratives.",
         },
         {
-          question: "When should I use this instead of stock analysis?",
-          answer: "Use this first when the question is about the market as a whole or a sector trend. Use stock analysis when you already have a specific name and want a structured read on it within the current narrative context.",
+          question: "When should I use this instead of asset analysis?",
+          answer: "Use this first when the question is about the market as a whole or a sector trend. Use asset analysis when you already have a specific name and want a structured read on it within the current narrative context.",
         },
         {
           question: "How does this connect to portfolio decisions?",
@@ -110,7 +110,7 @@ export default function MarketNarrativeTrackerPage() {
       relatedTools={[
         { title: "AI Portfolio Analyzer", description: "Check whether your holdings are already concentrated in the dominant narrative.", href: "/tools/ai-portfolio-analyzer" },
         { title: "AI Investment Research", description: "Take the narrative into Lyra for deeper cross-asset scenario analysis.", href: "/tools/ai-investment-research" },
-        { title: "AI Stock Analysis", description: "Score individual names once the narrative narrows the field.", href: "/tools/ai-stock-analysis" },
+        { title: "AI Crypto Analysis", description: "Score individual names once the narrative narrows the field.", href: "/tools/ai-crypto-analysis" },
       ]}
     />
   );

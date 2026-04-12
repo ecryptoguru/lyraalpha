@@ -175,9 +175,9 @@ describe("plan-gate", () => {
       expect(canAccessAssetType("ENTERPRISE", "CRYPTO")).toBe(true);
     });
 
-    it("allows STOCK for all plans", () => {
-      expect(canAccessAssetType("STARTER", "STOCK")).toBe(true);
-      expect(canAccessAssetType("PRO", "STOCK")).toBe(true);
+    it("allows CRYPTO for all plans", () => {
+      expect(canAccessAssetType("STARTER", "CRYPTO")).toBe(true);
+      expect(canAccessAssetType("PRO", "CRYPTO")).toBe(true);
     });
   });
 
@@ -200,11 +200,11 @@ describe("plan-gate", () => {
 
   describe("hasFeatureAccess", () => {
     it("returns true when limit > 0", () => {
-      expect(hasFeatureAccess("PRO", "etf_lookthrough")).toBe(true);
+      expect(hasFeatureAccess("PRO", "portfolio_lookthrough")).toBe(true);
     });
 
     it("returns false when limit is 0", () => {
-      expect(hasFeatureAccess("STARTER", "commodity_correlations")).toBe(false);
+      expect(hasFeatureAccess("STARTER", "macro_correlations")).toBe(false);
     });
   });
 

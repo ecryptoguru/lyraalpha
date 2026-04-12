@@ -88,7 +88,7 @@ const EXEMPT_MODES = new Set(["compare", "stress-test", "portfolio"]);
  * @param plan       STARTER | PRO | ELITE | ENTERPRISE
  * @param isEducational  Whether the query was classified as educational
  * @param responseMode   compare | stress-test | portfolio | standard | etc.
- * @param assetType  GLOBAL | STOCK | CRYPTO | etc.
+ * @param assetType  GLOBAL | CRYPTO | etc.
  */
 export function validateOutput(
   text: string,
@@ -221,4 +221,81 @@ export function validateToolOutput<T>(
     }
     return { success: false, error: "Unknown validation error" };
   }
+}
+
+// ─── Myra output validation ──────────────────────────────────────────────────
+// Lightweight post-generation check for plan/pricing hallucinations.
+// Non-blocking: logs warnings but never blocks the user from receiving the response.
+
+// Known plan prices (canonical source of truth — must match buildMyraPlatformFacts)
+const KNOWN_PLAN_PRICES: Record<string, string> = {
+  starter: "free",
+  pro: "$19",
+  elite: "$49",
+  enterprise: "custom",
+};
+
+// Patterns that indicate a specific price claim — e.g. "$29/month", "₹499", "99 per month"
+const PRICE_CLAIM_PATTERN = /(?:\$|€|₹|£)\s?\d+[\d,.]*|(?:\d+[\d,.]*)\s?(?:per\s+month|\/mo|\/month)/i;
+
+// Plan name pattern — matches "Starter plan", "Pro tier", "Elite subscription", etc.
+const PLAN_NAME_PATTERN = /\b(starter|pro|elite|enterprise)\s+(?:plan|tier|subscription|package)/i;
+
+export interface MyraValidationResult {
+  valid: boolean;
+  warnings: string[];
+  wordCount: number;
+}
+
+export function validateMyraOutput(text: string): MyraValidationResult {
+  const warnings: string[] = [];
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+
+  // Check for price claims adjacent to plan names
+  const planMatch = text.match(PLAN_NAME_PATTERN);
+  if (planMatch) {
+    const planKey = planMatch[1].toLowerCase();
+    const knownPrice = KNOWN_PLAN_PRICES[planKey];
+    const priceMatch = text.match(PRICE_CLAIM_PATTERN);
+    if (priceMatch && knownPrice) {
+      const claimedPrice = priceMatch[0].toLowerCase();
+      const knownPriceLower = knownPrice.toLowerCase();
+      // If the claimed price doesn't match the known price, flag it
+      if (!claimedPrice.includes(knownPriceLower) && knownPrice !== "custom") {
+        warnings.push(`Possible price hallucination: claimed "${claimedPrice}" for ${planKey} plan, expected "${knownPrice}"`);
+      }
+    }
+  }
+
+  // Check for invented plan entitlements — phrases like "unlimited credits" or "unlimited queries"
+  const unlimitedPattern = /\bunlimited\s+(credits|queries|questions|requests|calls|sessions)\b/i;
+  if (unlimitedPattern.test(text)) {
+    warnings.push(`Possible entitlement hallucination: "unlimited" claim detected — no plan offers unlimited credits`);
+  }
+
+  // Check for model/LLM self-disclosure — Myra should never reveal her underlying model.
+  // Narrowed: bare "openai" matches KB quotes like "OpenAI's API" (legitimate reference).
+  // Only flag when in a self-referential context (e.g. "powered by OpenAI", "I am an OpenAI model").
+  const modelDisclosurePattern = /\b(gpt-[\w.-]+|azure\s+(openai|ai)|\b(?:i\s+am|i'm|powered\s+by|built\s+(on|with))\s+(?:an?\s+)?(?:openai|llm|language\s+model|ai\s+model)|(?:large\s+)?language\s+model|ai\s+model)\b/i;
+  if (modelDisclosurePattern.test(text)) {
+    warnings.push("Possible model self-disclosure: Myra should not reveal underlying AI model details");
+  }
+
+  return { valid: warnings.length === 0, warnings, wordCount };
+}
+
+export function logMyraValidationResult(result: MyraValidationResult): void {
+  if (result.warnings.length > 0) {
+    logger.warn(
+      {
+        event: "myra_output_validation_warning",
+        warnings: result.warnings,
+        wordCount: result.wordCount,
+      },
+      `Myra output validation: ${result.warnings.length} warning(s)`,
+    );
+  }
+  recordValidationResult(result.valid).catch((e: unknown) => {
+    logger.debug({ err: e }, "recordValidationResult failed for Myra");
+  });
 }

@@ -12,7 +12,7 @@ export interface StockCardData {
 
   // Key Metrics
   marketCap: string;
-  peRatio: string;
+  peRatio?: string;
   oneYearChange: {
     value: string;
     isPositive: boolean;

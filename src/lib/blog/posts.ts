@@ -152,7 +152,7 @@ Our deterministic engine computes regime at three levels simultaneously:
 
 **Asset Regime** — Individual asset regime relative to its sector and the broader macro state.
 
-These three levels interact. An asset can be in a local uptrend (asset regime: bullish) while the macro regime is fragile — which means the trend is fragile too. Lyra knows this. Her response to "should I add more NVDA?" in that context will reflect all three levels of regime, not just the asset signal.
+These three levels interact. An asset can be in a local uptrend (asset regime: bullish) while the macro regime is fragile — which means the trend is fragile too. Lyra knows this. Her response to "should I add more BTC-USD?" in that context will reflect all three levels of regime, not just the asset signal.
 
 ---
 
@@ -162,7 +162,7 @@ When you open any asset in LyraAlpha:
 
 1. The regime context is already computed before you ask a question
 2. Lyra's analysis positions every signal within the regime frame
-3. Comparative analysis ("NVDA vs TSLA") shows which asset has better regime alignment, not just raw score comparison
+3. Comparative analysis ("BTC-USD vs ETH-USD") shows which asset has better regime alignment, not just raw score comparison
 
 Regime awareness is not a feature. It's the foundation of sound analysis.
 

@@ -29,7 +29,7 @@ const SAFE_BET_PREDICTION_PATTERN =
   /(?:\bis\s+.{0,40}\bsafe\s+bets?\b(?!\s+(?:in|for|during|under|given|against|when|if))|(?:^|tell\s+me|give\s+me|what(?:'s|\s+is)|find\s+me|recommend)\s+.{0,40}safe\s+bets?\b(?!\s+(?:in|for|during|under|given|against|when|if)))/i;
 
 // Block 10: Intent-aware "target price" check.
-// "what's the analyst target price for AAPL?" → data lookup → allowed.
+// "what's the analyst target price for BTC-USD?" → data lookup → allowed.
 // "my target price is $200" / "predict target price" → prediction claim → blocked.
 const TARGET_PRICE_PREDICTION_PATTERN =
   /(?:my|your|predict(?:ing|ed)?|forecast(?:ing|ed)?|will\s+reach|going\s+to\s+(?:hit|reach|be))\s+.{0,30}(?:target\s+price|price\s+target)/i;
@@ -51,8 +51,13 @@ const BANNED_WORD_PATTERNS: { word: string; regex: RegExp }[] = [
 ].map((w) => ({ word: w, regex: new RegExp(`\\b${w}\\b`) }));
 
 export function checkPromptInjection(query: string): { isValid: boolean; reason?: string } {
+  // R2-FIX: Normalize to NFKC form before pattern matching to defeat Unicode homoglyph evasion.
+  // Attackers can substitute Cyrillic characters that look identical to Latin letters
+  // (e.g. 'і' U+0456 for 'i', 'а' U+0430 for 'a') to bypass regex-based injection detection.
+  // NFKC normalization canonicalizes visually-similar characters to their base equivalents.
+  const normalized = query.normalize("NFKC");
   for (const pattern of INJECTION_PATTERNS) {
-    if (pattern.test(query)) {
+    if (pattern.test(normalized)) {
       return {
         isValid: false,
         reason: "Your query contains content that cannot be processed.",
@@ -114,17 +119,21 @@ export function validateInput(query: string): {
   isValid: boolean;
   reason?: string;
 } {
-  if (query.length > 5000) {
+  // R2-FIX: Normalize to NFKC before any checks — single normalization point for the
+  // entire validation pipeline. Defeats Unicode homoglyph evasion across all guardrails.
+  const normalized = query.normalize("NFKC");
+
+  if (normalized.length > 5000) {
     return {
       isValid: false,
       reason: "Your query is too long. Please keep it under 5000 characters.",
     };
   }
 
-  const injectionCheck = checkPromptInjection(query);
+  const injectionCheck = checkPromptInjection(normalized);
   if (!injectionCheck.isValid) return injectionCheck;
 
-  const financialCheck = checkFinancialGuardrails(query);
+  const financialCheck = checkFinancialGuardrails(normalized);
   if (!financialCheck.isValid) return financialCheck;
 
   return { isValid: true };

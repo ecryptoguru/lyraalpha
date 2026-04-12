@@ -28,24 +28,20 @@ const TOPIC_PATTERNS: Record<string, RegExp[]> = {
   signal_strength: [/signal.strength|composite.*signal|buy.*sell.*signal|bullish.*bearish/i],
   scoring: [/score.*dynamics|percentile|acceleration|factor.*DNA|factor.*alignment/i],
   risk: [/risk.*metric|sharpe|sortino|alpha|beta|max.*drawdown|CAGR|volatility.*risk|tail.*risk/i],
-  risk_profiles: [/risk.*profile|asset.*type.*risk|crypto.*risk|stock.*risk|etf.*risk|commodity.*risk|mutual.*fund.*risk/i],
+  risk_profiles: [/risk.*profile|asset.*type.*risk|crypto.*risk/i],
   correlation: [/correlation|cross.*sector|dispersion|regime.*correlation/i],
   red_flags: [/red.*flag|warning.*sign|danger|caution/i],
   position_sizing: [/position.*siz|portfolio.*allocation|kelly|risk.*budget/i],
   indian_markets: [/FII|DII|RBI|repo.*rate|CRR|SLR|NSE|BSE|SEBI|rupee|INR|monsoon|SIP.*flow/i],
   crypto_intelligence: [/network.*activity|holder.*stability|liquidity.*risk.*score|structural.*risk|enhanced.*trust|TVL.*MCap|DEX.*pool|on.chain.*score/i],
   sector_playbooks: [/NIM|net.*interest.*margin|P\/B.*bank|FDA|patent.*cliff|pipeline.*value|GRM|refining.*margin|same.store.*sales/i],
-  etf_lookthrough: [/lookthrough|constituent.*score|factor.*tilt|HHI|behavioral.*profile|expense.*drag|tracking.*error/i],
+  portfolio_lookthrough: [/lookthrough|constituent.*score|factor.*tilt|HHI|behavioral.*profile|expense.*drag|tracking.*error/i],
   comparison: [/compare|versus|vs\b|edge.*column|cross.class|same.class|comparison.*framework/i],
 };
 
 // ─── Asset Type Detection ───
 const ASSET_TYPE_PATTERNS: Record<string, RegExp> = {
-  STOCK: /stock|equit|earning|P\/E|valuation|margin|ROE|moat|FII|DII|NSE|BSE|pharma|banking|IT.*services/i,
   CRYPTO: /crypto|bitcoin|ethereum|blockchain|token|defi|on.chain|network.*health|TVL|DEX|holder.*stability/i,
-  ETF: /ETF|exchange.traded|factor.*exposure|tracking.*error|expense.*ratio|lookthrough|constituent/i,
-  MUTUAL_FUND: /mutual.*fund|NAV|SIP|SEBI|AUM|fund.*manager|scheme.*code|AMFI|exit.*load/i,
-  COMMODITY: /commodit|gold|oil|silver|crude|wheat|natural.*gas|supply.*demand|contango|backwardation/i,
 };
 
 // Rough token estimation: ~4 chars per token for English text

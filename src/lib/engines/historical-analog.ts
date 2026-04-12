@@ -108,7 +108,7 @@ export async function getCurrentMarketFingerprint(region = "US"): Promise<Market
       prisma.assetScore.groupBy({
         by: ["type"],
         where: {
-          asset: { region, type: "STOCK" },
+          asset: { region, type: "CRYPTO" },
           date: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
         },
         _avg: { value: true },
@@ -119,7 +119,7 @@ export async function getCurrentMarketFingerprint(region = "US"): Promise<Market
 
     const scoreMap: Record<string, number> = {};
     for (const s of scores) {
-      scoreMap[s.type] = s._avg.value ?? 50;
+      scoreMap[s.type] = s._avg?.value ?? 50;
     }
 
     const corrMetrics = regime.correlationMetrics as Record<string, unknown> | null;

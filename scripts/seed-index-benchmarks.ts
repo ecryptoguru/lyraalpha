@@ -16,14 +16,14 @@ const INDICES = [
   {
     symbol: "^NSEI",
     name: "Nifty 50",
-    type: AssetType.ETF, // Treated as ETF for pipeline compatibility
+    type: AssetType.CRYPTO,
     region: "IN",
     currency: "INR",
   },
   {
     symbol: "^BSESN",
     name: "BSE Sensex",
-    type: AssetType.ETF,
+    type: AssetType.CRYPTO,
     region: "IN",
     currency: "INR",
   },

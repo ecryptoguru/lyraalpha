@@ -82,7 +82,7 @@ export async function PUT(req: NextRequest) {
       preferredRegion,
       experienceLevel,
       ...(dashboardMode ? { dashboardMode } : {}),
-      interests,
+      interests: interests as ("CRYPTO")[],
       onboardingCompleted,
       onboardingCompletedAt: onboardingCompleted
         ? existing?.onboardingCompletedAt || new Date()

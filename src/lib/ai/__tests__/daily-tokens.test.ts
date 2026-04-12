@@ -46,6 +46,12 @@ const redisMock = {
     if (!h) return null;
     return Object.fromEntries([...h.entries()].map(([k, v]) => [k, String(v)]));
   }),
+  hget: vi.fn(async (key: string, field: string) => {
+    const h = _hashes.get(key);
+    if (!h) return null;
+    const val = h.get(field);
+    return val !== undefined ? String(val) : null;
+  }),
   hincrby: vi.fn(async (key: string, field: string, delta: number) => {
     if (!_hashes.has(key)) _hashes.set(key, new Map());
     const h = _hashes.get(key)!;
@@ -93,9 +99,8 @@ async function simulateIncrementDailyTokens(userId: string, tokens: number, toda
 }
 
 async function simulateGetDailyTokensUsed(userId: string, today: string): Promise<number> {
-  const stats = await redisMock.hgetall("lyra:daily_tokens_v2");
   const field = `${userId}:${today}`;
-  const raw = stats?.[field];
+  const raw = await redisMock.hget("lyra:daily_tokens_v2", field);
   return raw ? Number(raw) : 0;
 }
 

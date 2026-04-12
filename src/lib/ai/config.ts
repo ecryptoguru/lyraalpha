@@ -338,7 +338,7 @@ const PLAN_CONFIGS: Record<PlanTier, Record<QueryComplexity, TierConfig>> = {
 // and per-session memory extraction is a cost-tier feature (PRO+).
 // To enable STARTER memory in future, lower the gate to >= 2 in service.ts and guard
 // with: source === "lyra" && userPlan === "STARTER".
-export const HISTORY_CAPS: Record<string, number> = {
+export const HISTORY_CAPS: Record<PlanTier, number> = {
   ELITE: 10,
   ENTERPRISE: 10,
   PRO: 6,
@@ -362,14 +362,14 @@ export const HISTORY_CAPS: Record<string, number> = {
  * Falls back to maxTokens - 100 when wordBudgetMultiplier is null (unconstrained).
  * Prevents Azure from reserving 35-50% more output capacity than needed.
  */
-export function getTargetOutputTokens(config: TierConfig): number {
+export function getTargetOutputTokens(config: TierConfig, complexity?: QueryComplexity): number {
   if (config.wordBudgetMultiplier == null || config.wordBudgetMultiplier <= 0) {
     return config.maxTokens - 100;
   }
   const contentTokens = config.maxTokens - 450;
   const targetWords = Math.round(contentTokens * config.wordBudgetMultiplier * 0.72);
   // COMPLEX paths get +600 buffer (macro queries overshoot by 30-40%); others +400
-  const isComplex = config.maxTokens >= 2900;
+  const isComplex = complexity === "COMPLEX";
   const buffer = isComplex ? 600 : 400;
   const targetOutputTokens = Math.round(targetWords / 0.68) + buffer;
   // Never exceed maxTokens - 100 (hard ceiling) and never go below 400 (floor for short responses)

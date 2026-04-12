@@ -217,32 +217,7 @@ export function buildCompressedContext(
       }
     }
 
-    // P0: Valuation Metrics (stocks and ETFs only)
-    // PRUNING: Only send [VALUATION] for MODERATE/COMPLEX tiers (SIMPLE already has price/base scores)
-    if (opts.tier !== "SIMPLE" && (assetType === "STOCK" || assetType === "ETF")) {
-      const valParts: string[] = [];
-      if (enrich.peRatio != null) valParts.push(`P/E:${enrich.peRatio.toFixed(1)}`);
-      if (enrich.priceToBook != null) valParts.push(`P/B:${enrich.priceToBook.toFixed(1)}`);
-      if (enrich.roe != null) valParts.push(`ROE:${enrich.roe.toFixed(1)}%`);
-      if (enrich.eps != null) valParts.push(`EPS:${enrich.eps.toFixed(2)}`);
-      if (enrich.dividendYield != null && enrich.dividendYield > 0) valParts.push(`DivYield:${enrich.dividendYield.toFixed(2)}%`);
-      if (enrich.marketCap) valParts.push(`MCap:${enrich.marketCap}`);
-      if (valParts.length > 0) {
-        lines.push(`[VALUATION] ${valParts.join(" | ")}`);
-      }
-      // Analyst targets from metadata
-      const meta = enrich.metadata;
-      if (meta) {
-        const tgtParts: string[] = [];
-        if (meta.targetMeanPrice != null) tgtParts.push(`Mean:${cs}${(meta.targetMeanPrice as number).toFixed(0)}`);
-        if (meta.targetHighPrice != null) tgtParts.push(`High:${cs}${(meta.targetHighPrice as number).toFixed(0)}`);
-        if (meta.targetLowPrice != null) tgtParts.push(`Low:${cs}${(meta.targetLowPrice as number).toFixed(0)}`);
-        if (meta.numberOfAnalystOpinions != null) tgtParts.push(`Analysts:${meta.numberOfAnalystOpinions}`);
-        if (tgtParts.length > 0) {
-          lines.push(`[ANALYST_TARGETS] ${tgtParts.join(" | ")}`);
-        }
-      }
-    }
+    // P0: Valuation Metrics — not applicable for crypto-only platform
 
     // P1: Signal Strength (all asset types that have it)
     const sig = enrich.signalStrength as {
@@ -356,269 +331,11 @@ export function buildCompressedContext(
       }
     }
 
-    // PRUNING: Only send [COMPANY_PROFILE] for COMPLEX tier (too much noise for MODERATE)
-    if (opts.tier === "COMPLEX" && (assetType === "STOCK" || assetType === "ETF") && (enrich.description || enrich.industry)) {
-      const profileParts: string[] = [];
-      if (enrich.industry) profileParts.push(`Industry:${enrich.industry}`);
-      if (enrich.sector && enrich.sector !== enrich.industry) profileParts.push(`Sector:${enrich.sector}`);
-      if (enrich.description) {
-        profileParts.push(`About:${truncateDesc(enrich.description, 80)}`);
-      }
-      if (profileParts.length > 0) {
-        lines.push(`[COMPANY_PROFILE] ${profileParts.join(" | ")}`);
-      }
-    }
+    // Company profile — not applicable for crypto-only platform
 
-    // PRUNING: Only send sentiment in COMPLEX (analysts sufficient for MODERATE)
-    if (opts.tier === "COMPLEX" && (assetType === "STOCK" || assetType === "ETF") && enrich.metadata) {
-      const meta = enrich.metadata as Record<string, unknown>;
+    // Insider sentiment & financials — not applicable for crypto-only platform
 
-      // Insider Sentiment
-      const insider = meta.insiderSentiment as { signal?: string; avgMSPR?: number; totalShareChange6m?: number } | undefined;
-      if (insider?.signal) {
-        const iParts = [`Signal:${insider.signal}`];
-        if (insider.avgMSPR != null) iParts.push(`MSPR:${insider.avgMSPR.toFixed(3)}`);
-        if (insider.totalShareChange6m != null) iParts.push(`NetShares6m:${insider.totalShareChange6m.toLocaleString()}`);
-        lines.push(`[INSIDER_SENTIMENT] ${iParts.join(" | ")}`);
-      }
-    }
-
-    // P1: Mutual Fund Profile (category, fund house, NAV)
-    if (assetType === "MUTUAL_FUND") {
-      const mfParts: string[] = [];
-      if (enrich.fundHouse) mfParts.push(`FundHouse:${enrich.fundHouse}`);
-      if (enrich.category) mfParts.push(`Category:${enrich.category}`);
-      if (enrich.nav != null) mfParts.push(`NAV:₹${enrich.nav.toFixed(2)}`);
-      if (mfParts.length > 0) {
-        lines.push(`[MF_PROFILE] ${mfParts.join(" | ")}`);
-      }
-    }
-
-    // P1: Financial Highlights (stocks only — key metrics from latest annual)
-    if (assetType === "STOCK" && enrich.financials) {
-      const fin = enrich.financials as {
-        incomeStatement?: { totalRevenue?: number | null; netIncome?: number | null; grossProfit?: number | null };
-        balanceSheet?: { totalAssets?: number | null; totalEquity?: number | null; cash?: number | null; longTermDebt?: number | null };
-        cashflow?: { freeCashFlow?: number | null; operatingCashflow?: number | null };
-        debtToEquity?: number | null; currentRatio?: number | null;
-      };
-      const finParts: string[] = [];
-      if (fin.incomeStatement?.totalRevenue != null) finParts.push(`Rev:$${fmtLarge(fin.incomeStatement.totalRevenue)}`);
-      if (fin.incomeStatement?.netIncome != null) finParts.push(`NetInc:$${fmtLarge(fin.incomeStatement.netIncome)}`);
-      if (fin.balanceSheet?.cash != null) finParts.push(`Cash:$${fmtLarge(fin.balanceSheet.cash)}`);
-      if (fin.balanceSheet?.longTermDebt != null) finParts.push(`LTDebt:$${fmtLarge(fin.balanceSheet.longTermDebt)}`);
-      if (fin.cashflow?.freeCashFlow != null) finParts.push(`FCF:$${fmtLarge(fin.cashflow.freeCashFlow)}`);
-      if (fin.debtToEquity != null) finParts.push(`D/E:${(fin.debtToEquity/100).toFixed(1)}x`);
-      if (finParts.length > 0) {
-        lines.push(`[FINANCIALS] ${finParts.join(" | ")}`);
-      }
-    }
-
-    // P1: ETF Composition (top holdings — ETFs only)
-    if (assetType === "ETF") {
-      const th = enrich.topHoldings as {
-        holdings?: Array<{ name?: string | null; symbol?: string | null; weight?: number | null }>;
-      } | null;
-      if (th?.holdings?.length) {
-        const top5 = th.holdings.slice(0, 5)
-          .map(h => `${h.symbol || h.name || "?"}:${h.weight != null ? (h.weight * 100).toFixed(1) + "%" : "?"}`)
-          .join(", ");
-        lines.push(`[ETF_TOP_HOLDINGS] ${top5}`);
-      }
-    }
-
-    // P1: ETF Lookthrough Intelligence (ETFs only — factor exposure, concentration, risk, behavioral profile)
-    if (assetType === "ETF" && enrich.etfLookthrough) {
-      const lt = enrich.etfLookthrough as {
-        concentration?: { hhi?: number; top5Weight?: number; level?: string; holdingCount?: number };
-        factorExposure?: { value?: number; growth?: number; momentum?: number; quality?: number; size?: number; dominant?: string };
-        geographic?: { US?: number; IN?: number; other?: number; matchRate?: number };
-        lookthroughScores?: { trend?: number | null; momentum?: number | null; volatility?: number | null; weightedAvg?: number | null; matchRate?: number };
-        behavioral?: string;
-        risk?: { level?: string; factors?: string[]; tracking?: { trackingError?: number | null; correlation?: number | null }; expense?: { annualImpactBps?: number | null } };
-      };
-
-      // Factor exposure
-      if (lt.factorExposure) {
-        const fe = lt.factorExposure;
-        const feParts = [`Dominant:${fe.dominant || "balanced"}`];
-        if (fe.value) feParts.push(`Val:${fe.value}`);
-        if (fe.growth) feParts.push(`Gro:${fe.growth}`);
-        if (fe.momentum) feParts.push(`Mom:${fe.momentum}`);
-        if (fe.quality) feParts.push(`Qua:${fe.quality}`);
-        lines.push(`[ETF_FACTORS] ${feParts.join(" ")}`);
-      }
-
-      // Concentration + behavioral
-      const ltParts: string[] = [];
-      if (lt.concentration?.hhi != null) ltParts.push(`HHI:${lt.concentration.hhi.toFixed(3)}`);
-      if (lt.concentration?.top5Weight != null) ltParts.push(`Top5:${lt.concentration.top5Weight.toFixed(1)}%`);
-      if (lt.concentration?.level) ltParts.push(`Conc:${lt.concentration.level}`);
-      if (lt.behavioral) ltParts.push(`Profile:${lt.behavioral}`);
-      if (ltParts.length > 0) lines.push(`[ETF_LOOKTHROUGH] ${ltParts.join(" | ")}`);
-
-      // Risk summary
-      if (lt.risk) {
-        const rParts = [`Level:${lt.risk.level || "low"}`];
-        if (lt.risk.tracking?.trackingError != null) rParts.push(`TE:${(lt.risk.tracking.trackingError * 100).toFixed(2)}%`);
-        if (lt.risk.tracking?.correlation != null) rParts.push(`BenchCorr:${lt.risk.tracking.correlation.toFixed(2)}`);
-        if (lt.risk.expense?.annualImpactBps != null) rParts.push(`Expense:${lt.risk.expense.annualImpactBps}bps`);
-        lines.push(`[ETF_RISK] ${rParts.join(" | ")}`);
-        if (lt.risk.factors?.length) {
-          lines.push(`[ETF_RISK_FACTORS] ${lt.risk.factors.slice(0, 3).join("; ")}`);
-        }
-      }
-
-      // Lookthrough scores
-      if (lt.lookthroughScores?.weightedAvg != null) {
-        const ls = lt.lookthroughScores;
-        const lsParts = [`Avg:${ls.weightedAvg}`];
-        if (ls.trend != null) lsParts.push(`Trend:${ls.trend}`);
-        if (ls.momentum != null) lsParts.push(`Mom:${ls.momentum}`);
-        if (ls.volatility != null) lsParts.push(`Vol:${ls.volatility}`);
-        if (ls.matchRate) lsParts.push(`Match:${ls.matchRate.toFixed(0)}%`);
-        lines.push(`[ETF_CONSTITUENT_SCORES] ${lsParts.join(" ")}`);
-      }
-    }
-
-    // P1: Fund Returns (ETFs + Mutual Funds — both have fundPerformanceHistory)
-    if ((assetType === "ETF" || assetType === "MUTUAL_FUND") && enrich.fundPerformanceHistory) {
-      const fp = enrich.fundPerformanceHistory as {
-        ytd?: number | null; oneYear?: number | null; threeYear?: number | null; fiveYear?: number | null;
-      };
-      const fpParts: string[] = [];
-      if (fp.ytd != null) fpParts.push(`YTD:${fp.ytd >= 0 ? "+" : ""}${fp.ytd.toFixed(1)}%`);
-      if (fp.oneYear != null) fpParts.push(`1Y:${fp.oneYear >= 0 ? "+" : ""}${fp.oneYear.toFixed(1)}%`);
-      if (fp.threeYear != null) fpParts.push(`3Y:${fp.threeYear >= 0 ? "+" : ""}${fp.threeYear.toFixed(1)}%`);
-      if (fp.fiveYear != null) fpParts.push(`5Y:${fp.fiveYear >= 0 ? "+" : ""}${fp.fiveYear.toFixed(1)}%`);
-      if (fpParts.length > 0) {
-        const tag = assetType === "ETF" ? "ETF_FUND_RETURNS" : "MF_RETURNS";
-        lines.push(`[${tag}] ${fpParts.join(" | ")}`);
-      }
-    }
-
-    // P1: MF Lookthrough Intelligence (Mutual Funds only — style analysis, concentration, risk, behavioral profile)
-    if (assetType === "MUTUAL_FUND" && enrich.mfLookthrough) {
-      const lt = enrich.mfLookthrough as {
-        concentration?: { hhi?: number; top5Weight?: number; level?: string; holdingCount?: number };
-        styleAnalysis?: { declaredCategory?: string; actualLargeCapPct?: number; actualMidCapPct?: number; actualSmallCapPct?: number; styleDriftDetected?: boolean; driftDescription?: string | null };
-        lookthroughScores?: { trend?: number | null; momentum?: number | null; volatility?: number | null; weightedAvg?: number | null; matchRate?: number };
-        behavioral?: string;
-        risk?: { level?: string; factors?: string[]; styleDrift?: { detected?: boolean; description?: string | null }; benchmarkTracking?: { rSquared?: number | null; isClosetIndexer?: boolean }; expense?: { annualImpactBps?: number | null }; drawdown?: { maxDrawdown?: number | null } };
-      };
-
-      // Style analysis + concentration
-      const ltParts: string[] = [];
-      if (lt.styleAnalysis?.declaredCategory) ltParts.push(`Cat:${lt.styleAnalysis.declaredCategory}`);
-      if (lt.styleAnalysis?.actualLargeCapPct != null) ltParts.push(`Large:${lt.styleAnalysis.actualLargeCapPct.toFixed(0)}%`);
-      if (lt.styleAnalysis?.actualMidCapPct != null) ltParts.push(`Mid:${lt.styleAnalysis.actualMidCapPct.toFixed(0)}%`);
-      if (lt.styleAnalysis?.actualSmallCapPct != null) ltParts.push(`Small:${lt.styleAnalysis.actualSmallCapPct.toFixed(0)}%`);
-      if (lt.concentration?.hhi != null) ltParts.push(`HHI:${lt.concentration.hhi.toFixed(3)}`);
-      if (lt.concentration?.level) ltParts.push(`Conc:${lt.concentration.level}`);
-      if (lt.behavioral) ltParts.push(`Profile:${lt.behavioral}`);
-      if (ltParts.length > 0) lines.push(`[MF_LOOKTHROUGH] ${ltParts.join(" | ")}`);
-
-      // Style drift
-      if (lt.styleAnalysis?.styleDriftDetected && lt.styleAnalysis.driftDescription) {
-        lines.push(`[MF_STYLE_DRIFT] ${lt.styleAnalysis.driftDescription}`);
-      }
-
-      // Risk summary
-      if (lt.risk) {
-        const rParts = [`Level:${lt.risk.level || "low"}`];
-        if (lt.risk.expense?.annualImpactBps != null) rParts.push(`Expense:${lt.risk.expense.annualImpactBps}bps`);
-        if (lt.risk.drawdown?.maxDrawdown != null) rParts.push(`MaxDD:${lt.risk.drawdown.maxDrawdown.toFixed(1)}%`);
-        if (lt.risk.benchmarkTracking?.rSquared != null) rParts.push(`R²:${lt.risk.benchmarkTracking.rSquared.toFixed(2)}`);
-        if (lt.risk.benchmarkTracking?.isClosetIndexer) rParts.push(`ClosetIndexer:YES`);
-        lines.push(`[MF_RISK] ${rParts.join(" | ")}`);
-        if (lt.risk.factors?.length) {
-          lines.push(`[MF_RISK_FACTORS] ${lt.risk.factors.slice(0, 3).join("; ")}`);
-        }
-      }
-
-      // Lookthrough scores
-      if (lt.lookthroughScores?.weightedAvg != null) {
-        const ls = lt.lookthroughScores;
-        const lsParts = [`Avg:${ls.weightedAvg}`];
-        if (ls.trend != null) lsParts.push(`Trend:${ls.trend}`);
-        if (ls.momentum != null) lsParts.push(`Mom:${ls.momentum}`);
-        if (ls.volatility != null) lsParts.push(`Vol:${ls.volatility}`);
-        if (ls.matchRate) lsParts.push(`Match:${ls.matchRate.toFixed(0)}%`);
-        lines.push(`[MF_CONSTITUENT_SCORES] ${lsParts.join(" ")}`);
-      }
-    }
-
-    // P1: Commodity Intelligence (Commodities only — regime sensitivity, seasonality, correlations, structural context)
-    if (assetType === "COMMODITY" && enrich.commodityIntelligence) {
-      const ci = enrich.commodityIntelligence as {
-        regimeProfile?: { safeHavenScore?: number; inflationSensitivity?: number; usdSensitivity?: number; dominantRegime?: string; conditionedReturns?: { regime: string; avgReturn: number; count: number }[] };
-        seasonality?: { currentMonthSignal?: string; currentMonthAvgReturn?: number; strongestMonth?: string; weakestMonth?: string };
-        correlations?: { topCorrelated?: { symbol: string; name: string; correlation: number }[]; topAntiCorrelated?: { symbol: string; name: string; correlation: number }[]; clusterGroup?: string; diversificationValue?: string; avgCrossCorrelation?: number };
-        structuralContext?: { cluster?: string; supplyContext?: string; demandDrivers?: string; geopoliticalSensitivity?: string; storageCost?: string; inflationHedge?: boolean; safeHavenCandidate?: boolean; seasonalNotes?: string };
-      };
-
-      // Regime profile
-      if (ci.regimeProfile) {
-        const rp = ci.regimeProfile;
-        const rpParts: string[] = [];
-        if (rp.dominantRegime) rpParts.push(`BestRegime:${formatRegimeLabel(rp.dominantRegime)}`);
-        if (rp.safeHavenScore != null) rpParts.push(`SafeHaven:${rp.safeHavenScore}/100`);
-        if (rp.inflationSensitivity != null) rpParts.push(`InflCorr:${rp.inflationSensitivity.toFixed(2)}`);
-        if (rp.usdSensitivity != null) rpParts.push(`USDCorr:${rp.usdSensitivity.toFixed(2)}`);
-        if (rpParts.length > 0) lines.push(`[COMMODITY_REGIME] ${rpParts.join(" | ")}`);
-
-        // Conditioned returns summary
-        if (rp.conditionedReturns?.length) {
-          const crParts = rp.conditionedReturns
-            .filter(cr => cr.count > 5)
-            .map(cr => `${formatRegimeLabel(cr.regime)}:${cr.avgReturn >= 0 ? "+" : ""}${cr.avgReturn.toFixed(2)}%`)
-            .join(" ");
-          if (crParts) lines.push(`[COMMODITY_REGIME_RETURNS] ${crParts}`);
-        }
-      }
-
-      // Seasonality
-      if (ci.seasonality) {
-        const sp = ci.seasonality;
-        const spParts: string[] = [];
-        if (sp.currentMonthSignal) spParts.push(`CurrentSignal:${sp.currentMonthSignal}`);
-        if (sp.currentMonthAvgReturn != null) spParts.push(`CurrentAvg:${sp.currentMonthAvgReturn >= 0 ? "+" : ""}${sp.currentMonthAvgReturn.toFixed(1)}%`);
-        if (sp.strongestMonth) spParts.push(`Best:${sp.strongestMonth}`);
-        if (sp.weakestMonth) spParts.push(`Worst:${sp.weakestMonth}`);
-        if (spParts.length > 0) lines.push(`[COMMODITY_SEASONAL] ${spParts.join(" | ")}`);
-      }
-
-      // Correlations
-      if (ci.correlations) {
-        const cp = ci.correlations;
-        const cpParts: string[] = [];
-        if (cp.clusterGroup) cpParts.push(`Cluster:${cp.clusterGroup}`);
-        if (cp.diversificationValue) cpParts.push(`DivValue:${cp.diversificationValue}`);
-        if (cp.avgCrossCorrelation != null) cpParts.push(`AvgCorr:${cp.avgCrossCorrelation.toFixed(2)}`);
-        if (cp.topCorrelated?.length) {
-          cpParts.push(`Top+:${cp.topCorrelated.slice(0, 3).map(c => `${c.name}(${c.correlation.toFixed(2)})`).join(",")}`);
-        }
-        if (cp.topAntiCorrelated?.length) {
-          cpParts.push(`Top-:${cp.topAntiCorrelated.slice(0, 3).map(c => `${c.name}(${c.correlation.toFixed(2)})`).join(",")}`);
-        }
-        if (cpParts.length > 0) lines.push(`[COMMODITY_CORRELATIONS] ${cpParts.join(" | ")}`);
-      }
-
-      // Structural context
-      if (ci.structuralContext) {
-        const sc = ci.structuralContext;
-        const scParts: string[] = [];
-        if (sc.cluster) scParts.push(`Type:${sc.cluster}`);
-        if (sc.geopoliticalSensitivity) scParts.push(`GeoPol:${sc.geopoliticalSensitivity}`);
-        if (sc.storageCost) scParts.push(`Storage:${sc.storageCost}`);
-        if (sc.inflationHedge) scParts.push(`InflHedge:YES`);
-        if (sc.safeHavenCandidate) scParts.push(`SafeHaven:YES`);
-        if (scParts.length > 0) lines.push(`[COMMODITY_STRUCTURAL] ${scParts.join(" | ")}`);
-        if (sc.supplyContext) lines.push(`[COMMODITY_SUPPLY] ${sc.supplyContext}`);
-        if (sc.demandDrivers) lines.push(`[COMMODITY_DEMAND] ${sc.demandDrivers}`);
-        if (sc.seasonalNotes) lines.push(`[COMMODITY_SEASONAL_NOTES] ${sc.seasonalNotes}`);
-      }
-    }
+    // Platform is crypto-only — non-crypto sections removed
 
     // P1: Crypto Intelligence (Crypto only — network activity, holder stability, liquidity risk, structural risk, enhanced trust)
     if (assetType === "CRYPTO" && enrich.cryptoIntelligence) {
@@ -695,26 +412,7 @@ export function buildCompressedContext(
       }
     }
 
-    // P2: Factor DNA (Elite/Enterprise tier + stocks only)
-    if ((opts.userPlan === "ELITE" || opts.userPlan === "ENTERPRISE") && assetType === "STOCK" && enrich.factorAlignment) {
-      const fa = enrich.factorAlignment as {
-        score?: number; regimeFit?: string; dominantFactor?: string;
-        breakdown?: Record<string, number>;
-      };
-      if (fa.score != null) {
-        const parts = [`Score:${fa.score}`];
-        if (fa.regimeFit) parts.push(`Fit:${fa.regimeFit}`);
-        if (fa.dominantFactor) parts.push(`Dominant:${fa.dominantFactor}`);
-        if (fa.breakdown) {
-          const bp = Object.entries(fa.breakdown)
-            .filter(([, v]) => v != null)
-            .map(([k, v]) => `${capitalize(k)}:${v}`)
-            .join(" ");
-          if (bp) parts.push(bp);
-        }
-        lines.push(`[FACTOR_DNA] ${parts.join(" | ")}`);
-      }
-    }
+    // Factor DNA — not applicable for crypto-only platform
   }
 
   // --- Portfolio Health Context (injected from portfolio page) ---
@@ -926,20 +624,14 @@ export function buildCompressedContext(
  * The AI is instructed to only link assets in this list, so keeping it
  * small prevents hallucinated links while saving tokens.
  */
-// Block 5: Equal US + IN representation. US mega-caps + ETF benchmarks + IN large-caps.
-// This is the curated anchor list for GLOBAL queries — ~80 tokens vs ~1000 for the full dump.
+// Block 5: Crypto-only benchmark list for GLOBAL queries — ~50 tokens vs ~1000 for the full dump.
 const BENCHMARK_SYMBOLS = [
-  // US ETF benchmarks
-  "SPY", "QQQ", "IWM", "DIA", "VOO", "VTI",
-  // Crypto
-  "BTC-USD", "ETH-USD",
-  // Commodities
-  "GLD", "SLV", "TLT",
-  // US mega-caps
-  "AAPL", "MSFT", "NVDA", "GOOGL", "AMZN", "META", "TSLA", "JPM", "V",
-  // IN large-caps (equal representation)
-  "RELIANCE.NS", "TCS.NS", "INFY.NS", "HDFCBANK.NS", "ICICIBANK.NS",
-  "HINDUNILVR.NS", "BAJFINANCE.NS", "WIPRO.NS", "AXISBANK.NS", "SBIN.NS",
+  // Crypto majors
+  "BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD",
+  // Crypto mid-caps
+  "ADA-USD", "DOGE-USD", "AVAX-USD", "DOT-USD", "LINK-USD",
+  // Crypto L1/L2
+  "MATIC-USD", "UNI-USD", "AAVE-USD", "ARB-USD", "OP-USD",
 ];
 
 function buildSmartAssetList(
@@ -974,8 +666,8 @@ function buildSmartAssetList(
 }
 
 /**
- * Extract potential stock/crypto symbols mentioned in the conversation messages.
- * Looks for uppercase 1-6 letter words, common ticker patterns, and .NS suffixes.
+ * Extract potential crypto symbols mentioned in the conversation messages.
+ * Looks for uppercase 1-6 letter words and common crypto ticker patterns.
  */
 export function extractMentionedSymbols(messages: Array<{ role: string; content: string | unknown }>): string[] {
   const symbols = new Set<string>();

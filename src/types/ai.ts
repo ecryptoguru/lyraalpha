@@ -36,10 +36,9 @@ export interface FactorData {
  * Correlation data structure from database
  */
 export interface CorrelationData {
-  SPY: number;
-  QQQ: number;
   "BTC-USD": number;
-  GLD: number;
+  "ETH-USD": number;
+  "SOL-USD": number;
   [benchmark: string]: number;
 }
 

@@ -25,10 +25,10 @@ import {
 type TriggerContext =
   | "discovery_limit_reached"
   | "learning_advanced_locked"
-  | "etf_lookthrough_truncated"
+  | "portfolio_lookthrough_truncated"
   | "crypto_onchain_hidden"
-  | "mf_style_drift_hidden"
-  | "mf_overlap_locked"
+  | "concentration_drift_hidden"
+  | "overlap_locked"
   | "general";
 
 const TRIGGER_CONFIG: Record<TriggerContext, {
@@ -49,11 +49,11 @@ const TRIGGER_CONFIG: Record<TriggerContext, {
     description: "Cross-asset correlation, regime transitions and historical analogs help you turn learning into better portfolio and market decisions.",
     cta: "Unlock Advanced Learning",
   },
-  etf_lookthrough_truncated: {
+  portfolio_lookthrough_truncated: {
     icon: Layers,
-    headline: "Finish the ETF system",
-    description: "Factor exposure, concentration risk, behavioral profiles and lookthrough scores help you move from ticker to real ETF understanding.",
-    cta: "Unlock ETF system",
+    headline: "Finish the Portfolio system",
+    description: "Factor exposure, concentration risk, behavioral profiles and lookthrough scores help you move from ticker to real portfolio understanding.",
+    cta: "Unlock Portfolio system",
   },
   crypto_onchain_hidden: {
     icon: Shield,
@@ -61,16 +61,16 @@ const TRIGGER_CONFIG: Record<TriggerContext, {
     description: "Network activity, holder stability, liquidity risk and structural trust give you the deeper context behind crypto moves.",
     cta: "Unlock Crypto system",
   },
-  mf_style_drift_hidden: {
+  concentration_drift_hidden: {
     icon: TrendingUp,
-    headline: "Finish the mutual fund system",
-    description: "Style drift detection, closet indexing checks and concentration analysis show whether your fund still matches the job you expect it to do.",
-    cta: "Unlock MF system",
+    headline: "Finish the concentration system",
+    description: "Concentration drift detection and overlap analysis show whether your portfolio still matches the allocation you expect.",
+    cta: "Unlock Concentration system",
   },
-  mf_overlap_locked: {
+  overlap_locked: {
     icon: Layers,
     headline: "Reveal portfolio overlap",
-    description: "Overlap detection shows whether multiple funds are quietly creating the same portfolio bet.",
+    description: "Overlap detection shows whether multiple positions are quietly creating the same portfolio bet.",
     cta: "Unlock Overlap Detection",
   },
   general: {

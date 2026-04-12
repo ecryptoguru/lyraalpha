@@ -1,16 +1,33 @@
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
-import { getCache, setCache } from "@/lib/redis";
+import { redis, getCache, setCache } from "@/lib/redis";
 import { createHash } from "crypto";
 import { tavily } from "@tavily/core";
 import { alertIfWebSearchOutage } from "./alerting";
 import { INJECTION_PATTERNS } from "./guardrails";
 
 // ── Circuit Breaker ───────────────────────────────────────────────────────────
-// Tracks consecutive failures so one structured event fires per outage window.
-// Resets on first success.
-let _consecutiveFailures = 0;
+// R7-FIX: Moved from in-memory counter to Redis for multi-instance accuracy.
+// In serverless/multi-instance deployments, each instance had its own _consecutiveFailures
+// counter, so a real outage could have N instances each below threshold while the
+// actual total exceeded it. Redis provides a shared atomic counter with TTL.
+const CIRCUIT_BREAKER_KEY = "web_search:consecutive_failures";
+const CIRCUIT_BREAKER_TTL = 300; // 5 min — auto-resets if no updates
 const CIRCUIT_WARN_THRESHOLD = 3;
+
+async function incrementCircuitBreaker(): Promise<number> {
+  try {
+    const val = await redis.incr(CIRCUIT_BREAKER_KEY);
+    // Set TTL only on first increment (key didn't exist before) — avoids resetting TTL on every hit
+    if (val === 1) {
+      await redis.expire(CIRCUIT_BREAKER_KEY, CIRCUIT_BREAKER_TTL).catch(() => {});
+    }
+    return val;
+  } catch {
+    // Redis unavailable — fall back to allowing the request through
+    return 0;
+  }
+}
 
 const logger = createLogger({ service: "web-search" });
 
@@ -67,14 +84,22 @@ function getTavilyClient(): ReturnType<typeof tavily> | null {
 // Previously duplicated here, which risked pattern drift if guardrails were updated.
 
 function sanitizeSnippet(text: string): string {
-  const lines = text
+  // R2-FIX: Normalize to NFKC before injection scanning to defeat Unicode homoglyph evasion.
+  // Web search snippets from external sites could contain injection payloads using
+  // Cyrillic lookalike characters (e.g. 'і' for 'i', 'а' for 'a').
+  const normalized = text.normalize("NFKC");
+  const lines = normalized
     .replace(/\r/g, "")
     .split("\n")
     .map((l) => l.replace(/\s+/g, " ").trim())
     .filter(Boolean);
   const filtered = lines.filter((l) => !INJECTION_PATTERNS.some((p) => p.test(l)));
   const joined = filtered.join("\n");
-  if (INJECTION_PATTERNS.some((p) => p.test(joined))) return "";
+  // Multi-line injection check: some patterns only match across line boundaries.
+  // Only test patterns that can span multiple lines (contain \n or start-of-line anchors)
+  // to avoid redundantly re-testing single-line patterns already checked above.
+  const multiLinePatterns = INJECTION_PATTERNS.filter((p) => /\[INST\]|<\|im_start\|>|<\|im_end\|>|\bsystem\b|\bassistant\b|\buser\b/i.test(p.source));
+  if (multiLinePatterns.some((p) => p.test(joined))) return "";
   return joined.slice(0, SNIPPET_MAX_CHARS);
 }
 
@@ -82,51 +107,59 @@ function sanitizeSnippet(text: string): string {
 // Docs: topic="finance" and topic="news" are recognised values.
 // country is only valid when topic="general" — passing it with topic="finance"
 // will cause an API error. Docs confirmed this constraint.
-const FINANCE_KEYWORDS =
-  /\b(?:stock|etf|index|fund|equity|bond|yield|commodity|crypto|price|regime|inflation|rate|fed|rbi|ecb|gdp|sector|nifty|sensex|nasdaq|s&p|dow|ftse|dax|nikkei|reliance|tata|hdfc|bse|nse|rupee|rbi)\b/i;
+const CRYPTO_KEYWORDS =
+  /\b(?:crypto|bitcoin|btc|ethereum|eth|solana|sol|xrp|cardano|ada|dogecoin|doge|polkadot|dot|avalanche|avax|chainlink|link|polygon|matic|defi|token|coin|blockchain|usd|usdt|usdc|dai|price|whale|wallet|exchange|cefi|altcoin|stablecoin|nft|web3|dex|amm|apy|tvl|staking|yield|farm|liquidity|swap|bridge|layer2|l2|rollup|airdrop|mint|gas|halving|hashrate|mining|validator|governance|dao|memecoin|shitcoin|ico|ido|ieo|presale|rug|hodl|pump|dump|ath|atl|onchain|defillama|coingecko|coinmarketcap)\b/i;
+
+// News-specific keywords — queries about headlines, breaking events, announcements.
+// Must be checked BEFORE finance so that news queries about finance topics
+// (e.g. "latest crypto news") route to Tavily's news-optimized pipeline.
+const NEWS_KEYWORDS =
+  /\b(?:news|headline|breaking|announcement|update|latest|today|this week|press release|reported|according to)\b/i;
 
 function resolveTopic(query: string): "finance" | "news" | "general" {
-  if (FINANCE_KEYWORDS.test(query)) return "finance";
+  if (CRYPTO_KEYWORDS.test(query)) return "finance";
+  if (NEWS_KEYWORDS.test(query)) return "news";
   return "general";
 }
 
-// Region-specific domain lists — steer Tavily toward high-quality financial sources.
-// Without domain steering, Tavily may return Reddit/Quora/paywalled sites for finance queries.
+// Region-specific domain lists — steer Tavily toward high-quality crypto sources.
+// Without domain steering, Tavily may return Reddit/Quora/paywalled sites for crypto queries.
 // Configurable via environment variables for runtime flexibility.
-const DEFAULT_INDIA_FINANCE_DOMAINS = [
-  "moneycontrol.com",
+const DEFAULT_INDIA_CRYPTO_DOMAINS = [
+  "coingecko.com",
+  "coinmarketcap.com",
+  "cointelegraph.com",
+  "coindesk.com",
+  "decrypt.co",
+  "theblock.co",
+  "reuters.com",
   "economictimes.indiatimes.com",
   "livemint.com",
-  "business-standard.com",
-  "reuters.com",
-  "ndtvprofit.com",
-  "rbi.org.in",
-  "nseindia.com",
-  "bseindia.com",
+  "moneycontrol.com",
 ];
 
-const DEFAULT_US_FINANCE_DOMAINS = [
+const DEFAULT_US_CRYPTO_DOMAINS = [
+  "coingecko.com",
+  "coinmarketcap.com",
+  "cointelegraph.com",
+  "coindesk.com",
+  "decrypt.co",
+  "theblock.co",
   "reuters.com",
   "bloomberg.com",
-  "wsj.com",
-  "ft.com",
   "cnbc.com",
-  "marketwatch.com",
-  "seekingalpha.com",
-  "investopedia.com",
-  "federalreserve.gov",
-  "sec.gov",
+  "thedefiant.io",
 ];
 
-function getIndiaFinanceDomains(): string[] {
-  const envValue = process.env.TAVILY_INDIA_FINANCE_DOMAINS;
-  if (!envValue) return DEFAULT_INDIA_FINANCE_DOMAINS;
+function getIndiaCryptoDomains(): string[] {
+  const envValue = process.env.TAVILY_INDIA_CRYPTO_DOMAINS;
+  if (!envValue) return DEFAULT_INDIA_CRYPTO_DOMAINS;
   return envValue.split(",").map((d) => d.trim()).filter(Boolean);
 }
 
-function getUSFinanceDomains(): string[] {
-  const envValue = process.env.TAVILY_US_FINANCE_DOMAINS;
-  if (!envValue) return DEFAULT_US_FINANCE_DOMAINS;
+function getUSCryptoDomains(): string[] {
+  const envValue = process.env.TAVILY_US_CRYPTO_DOMAINS;
+  if (!envValue) return DEFAULT_US_CRYPTO_DOMAINS;
   return envValue.split(",").map((d) => d.trim()).filter(Boolean);
 }
 
@@ -150,8 +183,13 @@ export async function searchWeb(
   // Docs: keep query under 400 chars
   const trimmedQuery = query.slice(0, QUERY_MAX_CHARS);
 
-  const cacheKey = `tavily:v1:${createHash("sha256")
-    .update(`${region}:${trimmedQuery}:${effectiveMaxResults}`)
+  // Cache key includes topic hint so queries that resolve to different topics
+  // don't incorrectly share cache entries (e.g. "crypto" → finance vs general).
+  // Topic is resolved from the query text, not from the API response, so it's
+  // deterministic and safe to include in the cache key.
+  const topicHint = NEWS_KEYWORDS.test(trimmedQuery) ? "nws" : CRYPTO_KEYWORDS.test(trimmedQuery) ? "fin" : "gen";
+  const cacheKey = `tavily:v2:${createHash("sha256")
+    .update(`${region}:${topicHint}:${trimmedQuery}:${effectiveMaxResults}`)
     .digest("hex")
     .slice(0, 16)}`;
 
@@ -185,11 +223,14 @@ export async function searchWeb(
   }
 
   // Domain steering: pin high-quality financial sources per region.
-  // Applied regardless of topic — finance + news queries both benefit.
-  if (region === "IN") {
-    searchOptions.includeDomains = getIndiaFinanceDomains();
-  } else {
-    searchOptions.includeDomains = getUSFinanceDomains();
+  // Only applied for finance + news topics — general queries (e.g. weather, sports)
+  // must NOT be restricted to financial domains or they return zero results.
+  if (topic === "finance" || topic === "news") {
+    if (region === "IN") {
+      searchOptions.includeDomains = getIndiaCryptoDomains();
+    } else {
+      searchOptions.includeDomains = getUSCryptoDomains();
+    }
   }
 
   try {
@@ -202,7 +243,10 @@ export async function searchWeb(
     const sanitizedResults = relevantResults
       .map((r) => {
         const snippet = sanitizeSnippet(r.content || "");
-        return snippet ? { title: r.title, url: r.url, snippet } : null;
+        // R4-FIX: Sanitize titles too — a malicious SEO-poisoned page title could carry
+        // an injection payload into the system context via [WEB: title].
+        const title = sanitizeSnippet(r.title || "");
+        return snippet && title ? { title, url: r.url, snippet } : null;
       })
       .filter((r): r is { title: string; url: string; snippet: string } => r !== null);
 
@@ -232,13 +276,23 @@ export async function searchWeb(
       "Tavily search completed",
     );
 
-    // Circuit-breaker recovery
-    if (_consecutiveFailures > 0) {
-      logger.info(
-        { event: "web_search_recovery", previousFailures: _consecutiveFailures },
-        "Tavily recovered after consecutive failures",
-      );
-      _consecutiveFailures = 0;
+    // Circuit-breaker recovery — atomic GET+DEL via pipeline to prevent race
+    // where another instance increments the counter between our GET and DEL.
+    // Upstash pipeline executes as a single HTTP request (atomic on server).
+    try {
+      const pipe = redis.pipeline();
+      pipe.get(CIRCUIT_BREAKER_KEY);
+      pipe.del(CIRCUIT_BREAKER_KEY);
+      const pipeResults = await pipe.exec();
+      const currentFailures = pipeResults?.[0] as string | null;
+      if (currentFailures !== null) {
+        logger.info(
+          { event: "web_search_recovery", previousFailures: Number(currentFailures) },
+          "Tavily recovered after consecutive failures — circuit breaker reset",
+        );
+      }
+    } catch {
+      // Non-critical — TTL will auto-expire
     }
 
     try {
@@ -250,13 +304,13 @@ export async function searchWeb(
     return { content, sources };
   } catch (error) {
     const elapsed = Date.now() - start;
-    _consecutiveFailures++;
-    alertIfWebSearchOutage(_consecutiveFailures).catch(() => {});
+    const consecutiveFailures = await incrementCircuitBreaker();
+    alertIfWebSearchOutage(consecutiveFailures).catch(() => {});
 
     const errMsg = error instanceof Error ? error.message : String(error);
     const isRateLimit = errMsg.includes("429") || errMsg.toLowerCase().includes("rate limit");
     const isServerError = /5\d\d/.test(errMsg);
-    const logLevel = _consecutiveFailures >= CIRCUIT_WARN_THRESHOLD ? "warn" : "error";
+    const logLevel = consecutiveFailures >= CIRCUIT_WARN_THRESHOLD ? "warn" : "error";
 
     logger[logLevel](
       {
@@ -265,8 +319,8 @@ export async function searchWeb(
         elapsedMs: elapsed,
         isRateLimit,
         isServerError,
-        consecutiveFailures: _consecutiveFailures,
-        outage: _consecutiveFailures >= CIRCUIT_WARN_THRESHOLD,
+        consecutiveFailures,
+        outage: consecutiveFailures >= CIRCUIT_WARN_THRESHOLD,
         provider: "tavily",
       },
       isRateLimit

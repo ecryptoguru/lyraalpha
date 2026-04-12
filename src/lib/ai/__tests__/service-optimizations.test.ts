@@ -21,12 +21,12 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     asset: {
       findMany: vi.fn().mockResolvedValue([
-        { symbol: "AAPL" },
-        { symbol: "NVDA" },
-        { symbol: "SPY" },
+        { symbol: "BTC-USD" },
+        { symbol: "SOL-USD" },
+        { symbol: "BNB-USD" },
         { symbol: "BTC-USD" },
       ]),
-      findFirst: vi.fn().mockResolvedValue({ symbol: "NVDA", type: "CRYPTO" }),
+      findFirst: vi.fn().mockResolvedValue({ symbol: "SOL-USD", type: "CRYPTO" }),
       findUnique: vi.fn().mockResolvedValue({
         price: 142.30,
         changePercent: 2.15,
@@ -200,7 +200,7 @@ describe("Service Optimizations", () => {
 
     it("uses streamText (single mode) for PRO COMPLEX queries", async () => {
       await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT vs GOOGL in the current macro environment" }],
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD vs ADA-USD in the current macro environment" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
@@ -210,8 +210,8 @@ describe("Service Optimizations", () => {
     it("uses streamText (single mode) for ELITE MODERATE queries", async () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_elite", plan: "ELITE" } as any);
       await generateLyraStream(
-        [{ role: "user", content: "How is NVDA performing this quarter?" }],
-        { scores: {}, assetType: "CRYPTO", symbol: "NVDA" },
+        [{ role: "user", content: "How is SOL-USD performing this quarter?" }],
+        { scores: {}, assetType: "CRYPTO", symbol: "SOL-USD" },
         "user_elite",
       );
       expect(streamText).toHaveBeenCalled();
@@ -220,7 +220,7 @@ describe("Service Optimizations", () => {
     it("uses streamText (single mode) for ELITE COMPLEX queries", async () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_elite2", plan: "ELITE" } as any);
       await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT vs GOOGL portfolio impact and cross-sector correlation analysis" }],
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD vs ADA-USD portfolio impact and cross-chain correlation analysis" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_elite2",
       );
@@ -230,7 +230,7 @@ describe("Service Optimizations", () => {
     it("uses streamText (single mode) for ENTERPRISE COMPLEX queries", async () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_ent", plan: "ENTERPRISE" } as any);
       await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT vs GOOGL portfolio impact and cross-sector correlation analysis" }],
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD vs ADA-USD portfolio impact and cross-chain correlation analysis" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_ent",
       );
@@ -240,8 +240,8 @@ describe("Service Optimizations", () => {
     it("streamText result is returned as a stream (ELITE MODERATE single mode)", async () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_elite3", plan: "ELITE" } as any);
       const { result } = await generateLyraStream(
-        [{ role: "user", content: "How is NVDA performing this quarter?" }],
-        { scores: {}, assetType: "CRYPTO", symbol: "NVDA" },
+        [{ role: "user", content: "How is SOL-USD performing this quarter?" }],
+        { scores: {}, assetType: "CRYPTO", symbol: "SOL-USD" },
         "user_elite3",
       );
       const chunks: string[] = [];
@@ -292,14 +292,14 @@ describe("Service Optimizations", () => {
     it("skips price fetch for trivial queries", async () => {
       await generateLyraStream(
         [{ role: "user", content: "hi" }],
-        { scores: {}, symbol: "NVDA" },
+        { scores: {}, symbol: "SOL-USD" },
         "user_123",
       );
 
       expect(prisma.asset.findUnique).not.toHaveBeenCalled();
     });
 
-    it("skips cross-sector for trivial queries", async () => {
+    it("skips cross-chain for trivial queries", async () => {
       await generateLyraStream(
         [{ role: "user", content: "thanks" }],
         { scores: {} },
@@ -335,11 +335,11 @@ describe("Service Optimizations", () => {
 
   describe("non-trivial queries DO trigger retrieval", () => {
     const NON_TRIVIAL = [
-      "How is NVDA doing?",
+      "How is SOL-USD doing?",
       "What are the risks for Bitcoin?",
-      "hi there, can you analyze AAPL?",
+      "hi there, can you analyze BTC-USD?",
       "hello world",
-      "thanks for the analysis, now compare AAPL vs MSFT",
+      "thanks for the analysis, now compare BTC-USD vs ETH-USD",
     ];
 
     for (const query of NON_TRIVIAL) {
@@ -369,7 +369,7 @@ describe("Service Optimizations", () => {
       });
 
       const response = await generateLyraStream(
-        [{ role: "user", content: "How is NVDA doing?" }],
+        [{ role: "user", content: "How is SOL-USD doing?" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
@@ -393,7 +393,7 @@ describe("Service Optimizations", () => {
         tier: "COMPLEX",
         assetType: "CRYPTO",
         responseMode: "default",
-        query: "Compare AAPL vs MSFT",
+        query: "Compare BTC-USD vs ETH-USD",
       });
       const compareProKey = modelCacheKey({
         modelFamily: "gpt",
@@ -401,7 +401,7 @@ describe("Service Optimizations", () => {
         tier: "COMPLEX",
         assetType: "CRYPTO",
         responseMode: "compare",
-        query: "Compare AAPL vs MSFT",
+        query: "Compare BTC-USD vs ETH-USD",
       });
       const compareEliteKey = modelCacheKey({
         modelFamily: "gpt",
@@ -409,7 +409,7 @@ describe("Service Optimizations", () => {
         tier: "COMPLEX",
         assetType: "CRYPTO",
         responseMode: "compare",
-        query: "Compare AAPL vs MSFT",
+        query: "Compare BTC-USD vs ETH-USD",
       });
 
       expect(defaultProKey).not.toBe(compareProKey);
@@ -420,12 +420,12 @@ describe("Service Optimizations", () => {
       vi.mocked(searchWeb).mockResolvedValue({ content: "", sources: [] } as any);
 
       await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT on momentum and valuation" }],
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD on momentum and valuation" }],
         {
           scores: {},
           assetType: "CRYPTO",
           chatMode: "compare",
-          compareContext: [{ symbol: "AAPL" }, { symbol: "MSFT" }],
+          compareContext: [{ symbol: "BTC-USD" }, { symbol: "ETH-USD" }],
         },
         "user_123",
       );
@@ -435,19 +435,19 @@ describe("Service Optimizations", () => {
 
     it("allows web search for compare mode with explicit recency intent", async () => {
       // Restore searchWeb mock (beforeEach clearAllMocks resets implementation to undefined)
-      vi.mocked(searchWeb).mockResolvedValue({ content: "latest AAPL MSFT news", sources: [] } as any);
+      vi.mocked(searchWeb).mockResolvedValue({ content: "latest BTC-USD ETH-USD news", sources: [] } as any);
       // Force cache miss so the parallel block (including web search) is not bypassed
       vi.mocked(getCache).mockResolvedValue(null);
       // ELITE user required — PRO MODERATE has webSearchEnabled:false
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ plan: "ELITE", credits: 50 } as any);
 
       await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT latest news and current developments" }],
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD latest news and current developments" }],
         {
           scores: {},
           assetType: "CRYPTO",
           chatMode: "compare",
-          compareContext: [{ symbol: "AAPL" }, { symbol: "MSFT" }],
+          compareContext: [{ symbol: "BTC-USD" }, { symbol: "ETH-USD" }],
         },
         "user_123",
       );
@@ -463,17 +463,17 @@ describe("Service Optimizations", () => {
 
     it("routes Indian asset grounding through IN regional search", async () => {
       // Restore searchWeb mock (beforeEach clearAllMocks resets implementation to undefined)
-      vi.mocked(searchWeb).mockResolvedValue({ content: "Reliance latest news", sources: [] } as any);
+      vi.mocked(searchWeb).mockResolvedValue({ content: "Bitcoin latest news", sources: [] } as any);
       // Force cache miss so the parallel block (including web search) is not bypassed
       vi.mocked(getCache).mockResolvedValue(null);
       // ELITE user required for webSearchEnabled on MODERATE/COMPLEX tier
       vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ plan: "ELITE", credits: 50 } as any);
 
       await generateLyraStream(
-        [{ role: "user", content: "What are the latest developments for Reliance?" }],
+        [{ role: "user", content: "What are the latest developments for Bitcoin?" }],
         ({
           scores: {},
-          symbol: "RELIANCE.NS",
+          symbol: "BTC-USD",
           assetType: "CRYPTO",
           region: "IN",
         } as any),
@@ -484,7 +484,7 @@ describe("Service Optimizations", () => {
       expect(searchWeb).toHaveBeenCalledWith(
         // Domain steering is now Tavily's internal responsibility (includeDomains param).
         // The query passed to searchWeb is clean: "SYMBOL <user query>"
-        expect.stringContaining("RELIANCE.NS"),
+        expect.stringContaining("BTC-USD"),
         expect.any(Number),
         "basic",
         "IN",
@@ -499,21 +499,21 @@ describe("Service Optimizations", () => {
       vi.mocked(getCache).mockResolvedValue(null);
       vi.mocked(consumeCredits).mockResolvedValue({ success: true, remaining: 49 } as any);
       vi.mocked(prisma.user.findUnique).mockResolvedValue({ plan: "PRO", credits: 50 } as any);
-      vi.mocked(prisma.asset.findMany).mockResolvedValue([{ symbol: "AAPL" }, { symbol: "MSFT" }] as any);
+      vi.mocked(prisma.asset.findMany).mockResolvedValue([{ symbol: "BTC-USD" }, { symbol: "ETH-USD" }] as any);
       vi.mocked(prisma.$transaction).mockImplementation(async (cb: any) => cb({
         user: { update: vi.fn().mockResolvedValue({ credits: 49 }), updateMany: vi.fn().mockResolvedValue({ count: 1 }), findUnique: vi.fn().mockResolvedValue({ credits: 49 }) },
         creditTransaction: { create: vi.fn() },
       }));
 
       await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT on momentum and regime fit" }],
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD on momentum and regime fit" }],
         {
           scores: {},
           assetType: "CRYPTO",
           chatMode: "compare",
           compareContext: [
-            { symbol: "AAPL", scores: { trend: 78, momentum: 72 } },
-            { symbol: "MSFT", scores: { trend: 81, momentum: 68 } },
+            { symbol: "BTC-USD", scores: { trend: 78, momentum: 72 } },
+            { symbol: "ETH-USD", scores: { trend: 81, momentum: 68 } },
           ],
         },
         "user_123",
@@ -540,7 +540,7 @@ describe("Service Optimizations", () => {
       });
 
       const response = await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT in the current macro environment" }],
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD in the current macro environment" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
@@ -559,7 +559,7 @@ describe("Service Optimizations", () => {
       vi.mocked(getCache).mockResolvedValueOnce(null);
 
       await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT in the current macro environment" }],
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD in the current macro environment" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
@@ -584,7 +584,7 @@ describe("Service Optimizations", () => {
       const cacheSpy = vi.spyOn(monitoring, "logModelCacheEvent");
 
       await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT in the current macro environment" }],
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD in the current macro environment" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
@@ -604,13 +604,13 @@ describe("Service Optimizations", () => {
   describe("#5 — Real-time price injection", () => {
     it("fetches price data when symbol is provided", async () => {
       await generateLyraStream(
-        [{ role: "user", content: "How is NVDA doing?" }],
-        { scores: {}, symbol: "NVDA", assetType: "CRYPTO" },
+        [{ role: "user", content: "How is SOL-USD doing?" }],
+        { scores: {}, symbol: "SOL-USD", assetType: "CRYPTO" },
         "user_123",
       );
 
       expect(prisma.asset.findUnique).toHaveBeenCalledWith({
-        where: { symbol: "NVDA" },
+        where: { symbol: "SOL-USD" },
         select: {
           price: true, changePercent: true,
           fiftyTwoWeekHigh: true, fiftyTwoWeekLow: true, lastPriceUpdate: true,
@@ -648,8 +648,8 @@ describe("Service Optimizations", () => {
 
     it("price data is passed to context builder (appears in context message)", async () => {
       await generateLyraStream(
-        [{ role: "user", content: "How is NVDA doing?" }],
-        { scores: {}, symbol: "NVDA", assetType: "CRYPTO" },
+        [{ role: "user", content: "How is SOL-USD doing?" }],
+        { scores: {}, symbol: "SOL-USD", assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -670,7 +670,7 @@ describe("Service Optimizations", () => {
         callOrder.push("assets-start");
         await new Promise((r) => setTimeout(r, 10));
         callOrder.push("assets-end");
-        return [{ symbol: "AAPL" }];
+        return [{ symbol: "BTC-USD" }];
       })() as any);
 
       vi.mocked(retrieveInstitutionalKnowledge).mockImplementation(async () => {
@@ -681,7 +681,7 @@ describe("Service Optimizations", () => {
       });
 
       await generateLyraStream(
-        [{ role: "user", content: "AAPL outlook for next quarter" }],
+        [{ role: "user", content: "BTC-USD outlook for next quarter" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
@@ -698,14 +698,15 @@ describe("Service Optimizations", () => {
       );
     });
 
-    it("cross-sector runs in parallel for COMPLEX queries", async () => {
+    it("cross-chain runs in parallel for COMPLEX queries", async () => {
       await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT vs GOOGL in the current macro environment" }],
-        { scores: {}, symbol: "AAPL", assetType: "CRYPTO" },
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD vs ADA-USD in the current macro environment" }],
+        { scores: {}, symbol: "BTC-USD", assetType: "CRYPTO" },
         "user_123",
+        { preResolvedPlan: "ELITE" },
       );
 
-      // Cross-sector should have been called (COMPLEX tier)
+      // Cross-chain should have been called (COMPLEX tier + ELITE plan enables crossSectorEnabled)
       // Note: asset.findMany may be skipped due to in-memory cache from prior tests
       expect(prisma.marketRegime.findFirst).toHaveBeenCalled();
     });
@@ -715,7 +716,7 @@ describe("Service Optimizations", () => {
     it("rejects prediction-intent phrases before any retrieval", async () => {
       await expect(
         generateLyraStream(
-          [{ role: "user", content: "Predict the target price for AAPL" }],
+          [{ role: "user", content: "Predict the target price for BTC-USD" }],
           { scores: {} },
           "user_123",
         ),
@@ -727,8 +728,8 @@ describe("Service Optimizations", () => {
     it("allows analyst target price lookups (data request)", async () => {
       await expect(
         generateLyraStream(
-          [{ role: "user", content: "What is the analyst target price for AAPL?" }],
-          { scores: {}, symbol: "AAPL", assetType: "CRYPTO" },
+          [{ role: "user", content: "What is the analyst target price for BTC-USD?" }],
+          { scores: {}, symbol: "BTC-USD", assetType: "CRYPTO" },
           "user_123",
         ),
       ).resolves.toBeDefined();
@@ -737,8 +738,8 @@ describe("Service Optimizations", () => {
     it("allows 'price' alone (not a banned phrase)", async () => {
       await expect(
         generateLyraStream(
-          [{ role: "user", content: "What is the current price of AAPL?" }],
-          { scores: {}, symbol: "AAPL", assetType: "CRYPTO" },
+          [{ role: "user", content: "What is the current price of BTC-USD?" }],
+          { scores: {}, symbol: "BTC-USD", assetType: "CRYPTO" },
           "user_123",
         ),
       ).resolves.toBeDefined();
@@ -761,19 +762,20 @@ describe("Service Optimizations", () => {
       expect(retrieveUserMemory).not.toHaveBeenCalled();
     });
 
-    it("COMPLEX tier enables cross-sector correlation", async () => {
+    it("COMPLEX tier enables cross-chain correlation", async () => {
       await generateLyraStream(
-        [{ role: "user", content: "Compare AAPL vs MSFT portfolio impact and cross-sector correlation" }],
+        [{ role: "user", content: "Compare BTC-USD vs ETH-USD portfolio impact and cross-chain correlation" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_123",
+        { preResolvedPlan: "ELITE" },
       );
 
       expect(prisma.marketRegime.findFirst).toHaveBeenCalled();
     });
 
-    it("MODERATE tier does NOT enable cross-sector", async () => {
+    it("MODERATE tier does NOT enable cross-chain", async () => {
       await generateLyraStream(
-        [{ role: "user", content: "How is NVDA doing today?" }],
+        [{ role: "user", content: "How is SOL-USD doing today?" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );
@@ -805,9 +807,9 @@ describe("Service Optimizations", () => {
         marketCap: "3.5T",
         metadata: null,
         type: "CRYPTO",
-        description: "NVIDIA designs accelerated computing hardware and software.",
-        industry: "Semiconductors",
-        sector: "Technology",
+        description: "Solana is a high-throughput L1 blockchain with parallel execution.",
+        industry: "Layer 1",
+        sector: "Layer 1",
         financials: null,
         topHoldings: null,
         cryptoIntelligence: null,
@@ -819,13 +821,13 @@ describe("Service Optimizations", () => {
       } as any);
 
       const response = await generateLyraStream(
-        [{ role: "user", content: "NVDA stock" }],
+        [{ role: "user", content: "SOL-USD price" }],
         { scores: {} },
         "user_123",
       );
 
       expect(retrieveInstitutionalKnowledge).toHaveBeenCalledWith(
-        "NVDA stock",
+        "SOL-USD price",
         expect.any(Number),
         "CRYPTO",
         expect.any(Boolean),
@@ -836,14 +838,14 @@ describe("Service Optimizations", () => {
         modelFamily: "gpt",
         tier: "COMPLEX",
         assetType: "GLOBAL",
-        query: "NVDA stock",
+        query: "SOL-USD price",
       });
       expect(getCache).not.toHaveBeenCalledWith(earlyGlobalKey);
 
       expect(response.sources).toEqual([
         expect.objectContaining({
-          title: "NVDA asset intelligence context",
-          url: "/dashboard/assets/NVDA",
+          title: "SOL-USD asset intelligence context",
+          url: "/dashboard/assets/SOL-USD",
           type: "knowledge_base",
         }),
       ]);
@@ -858,8 +860,8 @@ describe("Service Optimizations", () => {
   describe("context message structure", () => {
     it("appends context as the last system message for optimal prompt caching", async () => {
       await generateLyraStream(
-        [{ role: "user", content: "Analyze AAPL" }],
-        { scores: {}, symbol: "AAPL", assetType: "CRYPTO" },
+        [{ role: "user", content: "Analyze BTC-USD" }],
+        { scores: {}, symbol: "BTC-USD", assetType: "CRYPTO" },
         "user_123",
       );
 
@@ -867,7 +869,7 @@ describe("Service Optimizations", () => {
       const lastMsg = streamCall.messages[streamCall.messages.length - 1];
       expect(lastMsg.role).toBe("system");
       expect(lastMsg.content).toContain("### LIVE MARKET CONTEXT");
-      expect(lastMsg.content).toContain("[ASSET] AAPL");
+      expect(lastMsg.content).toContain("[ASSET] BTC-USD");
     });
 
     it("propagates auto-detected symbol and resolved asset type into final context", async () => {
@@ -904,20 +906,20 @@ describe("Service Optimizations", () => {
       } as any);
 
       await generateLyraStream(
-        [{ role: "user", content: "How is NVDA doing today?" }],
+        [{ role: "user", content: "How is SOL-USD doing today?" }],
         { scores: {} },
         "user_123",
       );
 
       const streamCall = vi.mocked(streamText).mock.calls[0][0] as any;
       const lastMsg = streamCall.messages[streamCall.messages.length - 1];
-      expect(lastMsg.content).toContain("[ASSET] NVDA");
+      expect(lastMsg.content).toContain("[ASSET] SOL-USD");
       expect(lastMsg.content).toContain("Type: CRYPTO");
     });
 
     it("system prompt includes core identity and rules", async () => {
       await generateLyraStream(
-        [{ role: "user", content: "How is AAPL?" }],
+        [{ role: "user", content: "How is BTC-USD?" }],
         { scores: {}, assetType: "CRYPTO" },
         "user_123",
       );

@@ -10,14 +10,38 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // ── Mocks (must be hoisted before imports) ────────────────────────────────────
 
-const mockTavilySearch = vi.fn();
-const mockTavilyClient = { search: mockTavilySearch };
+// vi.hoisted ensures these are available inside hoisted vi.mock factories
+const { mockTavilySearch, mockTavilyClient, mockRedisPipeline, mockRedis } = vi.hoisted(() => {
+  const search = vi.fn();
+  const pipeline = {
+    incr: vi.fn().mockReturnThis(),
+    expire: vi.fn().mockReturnThis(),
+    hincrby: vi.fn().mockReturnThis(),
+    get: vi.fn().mockReturnThis(),
+    del: vi.fn().mockReturnThis(),
+    exec: vi.fn().mockResolvedValue([0]),
+  };
+  const redis = {
+    get: vi.fn().mockResolvedValue(null),
+    del: vi.fn().mockResolvedValue(1),
+    incr: vi.fn().mockResolvedValue(1),
+    expire: vi.fn().mockResolvedValue(1),
+    pipeline: vi.fn(() => pipeline),
+  };
+  return {
+    mockTavilySearch: search,
+    mockTavilyClient: { search },
+    mockRedisPipeline: pipeline,
+    mockRedis: redis,
+  };
+});
 
 vi.mock("@tavily/core", () => ({
   tavily: vi.fn(() => mockTavilyClient),
 }));
 
 vi.mock("@/lib/redis", () => ({
+  redis: mockRedis,
   getCache: vi.fn().mockResolvedValue(null),
   setCache: vi.fn().mockResolvedValue(undefined),
 }));
@@ -59,6 +83,7 @@ async function resetSearchModule() {
   // Re-apply mocks after reset
   vi.mock("@tavily/core", () => ({ tavily: vi.fn(() => mockTavilyClient) }));
   vi.mock("@/lib/redis", () => ({
+    redis: mockRedis,
     getCache: vi.fn().mockResolvedValue(null),
     setCache: vi.fn().mockResolvedValue(undefined),
   }));
@@ -75,6 +100,10 @@ beforeEach(() => {
   process.env.TAVILY_API_KEY = "tvly-test-key";
   mockGetCache.mockResolvedValue(null);
   mockSetCache.mockResolvedValue(undefined);
+  // Reset redis mock state — no previous circuit breaker failures
+  mockRedis.get.mockResolvedValue(null);
+  mockRedis.incr.mockResolvedValue(1);
+  mockRedisPipeline.exec.mockResolvedValue([0]);
   mockTavilySearch.mockResolvedValue(
     makeTavilyResponse([
       { title: "Reuters Finance", url: "https://reuters.com/1", content: "Market update.", score: 0.9 },
@@ -96,7 +125,7 @@ describe("Tavily client initialisation", () => {
     await resetSearchModule();
     delete process.env.TAVILY_API_KEY;
     const { searchWeb: freshSearch } = await import("../search");
-    const result = await freshSearch("AAPL latest news");
+    const result = await freshSearch("BTC-USD latest news");
     expect(result).toEqual({ content: "", sources: [] });
     expect(mockTavilySearch).not.toHaveBeenCalled();
   });
@@ -109,7 +138,7 @@ describe("Tavily client initialisation", () => {
       { title: "T", url: "https://reuters.com", content: "content", score: 0.9 },
     ]));
     const { searchWeb: freshSearch } = await import("../search");
-    const result = await freshSearch("AAPL stock price");
+    const result = await freshSearch("BTC-USD price");
     expect(result.sources.length).toBeGreaterThan(0);
     expect(mockTavilySearch).toHaveBeenCalledOnce();
   });
@@ -127,7 +156,7 @@ describe("cache behaviour", () => {
     };
     mockGetCache.mockResolvedValueOnce(cached);
 
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result).toEqual(cached);
     expect(mockTavilySearch).not.toHaveBeenCalled();
   });
@@ -135,11 +164,11 @@ describe("cache behaviour", () => {
   it("calls Tavily and writes to cache on cache MISS", async () => {
     mockGetCache.mockResolvedValueOnce(null);
 
-    await searchWeb("AAPL stock");
+    await searchWeb("BTC-USD price");
 
     expect(mockTavilySearch).toHaveBeenCalledOnce();
     expect(mockSetCache).toHaveBeenCalledWith(
-      expect.stringMatching(/^tavily:v1:/),
+      expect.stringMatching(/^tavily:v2:/),
       expect.objectContaining({ content: expect.any(String), sources: expect.any(Array) }),
       20 * 60,
     );
@@ -148,7 +177,7 @@ describe("cache behaviour", () => {
   it("continues without error when cache read throws", async () => {
     mockGetCache.mockRejectedValueOnce(new Error("Redis down"));
 
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result.sources.length).toBeGreaterThan(0); // still got real results
     expect(mockTavilySearch).toHaveBeenCalledOnce();
   });
@@ -156,13 +185,13 @@ describe("cache behaviour", () => {
   it("continues without error when cache write throws", async () => {
     mockSetCache.mockRejectedValueOnce(new Error("Redis write failed"));
 
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result.sources.length).toBeGreaterThan(0);
   });
 
   it("cache key differs for US vs IN region", async () => {
-    await searchWeb("Nifty 50 levels", undefined, "basic", "US");
-    await searchWeb("Nifty 50 levels", undefined, "basic", "IN");
+    await searchWeb("BTC-USD levels", undefined, "basic", "US");
+    await searchWeb("BTC-USD levels", undefined, "basic", "IN");
 
     const [firstKey] = mockSetCache.mock.calls[0];
     const [secondKey] = mockSetCache.mock.calls[1];
@@ -170,8 +199,8 @@ describe("cache behaviour", () => {
   });
 
   it("cache key differs for complex vs default queryComplexity", async () => {
-    await searchWeb("MSFT earnings", undefined, "basic", "US", "simple");
-    await searchWeb("MSFT earnings", undefined, "basic", "US", "complex");
+    await searchWeb("ETH-USD earnings", undefined, "basic", "US", "simple");
+    await searchWeb("ETH-USD earnings", undefined, "basic", "US", "complex");
 
     const [firstKey] = mockSetCache.mock.calls[0];
     const [secondKey] = mockSetCache.mock.calls[1];
@@ -184,22 +213,22 @@ describe("cache behaviour", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("topic detection", () => {
-  const financeQueries = [
-    "AAPL stock price today",
-    "Nifty index performance",
-    "ETF sector rotation",
-    "Fed rate decision impact",
-    "RBI policy meeting",
+  const cryptoQueries = [
+    "BTC-USD price today",
+    "Crypto index performance",
+    "DeFi sector rotation",
     "Bitcoin crypto outlook",
-    "HDFC equity fund",
-    "Sensex bull run",
-    "GDP growth forecast",
-    "Bond yield curve",
-    "RELIANCE latest news",
-    "BSE market update",
+    "Ethereum DeFi outlook",
+    "Altcoin season run",
+    "Solana staking yield",
+    "NFT market update",
+    "BTC-USD latest news",
+    "Crypto market update",
+    "Whale wallet activity",
+    "Layer2 rollup comparison",
   ];
 
-  for (const query of financeQueries) {
+  for (const query of cryptoQueries) {
     it(`detects finance topic for: "${query}"`, async () => {
       await searchWeb(query, undefined, "basic", "US");
       const [, opts] = mockTavilySearch.mock.calls[0];
@@ -208,20 +237,20 @@ describe("topic detection", () => {
   }
 
   it("uses general topic for non-finance query", async () => {
-    await searchWeb("latest climate change news");
+    await searchWeb("climate change impact on agriculture");
     const [, opts] = mockTavilySearch.mock.calls[0];
     expect(opts.topic).toBe("general");
   });
 
   it("does NOT pass country param when topic is finance (Tavily API constraint)", async () => {
-    await searchWeb("RELIANCE stock price", undefined, "basic", "IN");
+    await searchWeb("BTC-USD price", undefined, "basic", "US");
     const [, opts] = mockTavilySearch.mock.calls[0];
     expect(opts.topic).toBe("finance");
     expect(opts.country).toBeUndefined();
   });
 
   it("passes country=india for IN region with general topic", async () => {
-    await searchWeb("India budget policy announcement", undefined, "basic", "IN");
+    await searchWeb("India monsoon forecast", undefined, "basic", "IN");
     const [, opts] = mockTavilySearch.mock.calls[0];
     expect(opts.topic).toBe("general");
     expect(opts.country).toBe("india");
@@ -239,36 +268,37 @@ describe("topic detection", () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("domain steering", () => {
-  it("uses India finance domains for IN region", async () => {
-    await searchWeb("RELIANCE earnings", undefined, "basic", "IN");
+  it("uses India crypto domains for IN region", async () => {
+    await searchWeb("BTC-USD analysis", undefined, "basic", "IN");
     const [, opts] = mockTavilySearch.mock.calls[0];
-    expect(opts.includeDomains).toContain("moneycontrol.com");
+    expect(opts.includeDomains).toContain("coingecko.com");
+    expect(opts.includeDomains).toContain("coinmarketcap.com");
+    expect(opts.includeDomains).toContain("cointelegraph.com");
     expect(opts.includeDomains).toContain("economictimes.indiatimes.com");
-    expect(opts.includeDomains).toContain("nseindia.com");
-    expect(opts.includeDomains).toContain("bseindia.com");
+    expect(opts.includeDomains).toContain("moneycontrol.com");
   });
 
-  it("uses US finance domains for US region", async () => {
-    await searchWeb("AAPL earnings", undefined, "basic", "US");
+  it("uses US crypto domains for US region", async () => {
+    await searchWeb("BTC-USD analysis", undefined, "basic", "US");
     const [, opts] = mockTavilySearch.mock.calls[0];
-    expect(opts.includeDomains).toContain("reuters.com");
+    expect(opts.includeDomains).toContain("coingecko.com");
+    expect(opts.includeDomains).toContain("coinmarketcap.com");
+    expect(opts.includeDomains).toContain("coindesk.com");
     expect(opts.includeDomains).toContain("bloomberg.com");
-    expect(opts.includeDomains).toContain("wsj.com");
-    expect(opts.includeDomains).toContain("sec.gov");
+    expect(opts.includeDomains).toContain("thedefiant.io");
   });
 
-  it("IN region does not get US domains", async () => {
-    await searchWeb("Nifty 50", undefined, "basic", "IN");
+  it("IN region does not get US-only domains", async () => {
+    await searchWeb("BTC-USD", undefined, "basic", "IN");
     const [, opts] = mockTavilySearch.mock.calls[0];
-    expect(opts.includeDomains).not.toContain("bloomberg.com");
-    expect(opts.includeDomains).not.toContain("wsj.com");
+    expect(opts.includeDomains).not.toContain("thedefiant.io");
   });
 
-  it("US region does not get India domains", async () => {
-    await searchWeb("AAPL stock", undefined, "basic", "US");
+  it("US region does not get India-only domains", async () => {
+    await searchWeb("BTC-USD price", undefined, "basic", "US");
     const [, opts] = mockTavilySearch.mock.calls[0];
+    expect(opts.includeDomains).not.toContain("economictimes.indiatimes.com");
     expect(opts.includeDomains).not.toContain("moneycontrol.com");
-    expect(opts.includeDomains).not.toContain("nseindia.com");
   });
 });
 
@@ -278,43 +308,43 @@ describe("domain steering", () => {
 
 describe("maxResults / queryComplexity", () => {
   it("uses 3 results for simple complexity", async () => {
-    await searchWeb("AAPL news", undefined, "basic", "US", "simple");
+    await searchWeb("BTC-USD news", undefined, "basic", "US", "simple");
     const [, opts] = mockTavilySearch.mock.calls[0];
     expect(opts.maxResults).toBe(3);
   });
 
   it("uses 3 results for moderate complexity", async () => {
-    await searchWeb("AAPL news", undefined, "basic", "US", "moderate");
+    await searchWeb("BTC-USD news", undefined, "basic", "US", "moderate");
     const [, opts] = mockTavilySearch.mock.calls[0];
     expect(opts.maxResults).toBe(3);
   });
 
   it("uses 5 results for complex complexity", async () => {
-    await searchWeb("AAPL deep analysis vs MSFT", undefined, "basic", "US", "complex");
+    await searchWeb("BTC-USD deep analysis vs ETH-USD", undefined, "basic", "US", "complex");
     const [, opts] = mockTavilySearch.mock.calls[0];
     expect(opts.maxResults).toBe(5);
   });
 
   it("uses 3 results when queryComplexity is undefined", async () => {
-    await searchWeb("AAPL news");
+    await searchWeb("BTC-USD news");
     const [, opts] = mockTavilySearch.mock.calls[0];
     expect(opts.maxResults).toBe(3);
   });
 
   it("always uses basic search depth (1 credit)", async () => {
-    await searchWeb("AAPL news", undefined, "advanced", "US", "complex");
+    await searchWeb("BTC-USD news", undefined, "advanced", "US", "complex");
     const [, opts] = mockTavilySearch.mock.calls[0];
     expect(opts.searchDepth).toBe("basic");
   });
 
   it("uses timeRange=week", async () => {
-    await searchWeb("AAPL news");
+    await searchWeb("BTC-USD news");
     const [, opts] = mockTavilySearch.mock.calls[0];
     expect(opts.timeRange).toBe("week");
   });
 
   it("never requests raw content, images, or answer (cost control)", async () => {
-    await searchWeb("AAPL news");
+    await searchWeb("BTC-USD news");
     const [, opts] = mockTavilySearch.mock.calls[0];
     expect(opts.includeRawContent).toBe(false);
     expect(opts.includeImages).toBe(false);
@@ -335,7 +365,7 @@ describe("score-based filtering", () => {
       ]),
     );
 
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result.sources).toHaveLength(2);
   });
 
@@ -348,7 +378,7 @@ describe("score-based filtering", () => {
       ]),
     );
 
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result.sources).toHaveLength(1);
     expect(result.sources[0].title).toBe("High Score");
   });
@@ -360,7 +390,7 @@ describe("score-based filtering", () => {
       ]),
     );
 
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result).toEqual({ content: "", sources: [] });
   });
 
@@ -371,7 +401,7 @@ describe("score-based filtering", () => {
       ]),
     );
 
-    const result = await searchWeb("AAPL earnings");
+    const result = await searchWeb("BTC-USD earnings");
     expect(result.content).toContain("[WEB: Reuters Update]");
     expect(result.content).toContain("Apple reported earnings.");
   });
@@ -383,14 +413,14 @@ describe("score-based filtering", () => {
 
 describe("query truncation", () => {
   it("truncates query to 400 chars before sending to Tavily", async () => {
-    const longQuery = "AAPL stock analysis ".repeat(30); // > 400 chars
+    const longQuery = "BTC-USD price analysis ".repeat(30); // > 400 chars
     await searchWeb(longQuery);
     const [sentQuery] = mockTavilySearch.mock.calls[0];
     expect(sentQuery.length).toBeLessThanOrEqual(400);
   });
 
   it("passes short query unchanged", async () => {
-    const shortQuery = "AAPL stock earnings";
+    const shortQuery = "BTC-USD earnings";
     await searchWeb(shortQuery);
     const [sentQuery] = mockTavilySearch.mock.calls[0];
     expect(sentQuery).toBe(shortQuery);
@@ -421,7 +451,7 @@ describe("prompt-injection sanitizer", () => {
         ]),
       );
 
-      const result = await searchWeb("AAPL stock");
+      const result = await searchWeb("BTC-USD price");
       // The sanitized payload must not appear in the output — check the specific payload directly
       expect(result.content.toLowerCase()).not.toContain(payload.slice(0, 30).toLowerCase());
     });
@@ -435,7 +465,7 @@ describe("prompt-injection sanitizer", () => {
       ]),
     );
 
-    const result = await searchWeb("AAPL earnings");
+    const result = await searchWeb("BTC-USD earnings");
     expect(result.content).toContain(cleanContent);
   });
 
@@ -447,7 +477,7 @@ describe("prompt-injection sanitizer", () => {
       ]),
     );
 
-    const result = await searchWeb("AAPL earnings");
+    const result = await searchWeb("BTC-USD earnings");
     // Each snippet is max 900 chars; content = "[WEB: title]\nsnippet"
     const snippetPart = result.content.split("\n").slice(1).join("\n");
     expect(snippetPart.length).toBeLessThanOrEqual(900);
@@ -465,13 +495,13 @@ describe("prompt-injection sanitizer", () => {
         {
           title: "Clean",
           url: "https://reuters.com",
-          content: "Apple stock rose 2% on earnings.",
+          content: "Bitcoin price rose 2% on volume.",
           score: 0.85,
         },
       ]),
     );
 
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result.sources).toHaveLength(1);
     expect(result.sources[0].title).toBe("Clean");
   });
@@ -484,40 +514,40 @@ describe("prompt-injection sanitizer", () => {
 describe("error handling", () => {
   it("returns empty result on any Tavily error — graceful degradation", async () => {
     mockTavilySearch.mockRejectedValueOnce(new Error("Network error"));
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result).toEqual({ content: "", sources: [] });
   });
 
   it("classifies 500 error as isServerError=true", async () => {
     mockTavilySearch.mockRejectedValueOnce(new Error("Tavily error: 500 Internal Server Error"));
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result).toEqual({ content: "", sources: [] });
     // No throw — graceful
   });
 
   it("classifies 429 error as isRateLimit=true", async () => {
     mockTavilySearch.mockRejectedValueOnce(new Error("429 Too Many Requests"));
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result).toEqual({ content: "", sources: [] });
   });
 
   it("classifies rate limit text error correctly", async () => {
     mockTavilySearch.mockRejectedValueOnce(new Error("rate limit exceeded"));
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result).toEqual({ content: "", sources: [] });
   });
 
   it("does not false-positive isServerError on non-5xx messages containing '5'", async () => {
     // e.g. "failed after 5 retries" — should not match /5\d\d/
     mockTavilySearch.mockRejectedValueOnce(new Error("failed after 5 retries"));
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result).toEqual({ content: "", sources: [] });
     // Should still degrade gracefully
   });
 
   it("returns empty sources array (not undefined) on error", async () => {
     mockTavilySearch.mockRejectedValueOnce(new Error("boom"));
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(Array.isArray(result.sources)).toBe(true);
     expect(result.sources).toHaveLength(0);
   });
@@ -531,9 +561,9 @@ describe("circuit breaker", () => {
       .mockRejectedValueOnce(new Error("err2"))
       .mockRejectedValueOnce(new Error("err3"));
 
-    await searchWeb("AAPL stock");
-    await searchWeb("AAPL stock");
-    await searchWeb("AAPL stock");
+    await searchWeb("BTC-USD price");
+    await searchWeb("BTC-USD price");
+    await searchWeb("BTC-USD price");
 
     // All 3 returned empty gracefully
     expect(mockTavilySearch).toHaveBeenCalledTimes(3);
@@ -548,8 +578,8 @@ describe("circuit breaker", () => {
         ]),
       );
 
-    await searchWeb("AAPL stock"); // fails
-    const recovery = await searchWeb("AAPL stock"); // succeeds
+    await searchWeb("BTC-USD price"); // fails
+    const recovery = await searchWeb("BTC-USD price"); // succeeds
     expect(recovery.sources.length).toBeGreaterThan(0);
   });
 });
@@ -560,7 +590,7 @@ describe("circuit breaker", () => {
 
 describe("response structure", () => {
   it("sources have correct shape: title, url, type=web", async () => {
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     for (const src of result.sources) {
       expect(src).toHaveProperty("title");
       expect(src).toHaveProperty("url");
@@ -583,7 +613,7 @@ describe("response structure", () => {
 
   it("returns empty content string (not null/undefined) when no valid results", async () => {
     mockTavilySearch.mockResolvedValueOnce(makeTavilyResponse([]));
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result.content).toBe("");
     expect(typeof result.content).toBe("string");
   });
@@ -614,14 +644,176 @@ describe("empty or missing content handling", () => {
       ]),
     );
 
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result.sources).toHaveLength(1);
     expect(result.sources[0].title).toBe("Good");
   });
 
   it("handles Tavily returning zero results gracefully", async () => {
     mockTavilySearch.mockResolvedValueOnce(makeTavilyResponse([]));
-    const result = await searchWeb("AAPL stock");
+    const result = await searchWeb("BTC-USD price");
     expect(result).toEqual({ content: "", sources: [] });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 12. News topic detection (P0 fix: resolveTopic now returns "news")
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("news topic detection", () => {
+  // Pure news queries (no crypto keywords) → "news"
+  const pureNewsQueries = [
+    "latest headlines today",
+    "breaking news about SEC regulation",
+    "announcement from the Federal Reserve",
+    "press release from the White House",
+    "what is the latest update on the economy",
+    "reported by Reuters this morning",
+    "according to Bloomberg this week",
+  ];
+
+  for (const query of pureNewsQueries) {
+    it(`detects news topic for: "${query}"`, async () => {
+      await searchWeb(query, undefined, "basic", "US");
+      const [, opts] = mockTavilySearch.mock.calls[0];
+      expect(opts.topic).toBe("news");
+    });
+  }
+
+  it("finance topic takes priority over news for pure crypto queries", async () => {
+    // "BTC-USD price" has crypto keywords but no news keywords → finance
+    await searchWeb("BTC-USD price analysis");
+    const [, opts] = mockTavilySearch.mock.calls[0];
+    expect(opts.topic).toBe("finance");
+  });
+
+  it("crypto + news keywords → finance (crypto checked first)", async () => {
+    // "crypto news" has both — CRYPTO_KEYWORDS is checked first per user's edit
+    await searchWeb("crypto news today");
+    const [, opts] = mockTavilySearch.mock.calls[0];
+    expect(opts.topic).toBe("finance");
+  });
+
+  it("Bitcoin + news keywords → finance (crypto checked first)", async () => {
+    // "latest Bitcoin news" has both — CRYPTO_KEYWORDS wins
+    await searchWeb("latest Bitcoin news");
+    const [, opts] = mockTavilySearch.mock.calls[0];
+    expect(opts.topic).toBe("finance");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 13. Domain steering gated to finance/news only (P0 fix)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("domain steering — finance/news only", () => {
+  it("includes domains for finance topic queries", async () => {
+    await searchWeb("BTC-USD price", undefined, "basic", "US");
+    const [, opts] = mockTavilySearch.mock.calls[0];
+    expect(opts.topic).toBe("finance");
+    expect(opts.includeDomains).toBeDefined();
+    expect(opts.includeDomains.length).toBeGreaterThan(0);
+  });
+
+  it("includes domains for news topic queries", async () => {
+    await searchWeb("latest breaking headlines today", undefined, "basic", "US");
+    const [, opts] = mockTavilySearch.mock.calls[0];
+    expect(opts.topic).toBe("news");
+    expect(opts.includeDomains).toBeDefined();
+    expect(opts.includeDomains.length).toBeGreaterThan(0);
+  });
+
+  it("does NOT include domains for general topic queries", async () => {
+    await searchWeb("climate change impact on agriculture");
+    const [, opts] = mockTavilySearch.mock.calls[0];
+    expect(opts.topic).toBe("general");
+    expect(opts.includeDomains).toBeUndefined();
+  });
+
+  it("does NOT restrict general queries to financial domains even in IN region", async () => {
+    await searchWeb("India monsoon forecast", undefined, "basic", "IN");
+    const [, opts] = mockTavilySearch.mock.calls[0];
+    expect(opts.topic).toBe("general");
+    expect(opts.includeDomains).toBeUndefined();
+    // country is still passed for general+IN
+    expect(opts.country).toBe("india");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 14. Atomic circuit breaker reset (P0 fix: pipeline GET+DEL)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("circuit breaker — atomic reset", () => {
+  it("uses pipeline (GET+DEL) to reset circuit breaker on success", async () => {
+    // Simulate a previous failure (circuit breaker key exists)
+    mockRedisPipeline.get.mockReturnThis();
+    mockRedisPipeline.del.mockReturnThis();
+    mockRedisPipeline.exec.mockResolvedValueOnce(["3", 1]); // GET returns "3", DEL returns 1
+
+    const result = await searchWeb("BTC-USD price");
+
+    expect(result.sources.length).toBeGreaterThan(0);
+    // Pipeline was called for the atomic GET+DEL reset
+    expect(mockRedis.pipeline).toHaveBeenCalled();
+    expect(mockRedisPipeline.get).toHaveBeenCalled();
+    expect(mockRedisPipeline.del).toHaveBeenCalled();
+  });
+
+  it("does not log recovery when circuit breaker key is null (no prior failures)", async () => {
+    mockRedisPipeline.get.mockReturnThis();
+    mockRedisPipeline.del.mockReturnThis();
+    mockRedisPipeline.exec.mockResolvedValueOnce([null, 0]); // GET returns null
+
+    const result = await searchWeb("BTC-USD price");
+
+    expect(result.sources.length).toBeGreaterThan(0);
+    // Pipeline was still called (atomic check), but GET returned null
+    expect(mockRedis.pipeline).toHaveBeenCalled();
+  });
+
+  it("gracefully handles pipeline error during circuit breaker reset", async () => {
+    mockRedisPipeline.get.mockReturnThis();
+    mockRedisPipeline.del.mockReturnThis();
+    mockRedisPipeline.exec.mockRejectedValueOnce(new Error("Redis pipeline error"));
+
+    // Should still return results — circuit breaker reset is non-critical
+    const result = await searchWeb("BTC-USD price");
+    expect(result.sources.length).toBeGreaterThan(0);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 15. Cache key v2 with topic hint (P1 fix)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("cache key v2 — topic differentiation", () => {
+  it("produces different cache keys for finance vs general queries with same text stem", async () => {
+    // Two queries with same core text but different topic resolution
+    await searchWeb("Bitcoin price analysis");
+    await searchWeb("climate change analysis");
+
+    const [firstKey] = mockSetCache.mock.calls[0];
+    const [secondKey] = mockSetCache.mock.calls[1];
+    expect(firstKey).not.toEqual(secondKey);
+  });
+
+  it("cache key starts with tavily:v2: prefix", async () => {
+    await searchWeb("BTC-USD price");
+
+    expect(mockSetCache).toHaveBeenCalledWith(
+      expect.stringMatching(/^tavily:v2:/),
+      expect.any(Object),
+      expect.any(Number),
+    );
+  });
+
+  it("finance and news queries produce different cache keys", async () => {
+    await searchWeb("Bitcoin crypto analysis"); // finance
+    await searchWeb("latest breaking news update"); // news
+
+    const [firstKey] = mockSetCache.mock.calls[0];
+    const [secondKey] = mockSetCache.mock.calls[1];
+    expect(firstKey).not.toEqual(secondKey);
   });
 });

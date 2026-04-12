@@ -42,7 +42,6 @@ export type AssetMappingWithRelations = {
     type: AssetType;
     currency: string | null;
     marketCap: string | null;
-    peRatio: number | null;
     oneYearChange: number | null;
     technicalRating: string | null;
     analystRating: string | null;
@@ -204,7 +203,6 @@ export class DiscoveryService {
                 type: true,
                 currency: true,
                 marketCap: true,
-                peRatio: true,
                 oneYearChange: true,
                 technicalRating: true,
                 analystRating: true,
@@ -309,7 +307,6 @@ export class DiscoveryService {
       },
       metrics: {
         marketCap: m.asset.marketCap,
-        peRatio: m.asset.peRatio,
         oneYearChange: m.asset.oneYearChange,
         technicalRating: m.asset.technicalRating,
         analystRating: m.asset.analystRating,

@@ -138,28 +138,28 @@ const FEATURES: FeatureRow[] = [
   { category: "Lyra AI", feature: "Lyra credits", starter: getPlanCreditsLabel("STARTER"), pro: getPlanCreditsLabel("PRO"), elite: getPlanCreditsLabel("ELITE"), enterprise: getPlanCreditsLabel("ENTERPRISE") },
   { category: "Lyra AI", feature: "Lyra routing", starter: getPlanRoutingSummary("STARTER"), pro: getPlanRoutingSummary("PRO"), elite: getPlanRoutingSummary("ELITE"), enterprise: getEnterpriseHybridLabel() },
   { category: "Lyra AI", feature: "Cross-sector correlation", starter: false, pro: "COMPLEX queries only", elite: true, enterprise: true },
-  { category: "Lyra AI", feature: "Elite Lyra modules", starter: false, pro: false, elite: "5 modules: Discovery, ETF Deep, Crypto On-Chain, MF Deep, Commodity Macro", enterprise: "All modules + custom" },
+  { category: "Lyra AI", feature: "Elite Lyra modules", starter: false, pro: false, elite: "3 modules: Discovery, Crypto On-Chain, Macro Strategist", enterprise: "All modules + custom" },
   { category: "Lyra AI", feature: "Factor DNA context", starter: false, pro: false, elite: true, enterprise: true },
   { category: "Lyra AI", feature: "Custom AI fine-tuning", starter: false, pro: false, elite: false, enterprise: true },
   // Discovery
-  { category: "Discovery", feature: "Discovery Stocks (themes + sectors)", starter: true, pro: true, elite: true, enterprise: true },
+  { category: "Discovery", feature: "Discovery Crypto (themes + sectors)", starter: true, pro: true, elite: true, enterprise: true },
   { category: "Discovery", feature: "Discovery Feed items", starter: "5", pro: "15", elite: "100", enterprise: "Unlimited" },
   { category: "Discovery", feature: "Cross-asset patterns", starter: "Teaser only", pro: "Teaser only", elite: true, enterprise: true },
   { category: "Discovery", feature: "Score inflection alerts", starter: true, pro: true, elite: true, enterprise: true },
   { category: "Discovery", feature: "Custom signal alerts", starter: false, pro: false, elite: false, enterprise: true },
   // Intelligence Engines
-  { category: "Intelligence", feature: "ETF lookthrough", starter: false, pro: "1 per session", elite: "Up to 3 per session", enterprise: "Unlimited" },
+  { category: "Intelligence", feature: "Portfolio lookthrough", starter: false, pro: "1 per session", elite: "Up to 3 per session", enterprise: "Unlimited" },
   { category: "Intelligence", feature: "Factor DNA", starter: "Teaser only", pro: "Teaser only", elite: "Full", enterprise: "Full + custom factors" },
-  { category: "Intelligence", feature: "MF lookthrough & style drift", starter: false, pro: "1 per session", elite: "Up to 3 per session — full overlap detection", enterprise: "Unlimited + portfolio-level" },
+  { category: "Intelligence", feature: "Concentration & overlap", starter: false, pro: "1 per session", elite: "Up to 3 per session — full overlap detection", enterprise: "Unlimited + portfolio-level" },
   { category: "Intelligence", feature: "Crypto on-chain data", starter: false, pro: false, elite: "Full structural risk", enterprise: "Full + DeFi analytics" },
-  { category: "Intelligence", feature: "Commodity correlations", starter: false, pro: "Up to 3", elite: "Up to 10", enterprise: "Unlimited + custom baskets" },
+  { category: "Intelligence", feature: "Cross-asset correlations", starter: false, pro: "Up to 3", elite: "Up to 10", enterprise: "Unlimited + custom baskets" },
   // Learning
   { category: "Learning", feature: "Learning modules", starter: "Fundamentals", pro: "Fundamentals + Intermediate", elite: "All (incl. Advanced)", enterprise: "All + custom training" },
   { category: "Learning", feature: "XP multiplier", starter: "1.0x", pro: "1.0x", elite: "1.5x", enterprise: "2.0x" },
   { category: "Learning", feature: "Advanced badges", starter: false, pro: false, elite: true, enterprise: true },
   // Portfolio
   { category: "Portfolio", feature: "Portfolio tracking", starter: true, pro: true, elite: true, enterprise: true },
-  { category: "Portfolio", feature: "MF overlap detection", starter: false, pro: false, elite: true, enterprise: true },
+  { category: "Portfolio", feature: "Concentration & overlap detection", starter: false, pro: false, elite: true, enterprise: true },
   // Enterprise Exclusive
   { category: "Enterprise", feature: "Dedicated account manager", starter: false, pro: false, elite: false, enterprise: true },
   { category: "Enterprise", feature: "SSO / SAML authentication", starter: false, pro: false, elite: false, enterprise: true },
@@ -254,12 +254,12 @@ const PILLARS = [
   {
     icon: Brain,
     title: "Deeper Understanding",
-    description: "Elite Lyra modules provide specialist-level analysis across 5 domains — ETF decomposition, crypto on-chain, MF style drift, commodity macro, and cross-asset patterns.",
+    description: "Elite Lyra modules provide specialist-level analysis across 3 domains — crypto on-chain, macro strategist, and cross-asset patterns.",
   },
   {
     icon: Layers,
     title: "Full Transparency",
-    description: "See through the wrapper. Full ETF lookthrough, MF overlap detection, crypto structural risk, and commodity correlation matrices — the data institutions use.",
+    description: "See through the wrapper. Full portfolio lookthrough, concentration & overlap detection, crypto structural risk, and correlation matrices — the data institutions use.",
   },
   {
     icon: BarChart3,
@@ -526,7 +526,7 @@ export default function UpgradePage() {
                 "500 Lyra credits/month",
                 "Discovery Feed (15 items)",
                 "IN + US market access",
-                "ETF & MF lookthrough (1 per session)",
+                "Portfolio lookthrough (1 per session)",
                 "GPT-5.4 Nano AI + Mini for COMPLEX queries",
                 "Intermediate learning modules",
               ].map((item) => (
@@ -577,8 +577,8 @@ export default function UpgradePage() {
                 "Discovery Feed (100 items)",
                 "5 specialist Lyra AI modules",
                 "GPT routing for MODERATE + COMPLEX queries",
-                "ETF & MF lookthrough (up to 3)",
-                "Factor DNA + crypto on-chain + commodity macro",
+                "Portfolio lookthrough (up to 3)",
+                "Factor DNA + crypto on-chain + macro strategist",
                 "All learning modules + 1.5× XP",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-2 text-[12px] leading-5 text-foreground/85 dark:text-slate-200/85">

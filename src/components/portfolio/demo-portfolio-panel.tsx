@@ -43,13 +43,12 @@ import { Button } from "@/components/ui/button";
 // ─── US Demo Data ─────────────────────────────────────────────────────────────
 
 const US_DEMO_HOLDINGS = [
-  { symbol: "AAPL", name: "Apple Inc.", qty: 50, avgPrice: 155.0, price: 182.52, changePercent: 1.24, sector: "Technology", weight: 17.8 },
-  { symbol: "MSFT", name: "Microsoft Corp.", qty: 30, avgPrice: 290.0, price: 378.85, changePercent: 0.87, sector: "Technology", weight: 22.2 },
-  { symbol: "NVDA", name: "NVIDIA Corp.", qty: 20, avgPrice: 420.0, price: 875.40, changePercent: 2.31, sector: "Technology", weight: 34.1 },
-  { symbol: "SPY", name: "SPDR S&P 500 ETF", qty: 40, avgPrice: 440.0, price: 512.30, changePercent: 0.45, sector: "ETF", weight: 40.1 },
-  { symbol: "GOOGL", name: "Alphabet Inc.", qty: 15, avgPrice: 130.0, price: 157.80, changePercent: -0.32, sector: "Technology", weight: 4.6 },
-  { symbol: "BTC", name: "Bitcoin", qty: 0.5, avgPrice: 65000.0, price: 68000.0, changePercent: 2.5, sector: "Layer 1", weight: 25.0 },
-  { symbol: "ETH", name: "Ethereum", qty: 5.0, avgPrice: 3500.0, price: 3800.0, changePercent: 1.8, sector: "Layer 1", weight: 15.0 },
+  { symbol: "BTC-USD", name: "Bitcoin", qty: 0.5, avgPrice: 65000.0, price: 68000.0, changePercent: 2.5, sector: "Layer 1", weight: 34.1 },
+  { symbol: "ETH-USD", name: "Ethereum", qty: 5.0, avgPrice: 3500.0, price: 3800.0, changePercent: 1.8, sector: "DeFi", weight: 22.2 },
+  { symbol: "SOL-USD", name: "Solana", qty: 50, avgPrice: 150.0, price: 180.0, changePercent: 2.31, sector: "Layer 1", weight: 17.8 },
+  { symbol: "BNB-USD", name: "BNB", qty: 10, avgPrice: 580.0, price: 620.0, changePercent: 0.45, sector: "Exchange", weight: 12.5 },
+  { symbol: "XRP-USD", name: "XRP", qty: 2000, avgPrice: 2.10, price: 2.35, changePercent: 0.18, sector: "Payments", weight: 9.6 },
+  { symbol: "ADA-USD", name: "Cardano", qty: 5000, avgPrice: 0.65, price: 0.72, changePercent: -0.32, sector: "Layer 1", weight: 4.6 },
   { symbol: "SOL", name: "Solana", qty: 50.0, avgPrice: 145.0, price: 165.0, changePercent: 3.2, sector: "Layer 1", weight: 12.5 },
   { symbol: "AVAX", name: "Avalanche", qty: 30.0, avgPrice: 38.0, price: 42.5, changePercent: -1.2, sector: "Layer 1", weight: 4.2 },
   { symbol: "UNI", name: "Uniswap", qty: 20.0, avgPrice: 8.5, price: 10.2, changePercent: 4.5, sector: "DeFi", weight: 7.2 },
@@ -107,14 +106,14 @@ const US_DEMO_EQUITY_CURVE = [
 ];
 
 const US_DEMO_AI_INSIGHTS = [
-  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "Concentration alert", body: "NVDA now represents 34% of portfolio weight. A 20% drawdown in this single position would reduce total portfolio value by ~6.8%." },
-  { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Sector correlation risk", body: "AAPL, MSFT, NVDA, and GOOGL are in the same narrative cluster. A tech sector rotation could trigger correlated drawdowns across 46% of the portfolio." },
-  { icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", title: "Hedge quality is strong", body: "GLD and JNJ provide meaningful negative correlation during risk-off regimes. This reduces fragility by an estimated 8 points vs an all-equity portfolio." },
-  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Consider trimming NVDA below 25% and rotating proceeds into Healthcare or Industrials to reduce sector correlation without sacrificing expected return." },
+  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "Concentration alert", body: "BTC-USD now represents 34% of portfolio weight. A 20% drawdown in this single position would reduce total portfolio value by ~6.8%." },
+  { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Sector correlation risk", body: "BTC-USD, ETH-USD, SOL-USD, and ADA-USD are in the same narrative cluster. A L1 sector rotation could trigger correlated drawdowns across 56% of the portfolio." },
+  { icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", title: "Hedge quality is strong", body: "BNB-USD and XRP-USD provide meaningful negative correlation during risk-off regimes. This reduces fragility by an estimated 8 points vs an all-L1 portfolio." },
+  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Consider trimming BTC-USD below 25% and rotating proceeds into DeFi or Payments sectors to reduce sector correlation without sacrificing expected return." },
 ];
 
 const US_DEMO_RISK_METRICS = [
-  { label: "Beta (vs SPY)", value: "1.24", detail: "More volatile than market" },
+  { label: "Beta (vs BTC-USD)", value: "1.24", detail: "More volatile than market" },
   { label: "Sharpe Ratio", value: "0.84", detail: "Moderate risk-adjusted return" },
   { label: "Sortino Ratio", value: "1.12", detail: "Good downside protection" },
   { label: "Max Drawdown", value: "-23.1%", detail: "Stress-tested 1Y horizon" },
@@ -123,14 +122,14 @@ const US_DEMO_RISK_METRICS = [
 ];
 
 const US_DEMO_FRAGILITY = [
-  { label: "Tech Sector Concentration", pct: 79, color: "#ef4444" },
-  { label: "NVDA Single-Name Weight", pct: 64, color: "#f97316" },
-  { label: "AI-Thematic Exposure", pct: 55, color: "#fbbf24" },
-  { label: "Correlation Cluster Size", pct: 46, color: "#fbbf24" },
+  { label: "L1 Concentration", pct: 79, color: "#ef4444" },
+  { label: "BTC Single-Name Weight", pct: 64, color: "#f97316" },
+  { label: "Correlation Cluster Size", pct: 55, color: "#fbbf24" },
+  { label: "Volatility Regime Mismatch", pct: 46, color: "#fbbf24" },
 ];
 
 const US_DEMO_CORRELATIONS: [string, string, string][] = [
-  ["AAPL", "MSFT", "0.87"], ["MSFT", "NVDA", "0.79"], ["AAPL", "NVDA", "0.74"], ["MSFT", "GOOGL", "0.82"],
+  ["BTC-USD", "ETH-USD", "0.87"], ["ETH-USD", "SOL-USD", "0.79"], ["BTC-USD", "SOL-USD", "0.74"], ["ETH-USD", "BNB-USD", "0.82"],
 ];
 
 const US_DEMO_RETURN_DIST = [
@@ -141,33 +140,30 @@ const US_DEMO_RETURN_DIST = [
 // ─── IN Demo Data ─────────────────────────────────────────────────────────────
 
 const IN_DEMO_HOLDINGS = [
-  { symbol: "RELIANCE", name: "Reliance Industries", qty: 50, avgPrice: 2480.0, price: 2892.50, changePercent: 1.12, sector: "Energy", weight: 22.1 },
-  { symbol: "TCS", name: "Tata Consultancy Services", qty: 30, avgPrice: 3550.0, price: 4120.75, changePercent: 0.64, sector: "Technology", weight: 18.9 },
-  { symbol: "HDFCBANK", name: "HDFC Bank Ltd.", qty: 60, avgPrice: 1580.0, price: 1748.30, changePercent: -0.28, sector: "Financials", weight: 16.0 },
-  { symbol: "INFY", name: "Infosys Ltd.", qty: 80, avgPrice: 1420.0, price: 1685.90, changePercent: 0.91, sector: "Technology", weight: 20.6 },
-  { symbol: "ICICIBANK", name: "ICICI Bank Ltd.", qty: 70, avgPrice: 980.0, price: 1142.60, changePercent: 0.43, sector: "Financials", weight: 12.2 },
-  { symbol: "WIPRO", name: "Wipro Ltd.", qty: 120, avgPrice: 440.0, price: 512.35, changePercent: -0.55, sector: "Technology", weight: 9.4 },
-  { symbol: "HINDUNILVR", name: "Hindustan Unilever", qty: 25, avgPrice: 2540.0, price: 2318.80, changePercent: -0.71, sector: "Consumer", weight: 8.8 },
-  { symbol: "SBIN", name: "State Bank of India", qty: 100, avgPrice: 620.0, price: 748.45, changePercent: 1.34, sector: "Financials", weight: 11.4 },
-  { symbol: "TATAMOTORS", name: "Tata Motors Ltd.", qty: 80, avgPrice: 680.0, price: 924.10, changePercent: 2.18, sector: "Auto", weight: 11.3 },
-  { symbol: "GOLDBEES", name: "Nippon India Gold BeES", qty: 200, avgPrice: 52.0, price: 62.40, changePercent: 0.48, sector: "Commodity", weight: 19.0 },
+  { symbol: "BTC-USD", name: "Bitcoin", qty: 0.3, avgPrice: 95000, price: 104000, changePercent: 2.35, sector: "Layer 1", weight: 22.1 },
+  { symbol: "ETH-USD", name: "Ethereum", qty: 3, avgPrice: 3100, price: 3400, changePercent: 1.12, sector: "DeFi", weight: 18.9 },
+  { symbol: "SOL-USD", name: "Solana", qty: 40, avgPrice: 150, price: 180, changePercent: 3.41, sector: "Layer 1", weight: 20.6 },
+  { symbol: "XRP-USD", name: "XRP", qty: 1500, avgPrice: 2.10, price: 2.35, changePercent: 0.18, sector: "Payments", weight: 16.0 },
+  { symbol: "BNB-USD", name: "BNB", qty: 8, avgPrice: 580, price: 620, changePercent: 0.43, sector: "Exchange", weight: 12.2 },
+  { symbol: "ADA-USD", name: "Cardano", qty: 4000, avgPrice: 0.65, price: 0.72, changePercent: 0.65, sector: "Layer 1", weight: 9.4 },
+  { symbol: "DOT-USD", name: "Polkadot", qty: 200, avgPrice: 6.5, price: 7.2, changePercent: -0.55, sector: "Layer 0", weight: 8.8 },
+  { symbol: "AVAX-USD", name: "Avalanche", qty: 80, avgPrice: 35, price: 42, changePercent: 1.34, sector: "Layer 1", weight: 11.4 },
 ];
 
 const IN_DEMO_ALLOCATION = [
-  { label: "Technology", percent: 38.5, color: "#3b82f6" },
-  { label: "Financials", percent: 28.2, color: "#22c55e" },
-  { label: "Energy", percent: 14.8, color: "#f97316" },
-  { label: "Commodity", percent: 8.4, color: "#fbbf24" },
-  { label: "Consumer", percent: 5.9, color: "#a78bfa" },
-  { label: "Auto", percent: 4.2, color: "#38bdf8" },
+  { label: "Layer 1", percent: 51.5, color: "#3b82f6" },
+  { label: "DeFi", percent: 18.9, color: "#22c55e" },
+  { label: "Payments", percent: 16.0, color: "#f97316" },
+  { label: "Exchange", percent: 12.2, color: "#fbbf24" },
+  { label: "Layer 0", percent: 8.8, color: "#a78bfa" },
 ];
 
 const IN_DEMO_HEALTH_DIMENSIONS = [
-  { label: "Diversification", score: 68, color: "#22c55e", desc: "Good spread — 6 sectors represented" },
-  { label: "Concentration", score: 61, color: "#fbbf24", desc: "IT cluster at 38% warrants watch" },
-  { label: "Volatility Control", score: 74, color: "#22c55e", desc: "Gold hedge reduces drawdown risk" },
-  { label: "Correlation Risk", score: 63, color: "#fbbf24", desc: "IT names (TCS, Infy, Wipro) correlated" },
-  { label: "Quality & Trust", score: 84, color: "#22c55e", desc: "Blue-chip Nifty 50 core holdings" },
+  { label: "Diversification", score: 68, color: "#22c55e", desc: "Good spread — 5 sectors represented" },
+  { label: "Concentration", score: 61, color: "#fbbf24", desc: "L1 cluster at 51% warrants watch" },
+  { label: "Volatility Control", score: 74, color: "#22c55e", desc: "Payments hedge reduces drawdown risk" },
+  { label: "Correlation Risk", score: 63, color: "#fbbf24", desc: "L1 names (BTC, SOL, ADA) correlated" },
+  { label: "Quality & Trust", score: 84, color: "#22c55e", desc: "Blue-chip crypto core holdings" },
   { label: "Fragility Score", score: 71, color: "#22c55e", desc: "Low-moderate tail risk exposure" },
 ];
 
@@ -206,14 +202,14 @@ const IN_DEMO_EQUITY_CURVE = [
 ];
 
 const IN_DEMO_AI_INSIGHTS = [
-  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "IT sector clustering", body: "TCS, Infosys, and Wipro represent 38.5% combined weight in the same sector. A global IT spending slowdown could compress all three simultaneously." },
-  { icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", title: "Gold hedge working well", body: "GOLDBEES provides meaningful negative correlation during INR depreciation and global risk-off events, reducing portfolio fragility by ~9 points." },
-  { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Banking exposure is diversified", body: "HDFCBANK, ICICIBANK, and SBIN span private and public-sector banks, reducing single-bank failure risk while maintaining Nifty 50 core alignment." },
-  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Consider adding a mid-cap or pharma position (e.g. SUNPHARMA or DRREDDY) to reduce IT concentration and improve sector diversity score above 75." },
+  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "L1 sector clustering", body: "BTC-USD, SOL-USD, and ADA-USD represent 51.5% combined weight in the same sector. A L1 rotation could compress all three simultaneously." },
+  { icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", title: "Payments hedge working well", body: "XRP-USD provides meaningful negative correlation during risk-off events, reducing portfolio fragility by ~9 points." },
+  { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Exchange exposure is diversified", body: "BNB-USD spans exchange and DeFi narratives, reducing single-protocol failure risk while maintaining crypto core alignment." },
+  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Consider adding a DeFi or Layer 2 position (e.g. UNI-USD or ARB-USD) to reduce L1 concentration and improve sector diversity score above 75." },
 ];
 
 const IN_DEMO_RISK_METRICS = [
-  { label: "Beta (vs Nifty)", value: "1.08", detail: "Slightly more volatile than index" },
+  { label: "Beta (vs BTC-USD)", value: "1.08", detail: "Slightly more volatile than market" },
   { label: "Sharpe Ratio", value: "0.91", detail: "Good risk-adjusted return" },
   { label: "Sortino Ratio", value: "1.24", detail: "Strong downside protection" },
   { label: "Max Drawdown", value: "-19.4%", detail: "Stress-tested 1Y horizon" },
@@ -222,14 +218,14 @@ const IN_DEMO_RISK_METRICS = [
 ];
 
 const IN_DEMO_FRAGILITY = [
-  { label: "IT Sector Concentration", pct: 68, color: "#f97316" },
-  { label: "TCS Single-Name Weight", pct: 52, color: "#fbbf24" },
-  { label: "Global IT Demand Exposure", pct: 44, color: "#fbbf24" },
+  { label: "L1 Concentration", pct: 68, color: "#f97316" },
+  { label: "SOL-USD Single-Name Weight", pct: 52, color: "#fbbf24" },
+  { label: "L1 Narrative Exposure", pct: 44, color: "#fbbf24" },
   { label: "Correlation Cluster Size", pct: 38, color: "#22c55e" },
 ];
 
 const IN_DEMO_CORRELATIONS: [string, string, string][] = [
-  ["TCS", "INFY", "0.84"], ["INFY", "WIPRO", "0.78"], ["TCS", "WIPRO", "0.72"], ["HDFCBANK", "ICICIBANK", "0.76"],
+  ["BTC-USD", "SOL-USD", "0.84"], ["SOL-USD", "ADA-USD", "0.78"], ["BTC-USD", "ADA-USD", "0.72"], ["ETH-USD", "BNB-USD", "0.76"],
 ];
 
 const IN_DEMO_RETURN_DIST = [
@@ -280,13 +276,13 @@ function getDemoConfig(region: string): DemoConfig {
       returnDist: IN_DEMO_RETURN_DIST,
       currencySymbol: "₹",
       locale: "en-IN",
-      benchmarkLabel: "Nifty 50",
+      benchmarkLabel: "Bitcoin (BTC-USD)",
       healthScore: 74,
       healthTone: "Balanced",
-      healthDesc: "Strong blue-chip core with moderate IT concentration. Gold hedge improves risk-adjusted return.",
-      portfolioLabel: "Sample IN portfolio · 10 holdings",
+      healthDesc: "Strong blue-chip core with moderate L1 concentration. Payments hedge improves risk-adjusted return.",
+      portfolioLabel: "Sample IN portfolio · 8 holdings",
       fragilityScore: 71,
-      fragilityDesc: "Low-moderate tail risk — IT cluster is the primary fragility driver.",
+      fragilityDesc: "Low-moderate tail risk — L1 cluster is the primary fragility driver.",
     };
   }
   return {
@@ -304,13 +300,13 @@ function getDemoConfig(region: string): DemoConfig {
     returnDist: US_DEMO_RETURN_DIST,
     currencySymbol: "$",
     locale: "en-US",
-    benchmarkLabel: "S&P 500",
+    benchmarkLabel: "Bitcoin (BTC-USD)",
     healthScore: 72,
     healthTone: "Balanced",
-    healthDesc: "Solid fundamentals, elevated concentration in Technology sector warrants attention.",
-    portfolioLabel: "Sample US portfolio · 10 holdings",
+    healthDesc: "Solid fundamentals, elevated concentration in Layer 1 sector warrants attention.",
+    portfolioLabel: "Sample US portfolio · 8 holdings",
     fragilityScore: 67,
-    fragilityDesc: "Moderate tail risk — tech sector concentration is the primary fragility driver.",
+    fragilityDesc: "Moderate tail risk — L1 sector concentration is the primary fragility driver.",
   };
 }
 

@@ -61,7 +61,7 @@ const COMMAND_PATTERNS: Array<{
 export const ELITE_COMMAND_DEFINITIONS = [
   {
     command: "/compare",
-    syntax: "/compare AAPL MSFT NVDA",
+    syntax: "/compare BTC-USD ETH-USD SOL-USD",
     description: "Side-by-side multi-asset analysis with Lyra synthesis",
     example: "/compare BTC-USD ETH-USD SOL-USD",
   },
@@ -69,13 +69,13 @@ export const ELITE_COMMAND_DEFINITIONS = [
     command: "/deepdive",
     syntax: "/deepdive SYMBOL",
     description: "Full institutional deep-dive — all modules, no word cap",
-    example: "/deepdive NVDA",
+    example: "/deepdive SOL-USD",
   },
   {
     command: "/stress-test",
     syntax: "/stress-test SYMBOL [scenario]",
     description: "Stress test against rate shock, crash, or custom scenario",
-    example: "/stress-test AAPL rate shock",
+    example: "/stress-test BTC-USD rate shock",
   },
   {
     command: "/watchlist-audit",
@@ -87,7 +87,7 @@ export const ELITE_COMMAND_DEFINITIONS = [
     command: "/regime-backtest",
     syntax: "/regime-backtest SYMBOL",
     description: "How did this asset behave across all historical regime states?",
-    example: "/regime-backtest SPY",
+    example: "/regime-backtest BTC-USD",
   },
 ];
 

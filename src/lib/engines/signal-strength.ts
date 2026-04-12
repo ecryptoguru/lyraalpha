@@ -13,7 +13,7 @@ export type SignalLabel =
 
 export type SignalConfidence = "low" | "medium" | "high";
 
-export type AssetCategory = "STOCK" | "CRYPTO" | "ETF" | "MUTUAL_FUND" | "COMMODITY";
+export type AssetCategory = "CRYPTO";
 
 export interface SignalStrengthResult {
   score: number;                    // 0-100 composite
@@ -85,27 +85,19 @@ interface LayerWeights {
 }
 
 const TYPE_WEIGHTS: Record<string, LayerWeights> = {
-  STOCK:       { dse: 0.40, regime: 0.25, fundamental: 0.20, dynamics: 0.15 },
   CRYPTO:      { dse: 0.55, regime: 0.25, fundamental: 0.00, dynamics: 0.20 },
-  ETF:         { dse: 0.45, regime: 0.25, fundamental: 0.15, dynamics: 0.15 },
-  MUTUAL_FUND: { dse: 0.50, regime: 0.20, fundamental: 0.10, dynamics: 0.20 },
-  COMMODITY:   { dse: 0.50, regime: 0.30, fundamental: 0.00, dynamics: 0.20 },
 };
 
 const DSE_WEIGHTS: Record<string, Record<string, number>> = {
-  STOCK:       { trend: 0.30, momentum: 0.25, volatility: 0.15, sentiment: 0.15, liquidity: 0.10, trust: 0.05 },
   CRYPTO:      { trend: 0.25, momentum: 0.30, volatility: 0.20, sentiment: 0.15, liquidity: 0.05, trust: 0.05 },
-  ETF:         { trend: 0.30, momentum: 0.25, volatility: 0.15, sentiment: 0.10, liquidity: 0.15, trust: 0.05 },
-  MUTUAL_FUND: { trend: 0.35, momentum: 0.20, volatility: 0.15, sentiment: 0.10, liquidity: 0.15, trust: 0.05 },
-  COMMODITY:   { trend: 0.25, momentum: 0.30, volatility: 0.20, sentiment: 0.15, liquidity: 0.05, trust: 0.05 },
 };
 
 // ─── Core Engine ─────────────────────────────────────────────────────────────
 
 export function calculateSignalStrength(input: SignalStrengthInput): SignalStrengthResult {
   const assetType = normalizeAssetType(input.assetType);
-  const weights = TYPE_WEIGHTS[assetType] || TYPE_WEIGHTS.STOCK;
-  const dseWeights = DSE_WEIGHTS[assetType] || DSE_WEIGHTS.STOCK;
+  const weights = TYPE_WEIGHTS[assetType] || TYPE_WEIGHTS.CRYPTO;
+  const dseWeights = DSE_WEIGHTS[assetType] || DSE_WEIGHTS.CRYPTO;
 
   // Layer 1: DSE Composite
   const dseScore = calculateDSEComposite(input.signals, dseWeights);
@@ -270,7 +262,7 @@ function calculateFundamentalQuality(
   assetType: string,
 ): number {
   // No fundamentals for crypto/commodities — return neutral
-  if (!fundamentals || assetType === "CRYPTO" || assetType === "COMMODITY") {
+  if (!fundamentals || assetType === "CRYPTO") {
     return 50;
   }
 
@@ -738,11 +730,9 @@ function getEngineDirections(signals: AssetSignals): Record<string, string> {
 
 function normalizeAssetType(type: string): string {
   const upper = type.toUpperCase().replace(/[\s-]/g, "_");
-  if (upper.includes("MUTUAL") || upper === "MF") return "MUTUAL_FUND";
   if (upper === "CRYPTOCURRENCY" || upper === "CRYPTO") return "CRYPTO";
-  if (upper === "EQUITY" || upper === "STOCK") return "STOCK";
   if (TYPE_WEIGHTS[upper]) return upper;
-  return "STOCK"; // Default fallback
+  return "CRYPTO"; // Default fallback
 }
 
 function clamp(value: number, min: number, max: number): number {

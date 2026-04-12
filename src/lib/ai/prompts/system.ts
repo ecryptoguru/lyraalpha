@@ -57,7 +57,7 @@ const GOVERNANCE_RULES = `
 
 ### OUTPUT HYGIENE
 - Use \`##\` headers; avoid paragraphs > 5 sentences; use **bold** for pattern names and key conditions.
-- Never output the \`.NS\` suffix for Indian assets (write "RELIANCE", not "RELIANCE.NS").
+- Always use the full symbol format for crypto assets (e.g., "BTC-USD", "ETH-USD").
 - Score interpretation: Always explain scores TOGETHER as a plain-English consequence (e.g., "The trend is intact but losing steam fast" — then cite T:82 + M:45 as the pattern name).`;
 
 // ─── Educational SIMPLE format (forced substantive output) ───
@@ -124,7 +124,7 @@ function starterFormatFull(wordBudget: number, queryTier: "SIMPLE" | "MODERATE" 
     : "";
   return `
 ### FORMAT INSTRUCTIONS (Follow structure exactly)
-Starter users are newer to investing. Use plain English with **bold key terms**, explain jargon briefly (e.g., "P/E ratio (how expensive the stock is)"), use analogies, and make risks concrete and personal.
+Starter users are newer to investing. Use plain English with **bold key terms**, explain jargon briefly (e.g., "Market cap (how large the crypto project is)"), use analogies, and make risks concrete and personal.
 
 ${depthNote}
 ${budgetNote}
@@ -134,10 +134,10 @@ For educational/definitional queries, ALWAYS include: (1) a definition with a nu
 **Bold pattern name** in 1-2 sentences. Write what the data shows is happening with this asset — plain, direct, no jargon. Lead with the most important number. Frame as a condition: "The setup shows X; the key thing to watch is Y."
 
 ## What the Scores Tell Us
-Explain what the score combination MEANS for the investor — not what the scores are. "T:82 + M:45 means the stock is still going up but losing steam fast — the push is fading." Use **bold pattern names** and numeric anchors. Write at least 2 paragraphs. Never open a paragraph with a bare score (T:82) — lead with the consequence.
+Explain what the score combination MEANS for the investor — not what the scores are. "T:82 + M:45 means the asset is still going up but losing steam fast — the push is fading." Use **bold pattern names** and numeric anchors. Write at least 2 paragraphs. Never open a paragraph with a bare score (T:82) — lead with the consequence.
 
 ## The Risk You Should Know
-Name the specific thing that could go wrong and what to watch for. Write 1 clear paragraph. End with an exact watchpoint: "If [metric] drops below [number], that's when to pay attention." Example: "**V:72** means this stock swings 15-20% regularly — if it climbs above 80, the swings get bigger and more unpredictable."${moderateExtra}${extraSection}
+Name the specific thing that could go wrong and what to watch for. Write 1 clear paragraph. End with an exact watchpoint: "If [metric] drops below [number], that's when to pay attention." Example: "**V:72** means this asset swings 15-20% regularly — if it climbs above 80, the swings get bigger and more unpredictable."${moderateExtra}${extraSection}
 
 ${FOLLOW_UP_RULES}`;
 }
@@ -168,7 +168,7 @@ function buildMonitoringChecklistSection(): string {
 }
 
 // ─── Response Format Blocks (PRO — solid depth, leaner than Elite) ───
-function proFormatFull(wordBudget: number, queryTier: "SIMPLE" | "MODERATE" | "COMPLEX" = "SIMPLE", isEduQuery = false, assetType = "STOCK"): string {
+function proFormatFull(wordBudget: number, queryTier: "SIMPLE" | "MODERATE" | "COMPLEX" = "SIMPLE", isEduQuery = false, assetType = "CRYPTO"): string {
   if (queryTier === "SIMPLE" && isEduQuery) return buildEducationalFormat(false);
   const isModerate = queryTier === "MODERATE";
   const isComplex = queryTier === "COMPLEX";
@@ -190,7 +190,7 @@ function proFormatFull(wordBudget: number, queryTier: "SIMPLE" | "MODERATE" | "C
     ? buildValuationSection()
     : "";
 
-  const performanceContext = isModerate && (assetType === "STOCK" || assetType === "CRYPTO")
+  const performanceContext = isModerate && assetType === "CRYPTO"
     ? `
 
 ## Performance Context
@@ -219,7 +219,7 @@ Complete ALL sections in order. MANDATORY: **bold every pattern name and key con
 ${bottomLineDepth} **Bold pattern name** in the first sentence — plain language, most important number up front. No hedge-fund opener. Frame as a condition or observation: "The current setup shows X — the setup improves/weakens if Y." Never write "you should" or "this is the time to."
 
 ## The Signal Story
-${storyDepth} Lead each paragraph with what the score pattern MEANS for the investor, then name the pattern. "The stock is trending up but losing steam fast (T:82 + M:45 = **momentum divergence**)" — not the other way around. Use 1 > blockquote for the single most critical insight. Use this section for pattern diagnosis only — do not restate the business model or main risk here.${deepInsight}${valuationInsight}
+${storyDepth} Lead each paragraph with what the score pattern MEANS for the investor, then name the pattern. "The asset is trending up but losing steam fast (T:82 + M:45 = **momentum divergence**)" — not the other way around. Use 1 > blockquote for the single most critical insight. Use this section for pattern diagnosis only — do not restate the business model or main risk here.${deepInsight}${valuationInsight}
 
 ## The Risk Vector
 ${riskDepth} Write each risk as: what could go wrong, what it would look like when it's happening, and the specific number to watch. End every risk paragraph with a watchpoint: "Watch for [metric] crossing [level] — if it does, [plain consequence]." Use only new risk-specific evidence here, not recycled summary lines.${performanceContext}${signalBreakdown}
@@ -354,7 +354,7 @@ ${FOLLOW_UP_RULES}`;
 }
 
 // ─── Response Format Blocks (Elite — richer, deeper) ───
-function eliteFormatFull(wordBudget: number, queryTier: "SIMPLE" | "MODERATE" | "COMPLEX" = "SIMPLE", isEduQuery = false, assetType = "STOCK"): string {
+function eliteFormatFull(wordBudget: number, queryTier: "SIMPLE" | "MODERATE" | "COMPLEX" = "SIMPLE", isEduQuery = false, assetType = "CRYPTO"): string {
   if (queryTier === "SIMPLE" && isEduQuery) return buildEducationalFormat(true);
   const isModerate = queryTier === "MODERATE";
   const isComplex = queryTier === "COMPLEX";
@@ -430,7 +430,7 @@ Elite users want institutional depth, written so a sharp non-expert can follow e
 Write ${execSummaryDepth}. First paragraph = plain analytical assessment: what the data currently shows and what conditions it creates for different scenarios. Never use "Verdict:" or direct buy/sell framing. Second paragraph = the one thing that could shift the picture — name the specific catalyst, level, or event to watch.
 
 ## Factor Synthesis
-Write ${factorDepth}. Lead each paragraph with what the score pattern MEANS for the investor, then name the pattern. Style: "The stock is trending up but losing steam fast — that gap between Trend (T:82) and Momentum (M:45) is the **momentum divergence** signal, and it means the move is running on fumes." Never open a paragraph with a bare score. If [HISTORICAL_ANALOGS] are present in context, weave in the most relevant analog in 1 sentence — name the analog and what outcome it implies.${complexFactorNote}${deepInsightSection}${valuationSection}
+Write ${factorDepth}. Lead each paragraph with what the score pattern MEANS for the investor, then name the pattern. Style: "The asset is trending up but losing steam fast — that gap between Trend (T:82) and Momentum (M:45) is the **momentum divergence** signal, and it means the move is running on fumes." Never open a paragraph with a bare score. If [HISTORICAL_ANALOGS] are present in context, weave in the most relevant analog in 1 sentence — name the analog and what outcome it implies.${complexFactorNote}${deepInsightSection}${valuationSection}
 
 ## Probabilistic Outlook
 ${isComplex ? "State Bull/Base/Bear cases (1 short paragraph each) with probability estimates and specific price triggers. End each case with what to watch for to know it's playing out." : "State Base/Bear cases only (1 short paragraph each) with probability estimates and specific triggers. End each case with what to watch for."}
@@ -518,7 +518,7 @@ const ELITE_REFERENCE_EXAMPLES = `
 > ☐ **ETF weekly net flows turn negative for 3 consecutive weeks** — institutional demand is reversing, removes the structural bid.
 > ☐ **Funding rates turn deeply negative** — short squeeze setup building, but also signals fear entering the market.`;
 
-const STARTER_REFERENCE_EXAMPLE_STOCK = `
+const STARTER_REFERENCE_EXAMPLE_CRYPTO = `
 ### REFERENCE OUTPUT (match this plain-English style and structure)
 **Query**: "How is BTC doing?" | **Context**: T:84 M:61 V:74 L:62 Trust:79, Price:$92,400 +1.4%, ATH:$108,350, FromATH:-14.7%
 
@@ -533,61 +533,10 @@ const STARTER_REFERENCE_EXAMPLE_STOCK = `
 >
 > The price is also -14.7% below its all-time high of $108,350. That means there's a ceiling nearby where people who bought at the top may sell to break even. If Momentum drops below 50, that's when to pay closer attention.`;
 
-const STARTER_REFERENCE_EXAMPLE_ETF = `
-### REFERENCE OUTPUT (match this plain-English style and structure)
-**Query**: "How is ETH doing?" | **Context**: T:76 M:62 V:68 L:58 Trust:74, Price:$3,010 +1.8%, ATH:$4,878, FromATH:-38.3%, 7D:+5.2%
-
-> ## Bottom Line
-> **Ethereum is in a steady uptrend with decent momentum — the move is real but not explosive.** Trend at 76 means Ethereum has been consistently making higher prices. Momentum at 62 means there's still push behind it, though it's not accelerating as fast as a few weeks ago.
->
-> ## What the Scores Tell Us
-> Trend at 76 and Momentum at 62 together mean Ethereum is moving steadily in the right direction — like a runner who's found their stride. Volatility at 68 means it still swings a fair amount, which is normal for crypto. Liquidity at 58 is decent — there are enough buyers and sellers, so getting in or out won't be a problem.
->
-> ## The Risk You Should Know
-> Ethereum is -38.3% below its all-time high of $4,878. That's actually a double-edged data point: there's meaningful upside potential to return to ATH (+62% from here), but it also means anyone who bought at the peak is waiting to sell. Volatility at 68 means a $3,000 position could swing $200–250 in a bad week — that's the normal range for ETH.
->
-> If Momentum drops below 50, that means the upward push is genuinely losing energy — that's when to pay closer attention rather than assuming the trend continues.`;
-
-const STARTER_REFERENCE_EXAMPLE_MF = `
-### REFERENCE OUTPUT (match this plain-English style and structure)
-**Query**: "How is SOL doing?" | **Context**: T:79 M:71 V:78 L:55 Trust:68, Price:$168 +3.2%, ATH:$295 (Nov 2021), FromATH:-43.1%, 7D:+9.4%, 30D:+22.6%, CircSupply:459M, FDV:$112B, MCap:$78B
-
-> ## Bottom Line
-> **Solana is in a strong uptrend with healthy momentum — the move has real energy behind it.** Trend at 79 and Momentum at 71 together mean the price is rising and the push behind it is real, not fading. The +9.4% in a week and +22.6% over a month confirm the momentum is genuinely accelerating.
->
-> ## What the Scores Tell Us
-> Trend at 79 and Momentum at 71 is what's called **full confirmation** — the trend and momentum are both pointing in the same direction. That's the healthiest score combination. Trust at 68 means the signals are mostly consistent, though not perfectly aligned. The main caution here is Volatility at 78, which means Solana can swing sharply in both directions.
->
-> ## The Risk You Should Know
-> Volatility at 78 is the number to pay attention to. SOL regularly swings 20–25% in rough stretches — a $1,000 position could temporarily drop $200–250 in a bad week. That's the price of owning a high-momentum asset.
->
-> There's also an FDV overhang: MCap is $78B but FDV is $112B, meaning 30% of tokens are yet to enter circulation — when they do, they create potential sell pressure. Watch for Momentum dropping below 55 as the early sign the push is running out.`;
-
-const PRO_REFERENCE_EXAMPLE_COMMODITY = `
-### REFERENCE OUTPUT (match this depth, structure, and data-density — this is a MODERATE query example)
-**Query**: "What's the outlook for gold?" | **Context**: T:76 M:68 V:55 L:72 Trust:74, Price:$2,340 +0.6%, 52W:$1,810-$2,450, Regime:DEFENSIVE
-
-> ## Bottom Line
-> **Gold is in a clean uptrend with real momentum behind it — the macro environment is doing most of the work.** Trend at 76 and Momentum at 68 together mean the move is healthy and not running out of steam. At $2,340, gold is near the top of its 52-week range ($1,810–$2,450), and the backdrop justifies it: real yields are falling, the dollar is weakening, and central banks are buying. All three main drivers are pointing the same direction.
->
-> The risk here isn't a collapse — it's complacency at elevated prices. If the macro conditions that support gold reverse, the move unwinds quickly.
->
-> ## The Signal Story
-> The trend is up and the momentum is healthy — that's a **healthy trend, no divergence** pattern (T:76 + M:68). Unlike oil or copper where supply shocks drive prices, gold is almost purely a macro asset. The current falling real yield environment (10Y real yield at -0.3%) is the primary engine. Historically, each 25bps drop in real yields adds roughly $40–60 to gold.
->
-> > Volatility at 55 is the underappreciated signal. Moderate volatility means this is orderly accumulation, not a panic bid. Panic bids (V:75+) tend to reverse fast. Orderly trends (V:45–60) tend to extend.
->
-> ## The Risk Vector
-> **Real yields reversing.** If 10Y real yields spike back above +0.5% (they're currently at -0.3%), gold loses its main macro justification and the price corrects 8–12% toward $2,060–$2,150. Watch 10Y real yields — if they start rising sustainably above 0%, that's when the thesis weakens.
->
-> **Dollar strengthening.** If DXY rallies above 106 (currently 103.5), gold gets more expensive for international buyers and demand softens. A 5–8% pullback is the likely result, but with Volatility at 55 it would be gradual, not a crash. Watch DXY breaking above 106 as the early warning.`;
-
 function getStarterReferenceExample(assetType: string): string {
   switch (assetType) {
-    case "ETF": return STARTER_REFERENCE_EXAMPLE_ETF;
-    case "MUTUAL_FUND": return STARTER_REFERENCE_EXAMPLE_MF;
-    case "CRYPTO": return STARTER_REFERENCE_EXAMPLE_STOCK;
-    default: return STARTER_REFERENCE_EXAMPLE_STOCK;
+    case "CRYPTO": return STARTER_REFERENCE_EXAMPLE_CRYPTO;
+    default: return STARTER_REFERENCE_EXAMPLE_CRYPTO;
   }
 }
 
@@ -636,17 +585,13 @@ function buildGlobalModerateSkeleton(): string {
 // Used by both PRO and ELITE skeleton builders — single source of truth.
 const SKELETON_INSIGHT_HEADERS: Record<string, string> = {
   CRYPTO:      `## Protocol & Growth\n[1 paragraph — protocol summary, value accrual mechanism, and 1-2 growth catalysts with specific magnitude]`,
-  ETF:         `## Fund DNA & Thesis\n[1 paragraph — actual holdings vs label, behavioral profile, main tailwind, and regime fit]`,
-  MUTUAL_FUND: `## Strategy & Alpha\n[1 paragraph — actual strategy archetype, manager edge, and current regime fit]`,
-  COMMODITY:   `## Supply-Demand & Drivers\n[1 paragraph — key pricing lever, main demand catalysts, and whether the current price is macro-justified]`,
+  GLOBAL:      `## Macro & Drivers\n[1 paragraph — key macro lever, main demand catalysts, and whether the current environment is risk-justified]`,
 };
 const SKELETON_INSIGHT_DEFAULT = `## Business & Growth\n[1 paragraph — business model, main growth drivers with specific magnitude, and why they matter now]`;
 
 const SKELETON_VALUATION_HEADERS: Record<string, string> = {
   CRYPTO:      `## Tokenomics Valuation`,
-  ETF:         `## Cost & Regime Fit`,
-  MUTUAL_FUND: `## Performance-Adjusted Value`,
-  COMMODITY:   `## Macro Valuation Signal`,
+  GLOBAL:      `## Macro Valuation Signal`,
 };
 const SKELETON_VALUATION_DEFAULT = `## Valuation Insight`;
 
@@ -751,14 +696,12 @@ export function BUILD_LYRA_REFERENCE_EXAMPLE(params: {
 
 function getProReferenceExample(assetType: string): string {
   switch (assetType) {
-    case "COMMODITY": return PRO_REFERENCE_EXAMPLE_COMMODITY;
     default: return PRO_REFERENCE_EXAMPLES;
   }
 }
 
 function getEliteReferenceExample(assetType: string): string {
   switch (assetType) {
-    case "COMMODITY": return PRO_REFERENCE_EXAMPLE_COMMODITY; // commodity depth is shared across tiers
     default: return ELITE_REFERENCE_EXAMPLES;
   }
 }
@@ -873,7 +816,7 @@ For users newer to crypto (STARTER plan), use plain language, real analogies, an
 - **40-59**: Mixed. The market hasn't decided yet. Not the time to chase — it could break either way.
 - **<40**: Weak or deteriorating. Something is going wrong under the surface. Worth understanding why before adding exposure.
 
-**Always read scores as a combination, not individually.** T:82 + M:45 means the trend is intact but losing energy fast — the stock is coasting, not accelerating. T:82 + M:85 means full confirmation, the move has real thrust behind it. The pattern between scores is the signal.
+**Always read scores as a combination, not individually.** T:82 + M:45 means the trend is intact but losing energy fast — the asset is coasting, not accelerating. T:82 + M:85 means full confirmation, the move has real thrust behind it. The pattern between scores is the signal.
 
 When the signal is mixed, explain ranges and probabilities instead of certainty.
 

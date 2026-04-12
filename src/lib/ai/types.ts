@@ -15,11 +15,11 @@ export const COMMON_WORDS = new Set([
   "SOME", "THAN", "THEM", "THEN", "INTO", "JUST", "OVER", "SUCH", "TAKE",
   "YEAR", "ALSO", "BACK", "GOOD", "GIVE", "MOST", "ONLY", "TELL", "VERY",
   "WHEN", "WELL", "MUCH", "EVEN", "HERE", "THAT", "DOES", "RISK", "SELL",
-  "BUY", "ETF", "IPO", "CEO", "CFO", "GDP", "USD", "INR", "EUR",
+  "BUY", "TVL", "DEX", "CEO", "CFO", "GDP", "USD", "INR", "EUR", "ETF", "IPO",
   "ABOUT", "DOING", "GOING", "THINK", "WHICH", "THEIR", "COULD", "WOULD",
   "SHOULD", "WHERE", "THERE", "THESE", "THOSE", "AFTER", "BEFORE",
   // 2-3 letter words that are real tickers but almost always used as English words
-  "AI", "IT", "OR", "AT", "ON", "IS", "IF", "SO", "DO", "GO", "BE",
+  "AI", "IT", "OR", "AT", "ON", "IS", "IF", "SO", "DO", "GO", "BE", "PE", "PB",
   "AN", "AS", "BY", "WE", "NO", "MY", "US",
   // Financial vocabulary that triggers false ticker matches
   "GOLD", "BOND", "FUND", "RATE", "BANK", "TECH", "DATA", "DEBT",
@@ -67,9 +67,7 @@ export interface AssetEnrichment {
   sector?: string | null;
   financials?: Record<string, unknown> | null;
   topHoldings?: Record<string, unknown> | null;
-  etfLookthrough?: Record<string, unknown> | null;
-  mfLookthrough?: Record<string, unknown> | null;
-  commodityIntelligence?: Record<string, unknown> | null;
+  portfolioLookthrough?: Record<string, unknown> | null;
   cryptoIntelligence?: Record<string, unknown> | null;
   fundPerformanceHistory?: Record<string, unknown> | null;
   category?: string | null;

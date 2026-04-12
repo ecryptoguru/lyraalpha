@@ -1048,7 +1048,7 @@ test.describe("API Health Checks", () => {
     if (res.status() === 404) return;
     expect(res.ok()).toBeTruthy();
     const data = await res.json();
-    expect(data.type).toBe("ETF");
+    expect(data.type).toBe("CRYPTO");
     expect(data.technicalMetrics).toBeDefined();
     expect(data.technicalMetrics).toHaveProperty("expenseRatio");
   });
@@ -1060,7 +1060,7 @@ test.describe("API Health Checks", () => {
     const assets = Array.isArray(data) ? data : data.assets;
     if (assets) {
       for (const asset of assets) {
-        expect(asset.type).toBe("ETF");
+        expect(asset.type).toBe("CRYPTO");
       }
     }
   });
@@ -1070,7 +1070,7 @@ test.describe("API Health Checks", () => {
     if (res.status() === 404) return;
     expect(res.ok()).toBeTruthy();
     const data = await res.json();
-    expect(data.type).toBe("MUTUAL_FUND");
+    expect(data.type).toBe("CRYPTO");
   });
 });
 

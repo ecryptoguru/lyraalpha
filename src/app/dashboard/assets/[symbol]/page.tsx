@@ -27,7 +27,6 @@ import {
   AlertTriangle,
   ShieldCheck,
   Activity,
-  BarChart3,
   TrendingUp,
   TrendingDown,
   Waves,
@@ -437,19 +436,9 @@ export default function AssetPage({
                 <div className="px-2 py-0.5 rounded-md bg-muted/40 border border-border/30 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                   {analytics?.type || "ASSET"}
                 </div>
-                {!!(analytics?.type === "STOCK" && analyticsComputed.sector) && (
+                {!!(analyticsComputed.sector) && (
                   <div className="px-2 py-0.5 rounded-md bg-primary/5 border border-primary/15 text-[9px] font-bold text-primary/80 uppercase tracking-widest">
                     {analyticsComputed.sector}
-                  </div>
-                )}
-                {!!(analytics?.type === "MUTUAL_FUND" && analyticsComputed.fundHouse) && (
-                  <div className="px-2 py-0.5 rounded-md bg-sky-500/10 border border-sky-500/15 text-[9px] font-bold text-sky-700 dark:text-sky-400/80 uppercase tracking-widest max-w-[160px] truncate">
-                    {analyticsComputed.fundHouse}
-                  </div>
-                )}
-                {!!(analytics?.type === "ETF" && analyticsComputed.technicalMetrics?.category) && (
-                  <div className="px-2 py-0.5 rounded-md bg-sky-500/10 border border-sky-500/15 text-[9px] font-bold text-sky-700 dark:text-sky-400/80 uppercase tracking-widest max-w-[160px] truncate">
-                    {analyticsComputed.technicalMetrics.category as string}
                   </div>
                 )}
                 {grouping?.group && (
@@ -578,7 +567,7 @@ export default function AssetPage({
                   <TrendingUp className="h-3.5 w-3.5" />
                 </Link>
               </Button>
-              {(analyticsComputed.type === "STOCK" || analyticsComputed.type === "ETF") ? (
+              {true ? (
                 <Button asChild variant="outline" size="sm" className="gap-2">
                   <Link href="/dashboard/stress-test">
                     Stress test this theme
@@ -894,7 +883,7 @@ export default function AssetPage({
               <PriceChart
                 data={analyticsComputed.data as (OHLCV & { events?: AssetAnalyticsResponse["events"] })[]}
                 colors={{ textColor: "rgba(120,120,120,0.5)" }}
-                chartType={analyticsComputed.type === "MUTUAL_FUND" ? "AREA" : "CANDLESTICK"}
+                chartType="CANDLESTICK"
               />
 
               {/* Regime Overlay Indicator */}
@@ -908,9 +897,7 @@ export default function AssetPage({
           </div>
 
           {/* Company Profile — Stocks & ETFs with description */}
-          {(analyticsComputed.type === "STOCK" || analyticsComputed.type === "ETF") && (
-            analyticsComputed.description || analyticsComputed.industry
-          ) && (
+          {(analyticsComputed.description || analyticsComputed.industry) && (
             <CompanyProfile
               description={analyticsComputed.description}
               industry={analyticsComputed.industry}
@@ -923,7 +910,7 @@ export default function AssetPage({
           )}
 
           {/* Financial Highlights — Stocks only */}
-          {analyticsComputed.type === "STOCK" && analyticsComputed.financials && (
+          {false && analyticsComputed.financials && (
             <FinancialHighlights
               financials={analyticsComputed.financials as Record<string, unknown>}
               currencySymbol={currencySymbol}
@@ -942,162 +929,22 @@ export default function AssetPage({
             <div className="flex items-center gap-3 mb-6">
               <div className={cn(
                 "p-2 rounded-2xl border",
-                analyticsComputed.type === "COMMODITY"
-                  ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
-                  : analyticsComputed.type === "CRYPTO"
-                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
-                    : (analyticsComputed.type === "ETF" || analyticsComputed.type === "MUTUAL_FUND")
-                      ? "bg-sky-500/10 border-sky-500/20 text-sky-500"
-                      : "bg-primary/10 border-primary/20 text-primary"
+                "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
               )}>
-                {analyticsComputed.type === "COMMODITY" ? (
-                  <Activity className="h-5 w-5" />
-                ) : analyticsComputed.type === "CRYPTO" ? (
-                  <Zap className="h-5 w-5" />
-                ) : (analyticsComputed.type === "ETF" || analyticsComputed.type === "MUTUAL_FUND") ? (
-                  <BarChart3 className="h-5 w-5" />
-                ) : (
-                  <BarChart3 className="h-5 w-5" />
-                )}
+                <Zap className="h-5 w-5" />
               </div>
               <div className="space-y-0.5">
                 <h3 className="text-xl font-bold tracking-tighter uppercase">
-                  {analyticsComputed.type === "COMMODITY"
-                    ? "Commodity Data Matrix"
-                    : analyticsComputed.type === "CRYPTO"
-                      ? "Crypto Data Matrix"
-                      : analyticsComputed.type === "ETF"
-                        ? "ETF Data Matrix"
-                        : analyticsComputed.type === "MUTUAL_FUND"
-                          ? "Mutual Fund Data Matrix"
-                          : "Core market metrics"}
+                  Crypto Data Matrix
                 </h3>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
-                  {analyticsComputed.type === "COMMODITY"
-                    ? "Futures & Contracts Intelligence"
-                    : analyticsComputed.type === "CRYPTO"
-                      ? "Digital Asset Structural Metrics"
-                      : analyticsComputed.type === "ETF"
-                        ? "Fund Structure & Performance Metrics"
-                        : analyticsComputed.type === "MUTUAL_FUND"
-                          ? "Fund NAV & Category Intelligence"
-                          : "Valuation, ownership and market structure"}
+                  Digital Asset Structural Metrics
                 </p>
               </div>
             </div>
 
-            {/* Matrix Selection Logic — by asset type */}
-            {analyticsComputed.type === "MUTUAL_FUND" ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <TechnicalMetric
-                  label="NAV"
-                  value={analyticsComputed.technicalMetrics?.nav ? formatPrice(Number(analyticsComputed.technicalMetrics.nav), { symbol: currencySymbol, region: currencyRegion }) : "—"}
-                  tooltip="Net Asset Value per unit — the price at which you buy/sell one unit of the fund."
-                />
-                <TechnicalMetric
-                  label="Category"
-                  value={(analyticsComputed.technicalMetrics?.category as string) || "—"}
-                  tooltip="The fund's investment category classification (e.g., Large Cap, Flexi Cap, ELSS)."
-                />
-                <TechnicalMetric
-                  label="Fund House"
-                  value={(analyticsComputed.metadata?.fundHouse as string) || "—"}
-                  tooltip="The Asset Management Company (AMC) that manages this mutual fund scheme."
-                />
-                <TechnicalMetric
-                  label="Scheme Type"
-                  value={(analyticsComputed.metadata?.schemeType as string) || "—"}
-                  tooltip="Whether the fund is Open Ended (can buy/sell anytime) or Close Ended (fixed maturity)."
-                />
-                <TechnicalMetric
-                  label="1Y Return"
-                  value={performance?.returns?.["1Y"] != null ? `${performance.returns["1Y"] > 0 ? "+" : ""}${performance.returns["1Y"].toFixed(2)}%` : "—"}
-                  tooltip="Total return over the last 1 year, calculated from NAV history."
-                />
-                <TechnicalMetric
-                  label="6M Return"
-                  value={performance?.returns?.["6M"] != null ? `${performance.returns["6M"] > 0 ? "+" : ""}${performance.returns["6M"].toFixed(2)}%` : "—"}
-                  tooltip="Total return over the last 6 months."
-                />
-                <TechnicalMetric
-                  label="3M Return"
-                  value={performance?.returns?.["3M"] != null ? `${performance.returns["3M"] > 0 ? "+" : ""}${performance.returns["3M"].toFixed(2)}%` : "—"}
-                  tooltip="Total return over the last 3 months, calculated from NAV history."
-                />
-                <TechnicalMetric
-                  label="YTD Return"
-                  value={performance?.returns?.["YTD"] != null ? `${performance.returns["YTD"] > 0 ? "+" : ""}${performance.returns["YTD"].toFixed(2)}%` : "—"}
-                  tooltip="Year-to-date return from January 1st of the current year."
-                />
-              </div>
-            ) : analyticsComputed.type === "ETF" ? (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <TechnicalMetric
-                  label="Expense Ratio"
-                  value={analyticsComputed.technicalMetrics?.expenseRatio ? `${(Number(analyticsComputed.technicalMetrics.expenseRatio) * 100).toFixed(2)}%` : "—"}
-                  tooltip="Annual fee charged by the fund as a percentage of assets under management. Lower is better."
-                />
-                <TechnicalMetric
-                  label="AUM"
-                  value={analyticsComputed.technicalMetrics?.marketCap !== null && analyticsComputed.technicalMetrics?.marketCap !== undefined ? formatCompactNumber(analyticsComputed.technicalMetrics.marketCap, { symbol: currencySymbol, region: currencyRegion }) : "—"}
-                  tooltip="Total assets under management. Larger AUM indicates better liquidity and lower tracking error."
-                />
-                <TechnicalMetric
-                  label="Category"
-                  value={(analyticsComputed.technicalMetrics?.category as string) || "—"}
-                  tooltip="The ETF's investment category classification (e.g., Large Blend, Technology, Fixed Income)."
-                />
-                <TechnicalMetric
-                  label="NAV"
-                  value={analyticsComputed.technicalMetrics?.nav ? formatPrice(Number(analyticsComputed.technicalMetrics.nav), { symbol: currencySymbol, region: currencyRegion }) : "—"}
-                  tooltip="Net Asset Value per share. Compare to market price to assess premium/discount."
-                />
-                <TechnicalMetric
-                  label="Prem/Disc"
-                  value={analyticsComputed.technicalMetrics?.nav && analyticsComputed.price
-                    ? `${((analyticsComputed.price - Number(analyticsComputed.technicalMetrics.nav)) / Number(analyticsComputed.technicalMetrics.nav) * 100) >= 0 ? "+" : ""}${((analyticsComputed.price - Number(analyticsComputed.technicalMetrics.nav)) / Number(analyticsComputed.technicalMetrics.nav) * 100).toFixed(3)}%`
-                    : "—"}
-                  tooltip="Premium or discount to NAV. Positive means trading above fair value, negative below."
-                />
-                <TechnicalMetric
-                  label="Yield"
-                  value={analyticsComputed.technicalMetrics?.yield ? `${(Number(analyticsComputed.technicalMetrics.yield) * 100).toFixed(2)}%` : analyticsComputed.metadata?.dividendYield ? `${(Number(analyticsComputed.metadata.dividendYield) * 100).toFixed(2)}%` : "—"}
-                  tooltip="Annual distribution yield — dividends and interest paid as a percentage of price."
-                />
-                <TechnicalMetric
-                  label="P/E Ratio"
-                  value={analyticsComputed.technicalMetrics?.peRatio ? Number(analyticsComputed.technicalMetrics.peRatio).toFixed(2) : "—"}
-                  tooltip="Weighted average P/E of the ETF's underlying holdings. Indicates valuation level."
-                />
-                <TechnicalMetric
-                  label="Beta"
-                  value={analyticsComputed.metadata?.beta != null && Number(analyticsComputed.metadata.beta) !== 0 ? Number(analyticsComputed.metadata.beta).toFixed(2) : "—"}
-                  tooltip="Sensitivity to market movements. Beta > 1 means more volatile than the market, < 1 means less."
-                />
-                <TechnicalMetric
-                  label="52W Range"
-                  value={analyticsComputed.technicalMetrics?.fiftyTwoWeekHigh !== undefined && analyticsComputed.technicalMetrics?.fiftyTwoWeekHigh !== null
-                    ? `${formatPrice(analyticsComputed.technicalMetrics.fiftyTwoWeekLow || 0, { symbol: currencySymbol, region: currencyRegion, decimals: 1 })} - ${formatPrice(analyticsComputed.technicalMetrics.fiftyTwoWeekHigh || 0, { symbol: currencySymbol, region: currencyRegion, decimals: 1 })}`
-                    : "—"}
-                  tooltip="The lowest and highest price over the last 52 weeks."
-                />
-                <TechnicalMetric
-                  label="From 52W High"
-                  value={analyticsComputed.technicalMetrics?.distanceFrom52WHigh != null ? `${Number(analyticsComputed.technicalMetrics.distanceFrom52WHigh).toFixed(1)}%` : "—"}
-                  tooltip="How far the current price is from the 52-week high. Negative means below the high."
-                />
-                <TechnicalMetric
-                  label="1Y Return"
-                  value={performance?.returns?.["1Y"] != null ? `${performance.returns["1Y"] > 0 ? "+" : ""}${performance.returns["1Y"].toFixed(2)}%` : "—"}
-                  tooltip="Total return over the last 1 year including distributions."
-                />
-                <TechnicalMetric
-                  label="Avg Volume"
-                  value={analyticsComputed.technicalMetrics?.avgVolume ? formatCompactNumber(analyticsComputed.technicalMetrics.avgVolume.toString(), { isCurrency: false, region: currencyRegion }) : "—"}
-                  tooltip="Average daily trading volume. Higher volume means better liquidity and tighter spreads."
-                />
-              </div>
-            ) : analyticsComputed.type === "CRYPTO" ? (
+            {/* Matrix Selection Logic — crypto-only */}
+            {(
               <>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                   <TechnicalMetric label="Market Cap" value={analyticsComputed.technicalMetrics?.marketCap !== null && analyticsComputed.technicalMetrics?.marketCap !== undefined ? formatCompactNumber(analyticsComputed.technicalMetrics.marketCap, { symbol: currencySymbol, region: currencyRegion }) : "—"} tooltip="Total market value of all circulating coins. Key indicator of project size and adoption." />
@@ -1180,95 +1027,6 @@ export default function AssetPage({
                 )}
 
               </>
-            ) : analyticsComputed.type === "COMMODITY" ? (
-              <>
-                {/* IN commodities (GOLD-MCX / SILVER-MCX): show MCX-native INR metrics */}
-                {(analyticsComputed.symbol === "GOLD-MCX" || analyticsComputed.symbol === "SILVER-MCX") ? (() => {
-                  const meta = analyticsComputed.metadata as Record<string, unknown> | null;
-                  const isGoldMcx = analyticsComputed.symbol === "GOLD-MCX";
-                  const nativePrice = isGoldMcx ? Number(meta?.mcxPricePer10g) : Number(meta?.mcxPricePerKg);
-                  const chgPct = Number(meta?.dayChangePercent);
-                  const priorSettlInr = nativePrice > 0 && chgPct !== 0 ? nativePrice / (1 + chgPct / 100) : 0;
-                  // INR day range derived from USD spot × MCX/ask rate
-                  const mcxOz = Number(meta?.mcxPricePerOz);
-                  const askUsd = Number(meta?.spotAsk);
-                  const mcxRate = mcxOz > 0 && askUsd > 0 ? mcxOz / askUsd : 0;
-                  const OZ_TO_G = 31.1035;
-                  const dayHighInr = Number(meta?.dayHigh) > 0 && mcxRate > 0
-                    ? isGoldMcx ? (Number(meta?.dayHigh) * mcxRate / OZ_TO_G) * 10 : (Number(meta?.dayHigh) * mcxRate / OZ_TO_G) * 1000
-                    : 0;
-                  const dayLowInr = Number(meta?.dayLow) > 0 && mcxRate > 0
-                    ? isGoldMcx ? (Number(meta?.dayLow) * mcxRate / OZ_TO_G) * 10 : (Number(meta?.dayLow) * mcxRate / OZ_TO_G) * 1000
-                    : 0;
-                  const lotValue = isGoldMcx
-                    ? nativePrice > 0 ? `₹${(nativePrice * 10).toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "—"
-                    : nativePrice > 0 ? `₹${(nativePrice * 30).toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "—";
-                  const fmtInr = (v: number) => v > 0 ? `₹${v.toLocaleString("en-IN", { maximumFractionDigits: 0 })}` : "—";
-                  return (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                      <TechnicalMetric label={isGoldMcx ? "Spot (per 10g)" : "Spot (per kg)"} value={fmtInr(nativePrice)} tooltip={isGoldMcx ? "MCX Gold spot price in INR per 10 grams — the standard MCX quotation unit." : "MCX Silver spot price in INR per kg — the standard MCX quotation unit."} />
-                      <TechnicalMetric label="Prior Settlement" value={fmtInr(priorSettlInr)} tooltip="Estimated prior session closing price in INR, derived from current price and day change %." />
-                      <TechnicalMetric label="Day Range (INR)" value={dayHighInr > 0 && dayLowInr > 0 ? `${fmtInr(dayLowInr)} – ${fmtInr(dayHighInr)}` : "—"} tooltip={isGoldMcx ? "Intraday low–high range in INR per 10g, derived from USD spot range × MCX implied rate." : "Intraday low–high range in INR per kg, derived from USD spot range × MCX implied rate."} />
-                      <TechnicalMetric label={isGoldMcx ? "1 Lot (100g)" : "1 Lot (30kg)"} value={lotValue} tooltip={isGoldMcx ? "Value of one MCX Gold futures lot (100g) at current spot price." : "Value of one MCX Silver futures lot (30kg) at current spot price."} />
-                      <TechnicalMetric label="Exchange" value="MCX India" tooltip="Multi Commodity Exchange of India — the primary exchange for commodity futures in India." />
-                      <TechnicalMetric label={isGoldMcx ? "Quotation" : "Quotation"} value={isGoldMcx ? "₹ per 10g" : "₹ per kg"} tooltip="Standard MCX contract quotation unit." />
-                      <TechnicalMetric label="Linked COMEX" value={isGoldMcx ? "GC=F" : "SI=F"} tooltip="The corresponding USD-denominated COMEX futures contract that MCX tracks." />
-                      <TechnicalMetric label="1Y Return" value={performance?.returns?.["1Y"] != null ? `${performance.returns["1Y"] > 0 ? "+" : ""}${performance.returns["1Y"].toFixed(2)}%` : "—"} tooltip="Total return over the last 1 year." />
-                    </div>
-                  );
-                })() : (
-                  /* US commodities (GC=F, SI=F, etc.): original Yahoo-based metrics */
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                    <TechnicalMetric label="Open Interest" value={analyticsComputed.metadata?.openInterest ? formatCompactNumber(analyticsComputed.metadata.openInterest.toString(), { isCurrency: false, region: currencyRegion }) : "—"} tooltip="Total outstanding derivative contracts not yet settled. High OI indicates strong market participation." />
-                    <TechnicalMetric label="Volume" value={analyticsComputed.technicalMetrics?.volume ? formatCompactNumber(analyticsComputed.technicalMetrics.volume.toString(), { isCurrency: false, region: currencyRegion }) : "—"} tooltip="Total contracts traded during the current session." />
-                    <TechnicalMetric label="Avg Volume" value={analyticsComputed.technicalMetrics?.avgVolume ? formatCompactNumber(analyticsComputed.technicalMetrics.avgVolume.toString(), { isCurrency: false, region: currencyRegion }) : "—"} tooltip="Average daily trading volume. Compare with today's volume to gauge activity level." />
-                    <TechnicalMetric label="Vol vs Avg" value={analyticsComputed.technicalMetrics?.volume && analyticsComputed.technicalMetrics?.avgVolume && Number(analyticsComputed.technicalMetrics.avgVolume) > 0 ? `${((Number(analyticsComputed.technicalMetrics.volume) / Number(analyticsComputed.technicalMetrics.avgVolume)) * 100).toFixed(0)}%` : "—"} tooltip="Today's volume as a percentage of average. >100% means above-average activity." />
-                    <TechnicalMetric label="Day Range" value={(analyticsComputed.metadata?.dayHigh && analyticsComputed.metadata?.dayLow) ? `${formatPrice(analyticsComputed.metadata.dayLow as number, { symbol: currencySymbol, region: currencyRegion, decimals: 1 })} - ${formatPrice(analyticsComputed.metadata.dayHigh as number, { symbol: currencySymbol, region: currencyRegion, decimals: 1 })}` : "—"} tooltip="The low and high price for the current trading session." />
-                    <TechnicalMetric label="52W Range" value={analyticsComputed.technicalMetrics?.fiftyTwoWeekHigh !== undefined && analyticsComputed.technicalMetrics?.fiftyTwoWeekHigh !== null ? `${formatPrice(analyticsComputed.technicalMetrics.fiftyTwoWeekLow || 0, { symbol: currencySymbol, region: currencyRegion, decimals: 1 })} - ${formatPrice(analyticsComputed.technicalMetrics.fiftyTwoWeekHigh || 0, { symbol: currencySymbol, region: currencyRegion, decimals: 1 })}` : "—"} tooltip="The lowest and highest price over the last 52 weeks." />
-                    <TechnicalMetric label="Prior Settlement" value={formatPrice(analyticsComputed.price - analyticsComputed.change, { symbol: currencySymbol, region: currencyRegion })} tooltip="The closing price from the previous trading session." />
-                    <TechnicalMetric label="Exchange" value={(analyticsComputed.metadata?.exchangeName as string) || "—"} tooltip="The futures exchange where this contract is traded (e.g., COMEX, NYMEX)." />
-                    <TechnicalMetric label="Expiration" value={analyticsComputed.metadata?.expireDate ? new Date(analyticsComputed.metadata.expireDate as string).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "—"} tooltip="The date on which the futures contract expires." />
-                    <TechnicalMetric label="From 52W High" value={analyticsComputed.technicalMetrics?.distanceFrom52WHigh != null ? `${Number(analyticsComputed.technicalMetrics.distanceFrom52WHigh).toFixed(1)}%` : "—"} tooltip="Distance from 52-week high. Negative means below the high." />
-                    <TechnicalMetric label="1Y Return" value={performance?.returns?.["1Y"] != null ? `${performance.returns["1Y"] > 0 ? "+" : ""}${performance.returns["1Y"].toFixed(2)}%` : "—"} tooltip="Total return over the last 1 year." />
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <TechnicalMetric label="Market Cap" value={analyticsComputed.technicalMetrics?.marketCap && analyticsComputed.technicalMetrics.marketCap !== "0" ? formatCompactNumber(analyticsComputed.technicalMetrics.marketCap, { symbol: currencySymbol, region: currencyRegion }) : "—"} tooltip="Total market value of outstanding shares, indicating overall size and institutional footprint." />
-                <TechnicalMetric label="P/E (TTM)" value={analyticsComputed.technicalMetrics?.peRatio !== null && analyticsComputed.technicalMetrics?.peRatio !== undefined ? analyticsComputed.technicalMetrics.peRatio.toFixed(2) : "—"} tooltip={analyticsComputed.technicalMetrics?.industryPe ? `Industry P/E: ${Number(analyticsComputed.technicalMetrics.industryPe).toFixed(2)}x. ${Number(analyticsComputed.technicalMetrics.peRatio) < Number(analyticsComputed.technicalMetrics.industryPe) ? "Trading below industry average." : "Trading above industry average."}` : "Price-to-Earnings Ratio (Trailing Twelve Months)."} />
-                <TechnicalMetric label="Forward P/E" value={analyticsComputed.metadata?.forwardPe != null && Number(analyticsComputed.metadata.forwardPe) > 0 ? Number(analyticsComputed.metadata.forwardPe).toFixed(2) : "—"} tooltip="Forward P/E based on estimated future earnings. Lower than TTM P/E suggests expected earnings growth." />
-                {!!(analyticsComputed.technicalMetrics?.oneYearChange != null) && (
-                  <TechnicalMetric label="1Y Change" value={`${Number(analyticsComputed.technicalMetrics.oneYearChange) > 0 ? "+" : ""}${Number(analyticsComputed.technicalMetrics.oneYearChange).toFixed(1)}%`} tooltip="Price change over the last 52 weeks." />
-                )}
-                <TechnicalMetric label="EPS (TTM)" value={analyticsComputed.technicalMetrics?.eps && typeof analyticsComputed.technicalMetrics.eps === "number" ? formatPrice(analyticsComputed.technicalMetrics.eps, { symbol: currencySymbol, region: currencyRegion }) : "—"} tooltip="Earnings Per Share (Trailing Twelve Months). Key profitability indicator." />
-                <TechnicalMetric label="ROE" value={analyticsComputed.technicalMetrics?.roe !== null && analyticsComputed.technicalMetrics?.roe !== undefined ? `${(analyticsComputed.technicalMetrics.roe * 100).toFixed(2)}%` : "—"} tooltip="Return on Equity. >15% is generally considered strong capital efficiency." />
-                <TechnicalMetric label="Op. Margin" value={analyticsComputed.metadata?.operatingMargins != null ? `${(Number(analyticsComputed.metadata.operatingMargins) * 100).toFixed(2)}%` : "—"} tooltip="Operating profit as a percentage of revenue. Higher margins indicate pricing power and operational efficiency." />
-                <TechnicalMetric label="Price/Book" value={analyticsComputed.technicalMetrics?.priceToBook ? analyticsComputed.technicalMetrics.priceToBook.toFixed(2) : "—"} tooltip="Price-to-Book ratio. <1 may indicate undervaluation; >3 suggests growth premium." />
-                <TechnicalMetric label="52W Range" value={analyticsComputed.technicalMetrics?.fiftyTwoWeekLow && analyticsComputed.technicalMetrics?.fiftyTwoWeekHigh ? `${formatPrice(analyticsComputed.technicalMetrics.fiftyTwoWeekLow, { symbol: currencySymbol, region: currencyRegion, decimals: 0 })} - ${formatPrice(analyticsComputed.technicalMetrics.fiftyTwoWeekHigh, { symbol: currencySymbol, region: currencyRegion, decimals: 0 })}` : "—"} tooltip="52-week price range. Used to assess volatility and current price context." />
-                <TechnicalMetric label="From 52W High" value={analyticsComputed.technicalMetrics?.distanceFrom52WHigh != null ? `${Number(analyticsComputed.technicalMetrics.distanceFrom52WHigh).toFixed(1)}%` : "—"} tooltip="Distance from 52-week high. Negative means below the high." />
-                <TechnicalMetric label="Beta" value={analyticsComputed.metadata?.beta != null && Number(analyticsComputed.metadata.beta) !== 0 ? Number(analyticsComputed.metadata.beta).toFixed(2) : "—"} tooltip="Sensitivity to market movements. Beta > 1 = more volatile than market, < 1 = less volatile." />
-                <TechnicalMetric label="Div. Yield" value={analyticsComputed.technicalMetrics?.dividendYield != null && Number(analyticsComputed.technicalMetrics.dividendYield) > 0 ? `${(Number(analyticsComputed.technicalMetrics.dividendYield) * 100).toFixed(2)}%` : "—"} tooltip="Annual dividend as a percentage of share price." />
-                {!!(analyticsComputed.technicalMetrics?.shortRatio != null && Number(analyticsComputed.technicalMetrics.shortRatio) > 0) && (
-                  <TechnicalMetric label="Short Ratio" value={`${Number(analyticsComputed.technicalMetrics.shortRatio).toFixed(2)}`} tooltip="Days to cover short positions based on average volume. Higher values indicate more bearish sentiment." />
-                )}
-                {!!(analyticsComputed.metadata?.heldPercentInstitutions != null && Number(analyticsComputed.metadata.heldPercentInstitutions) > 0) && (
-                  <TechnicalMetric label="Inst. Ownership" value={`${(Number(analyticsComputed.metadata.heldPercentInstitutions) * 100).toFixed(1)}%`} tooltip="Percentage of shares held by institutional investors. High institutional ownership suggests professional confidence." />
-                )}
-                {!!(analyticsComputed.metadata?.revenueGrowth != null) && (
-                  <TechnicalMetric label="Rev. Growth" value={`${(Number(analyticsComputed.metadata.revenueGrowth) * 100).toFixed(1)}%`} tooltip="Year-over-year revenue growth rate." />
-                )}
-                {!!(analyticsComputed.technicalMetrics?.industryPe != null && Number(analyticsComputed.technicalMetrics.industryPe) > 0) && (
-                  <TechnicalMetric label="Sector P/E" value={Number(analyticsComputed.technicalMetrics.industryPe).toFixed(2)} tooltip="Average P/E ratio of the sector peers. Compare with stock P/E to assess relative valuation." />
-                )}
-                {!!(analyticsComputed.metadata?.deliveryPercent != null && Number(analyticsComputed.metadata.deliveryPercent) > 0) && (
-                  <TechnicalMetric label="Delivery %" value={`${Number(analyticsComputed.metadata.deliveryPercent).toFixed(1)}%`} tooltip="Percentage of traded volume that resulted in actual delivery. Higher delivery % indicates genuine buying interest." />
-                )}
-                {!!(analyticsComputed.metadata?.annualVolatility != null && Number(analyticsComputed.metadata.annualVolatility) > 0) && (
-                  <TechnicalMetric label="Ann. Volatility" value={`${Number(analyticsComputed.metadata.annualVolatility).toFixed(1)}%`} tooltip="Annualized price volatility. Higher values indicate greater price swings and risk." />
-                )}
-                <TechnicalMetric label="1Y Return" value={performance?.returns?.["1Y"] != null ? `${performance.returns["1Y"] > 0 ? "+" : ""}${performance.returns["1Y"].toFixed(2)}%` : "—"} tooltip="Total return over the last 1 year." />
-              </div>
             )}
           </div>
 
@@ -1296,9 +1054,8 @@ export default function AssetPage({
             />
           )}
 
-          {/* Scenario Analysis — Stocks & Equity ETFs only (assets with factor profiles) */}
-          {(analyticsComputed.type === "STOCK" || 
-            (analyticsComputed.type === "ETF" && factorData)) && (
+          {/* Scenario Analysis — assets with factor profiles */}
+          {factorData && (
             <div className="pt-4">
               <ScenarioAnalysisCard symbol={symbol} plan={plan} className="rounded-2xl" />
             </div>
@@ -1535,7 +1292,7 @@ export default function AssetPage({
                           ? "Idiosyncratic: Low correlation with peers. This asset moves on its own fundamentals, not macro trends."
                           : analytics.correlationRegime?.regime === "TRANSITIONING"
                           ? "Transitioning: Correlation structure is shifting. The asset may be decoupling from or converging with the broader market."
-                          : "Normal: Moderate correlation. Asset responds to both market-wide and stock-specific factors."}
+                          : "Normal: Moderate correlation. Asset responds to both market-wide and crypto-specific factors."}
                       </TooltipContent>
                     </Tooltip>
                     <Tooltip>
@@ -1624,7 +1381,7 @@ export default function AssetPage({
           )}
 
           {/* Enhanced Institutional Intelligence Section — Elite Only */}
-          {!!analyticsComputed && (analyticsComputed.type === "STOCK" || analyticsComputed.type === "ETF") && (
+          {!!analyticsComputed && (
             <EliteGate
               plan={plan}
               feature="Institutional Intelligence"
@@ -1748,7 +1505,7 @@ export default function AssetPage({
             trust: signals?.trust,
           },
           symbol,
-          assetType: analytics?.type || "STOCK",
+          assetType: analytics?.type || "CRYPTO",
           assetName: analyticsComputed.name,
         }}
         initialQuery={lyraSheetQuery?.query}

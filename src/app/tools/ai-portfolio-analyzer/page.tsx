@@ -28,12 +28,12 @@ export default function AiPortfolioAnalyzerPage() {
     <PublicToolPage
       eyebrow="AI portfolio intelligence"
       title="Find the one portfolio problem that matters before you rebalance."
-      description="Most portfolio tools show you everything. This one finds what's actually worth fixing — concentration risk, hidden overlap across ETFs and funds, fragility relative to current market regime, and what the right next move looks like."
+      description="Most portfolio tools show you everything. This one finds what's actually worth fixing — concentration risk, hidden overlap across positions, fragility relative to current market regime, and what the right next move looks like."
       systemLabel="Portfolio intelligence system"
       systemSummary="The portfolio engine computes a health score, fragility reading, correlation matrix, and Monte Carlo distribution before any AI speaks. Lyra then interprets the output — she doesn't invent the diagnosis. From there the system routes you into shock simulation for downside context or market narratives for regime framing."
       paths={[
         { label: "Get the health score", detail: "The engine scores your portfolio across concentration, diversification, volatility, and regime fit. One number that tells you where to look first." },
-        { label: "Find the real problem", detail: "Concentration, hidden overlap in ETF holdings, correlated drawdown risk, or narrative clustering — the system surfaces the most important issue, not a list of every metric." },
+        { label: "Find the real problem", detail: "Concentration, hidden overlap in holdings, correlated drawdown risk, or narrative clustering — the system surfaces the most important issue, not a list of every metric." },
         { label: "Move into scenario testing", detail: "From the health diagnostic, route into Shock Simulator for downside scenario testing, or into Lyra for a plain-English rebalance frame you can actually act on." },
       ]}
       examples={[
@@ -43,9 +43,9 @@ export default function AiPortfolioAnalyzerPage() {
           output: "The engine surfaces whether concentration is the primary issue, checks whether those names cluster around the same market narrative, and determines whether the right next step is a trim, a hedge, or a stress test. Lyra frames the rebalance path in plain language.",
         },
         {
-          label: "ETF overlap detection",
-          prompt: "I own QQQ, VGT, and ARKK. Am I actually diversified or just holding the same tech bet three times?",
-          output: "The system computes holding-level overlap across all three funds, surfaces the effective concentration, and flags whether the diversification is real or cosmetic. High overlap at the holding level even when tickers look different.",
+          label: "Concentration detection",
+          prompt: "I own BTC-USD, ETH-USD, and SOL-USD. Am I actually diversified or just holding the same L1 bet three times?",
+          output: "The system computes holding-level overlap across all three assets, surfaces the effective concentration, and flags whether the diversification is real or cosmetic. High overlap at the sector level even when tickers look different.",
         },
         {
           label: "Regime fragility",
@@ -63,7 +63,7 @@ export default function AiPortfolioAnalyzerPage() {
         },
         {
           label: "Analytical depth",
-          thisTool: "Health score, fragility index, concentration analysis, ETF overlap detection, Monte Carlo simulation, and regime fit — all computed before the AI interprets.",
+          thisTool: "Health score, fragility index, concentration analysis, portfolio overlap detection, Monte Carlo simulation, and regime fit — all computed before the AI interprets.",
           alternative: "Basic allocation pie charts and P&L. No engine underneath.",
         },
         {
@@ -84,11 +84,11 @@ export default function AiPortfolioAnalyzerPage() {
         },
         {
           question: "How does hidden overlap detection work?",
-          answer: "The system maps each ETF and mutual fund down to its underlying holdings, then computes actual overlap rather than surface-level ticker diversity. Two funds that look different can have 70%+ overlapping positions.",
+          answer: "The system maps each position down to its underlying holdings, then computes actual overlap rather than surface-level ticker diversity. Two positions that look different can have 70%+ overlapping exposure.",
         },
         {
           question: "What is the Shock Simulator?",
-          answer: "Shock Simulator runs historical stress scenarios on your portfolio — rate shocks, equity drawdowns, credit events, commodity spikes. It shows how your specific holdings would have behaved, not how a generic balanced portfolio would.",
+          answer: "Shock Simulator runs historical stress scenarios on your portfolio — rate shocks, crypto drawdowns, credit events, liquidity crises. It shows how your specific holdings would have behaved, not how a generic balanced portfolio would.",
         },
         {
           question: "Does this work for Indian portfolios?",
@@ -99,7 +99,7 @@ export default function AiPortfolioAnalyzerPage() {
           answer: "The most common paths are Shock Simulator for downside scenario context, Market Narratives for regime framing, or Lyra research when you need the diagnostic translated into a concrete rebalance plan.",
         },
       ]}
-      seoIntro="LyraAlpha's AI portfolio analyzer covers queries around portfolio risk analysis, concentration risk checker, ETF overlap detection, portfolio health scoring, and AI rebalance tools. The difference from a generic portfolio tracker is the analytical engine underneath — six deterministic signals computed first, Lyra interpreting second. This page covers both US and India investor use cases across equities, ETFs, mutual funds, and multi-asset portfolios."
+      seoIntro="LyraAlpha's AI portfolio analyzer covers queries around portfolio risk analysis, concentration risk checker, portfolio overlap detection, portfolio health scoring, and AI rebalance tools. The difference from a generic portfolio tracker is the analytical engine underneath — six deterministic signals computed first, Lyra interpreting second. This page covers crypto investor use cases across multi-asset portfolios."
       seoBullets={[
         "Use this when you already hold multiple positions and want to know the most important issue before making changes — not a list of every metric.",
         "The health score, fragility index, and Monte Carlo simulation are all computed by deterministic engines. Lyra interprets the output, she doesn't produce it.",

@@ -53,8 +53,8 @@ export async function compressKnowledgeContext(rawContext: string, maxTokens: nu
     }
     const compressed = chunks.join("");
     if (compressed && compressed.length < rawContext.length) {
-      // Calculate token savings using GPT-5.4 pricing
-      const rawTokens = Math.ceil(rawContext.length / 4); // Approximate 4 chars per token
+      // Calculate token savings using consistent char-to-token ratio (0.72 words/token, ~4 chars/word)
+      const rawTokens = Math.ceil(rawContext.length / 4);
       const compressedTokens = Math.ceil(compressed.length / 4);
       const tokensSaved = rawTokens - compressedTokens;
       

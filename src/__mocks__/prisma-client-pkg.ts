@@ -21,11 +21,7 @@ export const Prisma = {
 };
 
 export const AssetType = {
-  STOCK: "STOCK",
-  ETF: "ETF",
   CRYPTO: "CRYPTO",
-  COMMODITY: "COMMODITY",
-  MUTUAL_FUND: "MUTUAL_FUND",
 } as const;
 
 export const ScoreType = {

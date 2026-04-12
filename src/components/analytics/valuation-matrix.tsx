@@ -126,13 +126,12 @@ export function ValuationMatrix({
   revenueGrowth,
   freeCashflow,
   dividendYield,
-  assetType,
   industryPe,
   currencySymbol = "$",
   region = "US",
   className,
 }: ValuationMatrixProps) {
-  const isStock = assetType === "STOCK";
+  const isStock = false; // Platform is crypto-only
   const formatValue = createFormatValue(currencySymbol, region);
 
   const hasAnyVisibleMetrics = [

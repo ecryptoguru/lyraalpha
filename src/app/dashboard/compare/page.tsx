@@ -407,7 +407,7 @@ export default function ComparePage() {
                   onSelect={addSymbol}
                   region={region}
                   global={true}
-                  placeholder={region === "IN" ? "Search REL, Reliance, Gold" : "Search AAPL, Apple, Gold"}
+                  placeholder={region === "IN" ? "Search BTC, Bitcoin, ETH" : "Search BTC, Bitcoin, ETH"}
                   className="w-72 max-w-full"
                 />
               )}
@@ -752,7 +752,7 @@ export default function ComparePage() {
             <div className="flex flex-col items-center justify-center py-20 gap-4 text-muted-foreground">
               <GitCompare className="h-12 w-12 opacity-20" />
               <p className="text-sm font-bold">Add at least 2 symbols to compare</p>
-              <p className="text-xs opacity-60">Try AAPL, MSFT, NVDA or BTC-USD, ETH-USD</p>
+              <p className="text-xs opacity-60">Try BTC-USD, ETH-USD, SOL-USD or BNB-USD, XRP-USD</p>
             </div>
           )}
         </>

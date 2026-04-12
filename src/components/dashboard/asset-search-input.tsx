@@ -124,9 +124,9 @@ export function AssetSearchInput({
 
   const hasResults = data && data.assets?.length > 0;
 
-  const defaultPlaceholder = region === "IN" 
-    ? "Search REL, Reliance, Gold" 
-    : "Search AAPL, Apple, Gold";
+  const defaultPlaceholder = region === "IN"
+    ? "Search BTC, Bitcoin, ETH"
+    : "Search BTC, Bitcoin, ETH";
   const finalPlaceholder = placeholder || defaultPlaceholder;
 
   return (
@@ -212,7 +212,7 @@ export function AssetSearchInput({
                         </div>
                       </div>
                       <span className={cn("text-[10px] md:text-[8px] font-bold uppercase px-2 md:px-1.5 py-1 md:py-0.5 rounded-md md:rounded border shrink-0 ml-2", typeStyle)}>
-                        {asset.type === "MUTUAL_FUND" ? "MF" : asset.type}
+                        {asset.type === "CRYPTO" ? "CRYPTO" : asset.type}
                       </span>
                     </button>
                   );

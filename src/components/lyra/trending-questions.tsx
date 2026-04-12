@@ -35,7 +35,7 @@ const categoryIcons: Record<string, typeof TrendingUp> = {
 const FALLBACK_QUESTIONS: TrendingQuestion[] = [
   {
     id: "fallback-1",
-    question: "What are the key technical drivers for NVDA and the AI sector this week?",
+    question: "What are the key technical drivers for BTC-USD and the crypto market this week?",
     category: "markets",
     displayOrder: 1,
   },

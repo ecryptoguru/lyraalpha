@@ -24,14 +24,14 @@ describe("useWatchlist", () => {
             id: "1",
             userId: "u1",
             assetId: "a1",
-            symbol: "AAPL",
+            symbol: "BTC-USD",
             region: "US",
             note: null,
             createdAt: new Date().toISOString(),
             asset: {
-              symbol: "AAPL",
-              name: "Apple",
-              type: "STOCK",
+              symbol: "BTC-USD",
+              name: "Bitcoin",
+              type: "CRYPTO",
               price: 100,
               changePercent: 1,
               currency: "USD",
@@ -49,8 +49,8 @@ describe("useWatchlist", () => {
     } as never);
 
     const { result } = renderHook(() => useWatchlist());
-    expect(result.current.isWatchlisted("AAPL")).toBe(true);
-    expect(result.current.isWatchlisted("MSFT")).toBe(false);
+    expect(result.current.isWatchlisted("BTC-USD")).toBe(true);
+    expect(result.current.isWatchlisted("ETH-USD")).toBe(false);
   });
 
   it("toggleWatchlist removes when symbol already exists", async () => {
@@ -63,14 +63,14 @@ describe("useWatchlist", () => {
             id: "1",
             userId: "u1",
             assetId: "a1",
-            symbol: "AAPL",
+            symbol: "BTC-USD",
             region: "US",
             note: null,
             createdAt: new Date().toISOString(),
             asset: {
-              symbol: "AAPL",
-              name: "Apple",
-              type: "STOCK",
+              symbol: "BTC-USD",
+              name: "Bitcoin",
+              type: "CRYPTO",
               price: 100,
               changePercent: 1,
               currency: "USD",
@@ -92,7 +92,7 @@ describe("useWatchlist", () => {
     const { result } = renderHook(() => useWatchlist());
 
     await act(async () => {
-      const ok = await result.current.toggleWatchlist("AAPL", "US");
+      const ok = await result.current.toggleWatchlist("BTC-USD", "US");
       expect(ok).toBe(true);
     });
 

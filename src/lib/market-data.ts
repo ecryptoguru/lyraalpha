@@ -36,7 +36,7 @@ interface YahooQuote {
   forwardPE?: number;
   averageDailyVolume3Month?: number;
   trailingPegRatio?: number;
-  // Crypto/Commodity specific
+  // Crypto specific
   openInterest?: number;
   expireDate?: string;
   circulatingSupply?: number;

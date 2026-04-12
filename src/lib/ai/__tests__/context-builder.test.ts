@@ -8,12 +8,12 @@ describe("Context Builder — buildCompressedContext", () => {
   describe("asset identity", () => {
     it("includes symbol, name, and type", () => {
       const result = buildCompressedContext({
-        symbol: "AAPL",
-        assetName: "Apple Inc.",
-        assetType: "STOCK",
+        symbol: "BTC-USD",
+        assetName: "Bitcoin",
+        assetType: "CRYPTO",
         scores: {},
       });
-      expect(result).toContain("[ASSET] AAPL | Apple Inc. | Type: STOCK");
+      expect(result).toContain("[ASSET] BTC-USD | Bitcoin | Type: CRYPTO");
     });
 
     it("defaults to GLOBAL when no symbol", () => {
@@ -25,7 +25,7 @@ describe("Context Builder — buildCompressedContext", () => {
   describe("#5 — real-time price injection", () => {
     it("injects price data when provided", () => {
       const result = buildCompressedContext(
-        { symbol: "NVDA", assetName: "NVIDIA", assetType: "STOCK", scores: {} },
+        { symbol: "SOL-USD", assetName: "Solana", assetType: "CRYPTO", scores: {} },
         {
           priceData: {
             price: 142.3,
@@ -44,7 +44,7 @@ describe("Context Builder — buildCompressedContext", () => {
 
     it("shows negative change with minus sign", () => {
       const result = buildCompressedContext(
-        { symbol: "TSLA", scores: {} },
+        { symbol: "DOGE-USD", scores: {} },
         {
           priceData: {
             price: 250.0,
@@ -62,7 +62,7 @@ describe("Context Builder — buildCompressedContext", () => {
     it("shows update age in minutes when recent", () => {
       const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
       const result = buildCompressedContext(
-        { symbol: "AAPL", scores: {} },
+        { symbol: "BTC-USD", scores: {} },
         {
           priceData: {
             price: 180.5,
@@ -79,7 +79,7 @@ describe("Context Builder — buildCompressedContext", () => {
     it("shows update age in hours when old", () => {
       const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000);
       const result = buildCompressedContext(
-        { symbol: "AAPL", scores: {} },
+        { symbol: "BTC-USD", scores: {} },
         {
           priceData: {
             price: 180.5,
@@ -95,20 +95,20 @@ describe("Context Builder — buildCompressedContext", () => {
 
     it("omits [PRICE] when price is null", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", scores: {} },
+        { symbol: "BTC-USD", scores: {} },
         { priceData: { price: null, changePercent: null, fiftyTwoWeekHigh: null, fiftyTwoWeekLow: null, lastPriceUpdate: null } },
       );
       expect(result).not.toContain("[PRICE]");
     });
 
     it("omits [PRICE] when priceData is undefined", () => {
-      const result = buildCompressedContext({ symbol: "AAPL", scores: {} });
+      const result = buildCompressedContext({ symbol: "BTC-USD", scores: {} });
       expect(result).not.toContain("[PRICE]");
     });
 
     it("handles zero price change correctly", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", scores: {} },
+        { symbol: "BTC-USD", scores: {} },
         { priceData: { price: 100.0, changePercent: 0, fiftyTwoWeekHigh: null, fiftyTwoWeekLow: null, lastPriceUpdate: null } },
       );
       expect(result).toContain("Change:+0.00%");
@@ -118,7 +118,7 @@ describe("Context Builder — buildCompressedContext", () => {
   describe("engine scores", () => {
     it("includes non-null scores", () => {
       const result = buildCompressedContext({
-        symbol: "AAPL",
+        symbol: "BTC-USD",
         scores: { trend: 82, momentum: 71, volatility: 65 },
       });
       expect(result).toContain("[ENGINE_SCORES]");
@@ -129,7 +129,7 @@ describe("Context Builder — buildCompressedContext", () => {
 
     it("omits null scores", () => {
       const result = buildCompressedContext({
-        symbol: "AAPL",
+        symbol: "BTC-USD",
         scores: { trend: 82, momentum: null, volatility: undefined },
       });
       expect(result).toContain("Trend:82");
@@ -138,7 +138,7 @@ describe("Context Builder — buildCompressedContext", () => {
     });
 
     it("omits [ENGINE_SCORES] when all scores are null", () => {
-      const result = buildCompressedContext({ symbol: "AAPL", scores: {} });
+      const result = buildCompressedContext({ symbol: "BTC-USD", scores: {} });
       expect(result).not.toContain("[ENGINE_SCORES]");
     });
   });
@@ -146,7 +146,7 @@ describe("Context Builder — buildCompressedContext", () => {
   describe("regime data", () => {
     it("includes regime when present", () => {
       const result = buildCompressedContext({
-        symbol: "AAPL",
+        symbol: "BTC-USD",
         scores: {},
         regime: "RISK_ON",
       });
@@ -155,7 +155,7 @@ describe("Context Builder — buildCompressedContext", () => {
 
     it("includes enriched regime detail", () => {
       const result = buildCompressedContext({
-        symbol: "AAPL",
+        symbol: "BTC-USD",
         scores: {},
         regimeDetail: {
           regime: "STRONG_RISK_ON",
@@ -173,7 +173,7 @@ describe("Context Builder — buildCompressedContext", () => {
   describe("knowledge and memory context", () => {
     it("includes institutional knowledge", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", scores: {} },
+        { symbol: "BTC-USD", scores: {} },
         { knowledgeContext: "The DSE engine calculates six independent scores." },
       );
       expect(result).toContain("[INSTITUTIONAL_KNOWLEDGE]");
@@ -182,16 +182,16 @@ describe("Context Builder — buildCompressedContext", () => {
 
     it("includes user memory", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", scores: {} },
-        { memoryContext: "User previously asked about NVDA earnings." },
+        { symbol: "BTC-USD", scores: {} },
+        { memoryContext: "User previously asked about SOL-USD momentum." },
       );
       expect(result).toContain("[USER_MEMORY]");
-      expect(result).toContain("User previously asked about NVDA earnings.");
+      expect(result).toContain("User previously asked about SOL-USD momentum.");
     });
 
-    it("includes cross-sector correlation", () => {
+    it("includes cross-chain correlation", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", scores: {} },
+        { symbol: "BTC-USD", scores: {} },
         { crossSectorContext: "[CROSS_SECTOR_CORRELATION]: Regime: Convergent" },
       );
       expect(result).toContain("[CROSS_SECTOR_CORRELATION]");
@@ -199,32 +199,32 @@ describe("Context Builder — buildCompressedContext", () => {
   });
 
   describe("available assets — smart subset", () => {
-    it("includes benchmark symbols that exist in universe", () => {
+    it("includes top crypto symbols that exist in universe", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", scores: {} },
-        { availableAssets: ["AAPL", "MSFT", "GOOGL", "SPY", "BTC-USD"] },
+        { symbol: "BTC-USD", scores: {} },
+        { availableAssets: ["BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "XRP-USD"] },
       );
       expect(result).toContain("[AVAILABLE_ASSETS]");
-      expect(result).toContain("AAPL");
-      expect(result).toContain("SPY");
+      expect(result).toContain("BTC-USD");
+      expect(result).toContain("ETH-USD");
     });
 
     it("includes mentioned symbols", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", scores: {} },
+        { symbol: "BTC-USD", scores: {} },
         {
-          availableAssets: ["AAPL", "TSLA", "SPY"],
-          mentionedSymbols: ["TSLA"],
+          availableAssets: ["BTC-USD", "DOGE-USD", "ETH-USD"],
+          mentionedSymbols: ["DOGE-USD"],
         },
       );
-      expect(result).toContain("TSLA");
+      expect(result).toContain("DOGE-USD");
     });
   });
 
   describe("region", () => {
     it("shows India for IN region", () => {
       const result = buildCompressedContext({
-        symbol: "RELIANCE.NS",
+        symbol: "BTC-USD",
         scores: {},
         region: "IN",
       });
@@ -233,7 +233,7 @@ describe("Context Builder — buildCompressedContext", () => {
 
     it("shows United States for US region", () => {
       const result = buildCompressedContext({
-        symbol: "AAPL",
+        symbol: "BTC-USD",
         scores: {},
         region: "US",
       });
@@ -245,9 +245,9 @@ describe("Context Builder — buildCompressedContext", () => {
     it("produces sections in correct order: ASSET > PRICE > SCORES > REGIME > KNOWLEDGE > MEMORY > ASSETS", () => {
       const result = buildCompressedContext(
         {
-          symbol: "NVDA",
-          assetName: "NVIDIA",
-          assetType: "STOCK",
+          symbol: "SOL-USD",
+          assetName: "Solana",
+          assetType: "CRYPTO",
           scores: { trend: 82 },
           regime: "RISK_ON",
         },
@@ -255,7 +255,7 @@ describe("Context Builder — buildCompressedContext", () => {
           priceData: { price: 142.3, changePercent: 2.15, fiftyTwoWeekHigh: null, fiftyTwoWeekLow: null, lastPriceUpdate: null },
           knowledgeContext: "KB content",
           memoryContext: "Memory content",
-          availableAssets: ["NVDA", "SPY"],
+          availableAssets: ["SOL-USD", "ETH-USD"],
         },
       );
 
@@ -279,7 +279,7 @@ describe("Context Builder — buildCompressedContext", () => {
   describe("currency symbol — INR vs USD", () => {
     it("uses ₹ for INR assets", () => {
       const result = buildCompressedContext(
-        { symbol: "RELIANCE.NS", assetName: "Reliance", assetType: "STOCK", scores: {} },
+        { symbol: "XRP-USD", assetName: "XRP", assetType: "CRYPTO", scores: {} },
         {
           priceData: { price: 2450.50, changePercent: 1.2, fiftyTwoWeekHigh: 2800, fiftyTwoWeekLow: 2100, lastPriceUpdate: null },
           assetEnrichment: { currency: "INR" },
@@ -292,7 +292,7 @@ describe("Context Builder — buildCompressedContext", () => {
 
     it("uses $ for USD assets", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", assetName: "Apple", assetType: "STOCK", scores: {} },
+        { symbol: "BTC-USD", assetName: "Bitcoin", assetType: "CRYPTO", scores: {} },
         {
           priceData: { price: 180.50, changePercent: -0.5, fiftyTwoWeekHigh: 200, fiftyTwoWeekLow: 140, lastPriceUpdate: null },
           assetEnrichment: { currency: "USD" },
@@ -315,7 +315,7 @@ describe("Context Builder — buildCompressedContext", () => {
 
     it("defaults to $ when assetEnrichment is undefined", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", scores: {} },
+        { symbol: "BTC-USD", scores: {} },
         {
           priceData: { price: 180, changePercent: 0, fiftyTwoWeekHigh: null, fiftyTwoWeekLow: null, lastPriceUpdate: null },
         },
@@ -324,165 +324,192 @@ describe("Context Builder — buildCompressedContext", () => {
     });
   });
 
-  describe("company profile — stocks and ETFs", () => {
-    it("renders [COMPANY_PROFILE] with industry and sector", () => {
+  describe("crypto profile — [CRYPTO_ABOUT] and [CRYPTO_MARKET]", () => {
+    it("renders [CRYPTO_ABOUT] with truncated description", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", assetType: "STOCK", scores: {} },
+        { symbol: "ETH-USD", assetType: "CRYPTO", scores: {} },
         {
           tier: "COMPLEX",
           assetEnrichment: {
-            type: "STOCK",
-            industry: "Consumer Electronics",
-            sector: "Technology",
-            description: "Apple Inc. designs smartphones.",
+            type: "CRYPTO",
+            description: "Ethereum is a decentralized blockchain for smart contracts and dApps.",
+            metadata: { coingecko: {} },
           },
         },
       );
-      expect(result).toContain("[COMPANY_PROFILE]");
-      expect(result).toContain("Industry:Consumer Electronics");
-      expect(result).toContain("Sector:Technology");
-      expect(result).toContain("About:Apple Inc. designs smartphones.");
+      expect(result).toContain("[CRYPTO_ABOUT]");
+      expect(result).toContain("Ethereum is a decentralized blockchain for smart contracts and dApps.");
     });
 
-    it("omits sector when same as industry", () => {
+    it("renders [CRYPTO_MARKET] with supply and market structure", () => {
       const result = buildCompressedContext(
-        { symbol: "XLE", assetType: "ETF", scores: {} },
+        { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
         {
           tier: "COMPLEX",
           assetEnrichment: {
-            type: "ETF",
-            industry: "Energy",
-            sector: "Energy",
+            type: "CRYPTO",
+            metadata: {
+              circulatingSupply: 19_000_000,
+              maxSupply: 21_000_000,
+              volume24Hr: 30_000_000_000,
+              coingecko: {
+                fullyDilutedValuation: 2_100_000_000_000,
+                marketCapRank: 1,
+              },
+            },
           },
         },
       );
-      expect(result).toContain("Industry:Energy");
-      expect(result).not.toContain("Sector:Energy");
+      expect(result).toContain("[CRYPTO_MARKET]");
+      expect(result).toContain("CircSupply:");
+      expect(result).toContain("MaxSupply:");
+      expect(result).toContain("Mined:");
+      expect(result).toContain("Rank:#1");
     });
 
     it("truncates long descriptions to 80 chars", () => {
       const longDesc = "A".repeat(300);
       const result = buildCompressedContext(
-        { symbol: "AAPL", assetType: "STOCK", scores: {} },
+        { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
         {
           tier: "COMPLEX",
-          assetEnrichment: { type: "STOCK", description: longDesc, industry: "Tech" },
+          assetEnrichment: { type: "CRYPTO", description: longDesc, metadata: { coingecko: {} } },
         },
       );
-      expect(result).toContain("About:" + "A".repeat(80) + "...");
+      expect(result).toContain("[CRYPTO_ABOUT] " + "A".repeat(80) + "...");
     });
 
-    it("does NOT render [COMPANY_PROFILE] for MUTUAL_FUND", () => {
+    it("omits [CRYPTO_ABOUT] when no description", () => {
       const result = buildCompressedContext(
-        { symbol: "MF-119551", assetType: "MUTUAL_FUND", scores: {} },
+        { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
         {
-          assetEnrichment: { type: "MUTUAL_FUND", industry: "Equity", description: "A fund" },
+          tier: "COMPLEX",
+          assetEnrichment: { type: "CRYPTO", metadata: { coingecko: {} } },
         },
       );
-      expect(result).not.toContain("[COMPANY_PROFILE]");
-    });
-  });
-
-  describe("mutual fund profile", () => {
-    it("renders [MF_PROFILE] with fundHouse, category, NAV", () => {
-      const result = buildCompressedContext(
-        { symbol: "MF-119551", assetType: "MUTUAL_FUND", scores: {} },
-        {
-          assetEnrichment: {
-            type: "MUTUAL_FUND",
-            fundHouse: "Axis Mutual Fund",
-            category: "Equity - Large Cap",
-            nav: 110.43,
-          },
-        },
-      );
-      expect(result).toContain("[MF_PROFILE]");
-      expect(result).toContain("FundHouse:Axis Mutual Fund");
-      expect(result).toContain("Category:Equity - Large Cap");
-      expect(result).toContain("NAV:₹110.43");
-    });
-
-    it("does NOT render [MF_PROFILE] for STOCK", () => {
-      const result = buildCompressedContext(
-        { symbol: "AAPL", assetType: "STOCK", scores: {} },
-        {
-          assetEnrichment: { type: "STOCK", fundHouse: "N/A", category: "N/A", nav: 100 },
-        },
-      );
-      expect(result).not.toContain("[MF_PROFILE]");
-    });
-
-    it("omits [MF_PROFILE] when all MF fields are null", () => {
-      const result = buildCompressedContext(
-        { symbol: "MF-000", assetType: "MUTUAL_FUND", scores: {} },
-        {
-          assetEnrichment: { type: "MUTUAL_FUND", fundHouse: null, category: null, nav: null },
-        },
-      );
-      expect(result).not.toContain("[MF_PROFILE]");
+      expect(result).not.toContain("[CRYPTO_ABOUT]");
     });
   });
 
-  describe("fund performance returns — ETF and MF", () => {
-    it("renders [ETF_FUND_RETURNS] for ETF", () => {
+  describe("crypto intelligence — [CRYPTO_TVL] and [CRYPTO_ENHANCED_TRUST]", () => {
+    it("renders [CRYPTO_TVL] with TVL, category, and type", () => {
       const result = buildCompressedContext(
-        { symbol: "SPY", assetType: "ETF", scores: {} },
+        { symbol: "AAVE-USD", assetType: "CRYPTO", scores: {} },
         {
+          tier: "COMPLEX",
           assetEnrichment: {
-            type: "ETF",
-            fundPerformanceHistory: { ytd: 8.5, oneYear: 15.2, threeYear: 10.1, fiveYear: 12.3 },
+            type: "CRYPTO",
+            cryptoIntelligence: {
+              tvlData: { tvl: 12_000_000_000, category: "Lending", protocolCount: 3, isChain: false },
+            },
           },
         },
       );
-      expect(result).toContain("[ETF_FUND_RETURNS]");
-      expect(result).toContain("YTD:+8.5%");
+      expect(result).toContain("[CRYPTO_TVL]");
+      expect(result).toContain("TVL:$12.00B");
+      expect(result).toContain("Cat:Lending");
+      expect(result).toContain("Type:Protocol");
+    });
+
+    it("renders [CRYPTO_TVL] as Type:Chain when isChain is true", () => {
+      const result = buildCompressedContext(
+        { symbol: "ETH-USD", assetType: "CRYPTO", scores: {} },
+        {
+          tier: "COMPLEX",
+          assetEnrichment: {
+            type: "CRYPTO",
+            cryptoIntelligence: {
+              tvlData: { tvl: 65_000_000_000, protocolCount: 150, isChain: true },
+            },
+          },
+        },
+      );
+      expect(result).toContain("[CRYPTO_TVL]");
+      expect(result).toContain("Type:Chain");
+    });
+
+    it("omits [CRYPTO_TVL] when TVL is null", () => {
+      const result = buildCompressedContext(
+        { symbol: "DOGE-USD", assetType: "CRYPTO", scores: {} },
+        {
+          tier: "COMPLEX",
+          assetEnrichment: {
+            type: "CRYPTO",
+            cryptoIntelligence: {
+              tvlData: { tvl: null },
+            },
+          },
+        },
+      );
+      expect(result).not.toContain("[CRYPTO_TVL]");
+    });
+  });
+
+  describe("performance data — [PERFORMANCE] and [52W_POSITION]", () => {
+    it("renders [PERFORMANCE] with returns", () => {
+      const result = buildCompressedContext(
+        { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
+        {
+          tier: "COMPLEX",
+          assetEnrichment: {
+            type: "CRYPTO",
+            performanceData: {
+              returns: { "7D": 3.2, "30D": 8.5, "1Y": 15.2 },
+            },
+          },
+        },
+      );
+      expect(result).toContain("[PERFORMANCE]");
+      expect(result).toContain("7D:+3.2%");
+      expect(result).toContain("30D:+8.5%");
       expect(result).toContain("1Y:+15.2%");
-      expect(result).toContain("3Y:+10.1%");
-      expect(result).toContain("5Y:+12.3%");
     });
 
-    it("renders [MF_RETURNS] for MUTUAL_FUND", () => {
+    it("renders [52W_POSITION] with range data", () => {
       const result = buildCompressedContext(
-        { symbol: "MF-119551", assetType: "MUTUAL_FUND", scores: {} },
+        { symbol: "ETH-USD", assetType: "CRYPTO", scores: {} },
         {
+          tier: "COMPLEX",
           assetEnrichment: {
-            type: "MUTUAL_FUND",
-            fundPerformanceHistory: { ytd: 0.19, oneYear: 6.77 },
+            type: "CRYPTO",
+            performanceData: {
+              range52W: { currentPosition: 72, distanceFromHigh: -28, distanceFromLow: 150 },
+            },
           },
         },
       );
-      expect(result).toContain("[MF_RETURNS]");
-      expect(result).toContain("YTD:+0.2%");
-      expect(result).toContain("1Y:+6.8%");
-      expect(result).not.toContain("[ETF_FUND_RETURNS]");
+      expect(result).toContain("[52W_POSITION]");
+      expect(result).toContain("Position:72%");
+      expect(result).toContain("FromHigh:-28.0%");
     });
 
     it("handles negative returns", () => {
       const result = buildCompressedContext(
-        { symbol: "MF-000", assetType: "MUTUAL_FUND", scores: {} },
+        { symbol: "SOL-USD", assetType: "CRYPTO", scores: {} },
         {
+          tier: "COMPLEX",
           assetEnrichment: {
-            type: "MUTUAL_FUND",
-            fundPerformanceHistory: { ytd: -2.5, oneYear: -5.1 },
+            type: "CRYPTO",
+            performanceData: {
+              returns: { "7D": -2.5, "30D": -5.1 },
+            },
           },
         },
       );
-      expect(result).toContain("YTD:-2.5%");
-      expect(result).toContain("1Y:-5.1%");
+      expect(result).toContain("7D:-2.5%");
+      expect(result).toContain("30D:-5.1%");
     });
 
-    it("does NOT render fund returns for STOCK", () => {
+    it("omits performance when no performanceData", () => {
       const result = buildCompressedContext(
-        { symbol: "AAPL", assetType: "STOCK", scores: {} },
+        { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
         {
-          assetEnrichment: {
-            type: "STOCK",
-            fundPerformanceHistory: { ytd: 10 },
-          },
+          tier: "COMPLEX",
+          assetEnrichment: { type: "CRYPTO" },
         },
       );
-      expect(result).not.toContain("[ETF_FUND_RETURNS]");
-      expect(result).not.toContain("[MF_RETURNS]");
+      expect(result).not.toContain("[PERFORMANCE]");
+      expect(result).not.toContain("[52W_POSITION]");
     });
   });
 });
@@ -490,19 +517,19 @@ describe("Context Builder — buildCompressedContext", () => {
 describe("extractMentionedSymbols", () => {
   it("extracts uppercase ticker-like symbols", () => {
     const symbols = extractMentionedSymbols([
-      { role: "user", content: "How is AAPL doing compared to MSFT?" },
+      { role: "user", content: "How is BTC-USD doing compared to ETH-USD?" },
     ]);
-    expect(symbols).toContain("AAPL");
-    expect(symbols).toContain("MSFT");
+    expect(symbols).toContain("BTC-USD");
+    expect(symbols).toContain("ETH-USD");
   });
 
-  it("extracts .NS suffixed symbols including long Indian tickers", () => {
+  it("extracts -USD suffixed crypto symbols", () => {
     const symbols = extractMentionedSymbols([
-      { role: "user", content: "Tell me about TCS.NS, INFY.NS and RELIANCE.NS" },
+      { role: "user", content: "Tell me about BTC-USD, ETH-USD and SOL-USD" },
     ]);
-    expect(symbols).toContain("TCS.NS");
-    expect(symbols).toContain("INFY.NS");
-    expect(symbols).toContain("RELIANCE.NS");
+    expect(symbols).toContain("BTC-USD");
+    expect(symbols).toContain("ETH-USD");
+    expect(symbols).toContain("SOL-USD");
   });
 
   it("extracts crypto symbols with -USD suffix", () => {
@@ -534,17 +561,17 @@ describe("extractMentionedSymbols", () => {
 
   it("deduplicates symbols across messages", () => {
     const symbols = extractMentionedSymbols([
-      { role: "user", content: "What about AAPL?" },
-      { role: "assistant", content: "AAPL is doing well." },
-      { role: "user", content: "Tell me more about AAPL" },
+      { role: "user", content: "What about BTC-USD?" },
+      { role: "assistant", content: "BTC-USD is doing well." },
+      { role: "user", content: "Tell me more about BTC-USD" },
     ]);
-    const aaplCount = symbols.filter((s) => s === "AAPL").length;
+    const aaplCount = symbols.filter((s) => s === "BTC-USD").length;
     expect(aaplCount).toBe(1);
   });
 
   it("does not extract lowercase asset names as ticker symbols directly", () => {
     const symbols = extractMentionedSymbols([
-      { role: "user", content: "nvidia" },
+      { role: "user", content: "solana" },
     ]);
     expect(symbols).toEqual([]);
   });

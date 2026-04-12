@@ -19,11 +19,7 @@ import {
 } from "recharts";
 
 const TYPE_COLORS: Record<string, string> = {
-  STOCK: "#3b82f6",
-  ETF: "#22c55e",
   CRYPTO: "#f59e0b",
-  MUTUAL_FUND: "#0ea5e9",
-  COMMODITY: "#ef4444",
 };
 
 const REGION_COLORS: Record<string, string> = {

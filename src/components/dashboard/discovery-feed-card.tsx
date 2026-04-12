@@ -143,7 +143,7 @@ const ARCHETYPE_MODULE_MAP: Record<string, { slug: string; label: string }> = {
   peer_divergence: { slug: "peer-divergence", label: "Peer Divergence" },
   regime_sensitive: { slug: "what-is-market-regime", label: "Market Regimes" },
   sentiment_shift: { slug: "what-is-sentiment", label: "Sentiment" },
-  structural_anomaly: { slug: "etf-lookthrough-basics", label: "Structural Analysis" },
+  structural_anomaly: { slug: "concentration-risk", label: "Structural Analysis" },
   cross_asset_pattern: { slug: "cross-asset-correlation", label: "Cross-Asset Correlation" },
 };
 
@@ -169,7 +169,7 @@ const ARCHETYPE_CONTEXT: Record<string, { whySurfaced: string; whatChanged: stri
     whatItDoesNotMean: "Sentiment shifts reflect what people are saying, not what will happen. High sentiment can precede both rallies and reversals.",
   },
   structural_anomaly: {
-    whySurfaced: "Something changed in the asset's underlying structure — ETF concentration, MF style drift or crypto on-chain metrics shifted.",
+    whySurfaced: "Something changed in the asset's underlying structure — concentration, overlap or crypto on-chain metrics shifted.",
     whatChanged: "A structural metric (holdings concentration, factor exposure, on-chain activity) moved beyond its normal range.",
     whatItDoesNotMean: "Structural changes are descriptive observations about composition, not judgments about quality or future performance.",
   },

@@ -1,12 +1,12 @@
 import { OHLCV } from "./types";
-import { cleanHistory } from "./utils";
+import { cleanHistory, dailyReturns, stdDev } from "./utils";
 
 export interface FactorProfile {
   value: number; // Value factor score (0-100)
   growth: number; // Growth factor score (0-100)
   momentum: number; // Momentum factor score (0-100)
   volatility: number; // Volatility factor score (0-100)
-  lowVol?: number; // Low volatility factor (inverse of volatility, for scenario engine compatibility)
+  lowVol: number; // Low volatility factor (inverse of volatility, for scenario engine compatibility)
 }
 
 export function calculateFactorProfile(
@@ -16,11 +16,10 @@ export function calculateFactorProfile(
     peRatio?: number | null;
     industryPe?: number | null;
     roe?: number | null;
-    marketCap?: string | null;
     oneYearChange?: number | null;
   },
 ): FactorProfile {
-  const isCrypto = symbol.includes("-USD") || symbol.includes("-USDT");
+  const isCrypto = /^[A-Z]+-USD[T]?$/.test(symbol);
   const cleanData = cleanHistory(history);
   
   // 1. Value Factor (Lower PE relative to industry, Higher ROE)
@@ -33,7 +32,7 @@ export function calculateFactorProfile(
       valueScore = (valueScore + Math.min(100, financials.roe * 2)) / 2;
     }
   } else if (cleanData.length >= 20) {
-    // Crypto/commodity value: how far from 52-week high (higher = more value)
+    // Crypto value: how far from 52-week high (higher = more value)
     const last = cleanData[cleanData.length - 1].close;
     const prices = cleanData.slice(-252).map(h => h.close);
     const high52w = Math.max(...prices);
@@ -42,19 +41,21 @@ export function calculateFactorProfile(
     if (range > 0) {
       const positionInRange = (last - low52w) / range;
       // Invert: closer to low = higher "value"
-      valueScore = Math.round((1 - positionInRange) * 70 + 15);
+      valueScore = (1 - positionInRange) * 70 + 15;
     }
   }
 
   // 2. Growth Factor (Price velocity and fundamental proxy)
   let growthScore = 50;
   if (cleanData.length >= 20) {
-    // Calculate actual price growth over available period
+    // Calculate annualized price growth so that history length doesn't conflate with growth rate
     const startPrice = cleanData[0].close;
     const endPrice = cleanData[cleanData.length - 1].close;
     const totalGrowth = (endPrice - startPrice) / startPrice; // growth as decimal
-    // More lenient: 50 base, +10 for each 10% growth
-    growthScore = Math.min(95, Math.max(10, 50 + totalGrowth * 100));
+    const tradingDays = cleanData.length - 1;
+    const annualizedGrowth = totalGrowth * (252 / tradingDays); // normalize to 1-year equivalent
+    // More lenient: 50 base, +10 for each 10% annualized growth
+    growthScore = Math.min(95, Math.max(10, 50 + annualizedGrowth * 100));
   } else if (financials.oneYearChange) {
     growthScore = Math.min(95, Math.max(10, 50 + financials.oneYearChange));
   }
@@ -81,23 +82,15 @@ export function calculateFactorProfile(
   // 4. Volatility Factor (Inverse of realized volatility)
   let volScore = 50;
   if (cleanData.length > 20) {
-    const returns = [];
-    for (let i = 1; i < cleanData.length; i++) {
-      returns.push(
-        (cleanData[i].close - cleanData[i - 1].close) / cleanData[i - 1].close,
-      );
-    }
-    const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
-    const variance =
-      returns.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / returns.length;
-    const stdDev = Math.sqrt(variance) * Math.sqrt(252); // Annualized
+    const returns = dailyReturns(cleanData.map(h => h.close));
+    const annualizedVol = stdDev(returns) * Math.sqrt(252); // Annualized
 
     // Normalize: Higher score = LOWER volatility
     // Refined scaling: More conservative for outliers. 
-    // If stdDev = 0.2 (20% vol, typical blue chip), score = 100 - 12 = 88.
-    // If stdDev = 1.0 (100% vol, high risk), score = 100 - 60 = 40.
-    // If stdDev = 2.0 (200% vol, extreme noise), score = 100 - 120 = -20 -> clamped to 10.
-    volScore = Math.min(95, Math.max(10, 100 - stdDev * 60));
+    // If annualizedVol = 0.2 (20% vol, typical blue chip), score = 100 - 12 = 88.
+    // If annualizedVol = 1.0 (100% vol, high risk), score = 100 - 60 = 40.
+    // If annualizedVol = 2.0 (200% vol, extreme noise), score = 100 - 120 = -20 -> clamped to 10.
+    volScore = Math.min(95, Math.max(10, 100 - annualizedVol * 60));
   }
 
   const normalizedVolScore = Math.round(Math.max(10, Math.min(95, volScore)));

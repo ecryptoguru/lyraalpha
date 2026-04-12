@@ -9,11 +9,11 @@ describe("Behavioral Intelligence Layer", () => {
   describe("analyzeBehavioralPatterns", () => {
     it("should detect concentration risk", () => {
       const queries = [
-        { assetSymbol: "AAPL", assetType: "STOCK", timestamp: new Date() },
-        { assetSymbol: "AAPL", assetType: "STOCK", timestamp: new Date() },
-        { assetSymbol: "AAPL", assetType: "STOCK", timestamp: new Date() },
-        { assetSymbol: "AAPL", assetType: "STOCK", timestamp: new Date() },
-        { assetSymbol: "MSFT", assetType: "STOCK", timestamp: new Date() },
+        { assetSymbol: "BTC-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "BTC-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "BTC-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "BTC-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "ETH-USD", assetType: "CRYPTO", timestamp: new Date() },
       ];
 
       const patterns = analyzeBehavioralPatterns(queries);
@@ -21,16 +21,16 @@ describe("Behavioral Intelligence Layer", () => {
 
       expect(concentrationPattern).toBeDefined();
       expect(concentrationPattern?.severity).toBe("high");
-      expect(concentrationPattern?.affectedAssets).toContain("AAPL");
+      expect(concentrationPattern?.affectedAssets).toContain("BTC-USD");
     });
 
     it("should detect volatility seeking behavior", () => {
       const queries = [
-        { assetSymbol: "TSLA", volatility: 85, timestamp: new Date() },
-        { assetSymbol: "GME", volatility: 90, timestamp: new Date() },
-        { assetSymbol: "AMC", volatility: 88, timestamp: new Date() },
-        { assetSymbol: "NVDA", volatility: 75, timestamp: new Date() },
-        { assetSymbol: "COIN", volatility: 92, timestamp: new Date() },
+        { assetSymbol: "DOGE-USD", volatility: 85, timestamp: new Date() },
+        { assetSymbol: "SHIB-USD", volatility: 90, timestamp: new Date() },
+        { assetSymbol: "PEPE-USD", volatility: 88, timestamp: new Date() },
+        { assetSymbol: "SOL-USD", volatility: 75, timestamp: new Date() },
+        { assetSymbol: "AVAX-USD", volatility: 92, timestamp: new Date() },
       ];
 
       const patterns = analyzeBehavioralPatterns(queries);
@@ -59,14 +59,14 @@ describe("Behavioral Intelligence Layer", () => {
 
     it("should detect healthy diversification", () => {
       const queries = [
-        { assetSymbol: "AAPL", assetType: "STOCK", timestamp: new Date() },
-        { assetSymbol: "BTC", assetType: "CRYPTO", timestamp: new Date() },
-        { assetSymbol: "SPY", assetType: "ETF", timestamp: new Date() },
-        { assetSymbol: "MSFT", assetType: "STOCK", timestamp: new Date() },
-        { assetSymbol: "ETH", assetType: "CRYPTO", timestamp: new Date() },
-        { assetSymbol: "QQQ", assetType: "ETF", timestamp: new Date() },
-        { assetSymbol: "GOOGL", assetType: "STOCK", timestamp: new Date() },
-        { assetSymbol: "AMZN", assetType: "STOCK", timestamp: new Date() },
+        { assetSymbol: "BTC-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "ETH-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "SOL-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "BNB-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "XRP-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "ADA-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "DOGE-USD", assetType: "CRYPTO", timestamp: new Date() },
+        { assetSymbol: "AVAX-USD", assetType: "CRYPTO", timestamp: new Date() },
       ];
 
       const patterns = analyzeBehavioralPatterns(queries);
@@ -78,8 +78,8 @@ describe("Behavioral Intelligence Layer", () => {
 
     it("should return empty array for insufficient data", () => {
       const queries = [
-        { assetSymbol: "AAPL", timestamp: new Date() },
-        { assetSymbol: "MSFT", timestamp: new Date() },
+        { assetSymbol: "BTC-USD", timestamp: new Date() },
+        { assetSymbol: "ETH-USD", timestamp: new Date() },
       ];
 
       const patterns = analyzeBehavioralPatterns(queries);
@@ -91,30 +91,30 @@ describe("Behavioral Intelligence Layer", () => {
   describe("buildBehaviorProfile", () => {
     it("should build complete behavior profile", () => {
       const queries = [
-        { assetSymbol: "AAPL", assetType: "STOCK", volatility: 60, timestamp: new Date() },
-        { assetSymbol: "AAPL", assetType: "STOCK", volatility: 65, timestamp: new Date() },
-        { assetSymbol: "BTC", assetType: "CRYPTO", volatility: 85, timestamp: new Date() },
-        { assetSymbol: "SPY", assetType: "ETF", volatility: 40, timestamp: new Date() },
-        { assetSymbol: "MSFT", assetType: "STOCK", volatility: 55, timestamp: new Date() },
+        { assetSymbol: "BTC-USD", assetType: "CRYPTO", volatility: 60, timestamp: new Date() },
+        { assetSymbol: "BTC-USD", assetType: "CRYPTO", volatility: 65, timestamp: new Date() },
+        { assetSymbol: "ETH-USD", assetType: "CRYPTO", volatility: 85, timestamp: new Date() },
+        { assetSymbol: "SOL-USD", assetType: "CRYPTO", volatility: 40, timestamp: new Date() },
+        { assetSymbol: "BNB-USD", assetType: "CRYPTO", volatility: 55, timestamp: new Date() },
       ];
 
       const profile = buildBehaviorProfile("user123", queries);
 
       expect(profile.userId).toBe("user123");
       expect(profile.queryCount).toBe(5);
-      expect(profile.assetInterest.get("AAPL")).toBe(2);
-      expect(profile.assetTypeDistribution.STOCK).toBe(3);
+      expect(profile.assetInterest.get("BTC-USD")).toBe(2);
+      expect(profile.assetTypeDistribution.CRYPTO).toBe(5);
       expect(profile.volatilityPreference).toBeGreaterThan(0);
       expect(profile.patterns.length).toBeGreaterThan(0);
     });
 
     it("should calculate volatility preference correctly", () => {
       const queries = [
-        { assetSymbol: "AAPL", volatility: 50, timestamp: new Date() },
-        { assetSymbol: "MSFT", volatility: 60, timestamp: new Date() },
-        { assetSymbol: "GOOGL", volatility: 70, timestamp: new Date() },
-        { assetSymbol: "AMZN", volatility: 80, timestamp: new Date() },
-        { assetSymbol: "TSLA", volatility: 90, timestamp: new Date() },
+        { assetSymbol: "BTC-USD", volatility: 50, timestamp: new Date() },
+        { assetSymbol: "ETH-USD", volatility: 60, timestamp: new Date() },
+        { assetSymbol: "SOL-USD", volatility: 70, timestamp: new Date() },
+        { assetSymbol: "BNB-USD", volatility: 80, timestamp: new Date() },
+        { assetSymbol: "DOGE-USD", volatility: 90, timestamp: new Date() },
       ];
 
       const profile = buildBehaviorProfile("user123", queries);
@@ -131,7 +131,7 @@ describe("Behavioral Intelligence Layer", () => {
           severity: "high" as const,
           description: "80% focused on one asset",
           recommendation: "Diversify",
-          affectedAssets: ["AAPL"],
+          affectedAssets: ["BTC-USD"],
         },
         {
           pattern: "VOLATILITY_SEEKING" as const,

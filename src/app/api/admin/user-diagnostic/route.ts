@@ -1,35 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/middleware/admin-guard";
 import { prisma } from "@/lib/prisma";
 import { createLogger } from "@/lib/logger";
+import { sanitizeError } from "@/lib/logger/utils";
 import { delCache } from "@/lib/redis";
 import { addCredits } from "@/lib/services/credit.service";
 import { CreditTransactionType } from "@/generated/prisma/enums";
 import { getUserPlan, invalidatePlanCache } from "@/lib/middleware/plan-gate";
-import { isPrivilegedEmail } from "@/lib/auth";
+import { normalizePlanTier } from "@/lib/middleware/plan-gate";
 
 const logger = createLogger({ service: "user-diagnostic" });
+
+const VALID_ACTIONS = new Set(["diagnose", "clear-cache", "restore-credits", "force-plan"]);
+const VALID_PLANS = new Set(["STARTER", "PRO", "ELITE", "ENTERPRISE"]);
 
 /**
  * POST /api/admin/user-diagnostic
  * Emergency diagnostic and repair endpoint for user account issues.
- * Returns detailed user state and can fix common issues (cache, credits, plan).
+ * Requires admin authentication. Returns detailed user state and can fix common issues.
  */
 export async function POST(req: NextRequest) {
+  const check = await requireAdmin();
+  if (!check.authorized) return check.response;
+  const adminId = check.userId;
+
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Optional: Check if admin for sensitive operations
-    const isAdmin = isPrivilegedEmail(
-      await prisma.user.findUnique({ where: { id: userId }, select: { email: true } }).then(u => u?.email)
-    );
-
     const body = await req.json().catch(() => ({}));
-    const targetUserId = body.userId || userId;
-    const action = body.action as "diagnose" | "clear-cache" | "restore-credits" | "force-plan" | undefined;
+    const targetUserId = body.userId || adminId;
+    const action = VALID_ACTIONS.has(body.action) ? body.action as "diagnose" | "clear-cache" | "restore-credits" | "force-plan" : undefined;
 
     const results: Record<string, unknown> = {};
 
@@ -55,7 +53,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found", userId: targetUserId }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     results.user = {
@@ -82,8 +80,7 @@ export async function POST(req: NextRequest) {
     } catch (error) {
       results.resolvedPlan = null;
       results.planResolution = "failed";
-      results.planError = String(error);
-      logger.error({ userId: targetUserId, err: error }, "getUserPlan failed in diagnostic");
+      logger.error({ userId: targetUserId, err: sanitizeError(error) }, "getUserPlan failed in diagnostic");
     }
 
     // 3. Credit lots
@@ -116,7 +113,7 @@ export async function POST(req: NextRequest) {
     });
     results.recentTransactions = transactions;
 
-    // Execute requested actions
+    // Execute requested actions (all gated behind admin — requireAdmin already verified above)
     if (action === "clear-cache" || action === "restore-credits") {
       await delCache(`plan:${targetUserId}`);
       await invalidatePlanCache(targetUserId);
@@ -126,25 +123,26 @@ export async function POST(req: NextRequest) {
     if (action === "restore-credits") {
       const isElitePlan = user.plan === "ELITE" || user.plan === "ENTERPRISE";
       const amount = isElitePlan ? 1500 : user.plan === "PRO" ? 500 : 50;
-      
+
       const newBalance = await addCredits(
         targetUserId,
         amount,
         CreditTransactionType.ADJUSTMENT,
-        `Emergency credit restore via diagnostic API`
+        "Emergency credit restore via diagnostic API"
       );
       results.creditsRestored = true;
       results.grantedAmount = amount;
       results.newBalance = newBalance;
     }
 
-    if (action === "force-plan" && isAdmin && body.plan) {
+    if (action === "force-plan" && body.plan && VALID_PLANS.has(normalizePlanTier(body.plan))) {
+      const safePlan = normalizePlanTier(body.plan);
       await prisma.user.update({
         where: { id: targetUserId },
-        data: { plan: body.plan },
+        data: { plan: safePlan },
       });
       await invalidatePlanCache(targetUserId);
-      results.planForced = body.plan;
+      results.planForced = safePlan;
     }
 
     // Re-test plan resolution after fixes
@@ -154,7 +152,7 @@ export async function POST(req: NextRequest) {
         results.resolvedPlanAfterFix = newResolvedPlan;
       } catch (error) {
         results.resolvedPlanAfterFix = null;
-        results.planErrorAfterFix = String(error);
+        logger.error({ userId: targetUserId, err: sanitizeError(error) }, "getUserPlan re-test failed in diagnostic");
       }
     }
 
@@ -165,9 +163,9 @@ export async function POST(req: NextRequest) {
       results,
     });
   } catch (error) {
-    logger.error({ err: error }, "User diagnostic failed");
+    logger.error({ err: sanitizeError(error), adminId }, "User diagnostic failed");
     return NextResponse.json(
-      { error: "Diagnostic failed", details: String(error) },
+      { error: "Diagnostic failed" },
       { status: 500 }
     );
   }

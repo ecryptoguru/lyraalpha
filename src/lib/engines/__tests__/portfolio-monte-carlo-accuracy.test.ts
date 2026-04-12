@@ -34,9 +34,9 @@ const makeHolding = (
 
 const BASE: MCSimulationInput = {
   holdings: [
-    makeHolding("AAPL", 10, 180),
-    makeHolding("SPY", 5, 450),
-    makeHolding("GLD", 8, 190),
+    makeHolding("BTC-USD", 10, 65000),
+    makeHolding("ETH-USD", 5, 3400),
+    makeHolding("SOL-USD", 8, 180),
   ],
   mode: "A",
   horizon: 30,
@@ -361,7 +361,7 @@ describe("Monte Carlo — weight calculation", () => {
   it("single-holding portfolio runs without error", async () => {
     const r = await runMonteCarloSimulation({
       ...BASE,
-      holdings: [makeHolding("AAPL", 10, 180)],
+      holdings: [makeHolding("BTC-USD", 10, 180)],
       paths: 100,
     });
     expect(r.pathCount).toBe(100);

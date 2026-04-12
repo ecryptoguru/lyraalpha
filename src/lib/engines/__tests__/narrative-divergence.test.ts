@@ -56,55 +56,55 @@ describe("Narrative Divergence Engine", () => {
   describe("computeBatchNarrativeDivergence", () => {
     it("should compute divergence for multiple assets", () => {
       const assets = [
-        { symbol: "AAPL", mediaSentiment: 70, engineSentiment: 65, newsCount: 5 },
-        { symbol: "TSLA", mediaSentiment: 85, engineSentiment: 45, newsCount: 12 },
-        { symbol: "MSFT", mediaSentiment: 60, engineSentiment: 62, newsCount: 3 },
+        { symbol: "BTC-USD", mediaSentiment: 70, engineSentiment: 65, newsCount: 5 },
+        { symbol: "DOGE-USD", mediaSentiment: 85, engineSentiment: 45, newsCount: 12 },
+        { symbol: "ETH-USD", mediaSentiment: 60, engineSentiment: 62, newsCount: 3 },
       ];
 
       const results = computeBatchNarrativeDivergence(assets);
 
       expect(results.size).toBe(3);
-      expect(results.get("AAPL")).toBeDefined();
-      expect(results.get("TSLA")?.direction).toBe("BULLISH_DIVERGENCE");
-      expect(results.get("MSFT")?.direction).toBe("ALIGNED");
+      expect(results.get("BTC-USD")).toBeDefined();
+      expect(results.get("DOGE-USD")?.direction).toBe("BULLISH_DIVERGENCE");
+      expect(results.get("ETH-USD")?.direction).toBe("ALIGNED");
     });
 
     it("should skip assets with missing data", () => {
       const assets = [
-        { symbol: "AAPL", mediaSentiment: 70, engineSentiment: 65 },
-        { symbol: "TSLA", mediaSentiment: 85 },
-        { symbol: "MSFT", engineSentiment: 62 },
+        { symbol: "BTC-USD", mediaSentiment: 70, engineSentiment: 65 },
+        { symbol: "DOGE-USD", mediaSentiment: 85 },
+        { symbol: "ETH-USD", engineSentiment: 62 },
       ];
 
       const results = computeBatchNarrativeDivergence(assets);
 
       expect(results.size).toBe(1);
-      expect(results.has("AAPL")).toBe(true);
+      expect(results.has("BTC-USD")).toBe(true);
     });
   });
 
   describe("findSignificantDivergences", () => {
     it("should identify assets with high divergence", () => {
       const divergences = new Map();
-      divergences.set("AAPL", calculateNarrativeDivergence(70, 68, 5));
-      divergences.set("TSLA", calculateNarrativeDivergence(90, 40, 10));
-      divergences.set("MSFT", calculateNarrativeDivergence(80, 45, 8));
+      divergences.set("BTC-USD", calculateNarrativeDivergence(70, 68, 5));
+      divergences.set("DOGE-USD", calculateNarrativeDivergence(90, 40, 10));
+      divergences.set("ETH-USD", calculateNarrativeDivergence(80, 45, 8));
 
       const significant = findSignificantDivergences(divergences, 30);
 
       expect(significant.length).toBeGreaterThan(0);
-      expect(significant[0].symbol).toBe("TSLA"); // Highest divergence first
+      expect(significant[0].symbol).toBe("DOGE-USD"); // Highest divergence first
     });
 
     it("should filter by minimum divergence score", () => {
       const divergences = new Map();
-      divergences.set("AAPL", calculateNarrativeDivergence(60, 58, 5));
-      divergences.set("TSLA", calculateNarrativeDivergence(90, 40, 10));
+      divergences.set("BTC-USD", calculateNarrativeDivergence(60, 58, 5));
+      divergences.set("DOGE-USD", calculateNarrativeDivergence(90, 40, 10));
 
       const significant = findSignificantDivergences(divergences, 40);
 
       expect(significant.length).toBe(1);
-      expect(significant[0].symbol).toBe("TSLA");
+      expect(significant[0].symbol).toBe("DOGE-USD");
     });
   });
 });

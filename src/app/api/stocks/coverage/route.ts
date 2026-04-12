@@ -124,7 +124,7 @@ export async function GET(req: NextRequest) {
       avgTrustScore: true,
     } as const;
 
-    // Stock/MF-specific columns (always null for CRYPTO)
+    // Equity-specific columns (always null for CRYPTO)
     const equitySelect = {
       peRatio: true,
       avgVolume: true,

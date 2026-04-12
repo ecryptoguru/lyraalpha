@@ -4,7 +4,7 @@ import { timed } from "@/lib/telemetry";
 
 const logger = createLogger({ service: "redis" });
 
-type RedisLike = Pick<Redis, "get" | "set" | "setex" | "del" | "scan" | "pipeline" | "hgetall" | "hset" | "hdel" | "hincrby" | "expire" | "evalsha">;
+type RedisLike = Pick<Redis, "get" | "set" | "setex" | "del" | "scan" | "pipeline" | "hget" | "hgetall" | "hset" | "hdel" | "hincrby" | "expire" | "evalsha" | "incr">;
 
 const globalForRedis = global as unknown as { redis: RedisLike | undefined };
 
@@ -30,12 +30,14 @@ function createNoopRedis(): RedisLike {
       expire: () => undefined,
       exec: async () => [],
     }),
+    hget: async () => null,
     hgetall: async () => null,
     hset: async () => 0,
     hdel: async () => 0,
     hincrby: async () => 0,
     expire: async () => 0,
     evalsha: async () => null,
+    incr: async () => 0,
   } as unknown as RedisLike;
 }
 

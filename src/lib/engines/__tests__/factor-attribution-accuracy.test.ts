@@ -53,7 +53,7 @@ describe("Factor Attribution — value factor", () => {
     const history = makeHistory(flatPrices(30, 100));
     const result = calculateFactorProfile("AAPL", history, { peRatio: 20, industryPe: 20 });
     // peRel = 1 → 50, no ROE → valueScore = 50
-    expect(result.value).toBeCloseTo(50, 0);
+    expect(result.value).toBe(50);
   });
 
   it("high ROE boosts value score", () => {
@@ -88,7 +88,7 @@ describe("Factor Attribution — value factor", () => {
 describe("Factor Attribution — growth factor", () => {
   it("flat prices → totalGrowth = 0 → growthScore = 50", () => {
     const history = makeHistory(flatPrices(30, 100));
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     expect(result.growth).toBeCloseTo(50, 0);
   });
 
@@ -96,7 +96,7 @@ describe("Factor Attribution — growth factor", () => {
     // start=100, end=150 → totalGrowth = 0.5 → 50 + 0.5*100 = 100 → clamped to 95
     const prices = linearPrices(30, 100, 50 / 29);
     const history = makeHistory(prices);
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     expect(result.growth).toBe(95);
   });
 
@@ -106,13 +106,13 @@ describe("Factor Attribution — growth factor", () => {
     // growthScore = max(10, 50 + (-0.60)*100) = max(10, -10) = 10
     const prices = linearPrices(30, 250, -5);
     const history = makeHistory(prices);
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     expect(result.growth).toBe(10);
   });
 
   it("rising prices → higher growth score than falling prices", () => {
-    const rising = calculateFactorProfile("AAPL", makeHistory(linearPrices(30, 100, 1)), {});
-    const falling = calculateFactorProfile("AAPL", makeHistory(linearPrices(30, 130, -1)), {});
+    const rising = calculateFactorProfile("BTC-USD", makeHistory(linearPrices(30, 100, 1)), {});
+    const falling = calculateFactorProfile("BTC-USD", makeHistory(linearPrices(30, 130, -1)), {});
     expect(rising.growth).toBeGreaterThan(falling.growth);
   });
 });
@@ -122,7 +122,7 @@ describe("Factor Attribution — growth factor", () => {
 describe("Factor Attribution — momentum factor", () => {
   it("flat prices → mom1m = 0, mom3m = 0 → momentumScore = 50", () => {
     const history = makeHistory(flatPrices(70, 100));
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     expect(result.momentum).toBeCloseTo(50, 0);
   });
 
@@ -131,7 +131,7 @@ describe("Factor Attribution — momentum factor", () => {
     const base = flatPrices(49, 100);
     const recent = linearPrices(21, 100, 1);
     const history = makeHistory([...base, ...recent]);
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     expect(result.momentum).toBeGreaterThan(50);
   });
 
@@ -139,13 +139,13 @@ describe("Factor Attribution — momentum factor", () => {
     const base = flatPrices(49, 120);
     const recent = linearPrices(21, 120, -1);
     const history = makeHistory([...base, ...recent]);
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     expect(result.momentum).toBeLessThan(50);
   });
 
   it("momentum formula: 50 + mom1m*50 + mom3m*25", () => {
     const history = makeHistory(flatPrices(70, 100));
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     // mom1m = 0, mom3m = 0 → 50 + 0 + 0 = 50
     expect(result.momentum).toBe(50);
   });
@@ -156,7 +156,7 @@ describe("Factor Attribution — momentum factor", () => {
 describe("Factor Attribution — volatility factor (inverse)", () => {
   it("flat prices → stdDev = 0 → annualizedVol = 0 → volScore = 100 → clamped 95", () => {
     const history = makeHistory(flatPrices(30, 100));
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     // stdDev = 0 → 100 - 0*60 = 100 → clamped to 95
     expect(result.volatility).toBe(95);
   });
@@ -165,13 +165,13 @@ describe("Factor Attribution — volatility factor (inverse)", () => {
     // Alternating ±10% prices → high stdDev
     const prices = Array.from({ length: 30 }, (_, i) => (i % 2 === 0 ? 100 : 90));
     const history = makeHistory(prices);
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     expect(result.volatility).toBeLessThan(50);
   });
 
   it("lower volatility → higher volScore (monotonicity)", () => {
-    const calm = calculateFactorProfile("AAPL", makeHistory(flatPrices(30, 100)), {});
-    const volatile = calculateFactorProfile("AAPL", makeHistory(
+    const calm = calculateFactorProfile("BTC-USD", makeHistory(flatPrices(30, 100)), {});
+    const volatile = calculateFactorProfile("BTC-USD", makeHistory(
       Array.from({ length: 30 }, (_, i) => (i % 2 === 0 ? 100 : 85)),
     ), {});
     expect(calm.volatility).toBeGreaterThan(volatile.volatility);
@@ -179,7 +179,7 @@ describe("Factor Attribution — volatility factor (inverse)", () => {
 
   it("lowVol = volatility (same value)", () => {
     const history = makeHistory(flatPrices(30, 100));
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     expect(result.lowVol).toBe(result.volatility);
   });
 });
@@ -194,7 +194,7 @@ describe("Factor Attribution — output clamping [10, 95]", () => {
       { prices: linearPrices(30, 200, -5), fin: { peRatio: 100, industryPe: 5 } },
     ];
     for (const { prices, fin } of datasets) {
-      const result = calculateFactorProfile("AAPL", makeHistory(prices), fin);
+      const result = calculateFactorProfile("BTC-USD", makeHistory(prices), fin);
       expect(result.value).toBeGreaterThanOrEqual(10);
       expect(result.value).toBeLessThanOrEqual(95);
       expect(result.growth).toBeGreaterThanOrEqual(10);
@@ -208,7 +208,7 @@ describe("Factor Attribution — output clamping [10, 95]", () => {
 
   it("insufficient history (<20 bars) → all scores default to 50", () => {
     const history = makeHistory(flatPrices(10, 100));
-    const result = calculateFactorProfile("AAPL", history, {});
+    const result = calculateFactorProfile("BTC-USD", history, {});
     expect(result.growth).toBe(50);
     expect(result.momentum).toBe(50);
     expect(result.volatility).toBe(50);

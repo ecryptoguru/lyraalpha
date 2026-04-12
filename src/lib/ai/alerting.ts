@@ -1,5 +1,5 @@
 import { createLogger } from "@/lib/logger";
-import { getCache, setCache } from "@/lib/redis";
+import { redis, getCache, setCache } from "@/lib/redis";
 
 const logger = createLogger({ service: "ai-alerting" });
 
@@ -78,19 +78,41 @@ async function sendWebhookAlert(payload: {
 // ─── Public alert emitters ────────────────────────────────────────────────────
 
 /** OBS-1a: Daily cost spike alert.
- *  Call from incrementDailyTokens after writing to Redis when daily cost is recalculated. */
-export async function alertIfDailyCostExceeded(totalCostUsd: number): Promise<void> {
-  if (totalCostUsd < THRESHOLDS.dailyCostUsd) return;
+ *  Accumulates per-request cost into a Redis daily counter and checks the cumulative total
+ *  against the threshold. Previously accepted a single-request cost which could never
+ *  exceed the $50 threshold — the alert was effectively dead code.
+ *
+ *  @param requestCostUsd  Cost of the current request (added to daily cumulative total)
+ */
+export async function alertIfDailyCostExceeded(requestCostUsd: number): Promise<void> {
+  if (requestCostUsd <= 0) return;
+
+  // Accumulate into a Redis daily counter — same pattern as daily token tracking.
+  // Key resets at midnight UTC via the date suffix.
+  const todayKey = `ai:daily_cost:${new Date().toISOString().slice(0, 10)}`;
+  let cumulativeCost = 0;
+  try {
+    const pipeline = redis.pipeline();
+    pipeline.incrbyfloat(todayKey, requestCostUsd);
+    pipeline.expire(todayKey, 90_000); // 25h TTL — covers UTC day + buffer
+    const results = await pipeline.exec();
+    cumulativeCost = Number((results?.[0] as number) ?? 0);
+  } catch {
+    // Redis failure — alerting is non-critical, never block
+    return;
+  }
+
+  if (cumulativeCost < THRESHOLDS.dailyCostUsd) return;
   logger.warn(
-    { event: "ai_alert_cost", totalCostUsd, threshold: THRESHOLDS.dailyCostUsd },
+    { event: "ai_alert_cost", cumulativeCostUsd: cumulativeCost, requestCostUsd, threshold: THRESHOLDS.dailyCostUsd },
     "AI daily cost threshold exceeded",
   );
   await sendWebhookAlert({
     alert: "daily_cost_exceeded",
     severity: "critical",
-    value: totalCostUsd,
+    value: Number(cumulativeCost.toFixed(2)),
     threshold: THRESHOLDS.dailyCostUsd,
-    detail: `Daily AI spend has reached $${totalCostUsd.toFixed(2)}.`,
+    detail: `Daily AI spend has reached $${cumulativeCost.toFixed(2)} (threshold: $${THRESHOLDS.dailyCostUsd}).`,
   });
 }
 
@@ -116,7 +138,7 @@ export async function alertIfWebSearchOutage(consecutiveFailures: number): Promi
 export async function recordRagResult(hadResults: boolean): Promise<void> {
   const windowKey = `ai:rag:window:${Math.floor(Date.now() / (15 * 60 * 1000))}`;
   try {
-    const pipeline = (await import("@/lib/redis")).redis.pipeline();
+    const pipeline = redis.pipeline();
     pipeline.hincrby(windowKey, "total", 1);
     if (!hadResults) pipeline.hincrby(windowKey, "zero", 1);
     pipeline.expire(windowKey, 20 * 60); // 20 min TTL — 1 window + buffer
@@ -150,7 +172,7 @@ export async function recordRagResult(hadResults: boolean): Promise<void> {
 export async function recordValidationResult(passed: boolean): Promise<void> {
   const windowKey = `ai:validation:window:${Math.floor(Date.now() / (15 * 60 * 1000))}`;
   try {
-    const pipeline = (await import("@/lib/redis")).redis.pipeline();
+    const pipeline = redis.pipeline();
     pipeline.hincrby(windowKey, "total", 1);
     if (!passed) pipeline.hincrby(windowKey, "failed", 1);
     pipeline.expire(windowKey, 20 * 60);
@@ -187,7 +209,7 @@ export async function recordFallbackResult(wasFallback: boolean): Promise<void> 
   const windowKey = `ai:fallback:window:${Math.floor(Date.now() / (15 * 60 * 1000))}`;
   const mitigationFlagKey = "ai:fallback:mitigation_active";
   try {
-    const pipeline = (await import("@/lib/redis")).redis.pipeline();
+    const pipeline = redis.pipeline();
     pipeline.hincrby(windowKey, "total", 1);
     if (wasFallback) pipeline.hincrby(windowKey, "fallback", 1);
     pipeline.expire(windowKey, 20 * 60);
@@ -221,7 +243,7 @@ export async function recordFallbackResult(wasFallback: boolean): Promise<void> 
         "AI fallback mitigation triggered — setting backup model flag",
       );
       // Set mitigation flag with 30-minute TTL to avoid permanent switching
-      await (await import("@/lib/redis")).setCache(mitigationFlagKey, true, 30 * 60);
+      await setCache(mitigationFlagKey, true, 30 * 60);
       await sendWebhookAlert({
         alert: "fallback_mitigation_triggered",
         severity: "critical",
@@ -242,7 +264,7 @@ export async function recordFallbackResult(wasFallback: boolean): Promise<void> 
 export async function isFallbackMitigationActive(): Promise<boolean> {
   try {
     const mitigationFlagKey = "ai:fallback:mitigation_active";
-    const isActive = await (await import("@/lib/redis")).getCache<boolean>(mitigationFlagKey);
+    const isActive = await getCache<boolean>(mitigationFlagKey);
     return isActive === true;
   } catch {
     return false;
@@ -255,7 +277,7 @@ export async function isFallbackMitigationActive(): Promise<boolean> {
 export async function recordLatencyViolation(exceededBudget: boolean, latencyMs: number, tier: string): Promise<void> {
   const windowKey = `ai:latency:window:${Math.floor(Date.now() / (15 * 60 * 1000))}`;
   try {
-    const pipeline = (await import("@/lib/redis")).redis.pipeline();
+    const pipeline = redis.pipeline();
     pipeline.hincrby(windowKey, "total", 1);
     if (exceededBudget) pipeline.hincrby(windowKey, "violations", 1);
     pipeline.expire(windowKey, 20 * 60);

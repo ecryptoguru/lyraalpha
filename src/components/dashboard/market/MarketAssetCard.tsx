@@ -98,10 +98,9 @@ export function MarketAssetCard({
   const meta = (metadata as MarketAssetMetadata | undefined) ?? undefined;
 
   const displayName = useMemo(() => {
-    if (type === "ETF") return name || category || symbol;
-    if (type === "MUTUAL_FUND") return category || name || symbol;
+    // Platform is crypto-only
     return name || symbol;
-  }, [category, name, symbol, type]);
+  }, [name, symbol]);
 
   const compatibilityBadgeClass = useMemo(() => {
     if (compatibilityScore == null || compatibilityScore <= 0) return null;
@@ -161,80 +160,9 @@ export function MarketAssetCard({
       ];
     }
 
-    if (type === "MUTUAL_FUND") {
-      return [
-        {
-          label: "NAV",
-          value: nav
-            ? formatPrice(nav, { symbol: currencySymbol, region: currencyRegion })
-            : safePrice
-            ? formatPrice(safePrice, { symbol: currencySymbol, region: currencyRegion })
-            : "—",
-        },
-        {
-          label: "Scheme",
-          value: schemeType
-            ? schemeType.replace("Open Ended Schemes", "Open").replace("Close Ended Schemes", "Close")
-            : category
-            ? category.split(" - ")[0]
-            : "—",
-          border: true,
-        },
-        {
-          label: "1Y Perf",
-          value: oneYearChange && typeof oneYearChange === "number"
-            ? `${oneYearChange > 0 ? "+" : ""}${oneYearChange.toFixed(1)}%`
-            : "—",
-          valueClassName: cn(
-            "text-[11px] font-bold tracking-tight",
-            (oneYearChange || 0) >= 0 ? "text-emerald-400" : "text-rose-400",
-          ),
-        },
-      ];
-    }
+    // MF/ETF-specific stats removed — crypto-only platform
 
-    if (type === "ETF") {
-      return [
-        {
-          label: "Exp Ratio",
-          value: expenseRatio ? `${(expenseRatio * 100).toFixed(2)}%` : "—",
-        },
-        {
-          label: "AUM",
-          value: formatCompactNumber(marketCap, { symbol: currencySymbol, region: currencyRegion }),
-          border: true,
-          suppressHydrationWarning: true,
-        },
-        {
-          label: "Category",
-          value: category || "—",
-        },
-      ];
-    }
-
-    if (type === "CRYPTO") {
-      return [
-        {
-          label: "Mkt Cap",
-          value: formatCompactNumber(marketCap, { symbol: currencySymbol, region: currencyRegion }),
-          suppressHydrationWarning: true,
-        },
-        {
-          label: "24h Vol",
-          value: meta?.volume24Hr
-            ? formatCompactNumber(String(meta.volume24Hr), { symbol: currencySymbol, region: currencyRegion })
-            : "—",
-          border: true,
-        },
-        {
-          label: "Circ Supply",
-          value: meta?.circulatingSupply && typeof meta.circulatingSupply === "number" && meta.circulatingSupply > 0
-            ? formatCompactNumber(meta.circulatingSupply, { isCurrency: false, region: currencyRegion })
-            : "—",
-        },
-      ];
-    }
-
+    // Platform is crypto-only
     return [
       {
         label: "Mkt Cap",
@@ -242,40 +170,24 @@ export function MarketAssetCard({
         suppressHydrationWarning: true,
       },
       {
-        label: "P/E Ratio",
-        value: peRatio && typeof peRatio === "number" ? peRatio.toFixed(1) : "—",
+        label: "24h Vol",
+        value: meta?.volume24Hr
+          ? formatCompactNumber(String(meta.volume24Hr), { symbol: currencySymbol, region: currencyRegion })
+          : "—",
         border: true,
       },
-      dividendYield && dividendYield > 0
-        ? {
-            label: "Div Yield",
-            value: `${(dividendYield * 100).toFixed(2)}%`,
-            valueClassName: "text-[11px] font-bold tracking-tight text-emerald-400",
-          }
-        : {
-            label: "1Y Perf",
-            value: oneYearChange && typeof oneYearChange === "number"
-              ? `${oneYearChange > 0 ? "+" : ""}${oneYearChange.toFixed(1)}%`
-              : "—",
-            valueClassName: cn(
-              "text-[11px] font-bold tracking-tight",
-              (oneYearChange || 0) >= 0 ? "text-emerald-400" : "text-rose-400",
-            ),
-          },
+      {
+        label: "Circ Supply",
+        value: meta?.circulatingSupply && typeof meta.circulatingSupply === "number" && meta.circulatingSupply > 0
+          ? formatCompactNumber(meta.circulatingSupply, { isCurrency: false, region: currencyRegion })
+          : "—",
+      },
     ];
   }, [
-    category,
     currencyRegion,
     currencySymbol,
-    dividendYield,
-    expenseRatio,
     marketCap,
     meta,
-    nav,
-    oneYearChange,
-    peRatio,
-    safePrice,
-    schemeType,
     type,
   ]);
 
@@ -315,17 +227,7 @@ export function MarketAssetCard({
             <p className="text-[11px] font-bold text-muted-foreground/80 line-clamp-1 h-4">
               {displayName}
             </p>
-            {/* Sector / Fund House Tag */}
-            {type === "STOCK" && sector && (
-              <span className="inline-block text-[7px] md:text-[8px] font-bold text-primary/70 bg-primary/5 border border-primary/10 rounded-xl px-1.5 py-0.5 uppercase tracking-wider truncate max-w-[120px] md:max-w-[160px]">
-                {sector}
-              </span>
-            )}
-            {type === "MUTUAL_FUND" && fundHouse && (
-              <span className="inline-block text-[7px] md:text-[8px] font-bold text-sky-400/70 bg-sky-500/5 border border-sky-500/10 rounded-xl px-1.5 py-0.5 uppercase tracking-wider truncate max-w-[120px] md:max-w-[160px]">
-                {fundHouse}
-              </span>
-            )}
+            {/* Platform is crypto-only — sector/fundHouse badges removed */}
           </div>
 
           <div className="text-right shrink-0">

@@ -47,6 +47,12 @@ describe("scrubPII", () => {
     expect(result.redactionTypes).toContain("phone");
   });
 
+  it("redacts Indian mobile format +91-9778871110", () => {
+    const result = scrubPII("My number is +91-9778871110");
+    expect(result.scrubbed).toContain("[phone]");
+    expect(result.redactionTypes).toContain("phone");
+  });
+
   it("redacts Clerk user IDs", () => {
     const result = scrubPII("Reference: user_2xABC12345def for my account");
     expect(result.scrubbed).toContain("[user-id]");
@@ -80,6 +86,34 @@ describe("scrubPII", () => {
   it("does not redact @ mentions that are not emails", () => {
     const result = scrubPII("Check @BTC on Twitter");
     expect(result.scrubbed).toBe("Check @BTC on Twitter");
+  });
+
+  // R1 regression tests: financial data should not be matched as phone numbers
+  it("does not redact dollar amounts as phone numbers", () => {
+    const result = scrubPII("The price is $50,000 and market cap is $1,234,567");
+    expect(result.scrubbed).not.toContain("[phone]");
+    expect(result.redactionCount).toBe(0);
+  });
+
+  it("does not redact rupee amounts as phone numbers", () => {
+    const result = scrubPII("₹4,999 invested in crypto");
+    expect(result.scrubbed).not.toContain("[phone]");
+  });
+
+  it("does not redact percentage values as phone numbers", () => {
+    const result = scrubPII("Returns were 12,345% last year");
+    expect(result.scrubbed).not.toContain("[phone]");
+  });
+
+  it("does not redact plain digit groups without phone context", () => {
+    const result = scrubPII("Volume was 555-123-4567 shares");
+    expect(result.scrubbed).not.toContain("[phone]");
+  });
+
+  it("redacts phone number after phone-context word", () => {
+    const result = scrubPII("Call 555-123-4567 for support");
+    expect(result.scrubbed).toContain("[phone]");
+    expect(result.redactionTypes).toContain("phone");
   });
 });
 

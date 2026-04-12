@@ -970,7 +970,7 @@ export async function getUsageStats(range: UsageRange = "30d"): Promise<UsageSta
             WHEN LOWER(r."inputQuery") ~ '(timeline|event|news|impact|regime)' THEN 'TIMELINE'
             WHEN LOWER(r."inputQuery") ~ '(discover|discovery|theme|sector)' THEN 'DISCOVERY'
             WHEN LOWER(r."inputQuery") ~ '(learn|module|lesson|quiz|tutorial)' THEN 'LEARNING'
-            WHEN LOWER(r."inputQuery") ~ '(crypto|bitcoin|ethereum|etf|stock|asset|signal|momentum|volatility|liquidity|trust)' THEN 'MARKET_INTEL'
+            WHEN LOWER(r."inputQuery") ~ '(crypto|bitcoin|ethereum|asset|signal|momentum|volatility|liquidity|trust)' THEN 'MARKET_INTEL'
             ELSE 'LYRA_INTEL'
           END AS section
         FROM "AIRequestLog" r
@@ -1072,7 +1072,7 @@ export async function getUsageStats(range: UsageRange = "30d"): Promise<UsageSta
             WHEN LOWER(r."inputQuery") ~ '(timeline|event|news|impact|regime)' THEN 'TIMELINE'
             WHEN LOWER(r."inputQuery") ~ '(discover|discovery|theme|sector)' THEN 'DISCOVERY'
             WHEN LOWER(r."inputQuery") ~ '(learn|module|lesson|quiz|tutorial)' THEN 'LEARNING'
-            WHEN LOWER(r."inputQuery") ~ '(crypto|bitcoin|ethereum|etf|stock|asset|signal|momentum|volatility|liquidity|trust)' THEN 'MARKET_INTEL'
+            WHEN LOWER(r."inputQuery") ~ '(crypto|bitcoin|ethereum|asset|signal|momentum|volatility|liquidity|trust)' THEN 'MARKET_INTEL'
             ELSE 'LYRA_INTEL'
           END AS section
         FROM "AIRequestLog" r

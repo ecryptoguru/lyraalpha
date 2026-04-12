@@ -8,6 +8,8 @@ import { buildHumanizerGuidance } from "@/lib/ai/prompts/humanizer";
 import { getCache, setCache } from "@/lib/redis";
 import { createHash } from "crypto";
 import { distillSessionNotes, getGlobalNotes } from "@/lib/ai/memory";
+import { scrubPII } from "@/lib/ai/pii-scrub";
+import { validateMyraOutput, logMyraValidationResult } from "@/lib/ai/output-validation";
 
 const log = createLogger({ module: "myra" });
 
@@ -98,6 +100,7 @@ const SIGNUP_REDIRECT_RESPONSE = `That's a crypto market analysis question — p
 
 const MYRA_INPUT_TOKEN_BUDGET = 2000;
 const MYRA_MAX_HISTORY_MESSAGES = 8;
+const MYRA_GENERATE_TIMEOUT_MS = 15_000; // 15s — same as memory distillation timeout
 
 function approximateTokenCount(text: string): number {
   return Math.max(1, Math.ceil(text.length / 4));
@@ -135,7 +138,7 @@ function buildMyraSharedGuidance(publicFacing: boolean): string {
 - Bullet lists only when listing 3+ distinct items
 - [Link](/path) to the relevant page when navigation helps
 - No tables, no headers, no walls of text
-- **Never include the ".NS" suffix for Indian crypto ticker symbols** (e.g., write "HDFCBANK" instead of "HDFCBANK.NS")
+- **Always use the full symbol format for crypto assets** (e.g., "BTC-USD", "ETH-USD")
 
 ## ESCALATION
 - If you cannot verify the answer from the KB, context, or platform facts, say so plainly and point to the correct page or human support.
@@ -274,29 +277,29 @@ export async function bm25SearchKnowledge(query: string): Promise<Array<{ conten
     const phraseQuery = tokens.join(" <-> "); // adjacent-word phrase match
     const orQuery = tokens.join(" | ");       // broad OR recall fallback
 
+    // R6-FIX: Use $queryRaw with Prisma.sql for type-safe parameterized queries.
+    // $queryRawUnsafe bypasses Prisma's SQL injection protection entirely.
+    // Prisma.sql ensures all values are properly parameterized at the driver level.
+
     // Try phrase match first (highest precision); fall back to OR if too few results
-    const phraseResults = await prisma.$queryRawUnsafe<Array<{ content: string; rank: number }>>(
-      `SELECT content,
-              ts_rank_cd(to_tsvector('english', content), to_tsquery('english', $1)) AS rank
-       FROM "SupportKnowledgeDoc"
-       WHERE to_tsvector('english', content) @@ to_tsquery('english', $1)
-       ORDER BY rank DESC
-       LIMIT 3;`,
-      phraseQuery,
-    );
+    const phraseResults = await prisma.$queryRaw<Array<{ content: string; rank: number }>>`
+      SELECT content,
+              ts_rank_cd(to_tsvector('english', content), to_tsquery('english', ${phraseQuery})) AS rank
+      FROM "SupportKnowledgeDoc"
+      WHERE to_tsvector('english', content) @@ to_tsquery('english', ${phraseQuery})
+      ORDER BY rank DESC
+      LIMIT 3;`;
 
     if (phraseResults.length >= 2) return phraseResults;
 
     // Phrase had < 2 hits — widen to OR matching
-    const orResults = await prisma.$queryRawUnsafe<Array<{ content: string; rank: number }>>(
-      `SELECT content,
-              ts_rank_cd(to_tsvector('english', content), to_tsquery('english', $1)) AS rank
-       FROM "SupportKnowledgeDoc"
-       WHERE to_tsvector('english', content) @@ to_tsquery('english', $1)
-       ORDER BY rank DESC
-       LIMIT 3;`,
-      orQuery,
-    );
+    const orResults = await prisma.$queryRaw<Array<{ content: string; rank: number }>>`
+      SELECT content,
+              ts_rank_cd(to_tsvector('english', content), to_tsquery('english', ${orQuery})) AS rank
+      FROM "SupportKnowledgeDoc"
+      WHERE to_tsvector('english', content) @@ to_tsquery('english', ${orQuery})
+      ORDER BY rank DESC
+      LIMIT 3;`;
 
     return orResults;
   } catch {
@@ -349,7 +352,11 @@ export async function buildSupportPrompt(
   context: SupportContext,
   inMemoryHistory?: InMemoryMessage[],
 ): Promise<SupportPrompt> {
-  if (isFinancialAdviceRequest(userMessage)) {
+  // PII-1: Scrub PII from user message before it enters LLM context.
+  // Consistent with Lyra Intel's scrubPII pattern in service.ts.
+  const { scrubbed: safeUserMessage } = scrubPII(userMessage);
+
+  if (isFinancialAdviceRequest(safeUserMessage)) {
     return {
       system: "",
       messages: [],
@@ -369,11 +376,14 @@ export async function buildSupportPrompt(
     });
     return recentMessages
       .reverse()
+      // Dedup against original (unscrubbed) message — DB stores unscrubbed content,
+      // so comparing against safeUserMessage would never match when PII was redacted.
       .filter((m) => !(m.senderRole === "USER" && m.content === userMessage))
       .slice(-MYRA_MAX_HISTORY_MESSAGES)
       .map((m) => ({
         role: m.senderRole === "USER" ? "user" : "assistant",
-        content: m.content,
+        // PII-1: Scrub PII from user-role history messages before LLM context
+        content: m.senderRole === "USER" ? scrubPII(m.content).scrubbed : m.content,
       }));
   })();
 
@@ -381,14 +391,14 @@ export async function buildSupportPrompt(
   const systemPrompt = isPublicConversation ? PUBLIC_SYSTEM_PROMPT : BASE_SYSTEM_PROMPT;
 
   // BM25/Vector RAG keeps the prompt compact — no full-KB injection needed with Azure prompt cache
-  const ragPromise = needsRAG(userMessage)
-    ? bm25SearchKnowledge(userMessage).then(async (bm25Results) => {
+  const ragPromise = needsRAG(safeUserMessage)
+    ? bm25SearchKnowledge(safeUserMessage).then(async (bm25Results) => {
         if (bm25Results.length >= 2) {
           log.debug({ docs: bm25Results.length }, "BM25 hit — skipped embedding API");
           return bm25Results;
         }
         log.debug("BM25 miss — falling back to vector search");
-        return searchSupportKnowledge(userMessage);
+        return searchSupportKnowledge(safeUserMessage);
       })
     : Promise.resolve([]);
 
@@ -426,7 +436,7 @@ export async function buildSupportPrompt(
   const calcTokens = () => estimateSupportPromptTokens(systemPrompt, [
     ...effectiveHistory,
     ...(contextMsg ? [{ content: contextMsg }] : []),
-    { content: userMessage },
+    { content: safeUserMessage },
   ]);
 
   // 1st pass: trim oldest history turns until under budget
@@ -453,7 +463,7 @@ export async function buildSupportPrompt(
   if (contextMsg) {
     messages.push({ role: "system", content: contextMsg });
   }
-  messages.push({ role: "user", content: userMessage });
+  messages.push({ role: "user", content: safeUserMessage });
 
   return { system: systemPrompt, messages };
 }
@@ -472,37 +482,58 @@ export async function generateSupportReply(
     const prompt = await buildSupportPrompt(conversationId, userMessage, context, inMemoryHistory);
     if (prompt.staticReply) return prompt.staticReply;
 
-    const result = await generateText({
-      model: getGpt54Model("myra"),
-      maxOutputTokens: MYRA_MAX_TOKENS,
-      providerOptions: {
-        openai: {
-          textVerbosity: "medium" as const,
-          promptCacheKey: "myra-system-v1",
+    // LAT-1: AbortController with 15s timeout — prevents indefinite hangs on slow nano calls.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), MYRA_GENERATE_TIMEOUT_MS);
+    const startTime = Date.now();
+
+    try {
+      const result = await generateText({
+        model: getGpt54Model("myra"),
+        maxOutputTokens: MYRA_MAX_TOKENS,
+        abortSignal: controller.signal,
+        providerOptions: {
+          openai: {
+            textVerbosity: "medium" as const,
+            promptCacheKey: "myra-system-v1",
+          },
         },
-      },
-      system: prompt.system,
-      messages: prompt.messages,
-    });
-    const u = result.usage as Record<string, unknown>;
-    const cached = (u?.cachedInputTokens as number) ?? 0;
-    log.info({ provider: "gpt-myra", in: result.usage.inputTokens, cached, out: result.usage.outputTokens }, "token usage");
-    const text = result.text;
+        system: prompt.system,
+        messages: prompt.messages,
+      });
 
-    // Memory distillation — extract durable notes from session, async non-blocking.
-    // Only fires for logged-in users with enough conversation history (≥4 user turns).
-    // Pass only user+assistant messages (not the system context block) to keep
-    // the distillation prompt clean and avoid leaking KB content into memory notes.
-    if (context.userId && prompt.messages.filter((m) => m.role === "user").length >= 4) {
-      const distillMessages = prompt.messages.filter((m) => m.role !== "system");
-      distillSessionNotes(
-        context.userId,
-        distillMessages as Array<{ role: string; content: unknown }>,
-        "myra",
-      ).catch((e: unknown) => log.warn({ err: e }, "Myra memory distillation failed"));
+      const latencyMs = Date.now() - startTime;
+
+      const u = result.usage as Record<string, unknown>;
+      const cached = (u?.cachedInputTokens as number) ?? 0;
+      log.info({ provider: "gpt-myra", in: result.usage.inputTokens, cached, out: result.usage.outputTokens, latencyMs }, "token usage");
+      const text = result.text;
+
+      // MYRA-OV: Post-generation output validation — checks for plan/pricing hallucinations
+      // and model self-disclosure. Non-blocking: logs warnings but never blocks the response.
+      const trimmed = text.trim();
+      if (trimmed) {
+        const validation = validateMyraOutput(trimmed);
+        logMyraValidationResult(validation);
+      }
+
+      // Memory distillation — extract durable notes from session, async non-blocking.
+      // Only fires for logged-in users with enough conversation history (≥4 user turns).
+      // Pass only user+assistant messages (not the system context block) to keep
+      // the distillation prompt clean and avoid leaking KB content into memory notes.
+      if (context.userId && prompt.messages.filter((m) => m.role === "user").length >= 4) {
+        const distillMessages = prompt.messages.filter((m) => m.role !== "system");
+        distillSessionNotes(
+          context.userId,
+          distillMessages as Array<{ role: string; content: unknown }>,
+          "myra",
+        ).catch((e: unknown) => log.warn({ err: e }, "Myra memory distillation failed"));
+      }
+
+      return text.trim() || null;
+    } finally {
+      clearTimeout(timeoutId);
     }
-
-    return text.trim() || null;
   } catch (err) {
     log.error({ err }, "Failed to generate reply");
     return null;
@@ -533,15 +564,14 @@ async function searchSupportKnowledge(query: string): Promise<Array<{ content: s
 
     const vectorString = `[${queryVector.join(",")}]`;
 
+    // R6-FIX: Use $queryRaw with Prisma.sql for type-safe parameterized queries.
     // Reduced from 5 → 3 results: less context = faster model processing
-    const results = await prisma.$queryRawUnsafe<Array<{ id: string; content: string; similarity: number }>>(
-      `SELECT id, content, 1 - (embedding <=> $1::vector) as similarity
-       FROM "SupportKnowledgeDoc"
-       WHERE 1 - (embedding <=> $1::vector) >= 0.55
-       ORDER BY embedding <=> $1::vector ASC
-       LIMIT 3;`,
-      vectorString,
-    );
+    const results = await prisma.$queryRaw<Array<{ id: string; content: string; similarity: number }>>`
+      SELECT id, content, 1 - (embedding <=> ${vectorString}::vector) as similarity
+      FROM "SupportKnowledgeDoc"
+      WHERE 1 - (embedding <=> ${vectorString}::vector) >= 0.55
+      ORDER BY embedding <=> ${vectorString}::vector ASC
+      LIMIT 3;`;
 
     return results;
   } catch (err) {

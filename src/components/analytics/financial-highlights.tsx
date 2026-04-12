@@ -124,7 +124,7 @@ export function FinancialHighlights({
     : null;
 
   return (
-    <div className={cn("rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl backdrop-blur-xl", className)}>
+    <div className={cn("rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl", className)}>
       <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
           <BarChart3 className="w-4 h-4 text-emerald-500" />
@@ -211,7 +211,7 @@ export function FinancialHighlights({
               <FinMetric label="Dividends Paid" value={fmt(cashflow!.dividendsPaid)} tooltip="Total dividends distributed to shareholders" />
             )}
             {cashflow!.repurchaseOfCapitalStock != null && cashflow!.repurchaseOfCapitalStock !== 0 && (
-              <FinMetric label="Share Buybacks" value={fmt(cashflow!.repurchaseOfCapitalStock)} tooltip="Stock repurchased — reduces share count, boosting EPS" />
+              <FinMetric label="Share Buybacks" value={fmt(cashflow!.repurchaseOfCapitalStock)} tooltip="Token repurchased — reduces circulating supply" />
             )}
           </div>
         )}

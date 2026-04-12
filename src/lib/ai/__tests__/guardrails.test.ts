@@ -7,28 +7,28 @@ import { validateInput } from "../guardrails";
 describe("Guardrails — validateInput", () => {
   describe("allowed queries", () => {
     const ALLOWED = [
-      "What is the price of NVDA?",
+      "What is the price of SOL-USD?",
       "How is the price doing today?",
       "Show me price action for Bitcoin",
-      "What price did AAPL close at?",
+      "What price did BTC-USD close at?",
       "price",
       "current price",
       "price movement",
-      "What are the risks for TSLA?",
-      "Compare AAPL vs MSFT",
+      "What are the risks for DOGE-USD?",
+      "Compare BTC-USD vs ETH-USD",
       "How does the volatility score work?",
       "What is a short squeeze?",
       "Explain the momentum engine",
       "Is Bitcoin correlated with gold?",
-      "What's driving NVDA's rally?",
-      "How is the tech sector doing?",
-      "buyback program for AAPL",
+      "What's driving SOL-USD's rally?",
+      "How is the L1 sector doing?",
+      "buyback program for BTC-USD",
       "short-term outlook",
       "long-term investment thesis",
       // H2: These are now allowed — LLM reframes as analysis via governance rules
-      "Should I buy NVDA?",
+      "Should I buy SOL-USD?",
       "Should I sell my Bitcoin?",
-      "Buy or sell AAPL?",
+      "Buy or sell BTC-USD?",
     ];
 
     for (const query of ALLOWED) {
@@ -43,7 +43,7 @@ describe("Guardrails — validateInput", () => {
   describe("blocked queries — banned phrases", () => {
     const BLOCKED_PHRASES = [
       { query: "Give me a price prediction for BTC", phrase: "price prediction" },
-      { query: "Is TSLA a guaranteed return?", phrase: "guaranteed return" },
+      { query: "Is DOGE-USD a guaranteed return?", phrase: "guaranteed return" },
       { query: "Is this a safe bet?", phrase: "safe bet" },
     ];
 
@@ -60,10 +60,10 @@ describe("Guardrails — validateInput", () => {
   describe("target price — intent-aware (Block 10)", () => {
     describe("allows legitimate analyst target price lookups", () => {
       const ALLOWED_TARGET = [
-        "What is the analyst target price for AAPL?",
-        "What's the consensus target price on NVDA?",
-        "Show me the 12-month price target for TSLA",
-        "What do analysts have as a target price for MSFT?",
+        "What is the analyst target price for BTC-USD?",
+        "What's the consensus target price on SOL-USD?",
+        "Show me the 12-month price target for ETH-USD",
+        "What do analysts have as a target price for BNB-USD?",
       ];
       for (const query of ALLOWED_TARGET) {
         it(`allows: "${query}"`, () => {
@@ -75,10 +75,10 @@ describe("Guardrails — validateInput", () => {
 
     describe("blocks prediction-intent target price claims", () => {
       const BLOCKED_TARGET = [
-        { query: "My target price for AAPL is $250", desc: "own target price claim" },
+        { query: "My target price for BTC-USD is $250", desc: "own target price claim" },
         { query: "Predict the target price for BTC", desc: "explicit predict" },
-        { query: "Forecasting target price for NVDA next year", desc: "forecasting intent" },
-        { query: "TSLA will reach its target price of $400", desc: "will reach" },
+        { query: "Forecasting target price for SOL-USD next year", desc: "forecasting intent" },
+        { query: "DOGE-USD will reach its target price of $400", desc: "will reach" },
         { query: "Going to hit price target of $300 soon", desc: "going to hit" },
       ];
       for (const { query, desc } of BLOCKED_TARGET) {

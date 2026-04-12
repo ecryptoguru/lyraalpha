@@ -89,9 +89,7 @@ export interface AssetAnalytics {
   fundHouse?: string | null;
   financials?: Record<string, unknown> | null;
   topHoldings?: Record<string, unknown> | null;
-  etfLookthrough?: Record<string, unknown> | null;
-  mfLookthrough?: Record<string, unknown> | null;
-  commodityIntelligence?: Record<string, unknown> | null;
+  portfolioLookthrough?: Record<string, unknown> | null;
   cryptoIntelligence?: Record<string, unknown> | null;
   fundPerformanceHistory?: Record<string, unknown> | null;
   type: string;
@@ -184,12 +182,11 @@ export function buildAssetPageDerivedState({
   const compatibilityScore = compatibility?.score != null ? Math.round(compatibility.score) : null;
   const assetName = analyticsComputed.name || getFriendlySymbol(symbol, analytics?.type, analytics?.name);
 
-  const hasMeaningfulEtfLookthrough = (() => {
-    const lt = analyticsComputed.etfLookthrough as Record<string, unknown> | null | undefined;
+  const hasMeaningfulPortfolioLookthrough = (() => {
+    const lt = analyticsComputed.portfolioLookthrough as Record<string, unknown> | null | undefined;
     if (!lt) return false;
     const factor = lt.factorExposure as Record<string, unknown> | undefined;
     const concentration = lt.concentration as Record<string, unknown> | undefined;
-    const geographic = lt.geographic as Record<string, unknown> | undefined;
     const scores = lt.lookthroughScores as Record<string, unknown> | undefined;
     return [
       factor?.value,
@@ -200,18 +197,9 @@ export function buildAssetPageDerivedState({
       concentration?.top1Weight,
       concentration?.top5Weight,
       concentration?.top10Weight,
-      geographic?.US,
-      geographic?.IN,
-      geographic?.other,
       scores?.weightedAvg,
       scores?.matchRate,
     ].some((value) => hasVisibleValue(value));
-  })();
-
-  const hasMeaningfulMfLookthrough = (() => {
-    const lt = analyticsComputed.mfLookthrough as Record<string, unknown> | null | undefined;
-    if (!lt) return false;
-    return [lt.lookthroughScores, lt.risk, lt.behavioral, lt.holdingConcentration].some((value) => hasVisibleValue(value));
   })();
 
   const hasMeaningfulSignalStrength = (() => {
@@ -481,8 +469,7 @@ export function buildAssetPageDerivedState({
     keyRisks,
     summaryCards,
     assetShare,
-    hasMeaningfulEtfLookthrough,
-    hasMeaningfulMfLookthrough,
+    hasMeaningfulPortfolioLookthrough,
     hasMeaningfulSignalStrength,
     hasMeaningfulPerformanceSection,
     latestPrice: priceCalculations.latestPrice,

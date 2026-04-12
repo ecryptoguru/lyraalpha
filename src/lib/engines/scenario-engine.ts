@@ -13,6 +13,7 @@
  */
 
 import type { MarketContextSnapshot } from "./market-regime";
+import type { FactorProfile } from "./factor-attribution";
 
 export type RegimeLabel = "STRONG_RISK_ON" | "RISK_ON" | "NEUTRAL" | "DEFENSIVE" | "RISK_OFF";
 
@@ -25,7 +26,9 @@ export interface AssetSignals {
   trust: number;
 }
 
-export interface FactorProfile {
+export type { FactorProfile } from "./factor-attribution";
+
+interface FactorWeights {
   value: number;
   growth: number;
   momentum: number;
@@ -225,7 +228,7 @@ const TRANSITION_MATRIX: Record<RegimeLabel, Record<RegimeLabel, number>> = {
 };
 
 // Regime factor preference vectors (how much each regime favors each factor)
-const REGIME_FACTOR_PREFERENCE: Record<RegimeLabel, FactorProfile> = {
+const REGIME_FACTOR_PREFERENCE: Record<RegimeLabel, FactorWeights> = {
   STRONG_RISK_ON: { value: 0.15, growth: 0.45, momentum: 0.3, lowVol: 0.1 },
   RISK_ON: { value: 0.2, growth: 0.4, momentum: 0.25, lowVol: 0.15 },
   NEUTRAL: { value: 0.25, growth: 0.25, momentum: 0.25, lowVol: 0.25 },

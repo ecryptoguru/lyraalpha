@@ -1,4 +1,4 @@
-import { getUserCredits } from "@/lib/services/credit.service";
+import { getUserCreditsReadOnly } from "@/lib/services/credit.service";
 import { getUserPlan } from "./plan-gate";
 
 export interface CreditCheckResult {
@@ -9,7 +9,7 @@ export interface CreditCheckResult {
 }
 
 export async function checkCredits(userId: string, cost: number): Promise<CreditCheckResult> {
-  const credits = await getUserCredits(userId);
+  const credits = await getUserCreditsReadOnly(userId);
 
   if (credits >= cost) {
     return { allowed: true, remaining: credits, required: cost };

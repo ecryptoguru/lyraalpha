@@ -5,7 +5,6 @@ import {
   getQuotes,
   fetchAssetData,
   fetchInstitutionalSummary,
-  fetchFundamentals,
   getRawValue,
 } from "../market-data";
 import { calculateTrendScore } from "../engines/trend";
@@ -293,7 +292,7 @@ export class MarketSyncService {
             // Ensure summary is available for crypto enrichment if not already fetched
             // OR if essential metrics like ROE/PEG are missing and we have a deep sync window
             let effectiveSummary = summary;
-            const needsDeepData = !asset?.pegRatio || !asset?.roe;
+            const needsDeepData = false; // Platform is crypto-only, no PEG/ROE needed
             const needsExtended = false; // Platform is crypto-only, extended institutional data not applicable
             if (!effectiveSummary && (needsDeepData || needsExtended)) {
                // Use restricted fetch if not in daily window but data is missing
@@ -342,8 +341,7 @@ export class MarketSyncService {
             // Resolve the best name: prefer existing human-readable DB name over raw API value.
             // Only overwrite if the current name is absent, equals the raw symbol, or still has an exchange suffix.
             const existingName = asset?.name || "";
-            const isNameStale = !existingName || existingName === symbol
-              || existingName.endsWith(".NS") || existingName.endsWith(".BO");
+            const isNameStale = !existingName || existingName === symbol;
             const resolvedName = DISPLAY_NAME_OVERRIDES[symbol]
               || (!isNameStale ? existingName : (rawQuote.longName || rawQuote.shortName || symbol));
 
@@ -353,110 +351,31 @@ export class MarketSyncService {
               changePercent: quote.regularMarketChangePercent || 0,
               lastPriceUpdate: new Date(),
               marketCap: quote.marketCap !== null && quote.marketCap !== undefined ? quote.marketCap.toString() : (asset?.marketCap || "0"),
-              peRatio: (getRawValue(details.trailingPE || quote.trailingPE) as number) || null,
+              // peRatio removed — not on Asset model
               volume: (getRawValue(quote.regularMarketVolume || details.volume) as number) || null,
               avgVolume: (getRawValue(quote.averageDailyVolume10Day || details.averageVolume) as number) || null,
               fiftyTwoWeekHigh: (getRawValue(details.fiftyTwoWeekHigh || quote.fiftyTwoWeekHigh) as number) || null,
               fiftyTwoWeekLow: (getRawValue(details.fiftyTwoWeekLow || quote.fiftyTwoWeekLow) as number) || null,
-              roe: (getRawValue(financial.returnOnEquity || quote.returnOnEquity) as number) || null,
-              roce: (getRawValue(financial.returnOnAssets) as number) || null, // ROA as ROCE proxy
+              // roe/roce removed — not applicable for crypto-only platform
               sector: ((details as Record<string, unknown>).sector || (rawQuote as unknown as Record<string, unknown>).sector || asset?.sector) as string || null,
               openInterest: (getRawValue(details.openInterest || rawQuote.openInterest) as number) || null,
-              dividendYield: (getRawValue(details.dividendYield || rawQuote.dividendYield) || null) as number | null,
-              // P0: Persist fields that were read from quote but never written
-              eps: (getRawValue(quote.epsTrailingTwelveMonths) as number) || (getRawValue(stats.trailingEps) as number) || null,
-              priceToBook: (getRawValue(quote.priceToBook) as number) || (getRawValue(stats.priceToBook) as number) || null,
-              shortRatio: (getRawValue(quote.shortRatio) as number) || (getRawValue(stats.shortRatio) as number) || null,
+              // dividendYield removed — not on Asset model
+              // Stock-specific fields removed — not on Asset model (crypto-only platform)
               oneYearChange: (getRawValue(quote.fiftyTwoWeekChangePercent) as number) || null,
-              pegRatio: (getRawValue(stats.pegRatio) as number) || (getRawValue(quote.trailingPegRatio) as number) || null,
 
               ...(Object.keys(metadataPatch).length > 0
                 ? { metadata: { ...existingMetadata, ...metadataPatch } as Prisma.JsonObject }
                 : {}),
 
-              // P0: Fix ETF expense ratio — prefer fundProfile path (always populated) over ks path (always null)
-              expenseRatio: (getRawValue(fundProfile.feesExpensesInvestment?.annualReportExpenseRatio) as number) || (getRawValue(stats.annualReportExpenseRatio) as number) || null,
-              // P0: Fix NAV — prefer summaryDetail.navPrice (populated for ETFs) over ks.navPrice (always null)
-              nav: (getRawValue(details.navPrice) as number) || (getRawValue(stats.navPrice) as number) || null,
-              yield: (getRawValue(stats.yield) as number) || (getRawValue(details.yield) as number) || null,
-              morningstarRating: stats.morningStarOverallRating?.toString() || null,
-              category: details.category || fundProfile.categoryName || fundProfile.category || null,
-              forwardPe: (getRawValue(details.forwardPE || quote.forwardPE) as number) || null,
-              heldPercentInstitutions: (getRawValue(stats.heldPercentInstitutions) as number) || null,
-              heldPercentInsiders: (getRawValue(stats.heldPercentInsiders) as number) || null,
-              profitMargins: (getRawValue(stats.profitMargins || financial.profitMargins) as number) || null,
-              operatingMargins: (getRawValue(financial.operatingMargins) as number) || null,
-              revenueGrowth: (getRawValue(financial.revenueGrowth) as number) || null,
-              bookValue: (getRawValue(stats.bookValue) as number) || null,
-              priceToSales: (getRawValue(details.priceToSales) as number) || null,
+              // Fund-specific fields removed — crypto-only platform
               updatedAt: new Date(),
 
-              // Extended data: only for US stocks & ETFs - not applicable for crypto
+              // Extended data: not applicable for crypto
 
-              // Extended data: ETF Top Holdings + Sector Weights
-              ...(() => {
-                if (!effectiveSummary?.topHoldings) return {};
-                const th = effectiveSummary.topHoldings;
-                const holdings = th.holdings?.map(h => ({
-                  symbol: h.symbol || null,
-                  name: h.holdingName || null,
-                  weight: (getRawValue(h.holdingPercent) as number) ?? null,
-                })).filter(h => h.name || h.symbol) || [];
-                const sectorWeights = th.sectorWeightings?.flatMap(sw =>
-                  Object.entries(sw).map(([sector, val]) => ({
-                    sector,
-                    weight: (getRawValue(val) as number) ?? null,
-                  }))
-                ).filter(s => s.weight !== null && s.weight > 0) || [];
-                return {
-                  topHoldings: {
-                    holdings,
-                    sectorWeights,
-                    equityHoldings: th.equityHoldings ? {
-                      priceToEarnings: (getRawValue(th.equityHoldings.priceToEarnings) as number) ?? null,
-                      priceToBook: (getRawValue(th.equityHoldings.priceToBook) as number) ?? null,
-                      priceToSales: (getRawValue(th.equityHoldings.priceToSales) as number) ?? null,
-                      medianMarketCap: (getRawValue(th.equityHoldings.medianMarketCap) as number) ?? null,
-                      threeYearEarningsGrowth: (getRawValue(th.equityHoldings.threeYearEarningsGrowth) as number) ?? null,
-                    } : null,
-                    bondHoldings: th.bondHoldings ? {
-                      maturity: (getRawValue(th.bondHoldings.maturity) as number) ?? null,
-                      duration: (getRawValue(th.bondHoldings.duration) as number) ?? null,
-                    } : null,
-                  } as Prisma.InputJsonValue,
-                };
-              })(),
-
-              // Extended data: ETF Fund Performance History
-              ...(() => {
-                if (!effectiveSummary?.fundPerformance?.performanceOverview) return {};
-                const perf = effectiveSummary.fundPerformance.performanceOverview;
-                return {
-                  fundPerformanceHistory: {
-                    ytd: (getRawValue(perf.ytdReturnPct) as number) ?? null,
-                    oneYear: (getRawValue(perf.oneYearTotalReturn) as number) ?? null,
-                    threeYear: (getRawValue(perf.threeYearTotalReturn) as number) ?? null,
-                    fiveYear: (getRawValue(perf.fiveYearTotalReturn) as number) ?? null,
-                    tenYear: (getRawValue(perf.tenYearTotalReturn) as number) ?? null,
-                    bestThreeYear: (getRawValue(perf.bestThreeYrTotalReturn) as number) ?? null,
-                    worstThreeYear: (getRawValue(perf.worstThreeYrTotalReturn) as number) ?? null,
-                  } as Prisma.InputJsonValue,
-                };
-              })(),
+              // Top holdings & fund performance removed — crypto-only platform
             };
 
-            // Fetch financial statements for US stocks & ETFs via fundamentalsTimeSeries API
-            // Not applicable for crypto-only platform
-            if (false && shouldFetchDeepInstitutional) {
-              try {
-                const fundamentals = await fetchFundamentals(symbol);
-                if (fundamentals) {
-                  updatePayload.financials = fundamentals as unknown as Prisma.InputJsonValue;
-                }
-              } catch (e) {
-                logger.warn({ symbol, err: sanitizeError(e) }, "Fundamentals fetch failed, skipping");
-              }
-            }
+            // Financial statements not applicable for crypto-only platform
 
             return { symbol, data: updatePayload, history };
           } catch (err) {
@@ -881,8 +800,8 @@ export class MarketSyncService {
     const symbols = await this.resolveUniverse(region);
     
     // 1. Pre-fetch benchmark histories for correlation (region-aware)
-    const usBenchmarks = ["SPY", "QQQ", "BTC-USD", "GLD"];
-    const inBenchmarks = ["^NSEI", "^BSESN", "RELIANCE.NS", "HDFCBANK.NS"];
+    const usBenchmarks = ["BTC-USD", "ETH-USD", "SOL-USD"];
+    const inBenchmarks = ["BTC-USD", "ETH-USD", "SOL-USD"];
     const allBenchmarks = [...new Set([...usBenchmarks, ...inBenchmarks])];
     const benchmarkHistories: Record<string, OHLCV[]> = {};
     const benchmarkResults = await Promise.all(
@@ -968,7 +887,7 @@ export class MarketSyncService {
               regularMarketPrice: asset.price || 0,
               regularMarketChangePercent: asset.changePercent || 0,
               marketCap: asset.marketCap ? parseFloat(asset.marketCap) : undefined,
-              trailingPE: asset.peRatio || undefined,
+              trailingPE: (asset.metadata as Prisma.JsonObject)?.forwardPe as number || undefined,
               fiftyTwoWeekChangePercent: asset.oneYearChange || undefined,
               regularMarketVolume: asset.volume || undefined,
               dividendYield: (asset.metadata as Prisma.JsonObject)?.dividendYield as number || undefined,
@@ -981,7 +900,7 @@ export class MarketSyncService {
               liquidity: calculateLiquidityScore(quote, {
                 history: cleanData,
                 avgVolume3M: asset.avgVolume || undefined,
-                shortRatio: asset.shortRatio || undefined,
+                shortRatio: (asset.metadata as Prisma.JsonObject)?.shortRatio as number || undefined,
                 marketCap: asset.marketCap || undefined,
               }),
               sentiment: calculateSentimentScore(cleanData),
@@ -1175,10 +1094,9 @@ export class MarketSyncService {
 
         // Factors & Correlations
         const factorProfile = calculateFactorProfile(symbol, history, {
-          peRatio: asset.peRatio,
-          industryPe: asset.industryPe,
-          roe: asset.roe,
-          marketCap: asset.marketCap,
+          peRatio: (assetMeta.forwardPe as number) ?? null,
+          industryPe: (assetMeta.industryPe as number) ?? null,
+          roe: (assetMeta.roe as number) ?? null,
           oneYearChange: asset.oneYearChange,
         });
         // Region-aware benchmark selection: Indian assets use Indian benchmarks
@@ -1255,17 +1173,17 @@ export class MarketSyncService {
           unavailable: Object.values(fundamentalReliability).filter((f) => f.qualityTier === "unavailable").length,
         };
         const fundamentals: FundamentalData = {
-          peRatio: asset.peRatio ?? null,
-          industryPe: asset.industryPe ?? null,
-          pegRatio: asset.pegRatio ?? null,
-          priceToBook: asset.priceToBook ?? null,
-          roe: asset.roe ?? null,
-          roce: asset.roce ?? null,
+          peRatio: (assetMeta.forwardPe as number) ?? null,
+          industryPe: (assetMeta.industryPe as number) ?? null,
+          pegRatio: (assetMeta.pegRatio as number) ?? null,
+          priceToBook: (assetMeta.priceToBook as number) ?? null,
+          roe: (assetMeta.roe as number) ?? null,
+          roce: (assetMeta.roce as number) ?? null,
           profitMargins: (assetMeta.profitMargins as number) ?? null,
           operatingMargins: (assetMeta.operatingMargins as number) ?? null,
           revenueGrowth: (assetMeta.revenueGrowth as number) ?? null,
-          dividendYield: asset.dividendYield ?? null,
-          shortRatio: asset.shortRatio ?? null,
+          dividendYield: (assetMeta.dividendYield as number) ?? null,
+          shortRatio: (assetMeta.shortRatio as number) ?? null,
           heldPercentInstitutions: (assetMeta.heldPercentInstitutions as number) ?? null,
           targetMeanPrice: (assetMeta.targetMeanPrice as number) ?? null,
           currentPrice: asset.price,
@@ -1300,7 +1218,7 @@ export class MarketSyncService {
 
             const scenarios = calculateScenarios(
               flatSignals,
-              factorProfile as import("../engines/scenario-engine").FactorProfile,
+              factorProfile,
               context,
               avgCorr,
               historicalReturns,

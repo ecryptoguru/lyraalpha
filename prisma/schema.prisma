@@ -838,6 +838,7 @@ enum ScoreType {
 
 enum PaymentProvider {
   STRIPE
+  RAZORPAY
 }
 
 enum SubscriptionStatus {
@@ -850,6 +851,8 @@ enum SubscriptionStatus {
 
 enum UserPreferredRegion {
   US
+  IN
+  BOTH
 }
 
 enum UserExperienceLevel {

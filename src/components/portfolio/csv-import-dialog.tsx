@@ -42,17 +42,17 @@ interface CsvImportDialogProps {
 }
 
 const US_SAMPLE_CSV = `symbol,quantity,avgPrice
-AAPL,10,175.50
-MSFT,5,380.00
-NVDA,3,850.00
-SPY,20,510.00
+BTC-USD,0.5,95000.00
+ETH-USD,3,3100.00
+SOL-USD,40,150.00
+BNB-USD,10,580.00
 `;
 
 const IN_SAMPLE_CSV = `symbol,quantity,avgPrice
-RELIANCE,10,2450.00
-INFY,25,1780.00
-HDFCBANK,15,1620.00
-TCS,8,3850.00
+BTC-USD,0.5,95000.00
+ETH-USD,3,3100.00
+SOL-USD,40,150.00
+XRP-USD,1500,2.10
 `;
 
 function getSampleCsv(region: string): string {
@@ -61,7 +61,7 @@ function getSampleCsv(region: string): string {
 
 const COLUMN_ALIASES: Record<string, string> = {
   // symbol
-  symbol: "symbol", ticker: "symbol", stock: "symbol", scrip: "symbol", asset: "symbol",
+  symbol: "symbol", ticker: "symbol", crypto: "symbol", scrip: "symbol", asset: "symbol",
   name: "symbol", code: "symbol", isin: "symbol",
   // quantity
   quantity: "quantity", qty: "quantity", shares: "quantity", units: "quantity",
@@ -255,8 +255,8 @@ export function CsvImportDialog({ portfolioId, portfolioName, region, onAdd, onC
             </div>
             <code className="block text-[10px] font-mono text-muted-foreground leading-relaxed whitespace-pre">
               {region === "IN"
-                ? `symbol,quantity,avgPrice\nRELIANCE,10,2450.00\nINFY,25,1780.00`
-                : `symbol,quantity,avgPrice\nAAPL,10,175.50\nMSFT,5,380.00`}
+                ? `symbol,quantity,avgPrice\nBTC-USD,0.5,95000.00\nETH-USD,3,3100.00`
+                : `symbol,quantity,avgPrice\nBTC-USD,0.5,95000.00\nETH-USD,3,3100.00`}
             </code>
             <p className="text-[10px] text-muted-foreground">
               Column aliases supported: <span className="text-foreground">ticker, qty, shares, price, buyprice, avg_cost</span> and more. Symbols must exist in the {region} asset universe.

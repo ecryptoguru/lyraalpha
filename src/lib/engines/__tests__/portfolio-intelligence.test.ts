@@ -18,7 +18,7 @@ const baseInput: PortfolioIntelligenceInput = {
   riskMetrics: {
     averageCompatibilityScore: 66,
     weakCompatibilityCount: 1,
-    topCompatibilityDrag: ["AAPL"],
+    topCompatibilityDrag: ["BTC-USD"],
     regimeMismatchLabel: "Moderate mismatch",
     regimeMismatchReason: "Part of the portfolio still looks out of sync with the current risk on backdrop.",
     currentMarketRegime: "RISK_ON",
@@ -32,7 +32,7 @@ const baseInput: PortfolioIntelligenceInput = {
       asset: {
         price: 118,
         sector: "Technology",
-        type: "STOCK",
+        type: "CRYPTO",
       },
     },
     {
@@ -41,7 +41,7 @@ const baseInput: PortfolioIntelligenceInput = {
       asset: {
         price: 210,
         sector: "Finance",
-        type: "STOCK",
+        type: "CRYPTO",
       },
     },
   ],
@@ -114,7 +114,7 @@ describe("buildPortfolioIntelligence", () => {
 describe("computePortfolioHealth", () => {
   it("returns 0 diversification for a single holding (not 10)", () => {
     const result = computePortfolioHealth([
-      { symbol: "AAPL", weight: 1, avgVolatilityScore: 50, avgLiquidityScore: 80, avgTrustScore: 85, sector: "Technology", type: "STOCK" },
+      { symbol: "BTC-USD", weight: 1, avgVolatilityScore: 50, avgLiquidityScore: 80, avgTrustScore: 85, sector: null, type: "CRYPTO" },
     ]);
     expect(result.dimensions.diversificationScore).toBe(0);
   });
@@ -128,10 +128,10 @@ describe("computePortfolioHealth", () => {
 
   it("scores a well-diversified portfolio above 60", () => {
     const holdings = [
-      { symbol: "AAPL", weight: 0.25, avgVolatilityScore: 60, avgLiquidityScore: 90, avgTrustScore: 88, sector: "Technology", type: "STOCK" },
-      { symbol: "GLD", weight: 0.25, avgVolatilityScore: 30, avgLiquidityScore: 92, avgTrustScore: 95, sector: "Commodity", type: "ETF" },
-      { symbol: "AGG", weight: 0.25, avgVolatilityScore: 20, avgLiquidityScore: 98, avgTrustScore: 97, sector: "Bond", type: "ETF" },
-      { symbol: "BTC", weight: 0.25, avgVolatilityScore: 80, avgLiquidityScore: 70, avgTrustScore: 65, sector: "Crypto", type: "CRYPTO" },
+      { symbol: "BTC", weight: 0.25, avgVolatilityScore: 60, avgLiquidityScore: 90, avgTrustScore: 88, sector: "Layer 1", type: "CRYPTO" },
+      { symbol: "ETH", weight: 0.25, avgVolatilityScore: 30, avgLiquidityScore: 92, avgTrustScore: 95, sector: "DeFi", type: "CRYPTO" },
+      { symbol: "SOL", weight: 0.25, avgVolatilityScore: 20, avgLiquidityScore: 98, avgTrustScore: 97, sector: "Layer 1", type: "CRYPTO" },
+      { symbol: "LINK", weight: 0.25, avgVolatilityScore: 80, avgLiquidityScore: 70, avgTrustScore: 65, sector: "Oracle", type: "CRYPTO" },
     ];
     const result = computePortfolioHealth(holdings);
     expect(result.healthScore).toBeGreaterThan(45);

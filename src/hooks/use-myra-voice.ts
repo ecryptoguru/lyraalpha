@@ -35,9 +35,57 @@ const CLOSING_PHRASES = [
   "that's all", "have a great", "have a good",
 ];
 
+// V-INJ: Client-side injection pattern detection for voice transcripts.
+// Lightweight subset of server-side INJECTION_PATTERNS (guardrails.ts) — runs client-side
+// to log warnings when user speech matches known injection patterns. This is defense-in-depth;
+// the Realtime API receives audio directly, so we can't block it, but we can detect and log.
+const VOICE_INJECTION_PATTERNS = [
+  /ignore\s+(all\s+)?previous\s+(instructions|prompts?|rules)/i,
+  /you\s+are\s+now\s+/i,
+  /system\s*:\s*/i,
+  /new\s+instructions?\s*:/i,
+  /forget\s+(all\s+)?(your|previous|the)\s+/i,
+  /pretend\s+(you\s+are|to\s+be)\s+/i,
+  /act\s+as\s+(if\s+you|a)\s+/i,
+  /override\s+(your|the|all)\s+/i,
+  /disregard\s+(your|the|all|previous)\s+/i,
+  /\[system\]/i,
+  /<\/?(system|instructions|prompt)>/i,
+];
+
+function checkVoiceInjection(text: string): boolean {
+  return VOICE_INJECTION_PATTERNS.some((p) => p.test(text));
+}
+
+// PII-1: Client-side PII redaction for voice transcripts.
+// Redacts emails, phone numbers, and Clerk user IDs before emitting to the UI chat bubble.
+// Pure regex — no server dependencies needed. Matches server-side patterns in pii-scrub.ts.
+const CLIENT_PII_PATTERNS: Array<{ pattern: RegExp; replacement: string }> = [
+  { pattern: /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g, replacement: "[email]" },
+  { pattern: /(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,5}\)?[-.\s]?\d{3,5}[-.\s]?\d{3,5}\b/g, replacement: "[phone]" },
+  { pattern: /\buser_[a-zA-Z0-9]{10,30}\b/g, replacement: "[user-id]" },
+];
+
+function redactPII(text: string): string {
+  let result = text;
+  for (const { pattern, replacement } of CLIENT_PII_PATTERNS) {
+    pattern.lastIndex = 0;
+    result = result.replace(pattern, replacement);
+  }
+  return result;
+}
+
 export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
   const [state, setState] = useState<VoiceState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // UX: isThinking = model is generating but hasn't started speaking yet (dead-air gap)
+  const [isThinking, setIsThinking] = useState(false);
+  // UX: isSpeaking = Myra's audio is actively playing
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  // UX: silenceCountdown = seconds remaining before auto-stop (null when not counting)
+  const [silenceCountdown, setSilenceCountdown] = useState<number | null>(null);
+  // UX: micLevel = current microphone input level (0-1) for visual feedback
+  const [micLevel, setMicLevel] = useState(0);
 
   const stateRef = useRef<VoiceState>("idle");
   const sessionRef = useRef<import("@openai/agents/realtime").RealtimeSession | null>(null);
@@ -61,6 +109,9 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
 
   // Silence auto-stop timer
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Silence countdown interval — ticks every 1s to update UI
+  const silenceCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const silenceDeadlineRef = useRef<number>(0); // timestamp when silence timer fires
 
   const onTranscriptRef = useRef(onTranscript);
   useEffect(() => { stateRef.current = state; }, [state]);
@@ -86,6 +137,12 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
     }
+    if (silenceCountdownRef.current) {
+      clearInterval(silenceCountdownRef.current);
+      silenceCountdownRef.current = null;
+    }
+    silenceDeadlineRef.current = 0;
+    setSilenceCountdown(null);
   }, []);
 
   const closeSession = useCallback(() => {
@@ -103,7 +160,29 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
     closeSession();
     setState("idle");
     setErrorMessage(null);
+    setIsThinking(false);
+    setIsSpeaking(false);
   }, [closeSession]);
+
+  // UX: Reset the silence auto-stop timer — called when user taps the
+  // "Ending in Xs" countdown warning to keep the session alive.
+  const keepAlive = useCallback(() => {
+    if (stateRef.current !== "active") return;
+    clearSilenceTimer();
+    const deadline = Date.now() + SILENCE_TIMEOUT_MS;
+    silenceDeadlineRef.current = deadline;
+    silenceTimerRef.current = setTimeout(() => {
+      if (stateRef.current === "active") stopVoiceRef.current();
+    }, SILENCE_TIMEOUT_MS);
+    silenceCountdownRef.current = setInterval(() => {
+      const remaining = Math.max(0, Math.ceil((silenceDeadlineRef.current - Date.now()) / 1000));
+      setSilenceCountdown(remaining > 0 ? remaining : null);
+      if (remaining <= 0) {
+        if (silenceCountdownRef.current) clearInterval(silenceCountdownRef.current);
+        silenceCountdownRef.current = null;
+      }
+    }, 1000);
+  }, [clearSilenceTimer]);
 
   const stopVoiceRef = useRef(stopVoice);
   useEffect(() => { stopVoiceRef.current = stopVoice; }, [stopVoice]);
@@ -307,6 +386,8 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       let audioRmsSum = 0;
       let audioRmsCount = 0;
       let silenceWarningShown = false;
+      let micLevelAccum = 0;
+      let micLevelAccumCount = 0;
       worklet.port.onmessage = (evt) => {
         const activeSession = sessionRef.current ?? pendingSessionRef.current;
         if (!activeSession) return;
@@ -320,6 +401,16 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
         const rms = Math.sqrt(sumSq / float32.length);
         audioRmsSum += rms;
         audioRmsCount++;
+        // UX: Accumulate mic level for visual feedback — update state every ~30 chunks (~160ms)
+        // to avoid excessive re-renders while still feeling responsive.
+        micLevelAccum += rms;
+        micLevelAccumCount++;
+        if (micLevelAccumCount >= 30) {
+          const avgLevel = Math.min(1, (micLevelAccum / micLevelAccumCount) * 5); // scale up for visibility
+          setMicLevel(avgLevel);
+          micLevelAccum = 0;
+          micLevelAccumCount = 0;
+        }
         if (audioChunkCount === 1) {
           console.info(`[Myra voice] first audio chunk — rms: ${rms.toFixed(4)}, samples: ${float32.length}`);
         } else if (audioChunkCount % 500 === 0) {
@@ -343,9 +434,16 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       worklet.connect(silentGain);
       silentGain.connect(inputAudioCtxRef.current.destination);
 
+      let hasReceivedAudio = false;
       session.on("audio", (event: { data: ArrayBuffer }) => {
         const outputCtx = outputAudioCtxRef.current;
         if (!outputCtx) return;
+        // UX: First audio chunk means Myra started speaking — clear thinking indicator
+        if (!hasReceivedAudio) {
+          hasReceivedAudio = true;
+          setIsThinking(false);
+          setIsSpeaking(true);
+        }
         const pcm = new Int16Array(event.data);
         const buffer = outputCtx.createBuffer(1, pcm.length, 24_000);
         const channel = buffer.getChannelData(0);
@@ -360,6 +458,8 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
 
       session.on("audio_interrupted", () => {
         if (outputAudioCtxRef.current) nextPlayTimeRef.current = outputAudioCtxRef.current.currentTime;
+        setIsSpeaking(false);
+        hasReceivedAudio = false;
       });
 
       session.on("transport_event", (event: Record<string, unknown>) => {
@@ -371,6 +471,8 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
         }
         if (type === "response.created") {
           console.info("[Myra voice] response.created — model is generating");
+          setIsThinking(true);
+          setIsSpeaking(false);
         }
         if (type === "input_audio_buffer.speech_started") {
           console.info("[Myra voice] user speech detected (VAD)");
@@ -384,22 +486,39 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
 
         // ── Silence auto-stop ──────────────────────────────────────────────
         if (type === "input_audio_buffer.speech_started") {
-          // User started speaking — cancel silence timer
+          // User started speaking — cancel silence timer and reset thinking
           clearSilenceTimer();
+          setIsThinking(false);
+          setIsSpeaking(false);
+          hasReceivedAudio = false;
         }
 
         if (type === "response.done") {
           const wasGreetingPending = greetingResponsePendingRef.current;
           greetingResponsePendingRef.current = false;
           console.info(`[Myra voice] response.done (wasGreetingPending=${wasGreetingPending})`);
+          setIsThinking(false);
+          setIsSpeaking(false);
+          hasReceivedAudio = false;
 
           // Don't start the silence timer for the opening greeting turn.
           // Only arm it after a real conversation response.
           if (!wasGreetingPending) {
             clearSilenceTimer();
+            const deadline = Date.now() + SILENCE_TIMEOUT_MS;
+            silenceDeadlineRef.current = deadline;
             silenceTimerRef.current = setTimeout(() => {
               if (stateRef.current === "active") stopVoiceRef.current();
             }, SILENCE_TIMEOUT_MS);
+            // UX: Countdown ticks every 1s — shows seconds remaining in UI
+            silenceCountdownRef.current = setInterval(() => {
+              const remaining = Math.max(0, Math.ceil((silenceDeadlineRef.current - Date.now()) / 1000));
+              setSilenceCountdown(remaining > 0 ? remaining : null);
+              if (remaining <= 0) {
+                if (silenceCountdownRef.current) clearInterval(silenceCountdownRef.current);
+                silenceCountdownRef.current = null;
+              }
+            }, 1000);
           }
         }
 
@@ -433,10 +552,18 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
 
           if (!text || !itemId) return;
 
+          // V-INJ: Check user transcript for injection patterns — defense-in-depth logging
+          if (checkVoiceInjection(text)) {
+            console.warn("[Myra voice] Injection pattern detected in user transcript — model should disregard via system prompt guardrails");
+          }
+
+          // PII-1: Redact PII from user transcript before emitting to UI
+          const safeText = redactPII(text);
+
           const key = `user:${itemId}`;
           if (emittedIds.current.has(key)) return;
           emittedIds.current.add(key);
-          onTranscriptRef.current({ id: itemId, role: "user", text });
+          onTranscriptRef.current({ id: itemId, role: "user", text: safeText });
           return;
         }
 
@@ -572,7 +699,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
     return () => { closeSession(); };
   }, [closeSession]);
 
-  return { state, startVoice, stopVoice, prefetchSession, errorMessage };
+  return { state, startVoice, stopVoice, prefetchSession, errorMessage, isThinking, isSpeaking, silenceCountdown, keepAlive, micLevel };
 }
 
 function floatToPcm16(float32: Float32Array): ArrayBuffer {

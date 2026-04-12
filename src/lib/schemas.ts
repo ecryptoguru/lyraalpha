@@ -54,7 +54,7 @@ export const ChatMessageSchema = z.object({
   cacheScope: z.string().regex(/^[a-z0-9-]+$/i).max(80).optional(),
 });
 
-// ─── Stock History API ───────────────────────────────────────────────────────
+// ─── Asset History API ───────────────────────────────────────────────────────
 
 export const StockHistorySchema = z.object({
   symbol: SafeSymbol,
@@ -76,7 +76,7 @@ export const TrendingTrackSchema = z.object({
 // ─── Discovery Feed API ──────────────────────────────────────────────────────
 
 export const DiscoveryFeedSchema = z.object({
-  type: z.enum(["all", "stock", "etf", "crypto", "commodity", "mf"]).default("all"),
+  type: z.enum(["all", "crypto"]).default("all"),
   region: SafeRegion,
   limit: SafeLimit(50, 20),
   offset: SafeOffset,
@@ -181,7 +181,7 @@ export const UserPreferencesSchema = z.object({
   experienceLevel: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]),
   dashboardMode: DashboardModeSchema.optional(),
   interests: z
-    .array(z.enum(["STOCKS", "ETF", "CRYPTO", "MUTUAL_FUNDS", "COMMODITIES"]))
+    .array(z.enum(["CRYPTO"]))
     .min(1)
     .max(5),
   tourCompleted: z.boolean().default(true),
@@ -519,7 +519,7 @@ export const BrokerNormalizerConfigSchema = z.object({
   transactionFieldMap: z.array(BrokerFieldMapSchema),
   assetClassMap: z.record(
     z.string(),
-    z.enum(["STOCK", "ETF", "MUTUAL_FUND", "CRYPTO", "COMMODITY", "BOND", "CASH_EQUIVALENT", "DERIVATIVE", "OTHER"]),
+    z.enum(["CRYPTO", "OTHER"]),
   ),
   exchangeMap: z.record(z.string(), z.string()),
 });

@@ -54,11 +54,13 @@ export async function streamSupportReply(
   conversationId: string,
   content: string,
   onChunk: (value: string) => void,
+  signal?: AbortSignal,
 ): Promise<string | null> {
   const response = await fetch("/api/support/stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ conversationId, content }),
+    signal,
   });
 
   if (!response.ok || !response.body) {

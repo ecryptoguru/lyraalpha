@@ -454,7 +454,7 @@ const BADGE_EMOJI: Record<string, string> = {
   "cross-asset-thinker": "🌐",
   "market-analyst": "📰",
   "global-investor": "🌍",
-  "etf-transparency": "🔍",
+  "portfolio-transparency": "🔍",
   "crypto-risk-conscious": "₿",
   "lyra-user": "🤖",
 };

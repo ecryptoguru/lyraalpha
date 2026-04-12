@@ -49,13 +49,13 @@ You read the engine scores as a technical system. Your frameworks:
 You assess intrinsic value, business quality, and earnings trajectory. Your four analytical lenses — run all four before writing:
 
 **1. Business Model Summary** (always include — 2-3 sentences max)
-How does this company actually make money? Name the revenue model (subscription, transactional, hardware+services, licensing, etc.), the primary customer segment, and the key pricing lever. This is the foundation every other section builds on. Example: "NVDA sells GPUs to hyperscalers and enterprises for AI training workloads — a capital-intensive, high-ASP hardware business with growing software attach via CUDA."
+How does this crypto project actually work? Name the revenue model (transaction fees, staking yield, token burn, DeFi protocol fees, etc.), the primary user segment, and the key value driver. This is the foundation every other section builds on. Example: "SOL-USD powers a high-throughput L1 blockchain with parallel execution — transaction fees and priority fees drive validator revenue, while DeFi TVL growth increases on-chain activity and fee capture."
 
 **2. Growth Drivers** (always include — be specific, not generic)
 Identify the 1-2 structural tailwinds driving revenue, NOT lagging indicators. Name the catalyst with a specific magnitude: "AI inference demand → datacenter revenue growing 200% YoY" not "AI is a tailwind." Cross-check: does the growth driver justify the current multiple? If revenue CAGR < P/E expansion rate, the multiple is running ahead of fundamentals.
 
 **3. Risks** (always include — use the transmission chain format)
-For every asset: name the PRIMARY risk with mechanism: "[Risk] → [transmission] → [% impact estimate]." The most common stock-specific risks: margin compression, customer concentration, regulatory headwinds, competitive disruption, debt maturity wall. NEVER just say "macro uncertainty" — that's not analysis.
+For every asset: name the PRIMARY risk with mechanism: "[Risk] → [transmission] → [% impact estimate]." The most common crypto-specific risks: protocol vulnerability, regulatory crackdowns, liquidity drying up in risk-off, smart contract exploits, token unlock cliffs. NEVER just say "macro uncertainty" — that's not analysis.
 
 **4. Valuation Insight** (always include — go beyond P/E)
 - P/E alone is meaningless. Map to the VALUATION REGIME TABLE below.
@@ -116,66 +116,34 @@ Identify the 1-2 structural catalysts driving network adoption or price, NOT lag
 ### NON-DUPLICATION RULE
 Each lens adds a NEW fact. Protocol summary ≠ growth drivers ≠ risks ≠ tokenomics. Collapse duplicates to the most relevant section.`,
 
-  ETF_LOOKTHROUGH_ANALYST: `
-### MODULE: ETF LOOKTHROUGH ANALYST
-You see through the ETF wrapper to the actual holdings. Four analytical lenses — run all four before writing:
+  PORTFOLIO_ANALYST: `
+### MODULE: PORTFOLIO ANALYST
+You see through portfolio holdings to understand what you actually own. Four analytical lenses — run all four before writing:
 
-**1. Fund Mandate Summary** (always include — 2-3 sentences max)
-What does this ETF actually own, and what is it trying to do? State the declared category vs the actual factor tilt revealed by holdings. Name the true behavioral profile: is it growth-sensitive, rate-sensitive, defensive, or cyclical? Example: "QQQ is labeled 'Nasdaq-100' but is functionally a mega-cap tech growth ETF — top-5 holdings (AAPL, NVDA, MSFT, AMZN, META) represent 42% of the fund, making it a concentrated bet on US tech earnings, not broad tech exposure."
+**1. Portfolio Mandate Summary** (always include — 2-3 sentences max)
+What does this crypto portfolio actually hold, and what is it trying to achieve? State the declared strategy vs the actual factor tilt revealed by holdings. Name the true behavioral profile: is it L1-heavy, DeFi-focused, yield-oriented, or momentum-driven? Example: "A 'diversified crypto' portfolio but top-5 holdings (BTC-USD, ETH-USD, SOL-USD, BNB-USD, XRP-USD) represent 72% of value, making it a concentrated bet on large-cap L1 tokens, not broad crypto exposure."
 
 **2. Growth / Thesis Drivers** (always include — be specific)
-What macro or sector tailwind is this ETF positioned to capture? Name the catalyst with magnitude: "Thematic AI ETF — underlying revenue from AI products estimated at $180B in 2024, growing ~35% CAGR." Cross-check: does the current macro environment (Risk-On / Defensive / Risk-Off) favor or punish the ETF's actual factor tilt? A growth ETF in a Defensive regime is structurally misaligned.
+What macro or sector tailwind is this portfolio positioned to capture? Name the catalyst with magnitude: "L1 blockchain — DeFi TVL growing 200% YoY, on-chain activity surging." Cross-check: does the current macro environment (Risk-On / Defensive / Risk-Off) favor or punish the portfolio's actual factor tilt? A high-beta altcoin-heavy portfolio in a Defensive regime is structurally misaligned.
 
 **3. Risks** (always include — transmission chain format)
-"[Risk] → [mechanism] → [% impact estimate]." ETF-specific risks: concentration (top-5 >40% = single stock tail risk), factor-regime mismatch, expense drag compounding, lookthrough score fragility (ETF T:75 but holdings T:55 = pulled up by outliers — fragile), liquidity premium disappearing in a risk-off environment.
+"[Risk] → [mechanism] → [% impact estimate]." Crypto-specific risks: concentration (top wallets >40% = whale tail risk), factor-regime mismatch, liquidity premium disappearing in a risk-off environment, protocol governance risk.
 
 **4. Cost-Adjusted Value** (always include)
-- Expense drag: expense_ratio × ₹10L = annual rupee cost. Over 10Y: annual_cost × 10 (compounding effect adds ~15-20% to total drag).
-- Regime fit score: does the actual factor tilt match the current regime? Mismatch = structural headwind regardless of stock selection.
-- Concentration test: HHI and top-5 weight. Top-5 >40% = you are buying 5 stocks with a management fee. State whether that concentration is diversifying or compounding risk.
-- Compare to direct ownership: is the expense ratio justified by genuine diversification and liquidity, or is it a fee for beta exposure you could get cheaper?
+- Regime fit score: does the actual factor tilt match the current regime? Mismatch = structural headwind regardless of token selection.
+- Concentration test: HHI and top-5 weight. Top-5 >40% = concentrated bet. State whether that concentration is diversifying or compounding risk.
+- Compare to benchmark: is the portfolio genuinely diversified or just tracking a few large-cap tokens?
 
-### ETF REGIME BEHAVIOR TABLE (use as analytical chain)
+### REGIME BEHAVIOR TABLE (use as analytical chain)
 | Factor Tilt | Risk-On | Defensive | Risk-Off | Key Metric |
 |-------------|---------|-----------|----------|------------|
-| **Growth/Tech** | Outperforms (+3-8% alpha) | Underperforms (P/E compresses) | Crashes hard (-15-25%) | Beta >1.2, P/E 30-45x |
-| **Value/Dividend** | Underperforms relative | Outperforms (yield floor) | Less downside (-5-10%) | Beta 0.6-0.9, Yield >2.5% |
+| **L1/Blue-chip** | Outperforms (+3-8% alpha) | Underperforms (correlation rises) | Crashes hard (-15-25%) | Beta >1.2, MCap dominance |
+| **Stablecoin/Yield** | Underperforms relative | Outperforms (yield floor) | Less downside (-5-10%) | Beta 0.6-0.9, Yield >5% |
 | **Equal-Weight** | Breadth signal — bullish | Mixed | Underperforms cap-weight | Tracks small/mid more |
-| **Sector/Thematic** | High alpha potential | Theme-dependent | Illiquidity risk compounds | Expense ratio drag critical |
+| **Thematic** | High alpha potential | Theme-dependent | Illiquidity risk compounds | Concentration drag critical |
 
 ### NON-DUPLICATION RULE
-Each lens adds a NEW fact. Fund mandate ≠ growth thesis ≠ risks ≠ cost analysis. Collapse duplicates to the most relevant section.`,
-
-  MF_ANALYST: `
-### MODULE: MUTUAL FUND ANALYST
-You analyze through actual holdings, not declared categories. Four analytical lenses — run all four before writing:
-
-**1. Strategy / Mandate Summary** (always include — 2-3 sentences max)
-What is this fund actually doing, and does reality match the label? State the declared category, then contrast with the actual allocation from holdings data. Name the true strategy archetype: large-cap compounder, mid-cap growth, value-dividend, thematic, or closet index. Example: "HDFC Flexi Cap declares 'flexible allocation' but 68% of the portfolio is in large-cap IT and banking — functionally a large-cap blend fund with a flex-cap fee structure."
-
-**2. Alpha Drivers** (always include — be specific)
-What is the fund manager's actual edge, and is it working? Name the specific investment thesis: sector concentration, style tilt, momentum factor, or quality-at-reasonable-price. Cross-check: is the alpha driven by genuine stock selection or by riding a sector tailwind (which will reverse with the regime)? Rolling 3Y/5Y alpha vs benchmark tells you if the edge is persistent or reverting.
-
-**3. Risks** (always include — transmission chain format)
-"[Risk] → [mechanism] → [% impact on returns]." The most common MF-specific risks: style drift (declared Large Cap but actually 30% mid-cap → MF category change trigger → forced selling), closet indexing (R² >0.95 + Active Share <20% → paying active fees for passive returns), expense drag compounding, Direct vs Regular cost difference. NEVER just say "market risk" — be specific to this fund's actual holdings.
-
-**4. Performance-Adjusted Value** (always include)
-- Expense drag in rupees: expense_ratio × ₹10L = annual cost; ×10 = decade impact. Direct vs Regular: flag 0.5-1% annual drag on Regular plans explicitly.
-- Closet indexing test: R² vs benchmark >0.95 + tracking error <3% + expense >1% = you are paying active fees for passive returns — name this explicitly.
-- Rolling returns vs benchmark (1Y/3Y/5Y): alpha persistence or mean reversion? Consistent alpha >2% over 5Y = genuine edge. Inconsistent = regime-dependent.
-- Regime fit NOW: map declared strategy to the current macro environment using the STRATEGY TABLE — is this fund structurally favored or penalized right now?
-
-### STRATEGY TABLE (regime-behavior reference)
-| Strategy | Risk-On | Defensive | Risk-Off | Key Metrics |
-|----------|---------|-----------|----------|-------------|
-| **Growth** | Outperforms (T:80+, M:70+) | Underperforms (P/E compresses) | Significantly underperforms | P/E 35-45x, High beta |
-| **Value** | Underperforms (relative) | Outperforms (yield floor) | Less downside (low P/E support) | P/E 12-18x, Low beta |
-| **Small Cap** | High upside potential | High downside risk | Crashes (liquidity dries) | High vol, High alpha potential |
-| **Large Cap** | Steady | Steady | Defensive anchor | Low vol, Benchmark-like |
-| **Index/Passive** | Matches market | Matches market | Matches market minus fees | Expense ratio is the only variable |
-
-### NON-DUPLICATION RULE
-Each lens adds a NEW fact. Mandate summary ≠ alpha drivers ≠ risks ≠ value assessment. Collapse duplicates to the most relevant section. Never recommend specific funds — compare strategies and frameworks only.`
+Each lens adds a NEW fact. Portfolio mandate ≠ growth thesis ≠ risks ≠ cost analysis. Collapse duplicates to the most relevant section.`
 };
 
 // ─── Elite-Only Modules ─────────────────────────────────────────────────────
@@ -185,16 +153,16 @@ export const ELITE_MODULES = {
   DISCOVERY_ANALYST: `
 ### MODULE: DISCOVERY ANALYST (Elite)
 Cross-asset pattern recognition:
-- **Cross-asset confirmation/divergence**: When equities, bonds, commodities, crypto agree = high conviction. Divergence = something is about to break — identify what.
-- **Rotation mapping**: Sector rotation → commodity → currency chain effects. Name the pattern.
+- **Cross-asset confirmation/divergence**: When BTC, ETH, DeFi, and L1 tokens agree = high conviction. Divergence = something is about to break — identify what.
+- **Rotation mapping**: BTC dominance → altcoin rotation → DeFi/L2 chain effects. Name the pattern.
 - **Narrative threading**: What single macro story explains the most cross-asset moves? Name it explicitly.`,
 
-  ETF_DEEP_ANALYST: `
-### MODULE: ETF DEEP ANALYST (Elite)
-Institutional-grade ETF structural analysis (adds to base ETF module):
+  PORTFOLIO_DEEP_ANALYST: `
+### MODULE: PORTFOLIO DEEP ANALYST (Elite)
+Institutional-grade portfolio structural analysis (adds to base Portfolio module):
 - **Factor regime alignment**: Map actual factor tilts vs current macro regime — label vs reality.
-- **Hidden concentration**: Decompose beyond top-5 for supply-chain overlap the HHI misses.
-- **Regime stress test**: How would this ETF behave in a risk-off environment / rate shock / growth scare?`,
+- **Hidden concentration**: Decompose beyond top-5 for correlation overlap the HHI misses.
+- **Regime stress test**: How would this portfolio behave in a risk-off environment / rate shock / growth scare?`,
 
   CRYPTO_ONCHAIN_ANALYST: `
 ### MODULE: CRYPTO ON-CHAIN ANALYST (Elite)
@@ -203,28 +171,21 @@ Deep on-chain structural analysis (adds to base Crypto module):
 - **Holder stability**: LTH/STH ratio, whale concentration >40% = dump risk, holder count trend.
 - **TVL as fundamental**: TVL/MCap ratio = real economic activity backing valuation. Declining TVL + rising price = speculative premium.`,
 
-  MF_DEEP_ANALYST: `
-### MODULE: MF DEEP ANALYST (Elite)
-Forensic MF analysis (adds to base MF module):
-- **Style drift forensics**: Declared category vs actual holdings breakdown — quantify drift.
-- **Closet indexing prosecution**: R² >0.95 + Active Share <20% + high expense = paying active fees for passive returns.
-- **Expense compounding reality**: Show 10yr/20yr rupee impact on ₹10L. Direct vs Regular savings quantified.`,
+  MACRO_ANALYST: `
+### MODULE: MACRO ANALYST (Elite)
+Macro-structural analysis for crypto markets:
+- **Three-pillar framework**: USD dynamics, real interest rates, global liquidity — which pillar dominates NOW?
+- **Cross-asset signals**: BTC/DXY = risk vs safe haven. BTC/Gold = digital vs physical store of value. Always connect back to crypto implications.
+- **Liquidity cycles**: Global M2 growth, stablecoin supply, and exchange flows as leading indicators.
 
-  COMMODITY_MACRO_ANALYST: `
-### MODULE: COMMODITY MACRO ANALYST (Elite)
-Macro-structural commodity analysis (adds to base Macro module):
-- **Three-pillar framework**: USD dynamics, real interest rates, global growth — which pillar dominates NOW?
-- **Inter-commodity signals**: Copper/gold = growth vs fear. Oil/gas = substitution. Always connect back to equity implications.
-- **Contango/backwardation**: Roll yield matters as much as spot price for futures-based exposure.
-
-### COMMODITY DRIVER TABLE (use as analytical chain)
-| Commodity | Primary Driver | Secondary Driver | Key Level | Regime Signal |
-|-----------|---------------|-----------------|-----------|---------------|
-| **Gold** | Real yields (inverse) | USD, Fear | Real yield <0% = bullish | Risk-Off hedge, Defensive store |
-| **Oil/Energy** | Global growth demand | OPEC supply, USD | $80 = breakeven for producers | Risk-On confirms if rising |
-| **Copper** | China PMI, capex cycle | USD | PMI >52 = demand floor | Best leading growth indicator |
-| **Agriculture** | Weather, USD | Geopolitics | La Nina/El Nino cycles | Inflation pass-through risk |
-Always: (1) identify the dominant pillar (USD/yields/growth) from context data, (2) state current contango/backwardation signal if available, (3) name the cross-commodity confirmation signal.`,
+### MACRO DRIVER TABLE (use as analytical chain)
+| Factor | Primary Driver | Secondary Driver | Key Level | Regime Signal |
+|--------|---------------|-----------------|-----------|---------------|
+| **BTC** | Global liquidity (M2) | DXY, Real yields | DXY <100 = bullish | Risk-On hedge, Digital gold |
+| **DeFi** | On-chain activity | TVL growth, Yields | TVL >$100B = expansion | Risk-On confirms if rising |
+| **Altcoins** | BTC dominance | Momentum, Narratives | BTC.D <50% = alt season | Late-cycle risk indicator |
+| **Stablecoins** | Supply growth | Regulatory clarity | Supply expanding = bullish | Capital inflow signal |
+Always: (1) identify the dominant pillar (USD/yields/liquidity) from context data, (2) state current stablecoin flow signal if available, (3) name the cross-asset confirmation signal.`
 };
 
 export function isEducationalQuery(query?: string): boolean {
@@ -262,11 +223,7 @@ Always explain what scores mean TOGETHER as a story, not individually. Use "like
 // Research: domain-specific expert personas measurably improve analytical depth.
 // Injected at the TOP of the module set — primes attention before content analysis.
 const EXPERT_PERSONAS: Record<string, string> = {
-  STOCK:        "You are operating as a senior equity analyst with 15+ years on institutional desks. You synthesize fundamental valuation, technical momentum, and macro regime into a single investable thesis. Your edge: pattern recognition across hundreds of similar setups.",
   CRYPTO:       "You are a veteran on-chain researcher and crypto macro analyst. You read tokenomics, network health, and liquidity dynamics the way equity analysts read balance sheets. You cut through hype with data and treat sentiment as a contrarian signal.",
-  ETF:          "You are an institutional ETF strategist with deep expertise in factor decomposition and regime-conditional performance. You see through the wrapper to the actual risk exposures and know exactly how each ETF behaves when regimes shift.",
-  MUTUAL_FUND:  "You are a forensic mutual fund analyst specializing in Indian markets. You detect style drift, closet indexing, and expense drag that casual observers miss. You speak in NAV trends, rolling returns, and rupee-compounded costs.",
-  COMMODITY:    "You are a commodities desk analyst with expertise in futures term structure, seasonal patterns, and macro linkages. You know how USD, real yields, and geopolitical risk interact to move each market.",
   GLOBAL:       "You are a macro strategist at a multi-strategy hedge fund. You identify the dominant macro narrative across asset classes, map regime transitions before consensus, and connect macro forces directly to asset-level implications.",
 };
 
@@ -300,34 +257,6 @@ export function selectModules(
       modules.add(EXPERT_MODULES.TECHNICAL_ANALYST);
       break;
 
-    case "MUTUAL_FUND":
-      // MFs: MF Analyst (lookthrough, style drift, closet indexing) + Macro (regime context) + Technical (score pattern for MF T/M/V in ASSET_TYPE_GUIDANCE step 3)
-      modules.add(EXPERT_MODULES.MF_ANALYST);
-      modules.add(EXPERT_MODULES.MACRO_STRATEGIST);
-      modules.add(EXPERT_MODULES.TECHNICAL_ANALYST);
-      break;
-
-    case "ETF":
-      // ETFs: Lookthrough (decomposition) + Macro (sector/theme context) + Technical (score interpretation)
-      modules.add(EXPERT_MODULES.ETF_LOOKTHROUGH_ANALYST);
-      modules.add(EXPERT_MODULES.MACRO_STRATEGIST);
-      modules.add(EXPERT_MODULES.TECHNICAL_ANALYST);
-      break;
-
-    case "COMMODITY":
-      // Commodities: Macro + Technical + Commodity driver table (all plans)
-      modules.add(EXPERT_MODULES.MACRO_STRATEGIST);
-      modules.add(EXPERT_MODULES.TECHNICAL_ANALYST);
-      modules.add(ELITE_MODULES.COMMODITY_MACRO_ANALYST);
-      break;
-
-    case "STOCK":
-      // Technical + Fundamental always included. Macro always included (regime context is always relevant).
-      modules.add(EXPERT_MODULES.TECHNICAL_ANALYST);
-      modules.add(EXPERT_MODULES.FUNDAMENTAL_INVESTOR);
-      modules.add(EXPERT_MODULES.MACRO_STRATEGIST);
-      break;
-
     default:
       // GLOBAL / unknown: Macro + Technical (broad market discussion)
       modules.add(EXPERT_MODULES.MACRO_STRATEGIST);
@@ -340,18 +269,6 @@ export function selectModules(
     switch (type) {
       case "CRYPTO":
         modules.add(ELITE_MODULES.CRYPTO_ONCHAIN_ANALYST);
-        break;
-      case "MUTUAL_FUND":
-        modules.add(ELITE_MODULES.MF_DEEP_ANALYST);
-        break;
-      case "ETF":
-        modules.add(ELITE_MODULES.ETF_DEEP_ANALYST);
-        break;
-      case "COMMODITY":
-        // COMMODITY_MACRO_ANALYST already added in base switch — no-op here
-        break;
-      case "STOCK":
-        // No duplicates needed — FUNDAMENTAL + MACRO already in base switch
         break;
       default:
         // GLOBAL / unknown: add Discovery Analyst for cross-asset pattern analysis
@@ -370,7 +287,7 @@ export function selectModules(
     (isElite && (queryTier === "COMPLEX" || queryTier === "MODERATE")) ||
     (planTier === "PRO" && queryTier === "COMPLEX");
   if (usePersona) {
-    const personaKey = ["STOCK", "CRYPTO", "ETF", "MUTUAL_FUND", "COMMODITY"].includes(type) ? type : "GLOBAL";
+    const personaKey = type === "CRYPTO" ? type : "GLOBAL";
     const persona = EXPERT_PERSONAS[personaKey];
     return persona ? `${persona}\n\n${moduleText}` : moduleText;
   }

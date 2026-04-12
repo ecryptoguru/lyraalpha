@@ -11,22 +11,22 @@ import { describe, it, expect } from "vitest";
 import { modelCacheKey, getModelCacheTtl } from "../lyra-cache";
 
 describe("Phase 5 — modelCacheKey", () => {
-  const BASE = { query: "what is the outlook", assetType: "STOCK", tier: "COMPLEX", planTier: "ELITE" };
+  const BASE = { query: "what is the outlook", assetType: "CRYPTO", tier: "COMPLEX", planTier: "ELITE" };
 
   it("includes symbol dimension in cache key", () => {
-    const keyA = modelCacheKey({ ...BASE, symbol: "AAPL" });
+    const keyA = modelCacheKey({ ...BASE, symbol: "BTC-USD" });
     const keyB = modelCacheKey({ ...BASE, symbol: "GLOBAL" });
     expect(keyA).not.toBe(keyB);
   });
 
   it("produces different keys for same symbol with different tiers", () => {
-    const keyA = modelCacheKey({ query: "test", assetType: "STOCK", tier: "SIMPLE", planTier: "STARTER", symbol: "AAPL" });
-    const keyB = modelCacheKey({ query: "test", assetType: "STOCK", tier: "COMPLEX", planTier: "ELITE", symbol: "AAPL" });
+    const keyA = modelCacheKey({ query: "test", assetType: "CRYPTO", tier: "SIMPLE", planTier: "STARTER", symbol: "BTC-USD" });
+    const keyB = modelCacheKey({ query: "test", assetType: "CRYPTO", tier: "COMPLEX", planTier: "ELITE", symbol: "BTC-USD" });
     expect(keyA).not.toBe(keyB);
   });
 
   it("produces same key for same inputs (deterministic)", () => {
-    const params = { query: "analyze nvda", assetType: "STOCK", tier: "MODERATE", planTier: "PRO", symbol: "NVDA" };
+    const params = { query: "analyze sol", assetType: "CRYPTO", tier: "MODERATE", planTier: "PRO", symbol: "SOL-USD" };
     expect(modelCacheKey(params)).toBe(modelCacheKey(params));
   });
 });
@@ -80,7 +80,7 @@ describe("Phase 7 — signal chip parsing", () => {
   it("extracts a valid BULLISH chip from response text", () => {
     const raw = `<!--SIGNALS:{"verdict":"BULLISH","confidence":"HIGH","flags":["Strong momentum","Cheap valuation"]}-->
 ## Executive Summary
-NVDA looks strong.`;
+SOL-USD looks strong.`;
     const result = parseLyraMessage(raw);
     expect(result.signalChip).toBeDefined();
     expect(result.signalChip!.verdict).toBe("BULLISH");

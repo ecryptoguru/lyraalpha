@@ -28,37 +28,9 @@ function makeQuote(overrides: Partial<MarketQuote> = {}): MarketQuote {
 // ─── Base Score by Asset Type ─────────────────────────────────────────────────
 
 describe("Trust — base score by asset type", () => {
-  it("STOCK → baseScore = 78", () => {
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({ marketCap: 0 }));
-    // With no market cap, capScore = 30 (default), volumeScore = 50 (no avgVol), stabilityScore = 50
-    // score = round(78*0.40 + 30*0.30 + 50*0.15 + 50*0.15) = round(31.2 + 9 + 7.5 + 7.5) = round(55.2) = 55
-    expect(result.score).toBeGreaterThanOrEqual(40);
-    expect(result.context).toContain("Regulated public security");
-  });
-
-  it("ETF → baseScore = 78 (same as STOCK)", () => {
-    const result = calculateTrustScore(makeAsset("ETF"), makeQuote({ marketCap: 0 }));
-    expect(result.context).toContain("Regulated public security");
-  });
-
-  it("MUTUAL_FUND → baseScore = 78", () => {
-    const result = calculateTrustScore(makeAsset("MUTUAL_FUND"), makeQuote({ marketCap: 0 }));
-    expect(result.context).toContain("Regulated public security");
-  });
-
-  it("CRYPTO → baseScore = 38 (lower than STOCK)", () => {
-    const stockResult = calculateTrustScore(makeAsset("STOCK"), makeQuote({ marketCap: 0 }));
-    const cryptoResult = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ marketCap: 0 }));
-    expect(cryptoResult.score).toBeLessThan(stockResult.score);
-    expect(cryptoResult.context).toContain("Speculative asset class");
-  });
-
-  it("COMMODITY → baseScore = 72 (between STOCK and CRYPTO)", () => {
-    const stockResult = calculateTrustScore(makeAsset("STOCK"), makeQuote({ marketCap: 0 }));
-    const cryptoResult = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ marketCap: 0 }));
-    const commodityResult = calculateTrustScore(makeAsset("COMMODITY"), makeQuote({ marketCap: 0 }));
-    expect(commodityResult.score).toBeLessThan(stockResult.score);
-    expect(commodityResult.score).toBeGreaterThan(cryptoResult.score);
+  it("CRYPTO → baseScore = 38", () => {
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ marketCap: 0 }));
+    expect(result.context).toContain("Speculative asset class");
   });
 });
 
@@ -67,37 +39,37 @@ describe("Trust — base score by asset type", () => {
 describe("Trust — market cap score (log scale)", () => {
   it("$1T market cap → capScore near 95", () => {
     // log10(1T) = 12 → ((12-7)/5.5)*85 + 10 = (5/5.5)*85 + 10 ≈ 77.3 + 10 = 87.3 → min(95, 87.3) = 87.3
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({ marketCap: 1_000_000_000_000 }));
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ marketCap: 1_000_000_000_000 }));
     const capScore = (result.metadata as Record<string, unknown>)?.breakdown as Record<string, number>;
     expect(capScore.cap).toBeGreaterThanOrEqual(85);
   });
 
   it("$100M market cap → capScore ≈ 10 (minimum)", () => {
     // log10(100M) = 8 → ((8-7)/5.5)*85 + 10 = (1/5.5)*85 + 10 ≈ 15.45 + 10 = 25.45
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({ marketCap: 100_000_000 }));
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ marketCap: 100_000_000 }));
     const breakdown = (result.metadata as Record<string, unknown>)?.breakdown as Record<string, number>;
     expect(breakdown.cap).toBeGreaterThanOrEqual(10);
     expect(breakdown.cap).toBeLessThan(40);
   });
 
   it("larger market cap → higher trust score", () => {
-    const small = calculateTrustScore(makeAsset("STOCK"), makeQuote({ marketCap: 500_000_000 }));
-    const large = calculateTrustScore(makeAsset("STOCK"), makeQuote({ marketCap: 500_000_000_000 }));
+    const small = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ marketCap: 500_000_000 }));
+    const large = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ marketCap: 500_000_000_000 }));
     expect(large.score).toBeGreaterThan(small.score);
   });
 
   it("$500B+ market cap → context includes 'Category leader'", () => {
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({ marketCap: 600_000_000_000 }));
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ marketCap: 600_000_000_000 }));
     expect(result.context).toContain("Category leader");
   });
 
   it("$100B+ market cap → context includes 'Mega-cap'", () => {
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({ marketCap: 150_000_000_000 }));
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ marketCap: 150_000_000_000 }));
     expect(result.context).toContain("Mega-cap institutional grade");
   });
 
   it("< $100M market cap → context includes 'Micro-cap'", () => {
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({ marketCap: 50_000_000 }));
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ marketCap: 50_000_000 }));
     expect(result.context).toContain("Micro-cap volatility risk");
   });
 });
@@ -106,7 +78,7 @@ describe("Trust — market cap score (log scale)", () => {
 
 describe("Trust — volume score (log scale)", () => {
   it("zero volume → volumeScore = 50 (default)", () => {
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({ averageDailyVolume10Day: 0, regularMarketVolume: 0 }));
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ averageDailyVolume10Day: 0, regularMarketVolume: 0 }));
     const breakdown = (result.metadata as Record<string, unknown>)?.breakdown as Record<string, number>;
     expect(breakdown.volume).toBe(50);
   });
@@ -114,7 +86,7 @@ describe("Trust — volume score (log scale)", () => {
   it("$1B daily dollar volume → volumeScore near 90", () => {
     // avgVol = 10_000_000, price = 100 → dollarVol = $1B
     // log10(1B) = 9 → ((9-5)/5)*75 + 15 = (4/5)*75 + 15 = 60 + 15 = 75 → min(90, 75) = 75
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({
       averageDailyVolume10Day: 10_000_000,
       regularMarketPrice: 100,
     }));
@@ -123,8 +95,8 @@ describe("Trust — volume score (log scale)", () => {
   });
 
   it("higher volume → higher volume score", () => {
-    const low = calculateTrustScore(makeAsset("STOCK"), makeQuote({ averageDailyVolume10Day: 10_000, regularMarketPrice: 10 }));
-    const high = calculateTrustScore(makeAsset("STOCK"), makeQuote({ averageDailyVolume10Day: 10_000_000, regularMarketPrice: 100 }));
+    const low = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ averageDailyVolume10Day: 10_000, regularMarketPrice: 10 }));
+    const high = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ averageDailyVolume10Day: 10_000_000, regularMarketPrice: 100 }));
     const lowBreakdown = (low.metadata as Record<string, unknown>)?.breakdown as Record<string, number>;
     const highBreakdown = (high.metadata as Record<string, unknown>)?.breakdown as Record<string, number>;
     expect(highBreakdown.volume).toBeGreaterThan(lowBreakdown.volume);
@@ -135,7 +107,7 @@ describe("Trust — volume score (log scale)", () => {
 
 describe("Trust — price stability score", () => {
   it("price = 52W high → distFromHigh = 0 → stabilityScore = 85", () => {
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({
       regularMarketPrice: 120,
       fiftyTwoWeekHigh: 120,
     }));
@@ -145,7 +117,7 @@ describe("Trust — price stability score", () => {
   });
 
   it("price 50% below 52W high → stabilityScore = 20 (clamped)", () => {
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({
       regularMarketPrice: 60,
       fiftyTwoWeekHigh: 120,
     }));
@@ -155,8 +127,8 @@ describe("Trust — price stability score", () => {
   });
 
   it("closer to 52W high → higher stability score", () => {
-    const near = calculateTrustScore(makeAsset("STOCK"), makeQuote({ regularMarketPrice: 115, fiftyTwoWeekHigh: 120 }));
-    const far = calculateTrustScore(makeAsset("STOCK"), makeQuote({ regularMarketPrice: 80, fiftyTwoWeekHigh: 120 }));
+    const near = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ regularMarketPrice: 115, fiftyTwoWeekHigh: 120 }));
+    const far = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({ regularMarketPrice: 80, fiftyTwoWeekHigh: 120 }));
     const nearBreakdown = (near.metadata as Record<string, unknown>)?.breakdown as Record<string, number>;
     const farBreakdown = (far.metadata as Record<string, unknown>)?.breakdown as Record<string, number>;
     expect(nearBreakdown.stability).toBeGreaterThan(farBreakdown.stability);
@@ -167,7 +139,7 @@ describe("Trust — price stability score", () => {
 
 describe("Trust — composite formula", () => {
   it("score = round(base*0.40 + cap*0.30 + volume*0.15 + stability*0.15)", () => {
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote({
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote({
       marketCap: 50_000_000_000,
       averageDailyVolume10Day: 5_000_000,
       regularMarketPrice: 100,
@@ -188,7 +160,7 @@ describe("Trust — composite formula", () => {
       makeQuote({ marketCap: 2_000_000_000_000, averageDailyVolume10Day: 100_000_000 }),
     ];
     for (const quote of cases) {
-      const result = calculateTrustScore(makeAsset("STOCK"), quote);
+      const result = calculateTrustScore(makeAsset("CRYPTO"), quote);
       expect(result.score).toBeGreaterThanOrEqual(1);
       expect(result.score).toBeLessThanOrEqual(99);
     }
@@ -199,7 +171,7 @@ describe("Trust — composite formula", () => {
 
 describe("Trust — metadata", () => {
   it("includes breakdown with base, cap, volume, stability", () => {
-    const result = calculateTrustScore(makeAsset("STOCK"), makeQuote());
+    const result = calculateTrustScore(makeAsset("CRYPTO"), makeQuote());
     const breakdown = (result.metadata as Record<string, unknown>)?.breakdown as Record<string, number>;
     expect(breakdown).toHaveProperty("base");
     expect(breakdown).toHaveProperty("cap");
@@ -209,7 +181,7 @@ describe("Trust — metadata", () => {
 
   it("direction reflects score (UP >= 65, DOWN <= 40, FLAT otherwise)", () => {
     // Score > 65 should be UP
-    const highAsset = makeAsset("STOCK");
+    const highAsset = makeAsset("CRYPTO");
     const highQuote = makeQuote({ marketCap: 2000000000000, averageDailyVolume10Day: 100000000, regularMarketPrice: 100, fiftyTwoWeekHigh: 100 });
     const highResult = calculateTrustScore(highAsset, highQuote);
     expect(highResult.score).toBeGreaterThanOrEqual(65);

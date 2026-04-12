@@ -56,7 +56,7 @@ export function modelCacheKey(params: {
   tier: string;
   assetType: string;
   query: string;
-  symbol?: string;  // differentiates asset-level (AAPL) vs market-level (GLOBAL) entries
+  symbol?: string;  // differentiates asset-level (BTC-USD) vs market-level (GLOBAL) entries
   planTier?: string;
   responseMode?: "default" | "compare" | "stress-test" | "portfolio" | "macro-research";
 }): string {
@@ -64,7 +64,7 @@ export function modelCacheKey(params: {
   const queryHash = createHash("sha256").update(normalizedQuery).digest("hex").slice(0, 32);
   const planTier = (params.planTier || "unknown").toLowerCase();
   const responseMode = (params.responseMode || "default").toLowerCase();
-  // symbol dimension: distinguishes AAPL vs GLOBAL vs TSLA for same query text
+  // symbol dimension: distinguishes BTC-USD vs GLOBAL vs ETH-USD for same query text
   const symbolDim = params.symbol ? params.symbol.toUpperCase() : (params.assetType.toUpperCase() === "GLOBAL" ? "GLOBAL" : "asset");
   return `${MODEL_CACHE_PREFIX}gpt:${planTier}:${params.tier}:${params.assetType.toLowerCase()}:${symbolDim}:${responseMode}:${queryHash}`;
 }

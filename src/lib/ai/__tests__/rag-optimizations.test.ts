@@ -72,18 +72,18 @@ describe("RAG Optimizations", () => {
         {
           id: "engines-chunk-001",
           content: "The trend engine measures directional price movement.",
-          metadata: { source: "engines.md", section: "Trend Engine", assetTypes: ["STOCK"] },
+          metadata: { source: "engines.md", section: "Trend Engine", assetTypes: ["CRYPTO"] },
           similarity: 0.85,
         },
         {
           id: "engines-chunk-002",
           content: "Momentum captures the rate of change in price.",
-          metadata: { source: "engines.md", section: "Momentum Engine", assetTypes: ["STOCK"] },
+          metadata: { source: "engines.md", section: "Momentum Engine", assetTypes: ["CRYPTO"] },
           similarity: 0.78,
         },
       ]);
 
-      const result = await retrieveInstitutionalKnowledge("How does the trend engine work?", 3, "STOCK");
+      const result = await retrieveInstitutionalKnowledge("How does the trend engine work?", 3, "CRYPTO");
 
       expect(result.content).toContain("[KB: engines.md > Trend Engine]");
       expect(result.content).toContain("[KB: engines.md > Momentum Engine]");
@@ -140,19 +140,19 @@ describe("RAG Optimizations", () => {
       const queryScopedChunks: Document[] = [
         {
           id: "query-hit-1",
-          content: "Query-specific STOCK chunk",
-          metadata: { source: "engines.md", section: "Trend", assetTypes: ["STOCK"] },
+          content: "Query-specific CRYPTO chunk",
+          metadata: { source: "engines.md", section: "Trend", assetTypes: ["CRYPTO"] },
           similarity: 0.91,
         },
       ];
 
       mockGetCache.mockImplementation(async (key: string) => {
-        if (key.startsWith("rag:q:stock:")) return queryScopedChunks;
-        if (key === "rag:assettype:stock") {
+        if (key.startsWith("rag:q:crypto:")) return queryScopedChunks;
+        if (key === "rag:assettype:crypto") {
           return [
             {
               id: "baseline-1",
-              content: "Generic STOCK baseline chunk",
+              content: "Generic CRYPTO baseline chunk",
               metadata: { source: "overview.md", section: "General" },
               similarity: 0.5,
             },
@@ -161,13 +161,13 @@ describe("RAG Optimizations", () => {
         return null;
       });
 
-      const result = await retrieveInstitutionalKnowledge("How is AAPL momentum?", 2, "STOCK", true);
+      const result = await retrieveInstitutionalKnowledge("How is BTC-USD momentum?", 2, "CRYPTO", true);
 
-      expect(result.content).toContain("Query-specific STOCK chunk");
-      expect(result.content).not.toContain("Generic STOCK baseline chunk");
+      expect(result.content).toContain("Query-specific CRYPTO chunk");
+      expect(result.content).not.toContain("Generic CRYPTO baseline chunk");
 
       const assetBaselineCalls = mockGetCache.mock.calls.filter(
-        (call) => call[0] === "rag:assettype:stock",
+        (call) => call[0] === "rag:assettype:crypto",
       );
       expect(assetBaselineCalls).toHaveLength(0);
     });
@@ -178,20 +178,20 @@ describe("RAG Optimizations", () => {
       vi.mocked(prisma.$queryRaw).mockResolvedValue([
         {
           id: "chunk-1",
-          content: "Stock analysis content",
-          metadata: { source: "engines.md", section: "Overview", assetTypes: ["STOCK"] },
+          content: "Crypto analysis content",
+          metadata: { source: "engines.md", section: "Overview", assetTypes: ["CRYPTO"] },
           similarity: 0.8,
         },
       ]);
 
-      await retrieveInstitutionalKnowledge("How is AAPL?", 3, "STOCK");
+      await retrieveInstitutionalKnowledge("How is BTC-USD?", 3, "CRYPTO");
 
       // Give background task time to execute
       await new Promise((r) => setTimeout(r, 50));
 
       // The getPreCachedChunks check should have been called
       expect(mockGetCache).toHaveBeenCalledWith(
-        expect.stringContaining("rag:assettype:stock"),
+        expect.stringContaining("rag:assettype:crypto"),
       );
     });
 
@@ -201,22 +201,22 @@ describe("RAG Optimizations", () => {
         {
           id: "query-chunk-1",
           content: "Query-specific content",
-          metadata: { source: "engines.md", section: "Trend", assetTypes: ["STOCK"] },
+          metadata: { source: "engines.md", section: "Trend", assetTypes: ["CRYPTO"] },
           similarity: 0.9,
         },
       ]);
 
       // Pre-cached chunks available
       const cachedChunks: Document[] = [
-        { id: "cached-1", content: "Cached stock overview", metadata: { source: "engines.md", section: "Overview" }, similarity: 0.7 },
-        { id: "cached-2", content: "Cached stock scoring", metadata: { source: "engines.md", section: "Scoring" }, similarity: 0.65 },
+        { id: "cached-1", content: "Cached crypto overview", metadata: { source: "engines.md", section: "Overview" }, similarity: 0.7 },
+        { id: "cached-2", content: "Cached crypto scoring", metadata: { source: "engines.md", section: "Scoring" }, similarity: 0.65 },
       ];
 
       // First getCache call for pre-cached check returns null (initial check)
       // Second getCache call (merge check) returns cached chunks
       let getCacheCallCount = 0;
       mockGetCache.mockImplementation(async (key: string) => {
-        if (key.includes("rag:assettype:stock")) {
+        if (key.includes("rag:assettype:crypto")) {
           getCacheCallCount++;
           // Return null on first call (pre-search check), cached on second (merge check)
           return getCacheCallCount <= 1 ? null : cachedChunks;
@@ -224,7 +224,7 @@ describe("RAG Optimizations", () => {
         return null; // embedding cache miss
       });
 
-      const result = await retrieveInstitutionalKnowledge("AAPL trend", 5, "STOCK");
+      const result = await retrieveInstitutionalKnowledge("BTC-USD trend", 5, "CRYPTO");
 
       // Should contain the query-specific chunk
       expect(result.content).toContain("Query-specific content");
@@ -235,16 +235,16 @@ describe("RAG Optimizations", () => {
       vi.mocked(prisma.$queryRaw).mockResolvedValue([
         {
           id: "query-chunk-1",
-          content: "Query-specific STOCK content",
-          metadata: { source: "engines.md", section: "Trend", assetTypes: ["STOCK"] },
+          content: "Query-specific CRYPTO content",
+          metadata: { source: "engines.md", section: "Trend", assetTypes: ["CRYPTO"] },
           similarity: 0.89,
         },
       ]);
 
-      await retrieveInstitutionalKnowledge("AAPL trend setup", 3, "STOCK", true);
+      await retrieveInstitutionalKnowledge("BTC-USD trend setup", 3, "CRYPTO", true);
 
       expect(mockSetCache).toHaveBeenCalledWith(
-        expect.stringMatching(/^rag:q:stock:/),
+        expect.stringMatching(/^rag:q:crypto:/),
         expect.arrayContaining([
           expect.objectContaining({ id: "query-chunk-1" }),
         ]),
@@ -301,7 +301,7 @@ describe("RAG Optimizations", () => {
         {
           id: "generic-chunk",
           content: "Generic market content",
-          metadata: { source: "overview.md", section: "General", assetTypes: ["ETF"] },
+          metadata: { source: "overview.md", section: "General", assetTypes: [] },
           similarity: 0.85,
         },
         {

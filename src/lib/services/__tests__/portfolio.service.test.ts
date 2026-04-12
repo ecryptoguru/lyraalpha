@@ -93,7 +93,7 @@ function makePortfolio(holdingOverrides: Partial<{
       avgPrice: 100,
       asset: {
         price: 110,
-        type: "STOCK",
+        type: "CRYPTO",
         sector: i % 2 === 0 ? "Technology" : "Finance",
         avgVolatilityScore: 40,
         avgLiquidityScore: 70,

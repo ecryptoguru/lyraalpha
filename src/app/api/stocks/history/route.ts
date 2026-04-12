@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
     response.headers.set("Cache-Control", "private, no-store");
     return response;
   } catch (error) {
-    logger.error({ err: sanitizeError(error) }, "Stock history API failed");
+    logger.error({ err: sanitizeError(error) }, "Asset history API failed");
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

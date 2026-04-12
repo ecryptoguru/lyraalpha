@@ -21,14 +21,14 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     asset: {
       findMany: vi.fn().mockResolvedValue([
-        { symbol: "AAPL", name: "Apple", type: "CRYPTO", region: "US", marketCap: "2.8T" },
-        { symbol: "NVDA", name: "NVIDIA", type: "CRYPTO", region: "US", marketCap: "2.1T" },
-        { symbol: "SPY", name: "SPDR S&P 500 ETF", type: "ETF", region: "US", marketCap: "500B" },
         { symbol: "BTC-USD", name: "Bitcoin", type: "CRYPTO", region: "US", marketCap: "1.3T" },
-        { symbol: "RELIANCE.NS", name: "Reliance Industries", type: "CRYPTO", region: "IN", marketCap: "240B" },
-        { symbol: "QQQ", name: "Invesco QQQ", type: "ETF", region: "US", marketCap: "300B" },
+        { symbol: "ETH-USD", name: "Ethereum", type: "CRYPTO", region: "US", marketCap: "400B" },
+        { symbol: "SOL-USD", name: "Solana", type: "CRYPTO", region: "US", marketCap: "80B" },
+        { symbol: "BNB-USD", name: "BNB", type: "CRYPTO", region: "US", marketCap: "90B" },
+        { symbol: "XRP-USD", name: "XRP", type: "CRYPTO", region: "US", marketCap: "130B" },
+        { symbol: "ADA-USD", name: "Cardano", type: "CRYPTO", region: "US", marketCap: "25B" },
       ]),
-      findFirst: vi.fn().mockResolvedValue({ symbol: "NVDA", type: "CRYPTO" }),
+      findFirst: vi.fn().mockResolvedValue({ symbol: "SOL-USD", type: "CRYPTO" }),
       findUnique: vi.fn().mockResolvedValue({
         price: 721.33,
         changePercent: 2.15,
@@ -91,8 +91,8 @@ vi.mock("@/lib/ai/rag", () => ({
 
 vi.mock("@/lib/ai/search", () => ({
   searchWeb: vi.fn().mockResolvedValue({
-    content: "NVDA rallied 3% on AI capex news. Semiconductor sector showing strength.",
-    sources: [{ title: "MarketWatch", url: "https://marketwatch.com/nvda", type: "web" }],
+    content: "SOL-USD rallied 3% on DeFi TVL growth. L1 ecosystem showing strength.",
+    sources: [{ title: "CoinGecko", url: "https://coingecko.com/sol-usd", type: "web" }],
   }),
 }));
 
@@ -208,13 +208,13 @@ const QUERIES = {
   SIMPLE_EDUCATIONAL: "What is the volatility score?",
   SIMPLE_PLATFORM: "Explain the trend engine",
   SIMPLE_GREETING: "hi",
-  COMPLEX_SINGLE_ASSET: "How is NVDA doing?",
-  MODERATE_SINGLE_ASSET: "How is NVDA doing?",
-  COMPLEX_RISK: "What are the risks for AAPL this month?",
-  COMPLEX_TECHNICAL: "What are the key catalysts for TSLA?",
-  COMPLEX_COMPARISON: "Compare AAPL vs MSFT in the current macro environment",
-  COMPLEX_SECTOR: "What are the key technical drivers for NVDA and the AI sector this week?",
-  COMPLEX_PORTFOLIO: "How should I think about portfolio risk in the current regime?",
+  COMPLEX_SINGLE_ASSET: "How is SOL-USD doing?",
+  MODERATE_SINGLE_ASSET: "How is SOL-USD doing?",
+  COMPLEX_RISK: "What are the risks for BTC-USD this month?",
+  COMPLEX_TECHNICAL: "What are the key catalysts for SOL-USD?",
+  COMPLEX_COMPARISON: "Compare BTC-USD vs ETH-USD in the current macro environment",
+  COMPLEX_SECTOR: "What are the key technical drivers for SOL-USD and the L1 sector this week?",
+  COMPLEX_PORTFOLIO: "How should I think about crypto portfolio risk in the current regime?",
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -261,25 +261,25 @@ describe("Query Classifier Quality", () => {
     const SHOULD_BE_MODERATE = [
       "Market breadth is narrowing lately",
       "Macro liquidity looks tighter now",
-      "The semiconductor cycle seems fragile",
-      "Current sector rotation looks uneven",
-      "Is the tech sector overvalued right now?",
+      "The DeFi yield cycle seems fragile",
+      "Current token rotation looks uneven",
+      "Is the L1 sector overvalued right now?",
     ];
 
     for (const q of SHOULD_BE_MODERATE) {
-      it(`classifies "${q}" as ${q === "Current sector rotation looks uneven" ? "COMPLEX" : "MODERATE"}`, () => {
-        expect(classifyQuery(q, 1)).toBe(q === "Current sector rotation looks uneven" ? "COMPLEX" : "MODERATE");
+      it(`classifies "${q}" as ${q === "Current token rotation looks uneven" ? "COMPLEX" : "MODERATE"}`, () => {
+        expect(classifyQuery(q, 1)).toBe(q === "Current token rotation looks uneven" ? "COMPLEX" : "MODERATE");
       });
     }
   });
 
   describe("COMPLEX classification accuracy", () => {
     const SHOULD_BE_COMPLEX = [
-      "Compare AAPL vs MSFT in the current macro environment",
-      "What are the key technical drivers for NVDA and the AI sector this week?",
-      "How does portfolio correlation change in a risk-off regime?",
-      "What's happening in the tech sector this week and how does it affect AI stocks?",
-      "Analyze cross-sector momentum and factor rotation this quarter",
+      "Compare BTC-USD vs ETH-USD in the current macro environment",
+      "What are the key technical drivers for SOL-USD and the L1 sector this week?",
+      "How does crypto portfolio correlation change in a risk-off regime?",
+      "What's happening in the DeFi sector this week and how does it affect L1 tokens?",
+      "Analyze cross-chain momentum and token rotation this quarter",
     ];
 
     for (const q of SHOULD_BE_COMPLEX) {
@@ -297,9 +297,9 @@ describe("Query Classifier Quality", () => {
       expect(classifyQuery("Can you explain the momentum engine?", 1)).toBe("SIMPLE");
     });
 
-    it("'AI sector' does not classify based on AI ticker", () => {
-      // "AI sector" should trigger COMPLEX (sector analysis), not because AI is a ticker
-      const result = classifyQuery("What are the key technical drivers for NVDA and the AI sector this week?", 1);
+    it("'L1 sector' does not classify based on L1 ticker", () => {
+      // "L1 sector" should trigger COMPLEX (sector analysis), not because L1 is a ticker
+      const result = classifyQuery("What are the key technical drivers for SOL-USD and the L1 sector this week?", 1);
       expect(result).toBe("COMPLEX");
     });
 
@@ -371,18 +371,18 @@ describe("Pro Tier Prompt Quality", () => {
       );
 
       const call = getStreamCall();
-      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "SIMPLE")));
+      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "SIMPLE"), "SIMPLE" as const));
     });
 
     it("single-asset query uses MODERATE maxOutputTokens", async () => {
       await generateLyraStream(
         [{ role: "user", content: QUERIES.COMPLEX_SINGLE_ASSET }],
-        { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+        { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
         "user_123",
       );
 
       const call = getStreamCall();
-      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "MODERATE")));
+      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "MODERATE"), "MODERATE" as const));
     });
 
     it("COMPLEX query uses correct maxOutputTokens", async () => {
@@ -394,7 +394,7 @@ describe("Pro Tier Prompt Quality", () => {
 
       // PRO COMPLEX uses single mode → streamText directly
       const call = getStreamCall();
-      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "COMPLEX")));
+      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "COMPLEX"), "COMPLEX" as const));
     });
   });
 
@@ -414,14 +414,14 @@ describe("Pro Tier Prompt Quality", () => {
     it("single-asset COMPLEX queries activate RAG retrieval for deeper contextual analysis", async () => {
       await generateLyraStream(
         [{ role: "user", content: QUERIES.COMPLEX_SINGLE_ASSET }],
-        { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+        { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
         "user_123",
       );
 
       expect(retrieveInstitutionalKnowledge).toHaveBeenCalled();
     });
 
-    it("COMPLEX activates cross-sector context", async () => {
+    it("COMPLEX activates cross-chain context", async () => {
       await generateLyraStream(
         [{ role: "user", content: QUERIES.COMPLEX_COMPARISON }],
         { scores: {}, assetType: "CRYPTO" },
@@ -431,7 +431,7 @@ describe("Pro Tier Prompt Quality", () => {
       expect(prisma.marketRegime.findFirst).toHaveBeenCalled();
     });
 
-    it("SIMPLE does NOT activate cross-sector context", async () => {
+    it("SIMPLE does NOT activate cross-chain context", async () => {
       await generateLyraStream(
         [{ role: "user", content: QUERIES.SIMPLE_EDUCATIONAL }],
         { scores: {}, assetType: "CRYPTO" },
@@ -501,19 +501,19 @@ describe("Elite Tier Prompt Quality", () => {
       );
 
       const call = getStreamCall();
-      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "SIMPLE")));
+      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "SIMPLE"), "SIMPLE" as const));
     });
 
     it("single-asset query uses Elite MODERATE maxOutputTokens", async () => {
       await generateLyraStream(
         [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-        { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+        { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
         ELITE_USER,
       );
 
       // ELITE MODERATE = single mode — goes through streamText directly
       const call = getStreamCall();
-      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "MODERATE")));
+      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "MODERATE"), "MODERATE" as const));
     });
 
     it("COMPLEX query uses Elite maxOutputTokens (2100)", async () => {
@@ -525,7 +525,7 @@ describe("Elite Tier Prompt Quality", () => {
 
       // ELITE COMPLEX = single mode → streamText directly
       const call = getStreamCall();
-      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "COMPLEX")));
+      expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "COMPLEX"), "COMPLEX" as const));
     });
   });
 
@@ -533,8 +533,8 @@ describe("Elite Tier Prompt Quality", () => {
     it("Elite static prompt is comparable or longer than Pro for same parameters", () => {
       // Use BUILD_LYRA_STATIC_PROMPT directly to avoid mock isolation issues
       // Same wordBudget (0) for both so we compare structural richness, not word instruction length
-      const proPrompt = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "How is NVDA doing?", "PRO", 0);
-      const elitePrompt = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "How is NVDA doing?", "ELITE", 0);
+      const proPrompt = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "How is SOL-USD doing?", "PRO", 0);
+      const elitePrompt = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "How is SOL-USD doing?", "ELITE", 0);
 
       // Elite and Pro prompts should be within ~5% of each other (structural parity);
       // actual Elite-exclusive content (sections, personas) is verified in the test below.
@@ -574,15 +574,12 @@ describe("Asset-Type Prompt Quality", () => {
     expect(prompt).toContain("Network health");
   });
 
-  it("ETF prompt includes composition/factor guidance", () => {
-    const prompt = BUILD_LYRA_STATIC_PROMPT("ETF", "test", "PRO", 600);
-    expect(prompt).toContain("factor tilt");
+  it("CRYPTO prompt includes protocol/tokenomics guidance", () => {
+    const prompt = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "test", "PRO", 600);
+    expect(prompt).toContain("Protocol summary");
   });
 
-  it("MUTUAL_FUND prompt includes rolling returns guidance", () => {
-    const prompt = BUILD_LYRA_STATIC_PROMPT("MUTUAL_FUND", "test", "PRO", 600);
-    expect(prompt).toContain("Rolling returns vs benchmark");
-  });
+  // MUTUAL_FUND test removed — crypto-only platform
 
   // COMMODITY asset type removed in crypto-only rebranding
   // it("COMMODITY prompt includes supply-demand guidance", () => {
@@ -669,12 +666,12 @@ describe("Cross-Tier Consistency", () => {
 
     await generateLyraStream(
       [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-      { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+      { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
       "user_123",
     );
 
     const call = getStreamCall();
-    expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("STARTER", "MODERATE")));
+    expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("STARTER", "MODERATE"), "MODERATE" as const));
   });
 
   it("STARTER COMPLEX query uses correct maxOutputTokens", async () => {
@@ -688,7 +685,7 @@ describe("Cross-Tier Consistency", () => {
     );
 
     const call = getStreamCall();
-    expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("STARTER", "COMPLEX")));
+    expect(call.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("STARTER", "COMPLEX"), "COMPLEX" as const));
   });
 });
 
@@ -702,8 +699,8 @@ describe("Prompt Caching Quality", () => {
   });
 
   it("same inputs produce identical static prompts (cacheable)", () => {
-    const p1 = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "How is AAPL?", "PRO", 600);
-    const p2 = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "How is AAPL?", "PRO", 600);
+    const p1 = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "How is BTC-USD?", "PRO", 600);
+    const p2 = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "How is BTC-USD?", "PRO", 600);
     expect(p1).toBe(p2);
   });
 
@@ -722,7 +719,7 @@ describe("Prompt Caching Quality", () => {
   it("static prompt goes in system param, variable context in messages", async () => {
     await generateLyraStream(
       [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-      { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+      { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
       "user_123",
     );
 
@@ -762,7 +759,7 @@ describe("Web Search Testability", () => {
   it.skip("MODERATE query calls searchWeb directly", async () => {
     await generateLyraStream(
       [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-      { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+      { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
       "user_123",
     );
 
@@ -772,7 +769,7 @@ describe("Web Search Testability", () => {
   it.skip("web search results are included in context", async () => {
     await generateLyraStream(
       [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-      { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+      { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
       "user_123",
     );
 
@@ -781,7 +778,7 @@ describe("Web Search Testability", () => {
     const lastMsg = call.messages[call.messages.length - 1];
     const contextMsg = lastMsg.content as string;
     // Web search content should be merged into knowledge context
-    expect(contextMsg).toContain("NVDA rallied 3%");
+    expect(contextMsg).toContain("SOL-USD rallied 3%");
     expect(contextMsg).toContain("[INSTITUTIONAL_KNOWLEDGE]");
   });
 });
@@ -820,20 +817,20 @@ describe("Word Budget Config", () => {
 // 10. SECTOR CLASSIFIER PATTERNS (Fix #2)
 // ═══════════════════════════════════════════════════════════════
 describe("Sector Classifier Patterns", () => {
-  it("'tech sector outlook' classifies as COMPLEX", () => {
-    expect(classifyQuery("Tell me about the tech sector outlook", 1)).toBe("COMPLEX");
+  it("'L1 sector outlook' classifies as COMPLEX", () => {
+    expect(classifyQuery("Tell me about the L1 sector outlook", 1)).toBe("COMPLEX");
   });
 
-  it("'semiconductor sector performance' classifies as COMPLEX", () => {
-    expect(classifyQuery("How is the semiconductor sector performance?", 1)).toBe("COMPLEX");
+  it("'DeFi sector performance' classifies as COMPLEX", () => {
+    expect(classifyQuery("How is the DeFi sector performance?", 1)).toBe("COMPLEX");
   });
 
   it("'sector rotation analysis' classifies as COMPLEX", () => {
     expect(classifyQuery("What does sector rotation analysis show?", 1)).toBe("COMPLEX");
   });
 
-  it("'energy sector trend' classifies as COMPLEX", () => {
-    expect(classifyQuery("Tell me about the energy sector trend", 1)).toBe("COMPLEX");
+  it("'NFT sector trend' classifies as COMPLEX", () => {
+    expect(classifyQuery("Tell me about the NFT sector trend", 1)).toBe("COMPLEX");
   });
 
   it("'sector breakdown' classifies as COMPLEX", () => {
@@ -842,7 +839,7 @@ describe("Sector Classifier Patterns", () => {
 
   it("generic 'sector' mention without analysis keyword stays MODERATE", () => {
     // "sector" alone is a MODERATE_SIGNAL, not a COMPLEX trigger
-    expect(classifyQuery("What sector is NVDA in?", 1)).toBe("MODERATE");
+    expect(classifyQuery("What sector is SOL-USD in?", 1)).toBe("MODERATE");
   });
 });
 
@@ -860,14 +857,14 @@ describe("Common Words Filter — extractMentionedSymbols", () => {
 
     for (const word of COMMON_WORDS_THAT_ARE_TICKERS) {
       it(`filters out "${word}" from "The ${word} sector is growing"`, () => {
-        const symbols = extractMentionedSymbols(wrap(`The ${word} sector is growing`));
+        const symbols = extractMentionedSymbols(wrap(`The ${word} crypto sector is growing`));
         expect(symbols).not.toContain(word);
       });
     }
   });
 
   describe("preserves real tickers", () => {
-    const REAL_TICKERS = ["NVDA", "AAPL", "MSFT", "TSLA", "SPY", "QQQ", "BTC-USD"];
+    const REAL_TICKERS = ["BTC-USD", "ETH-USD", "SOL-USD", "DOGE-USD", "BNB-USD", "XRP-USD", "ADA-USD"];
 
     for (const ticker of REAL_TICKERS) {
       it(`preserves "${ticker}"`, () => {
@@ -883,34 +880,33 @@ describe("Common Words Filter — extractMentionedSymbols", () => {
       expect(symbols).toHaveLength(0);
     });
 
-    it("filters financial acronyms that aren't tickers: ETF, IPO, CEO, GDP, USD", () => {
-      const symbols = extractMentionedSymbols(wrap("The ETF had a great IPO, said the CEO. GDP and USD are up."));
+    it("filters financial acronyms that aren't tickers: ETF, IPO, CEO, GDP", () => {
+      const symbols = extractMentionedSymbols(wrap("The ETF had a great IPO, said the CEO. GDP is up."));
       expect(symbols).not.toContain("ETF");
       expect(symbols).not.toContain("IPO");
       expect(symbols).not.toContain("CEO");
       expect(symbols).not.toContain("GDP");
-      expect(symbols).not.toContain("USD");
     });
   });
 
   describe("handles mixed content correctly", () => {
-    it("extracts NVDA but not AI from 'NVDA is leading the AI sector'", () => {
-      const symbols = extractMentionedSymbols(wrap("NVDA is leading the AI sector"));
-      expect(symbols).toContain("NVDA");
+    it("extracts SOL-USD but not AI from 'SOL-USD is leading the DeFi sector'", () => {
+      const symbols = extractMentionedSymbols(wrap("SOL-USD is leading the DeFi sector"));
+      expect(symbols).toContain("SOL-USD");
       expect(symbols).not.toContain("AI");
       expect(symbols).not.toContain("IS");
     });
 
     it("extracts multiple tickers from comparison query", () => {
-      const symbols = extractMentionedSymbols(wrap("Compare AAPL vs MSFT in the current environment"));
-      expect(symbols).toContain("AAPL");
-      expect(symbols).toContain("MSFT");
+      const symbols = extractMentionedSymbols(wrap("Compare BTC-USD vs ETH-USD in the current environment"));
+      expect(symbols).toContain("BTC-USD");
+      expect(symbols).toContain("ETH-USD");
       expect(symbols).not.toContain("IN");
     });
 
-    it("handles Indian stock suffixes (.NS)", () => {
-      const symbols = extractMentionedSymbols(wrap("How is RELIANCE.NS doing?"));
-      expect(symbols).toContain("RELIANCE.NS");
+    it("handles crypto pair suffixes (-USD)", () => {
+      const symbols = extractMentionedSymbols(wrap("How is BTC-USD doing?"));
+      expect(symbols).toContain("BTC-USD");
     });
 
     it("handles crypto pairs (BTC-USD)", () => {
@@ -967,7 +963,7 @@ describe("Output Structure Validation", () => {
     });
 
     it("Risk Matrix instructs transmission mechanism", () => {
-      // "transmission" only appears in GLOBAL (macro) format, not STOCK-specific
+      // "transmission" only appears in GLOBAL (macro) format, not CRYPTO-specific
       const prompt = BUILD_LYRA_STATIC_PROMPT("GLOBAL", "test", "ELITE", 0);
       expect(prompt).toContain("transmission");
     });
@@ -991,14 +987,14 @@ describe("Output Structure Validation", () => {
     it("MODERATE query includes asset data, scores, and knowledge in context", async () => {
       await generateLyraStream(
         [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-        { scores: { trend: 82, momentum: 75 }, symbol: "NVDA", assetName: "NVIDIA", assetType: "CRYPTO" },
+        { scores: { trend: 82, momentum: 75 }, symbol: "SOL-USD", assetName: "Solana", assetType: "CRYPTO" },
         "user_123",
       );
 
       const call = getStreamCall();
       const lastMsg = call.messages[call.messages.length - 1];
       const ctx = lastMsg.content as string;
-      expect(ctx).toContain("[ASSET] NVDA");
+      expect(ctx).toContain("[ASSET] SOL-USD");
       expect(ctx).toContain("[ENGINE_SCORES]");
       expect(ctx).toContain("Trend:82");
       expect(ctx).toContain("[AVAILABLE_ASSETS]");
@@ -1006,7 +1002,7 @@ describe("Output Structure Validation", () => {
 
     it("resolves lowercase asset-name queries into single-asset context", async () => {
       await generateLyraStream(
-        [{ role: "user", content: "nvidia" }],
+        [{ role: "user", content: "solana" }],
         { scores: { trend: 82, momentum: 75 } },
         "user_123",
       );
@@ -1014,18 +1010,18 @@ describe("Output Structure Validation", () => {
       const call = getStreamCall();
       const lastMsg = call.messages[call.messages.length - 1];
       const ctx = lastMsg.content as string;
-      expect(ctx).toContain("[ASSET] NVDA");
+      expect(ctx).toContain("[ASSET] SOL-USD");
       expect(ctx).toContain("[QUESTION_FOCUS]");
       expect(vi.mocked(prisma.asset.findMany)).toHaveBeenCalled();
     });
 
     it("resolves India asset-name queries into single-asset context", async () => {
       vi.mocked(prisma.asset.findMany).mockResolvedValueOnce([
-        { symbol: "RELIANCE.NS", name: "Reliance Industries", type: "CRYPTO", region: "IN", marketCap: "240B" },
+        { symbol: "BTC-USD", name: "Bitcoin", type: "CRYPTO", region: "US", marketCap: "2T" },
       ] as any);
 
       await generateLyraStream(
-        [{ role: "user", content: "reliance" }],
+        [{ role: "user", content: "bitcoin" }],
         { scores: { trend: 79, momentum: 68 } },
         "user_123",
       );
@@ -1033,11 +1029,11 @@ describe("Output Structure Validation", () => {
       const call = getStreamCall();
       const lastMsg = call.messages[call.messages.length - 1];
       const ctx = lastMsg.content as string;
-      expect(ctx).toContain("[ASSET] RELIANCE.NS");
+      expect(ctx).toContain("[ASSET] BTC-USD");
       expect(ctx).toContain("[QUESTION_FOCUS]");
     });
 
-    it("COMPLEX query includes cross-sector correlation in context", async () => {
+    it("COMPLEX query includes cross-chain correlation in context", async () => {
       // Use a fresh userId to avoid plan cache issues
       const complexUser = "complex_user_789";
       vi.mocked(prisma.user.upsert).mockResolvedValue({ plan: "PRO" } as any);
@@ -1089,12 +1085,12 @@ describe("Plan Cache — answers don't get stuck on old plan", () => {
 
     await generateLyraStream(
       [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-      { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+      { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
       upgradeUser,
     );
 
     const proCall = getStreamCall();
-    expect(proCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "MODERATE")));
+    expect(proCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "MODERATE"), "MODERATE" as const));
 
     // Step 2: User upgrades to ELITE — streamText path (ELITE MODERATE = single mode)
     vi.clearAllMocks(); restoreTransactionMock();
@@ -1102,13 +1098,13 @@ describe("Plan Cache — answers don't get stuck on old plan", () => {
 
     await generateLyraStream(
       [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-      { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+      { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
       upgradeUser,
     );
 
     // ELITE MODERATE = single mode — goes through streamText directly
     const eliteOrchCall = getStreamCall();
-    expect(eliteOrchCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "MODERATE")));
+    expect(eliteOrchCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "MODERATE"), "MODERATE" as const));
   });
 
   it("ELITE → PRO downgrade takes effect immediately", async () => {
@@ -1120,12 +1116,12 @@ describe("Plan Cache — answers don't get stuck on old plan", () => {
 
     await generateLyraStream(
       [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-      { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+      { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
       downgradeUser,
     );
 
     const eliteOrchCall = getStreamCall();
-    expect(eliteOrchCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "MODERATE")));
+    expect(eliteOrchCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "MODERATE"), "MODERATE" as const));
 
     // Step 2: User downgraded to PRO — streamText path (PRO MODERATE = single mode)
     vi.clearAllMocks(); restoreTransactionMock();
@@ -1133,12 +1129,12 @@ describe("Plan Cache — answers don't get stuck on old plan", () => {
 
     await generateLyraStream(
       [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-      { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+      { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
       downgradeUser,
     );
 
     const proCall = getStreamCall();
-    expect(proCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "MODERATE")));
+    expect(proCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "MODERATE"), "MODERATE" as const));
   });
 
   it("different users get their own independent plan cache", async () => {
@@ -1150,11 +1146,11 @@ describe("Plan Cache — answers don't get stuck on old plan", () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ plan: "PRO" } as any);
     await generateLyraStream(
       [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-      { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+      { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
       proUser,
     );
     const proCall = getStreamCall();
-    expect(proCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "MODERATE")));
+    expect(proCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("PRO", "MODERATE"), "MODERATE" as const));
 
     // User B is ELITE — streamText path (ELITE MODERATE = single mode)
     // Should NOT be affected by User A's cache
@@ -1162,11 +1158,11 @@ describe("Plan Cache — answers don't get stuck on old plan", () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ plan: "ELITE" } as any);
     await generateLyraStream(
       [{ role: "user", content: QUERIES.MODERATE_SINGLE_ASSET }],
-      { scores: { trend: 82 }, symbol: "NVDA", assetType: "CRYPTO" },
+      { scores: { trend: 82 }, symbol: "SOL-USD", assetType: "CRYPTO" },
       eliteUser,
     );
     const eliteOrchCall = getStreamCall();
-    expect(eliteOrchCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "MODERATE")));
+    expect(eliteOrchCall.maxOutputTokens).toBe(getTargetOutputTokens(getTierConfig("ELITE", "MODERATE"), "MODERATE" as const));
   });
 });
 
@@ -1185,10 +1181,7 @@ describe("Phase 1 — LLM Quality Breakthrough", () => {
       expect(prompt).toContain("on-chain researcher");
     });
 
-    it("ELITE COMPLEX GPT path injects MF persona for MUTUAL_FUND asset", () => {
-      const prompt = BUILD_LYRA_STATIC_PROMPT("MUTUAL_FUND", "test", "ENTERPRISE", 0, "COMPLEX", "gpt");
-      expect(prompt).toContain("forensic mutual fund analyst");
-    });
+    // MUTUAL_FUND persona test removed — crypto-only platform
 
     it("PRO COMPLEX GPT path injects expert persona for deeper analysis", () => {
       const prompt = BUILD_LYRA_STATIC_PROMPT("CRYPTO", "test", "PRO", 600, "COMPLEX", "gpt");

@@ -11,14 +11,14 @@ import {
 } from "../portfolio-fragility";
 
 const makeHolding = (overrides: Partial<FragilityHoldingInput> = {}): FragilityHoldingInput => ({
-  symbol: "AAPL",
+  symbol: "BTC-USD",
   weight: 1,
   avgVolatilityScore: 50,
   avgLiquidityScore: 60,
   avgTrustScore: 70,
   compatibilityScore: 55,
   sector: "Technology",
-  type: "STOCK",
+  type: "CRYPTO",
   ...overrides,
 });
 
@@ -34,9 +34,9 @@ describe("Portfolio Fragility Engine — boundary conditions", () => {
 
   it("all component scores are within [0, 100]", () => {
     const holdings = [
-      makeHolding({ symbol: "A", weight: 0.4, type: "STOCK", sector: "Tech" }),
+      makeHolding({ symbol: "A", weight: 0.4, type: "CRYPTO", sector: "Tech" }),
       makeHolding({ symbol: "B", weight: 0.3, type: "CRYPTO", sector: null, avgVolatilityScore: 90 }),
-      makeHolding({ symbol: "C", weight: 0.3, type: "ETF", sector: "Finance" }),
+      makeHolding({ symbol: "C", weight: 0.3, type: "CRYPTO", sector: "Finance" }),
     ];
     const result = computePortfolioFragility(holdings);
     expect(result.fragilityScore).toBeGreaterThanOrEqual(0);
@@ -90,14 +90,14 @@ describe("Portfolio Fragility Engine — monotonicity", () => {
 
   it("concentrated portfolio is more fragile than diversified one", () => {
     const diversified = computePortfolioFragility([
-      makeHolding({ symbol: "A", weight: 0.25, type: "STOCK", sector: "Tech" }),
-      makeHolding({ symbol: "B", weight: 0.25, type: "ETF", sector: "Finance" }),
+      makeHolding({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
+      makeHolding({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance" }),
       makeHolding({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: null }),
-      makeHolding({ symbol: "D", weight: 0.25, type: "COMMODITY", sector: "Energy" }),
+      makeHolding({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Energy" }),
     ]);
     const concentrated = computePortfolioFragility([
-      makeHolding({ symbol: "A", weight: 0.90, type: "STOCK", sector: "Tech" }),
-      makeHolding({ symbol: "B", weight: 0.10, type: "STOCK", sector: "Tech" }),
+      makeHolding({ symbol: "A", weight: 0.90, type: "CRYPTO", sector: "Tech" }),
+      makeHolding({ symbol: "B", weight: 0.10, type: "CRYPTO", sector: "Tech" }),
     ]);
     expect(concentrated.fragilityScore).toBeGreaterThan(diversified.fragilityScore);
   });
@@ -179,8 +179,8 @@ describe("Portfolio Fragility Engine — mathematical accuracy", () => {
 
   it("composite score is weighted sum of components (within rounding tolerance)", () => {
     const holdings = [
-      makeHolding({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech" }),
-      makeHolding({ symbol: "B", weight: 0.5, type: "ETF", sector: "Finance" }),
+      makeHolding({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      makeHolding({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance" }),
     ];
     const result = computePortfolioFragility(holdings);
     const { volatilityFragility, correlationFragility, liquidityFragility, factorRotationFragility, concentrationFragility } = result.components;
@@ -197,12 +197,12 @@ describe("Portfolio Fragility Engine — mathematical accuracy", () => {
 
   it("weight normalization: raw weights produce same result as normalized weights", () => {
     const raw = computePortfolioFragility([
-      makeHolding({ symbol: "A", weight: 3000, type: "STOCK", sector: "Tech" }),
-      makeHolding({ symbol: "B", weight: 7000, type: "ETF", sector: "Finance" }),
+      makeHolding({ symbol: "A", weight: 3000, type: "CRYPTO", sector: "Tech" }),
+      makeHolding({ symbol: "B", weight: 7000, type: "CRYPTO", sector: "Finance" }),
     ]);
     const norm = computePortfolioFragility([
-      makeHolding({ symbol: "A", weight: 0.3, type: "STOCK", sector: "Tech" }),
-      makeHolding({ symbol: "B", weight: 0.7, type: "ETF", sector: "Finance" }),
+      makeHolding({ symbol: "A", weight: 0.3, type: "CRYPTO", sector: "Tech" }),
+      makeHolding({ symbol: "B", weight: 0.7, type: "CRYPTO", sector: "Finance" }),
     ]);
     expect(raw.fragilityScore).toBeCloseTo(norm.fragilityScore, 1);
   });
@@ -214,9 +214,9 @@ describe("Portfolio Fragility Engine — classification", () => {
   it("returns Robust for very low fragility", () => {
     // Maximally diversified, liquid, low-vol portfolio
     const holdings = [
-      makeHolding({ symbol: "A", weight: 0.25, type: "STOCK", sector: "Tech", avgVolatilityScore: 5, avgLiquidityScore: 99, compatibilityScore: 99 }),
-      makeHolding({ symbol: "B", weight: 0.25, type: "ETF", sector: "Finance", avgVolatilityScore: 5, avgLiquidityScore: 99, compatibilityScore: 99 }),
-      makeHolding({ symbol: "C", weight: 0.25, type: "COMMODITY", sector: "Energy", avgVolatilityScore: 5, avgLiquidityScore: 99, compatibilityScore: 99 }),
+      makeHolding({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech", avgVolatilityScore: 5, avgLiquidityScore: 99, compatibilityScore: 99 }),
+      makeHolding({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance", avgVolatilityScore: 5, avgLiquidityScore: 99, compatibilityScore: 99 }),
+      makeHolding({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "Energy", avgVolatilityScore: 5, avgLiquidityScore: 99, compatibilityScore: 99 }),
       makeHolding({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: null, avgVolatilityScore: 5, avgLiquidityScore: 99, compatibilityScore: 99 }),
     ];
     const result = computePortfolioFragility(holdings);

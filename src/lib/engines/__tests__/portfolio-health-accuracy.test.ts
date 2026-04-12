@@ -17,7 +17,7 @@ const make = (overrides: Partial<HoldingInput> = {}): HoldingInput => ({
   avgLiquidityScore: 60,
   avgTrustScore: 70,
   sector: "Technology",
-  type: "STOCK",
+  type: "CRYPTO",
   ...overrides,
 });
 
@@ -26,13 +26,13 @@ const make = (overrides: Partial<HoldingInput> = {}): HoldingInput => ({
 describe("Portfolio Health — weight normalization", () => {
   it("raw dollar weights produce same result as fractional weights", () => {
     const raw = computePortfolioHealth([
-      make({ symbol: "A", weight: 10000, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 5000, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 10000, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 5000, type: "CRYPTO", sector: "Finance" }),
       make({ symbol: "C", weight: 5000, type: "CRYPTO", sector: null }),
     ]);
     const frac = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance" }),
       make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: null }),
     ]);
     expect(raw.healthScore).toBeCloseTo(frac.healthScore, 1);
@@ -63,22 +63,22 @@ describe("Portfolio Health — diversification score", () => {
     // 4 sectors, equal weight → sectorHHI = 0.25 → sectorScore = 93.75
     // diversification = 93.75*0.6 + 93.75*0.4 = 93.75
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.25, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance" }),
       make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "Crypto" }),
-      make({ symbol: "D", weight: 0.25, type: "COMMODITY", sector: "Energy" }),
+      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Energy" }),
     ]);
     expect(result.dimensions.diversificationScore).toBeCloseTo(93.75, 0);
   });
 
   it("all same type → typeHHI penalizes diversification vs mixed types", () => {
     const sameType = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "STOCK", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance" }),
     ]);
     const mixedType = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance" }),
     ]);
     // Same type → typeHHI = 2*(0.5^2) = 0.5 → typeScore = clamp(0.5*125) = 62.5
     // Mixed type → typeHHI = 0.5 → same typeScore BUT sectorHHI differs
@@ -89,8 +89,8 @@ describe("Portfolio Health — diversification score", () => {
 
   it("all same sector → sectorHHI = 1.0 → sectorScore = 0", () => {
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "ETF", sector: "Tech" }),
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
     ]);
     // typeHHI = 0.5 → typeScore = clamp(0.5*125) = 62.5
     // sectorHHI = 1.0 → sectorScore = 0
@@ -108,18 +108,18 @@ describe("Portfolio Health — concentration score", () => {
     // penalty for top5: (1.0-0.70)*60 = 18
     // score = 100 - 25 - 18 = 57
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.25, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance" }),
       make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "Crypto" }),
-      make({ symbol: "D", weight: 0.25, type: "COMMODITY", sector: "Energy" }),
+      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Energy" }),
     ]);
     expect(result.dimensions.concentrationScore).toBeCloseTo(57, 0);
   });
 
   it("single asset at 80% weight triggers top1 penalty: (0.80-0.25)*200 = 110 → score = 0", () => {
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.80, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.20, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.80, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.20, type: "CRYPTO", sector: "Finance" }),
     ]);
     // top1=0.80 → penalty=(0.80-0.25)*200=110
     // top3=1.0 → penalty=(1.0-0.50)*100=50
@@ -130,10 +130,10 @@ describe("Portfolio Health — concentration score", () => {
 
   it("top1 at exactly 25% → no top1 penalty", () => {
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.25, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance" }),
       make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "Crypto" }),
-      make({ symbol: "D", weight: 0.25, type: "COMMODITY", sector: "Energy" }),
+      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Energy" }),
     ]);
     // top1 = 0.25 → no top1 penalty (condition: > 0.25)
     // Penalty only from top3 and top5
@@ -143,8 +143,8 @@ describe("Portfolio Health — concentration score", () => {
 
   it("two equal-weight assets: top1=0.5, top3=1.0, top5=1.0", () => {
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance" }),
     ]);
     // top1=0.5 → (0.5-0.25)*200=50
     // top3=1.0 → (1.0-0.50)*100=50
@@ -232,10 +232,10 @@ describe("Portfolio Health — quality score", () => {
 
   it("COMMODITY with liquidity < 30 applies 5-point penalty", () => {
     const withPenalty = computePortfolioHealth([
-      make({ symbol: "A", weight: 1, type: "COMMODITY", avgTrustScore: 70, avgLiquidityScore: 20 }),
+      make({ symbol: "A", weight: 1, type: "CRYPTO", avgTrustScore: 70, avgLiquidityScore: 20 }),
     ]);
     const withoutPenalty = computePortfolioHealth([
-      make({ symbol: "A", weight: 1, type: "COMMODITY", avgTrustScore: 70, avgLiquidityScore: 50 }),
+      make({ symbol: "A", weight: 1, type: "CRYPTO", avgTrustScore: 70, avgLiquidityScore: 50 }),
     ]);
     // composite(liq=20) = 70*0.6+20*0.4 = 50, penalty=5 → 45
     // composite(liq=50) = 70*0.6+50*0.4 = 62, no penalty → 62
@@ -245,7 +245,7 @@ describe("Portfolio Health — quality score", () => {
 
   it("quality composite formula: trust*0.6 + liquidity*0.4", () => {
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 1, type: "STOCK", avgTrustScore: 80, avgLiquidityScore: 60 }),
+      make({ symbol: "A", weight: 1, type: "CRYPTO", avgTrustScore: 80, avgLiquidityScore: 60 }),
     ]);
     // composite = 80*0.6 + 60*0.4 = 48+24 = 72
     expect(result.dimensions.qualityScore).toBeCloseTo(72, 0);
@@ -257,8 +257,8 @@ describe("Portfolio Health — quality score", () => {
 describe("Portfolio Health — composite score formula", () => {
   it("healthScore = weighted sum of 5 dimensions with correct weights (within rounding tolerance)", () => {
     const holdings = [
-      make({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance" }),
     ];
     const result = computePortfolioHealth(holdings);
     const { diversificationScore, concentrationScore, volatilityScore, correlationScore, qualityScore } = result.dimensions;
@@ -284,9 +284,9 @@ describe("Portfolio Health — band thresholds", () => {
   it("score >= 75 → Strong", () => {
     // Maximally healthy: 4 types, 4 sectors, low vol, high quality
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.25, type: "STOCK", sector: "Tech", avgVolatilityScore: 5, avgTrustScore: 95, avgLiquidityScore: 95 }),
-      make({ symbol: "B", weight: 0.25, type: "ETF", sector: "Finance", avgVolatilityScore: 5, avgTrustScore: 95, avgLiquidityScore: 95 }),
-      make({ symbol: "C", weight: 0.25, type: "COMMODITY", sector: "Energy", avgVolatilityScore: 5, avgTrustScore: 95, avgLiquidityScore: 95 }),
+      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech", avgVolatilityScore: 5, avgTrustScore: 95, avgLiquidityScore: 95 }),
+      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance", avgVolatilityScore: 5, avgTrustScore: 95, avgLiquidityScore: 95 }),
+      make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "Energy", avgVolatilityScore: 5, avgTrustScore: 95, avgLiquidityScore: 95 }),
       make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Crypto", avgVolatilityScore: 5, avgTrustScore: 95, avgLiquidityScore: 95 }),
     ]);
     if (result.healthScore >= 75) expect(result.band).toBe("Strong");
@@ -294,8 +294,8 @@ describe("Portfolio Health — band thresholds", () => {
 
   it("score in [55,75) → Balanced", () => {
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech", avgVolatilityScore: 40, avgTrustScore: 65, avgLiquidityScore: 65 }),
-      make({ symbol: "B", weight: 0.5, type: "ETF", sector: "Finance", avgVolatilityScore: 40, avgTrustScore: 65, avgLiquidityScore: 65 }),
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech", avgVolatilityScore: 40, avgTrustScore: 65, avgLiquidityScore: 65 }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance", avgVolatilityScore: 40, avgTrustScore: 65, avgLiquidityScore: 65 }),
     ]);
     if (result.healthScore >= 55 && result.healthScore < 75) {
       expect(result.band).toBe("Balanced");
@@ -304,8 +304,8 @@ describe("Portfolio Health — band thresholds", () => {
 
   it("score in [40,55) → Fragile", () => {
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.7, type: "STOCK", sector: "Tech", avgVolatilityScore: 70, avgTrustScore: 40, avgLiquidityScore: 40 }),
-      make({ symbol: "B", weight: 0.3, type: "STOCK", sector: "Tech", avgVolatilityScore: 70, avgTrustScore: 40, avgLiquidityScore: 40 }),
+      make({ symbol: "A", weight: 0.7, type: "CRYPTO", sector: "Tech", avgVolatilityScore: 70, avgTrustScore: 40, avgLiquidityScore: 40 }),
+      make({ symbol: "B", weight: 0.3, type: "CRYPTO", sector: "Tech", avgVolatilityScore: 70, avgTrustScore: 40, avgLiquidityScore: 40 }),
     ]);
     if (result.healthScore >= 40 && result.healthScore < 55) {
       expect(result.band).toBe("Fragile");
@@ -321,8 +321,8 @@ describe("Portfolio Health — band thresholds", () => {
 
   it("band boundaries are consistent with score", () => {
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance" }),
     ]);
     const { healthScore, band } = result;
     if (healthScore >= 75) expect(band).toBe("Strong");
@@ -343,28 +343,28 @@ describe("Portfolio Health — correlation score", () => {
   it("more unique types → higher correlation score", () => {
     // 4 holdings: 4 types vs 1 type — with 4 holdings the clamp ceiling is not hit
     const fourTypes = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.25, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance" }),
       make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "Crypto" }),
-      make({ symbol: "D", weight: 0.25, type: "COMMODITY", sector: "Energy" }),
+      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Energy" }),
     ]);
     const oneType = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.25, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "STOCK", sector: "Finance" }),
-      make({ symbol: "C", weight: 0.25, type: "STOCK", sector: "Crypto" }),
-      make({ symbol: "D", weight: 0.25, type: "STOCK", sector: "Energy" }),
+      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance" }),
+      make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "Crypto" }),
+      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Energy" }),
     ]);
     expect(fourTypes.dimensions.correlationScore).toBeGreaterThan(oneType.dimensions.correlationScore);
   });
 
   it("more unique sectors → higher correlation score", () => {
     const twoSectors = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "STOCK", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance" }),
     ]);
     const oneSector = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "STOCK", sector: "Tech" }),
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
     ]);
     expect(twoSectors.dimensions.correlationScore).toBeGreaterThan(oneSector.dimensions.correlationScore);
   });
@@ -375,8 +375,8 @@ describe("Portfolio Health — correlation score", () => {
 describe("Portfolio Health — output rounding", () => {
   it("all scores are rounded to 1 decimal place", () => {
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.33, type: "STOCK", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.33, type: "ETF", sector: "Finance" }),
+      make({ symbol: "A", weight: 0.33, type: "CRYPTO", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.33, type: "CRYPTO", sector: "Finance" }),
       make({ symbol: "C", weight: 0.34, type: "CRYPTO", sector: null }),
     ]);
     const checkRounded = (v: number) => Math.round(v * 10) / 10 === v;

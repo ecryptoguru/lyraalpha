@@ -87,7 +87,7 @@ ${signalsText}
 Instructions for Formatting:
 1. Use the following Markdown structure strictly:
    ### **Why It's Here**
-   [A concise, professional one-sentence summary of why the stock is included here.]
+   [A concise, professional one-sentence summary of why the asset is included here.]
 
    ### **Key Drivers**
    - **[Primary Factor Name]**: [Explanation of the primary deterministic factor.]
@@ -104,6 +104,6 @@ Instructions for Formatting:
 
 3. Objective:
    - Factual analysis only. No hype, no predictions.
-   - Never include the ".NS" suffix for Indian stock ticker symbols (e.g., write "HDFCBANK" instead of "HDFCBANK.NS").
+   - Always use the full symbol format for crypto assets (e.g., "BTC-USD", "ETH-USD").
 `.trim();
 }

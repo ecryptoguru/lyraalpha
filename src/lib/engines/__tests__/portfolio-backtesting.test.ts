@@ -82,7 +82,7 @@ describe("Portfolio Backtesting Engine — boundary conditions", () => {
       priceHistory: flatPriceHistory(DATES_60, 100),
     };
     const result = computePortfolioBacktest([holding], flatPriceHistory(DATES_60, 100), "US");
-    expect(result.benchmarkLabel).toBe("S&P 500 (SPY)");
+    expect(result.benchmarkLabel).toBe("Bitcoin (BTC-USD)");
   });
 
   it("returns correct benchmark label for IN region", () => {
@@ -92,7 +92,7 @@ describe("Portfolio Backtesting Engine — boundary conditions", () => {
       priceHistory: flatPriceHistory(DATES_60, 100),
     };
     const result = computePortfolioBacktest([holding], flatPriceHistory(DATES_60, 100), "IN");
-    expect(result.benchmarkLabel).toBe("Nifty 50");
+    expect(result.benchmarkLabel).toBe("Bitcoin (BTC-USD)");
   });
 });
 

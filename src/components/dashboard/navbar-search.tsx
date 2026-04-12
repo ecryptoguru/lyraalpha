@@ -79,7 +79,7 @@ export function NavbarSearch({ desktopExpanded = false }: NavbarSearchProps) {
             >
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground opacity-60" />
               <span className="truncate text-sm font-bold tracking-tight text-muted-foreground/60">
-                Search AAPL, Apple, Gold
+                Search BTC-USD, Ethereum, Solana
               </span>
             </button>
           ) : (

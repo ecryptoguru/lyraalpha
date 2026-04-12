@@ -20,7 +20,7 @@ export function MarketSearchInput({
   onEnter,
   initialValue = "",
   className,
-  placeholder = "Search global terminal (e.g. AAPL, BTC, GLD)...",
+  placeholder = "Search global terminal (e.g. BTC-USD, ETH-USD, SOL-USD)..."
 }: MarketSearchInputProps) {
   const [value, setValue] = useState(initialValue);
   const [isDebouncing, setIsDebouncing] = useState(false);

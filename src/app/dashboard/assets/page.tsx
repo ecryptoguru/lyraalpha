@@ -629,7 +629,7 @@ export default function AssetsPage() {
                 No assets found
               </p>
               <p className="text-xs text-muted-foreground/60 mt-1">
-                Try a ticker like AAPL, BTC or GOLD
+                Try a ticker like BTC-USD, ETH-USD or SOL-USD
               </p>
             </div>
           )}

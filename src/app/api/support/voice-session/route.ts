@@ -5,6 +5,7 @@ import { rateLimitChat } from "@/lib/rate-limit";
 import { getGlobalNotes } from "@/lib/ai/memory";
 import { buildMyraVoiceInstructions } from "@/lib/support/voice-prompt";
 import { bm25SearchKnowledge } from "@/lib/support/ai-responder";
+import { checkPromptInjection } from "@/lib/ai/guardrails";
 import { apiError } from "@/lib/api-response";
 import { createLogger } from "@/lib/logger";
 
@@ -130,11 +131,23 @@ export async function GET(request: Request) {
     // Extract current page from query param for contextual responses
     const pageParam = new URL(request.url).searchParams.get("page") || undefined;
 
+    // V-INJ: Validate page param against prompt injection before injecting into voice instructions.
+    // The page param is user-controlled (query string) and gets embedded in the system prompt.
+    let safePageParam: string | undefined;
+    if (pageParam) {
+      const injectionCheck = checkPromptInjection(pageParam);
+      if (!injectionCheck.isValid) {
+        logger.warn({ userId, pageParam, reason: injectionCheck.reason }, "Voice session: injection pattern in page param — stripping");
+      } else {
+        safePageParam = pageParam;
+      }
+    }
+
     const instructions = buildMyraVoiceInstructions(
       {
         plan: userPlan,
         credits: userRecord?.credits ?? undefined,
-        currentPage: pageParam,
+        currentPage: safePageParam,
         globalNotes: globalNotes || undefined,
       },
       kbDocs,

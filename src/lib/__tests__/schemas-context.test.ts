@@ -15,16 +15,16 @@ describe("ChatContextDataSchema (I3)", () => {
 
     it("accepts all known fields with valid values", () => {
       const result = ChatContextDataSchema.safeParse({
-        symbol: "AAPL",
-        assetName: "Apple Inc.",
-        assetType: "STOCK",
+        symbol: "BTC-USD",
+        assetName: "Bitcoin",
+        assetType: "CRYPTO",
         region: "US",
         regime: "RISK_ON",
         chatMode: "compare",
         scores: { momentum: 0.75, value: -0.3 },
         compareContext: [
-          { symbol: "AAPL", name: "Apple", assetType: "STOCK", region: "US", price: 180.5, changePercent: 1.2 },
-          { symbol: "MSFT", name: "Microsoft", assetType: "STOCK" },
+          { symbol: "BTC-USD", name: "Bitcoin", assetType: "CRYPTO", region: "US", price: 104000, changePercent: 1.2 },
+          { symbol: "ETH-USD", name: "Ethereum", assetType: "CRYPTO" },
         ],
       });
       expect(result.success).toBe(true);
@@ -48,13 +48,13 @@ describe("ChatContextDataSchema (I3)", () => {
 
     it("accepts compareContext item with null price/changePercent", () => {
       const result = ChatContextDataSchema.safeParse({
-        compareContext: [{ symbol: "AAPL", price: null, changePercent: null }],
+        compareContext: [{ symbol: "BTC-USD", price: null, changePercent: null }],
       });
       expect(result.success).toBe(true);
     });
 
     it("passes through unknown extra keys (catchall)", () => {
-      const result = ChatContextDataSchema.safeParse({ unknownField: "extra", symbol: "SPY" });
+      const result = ChatContextDataSchema.safeParse({ unknownField: "extra", symbol: "BTC-USD" });
       expect(result.success).toBe(true);
       if (result.success) {
         expect((result.data as Record<string, unknown>).unknownField).toBe("extra");
@@ -89,7 +89,7 @@ describe("ChatContextDataSchema (I3)", () => {
     });
 
     it("rejects symbol with injection characters", () => {
-      const result = ChatContextDataSchema.safeParse({ symbol: "AAPL; DROP TABLE" });
+      const result = ChatContextDataSchema.safeParse({ symbol: "BTC-USD; DROP TABLE" });
       expect(result.success).toBe(false);
     });
   });
@@ -110,21 +110,21 @@ describe("ChatContextDataSchema (I3)", () => {
 
     it("rejects compareContext item with non-finite price", () => {
       const result = ChatContextDataSchema.safeParse({
-        compareContext: [{ symbol: "AAPL", price: Infinity }],
+        compareContext: [{ symbol: "BTC-USD", price: Infinity }],
       });
       expect(result.success).toBe(false);
     });
 
     it("rejects compareContext item with non-finite changePercent", () => {
       const result = ChatContextDataSchema.safeParse({
-        compareContext: [{ symbol: "AAPL", changePercent: NaN }],
+        compareContext: [{ symbol: "BTC-USD", changePercent: NaN }],
       });
       expect(result.success).toBe(false);
     });
 
     it("rejects summary longer than 2000 chars", () => {
       const result = ChatContextDataSchema.safeParse({
-        compareContext: [{ symbol: "AAPL", summary: "x".repeat(2001) }],
+        compareContext: [{ symbol: "BTC-USD", summary: "x".repeat(2001) }],
       });
       expect(result.success).toBe(false);
     });
@@ -164,13 +164,13 @@ describe("ChatContextDataSchema (I3)", () => {
 describe("ChatMessageSchema — contextData integration (I3)", () => {
   it("accepts valid contextData with compareContext in full ChatMessageSchema", () => {
     const result = ChatMessageSchema.safeParse({
-      messages: [{ role: "user", content: "compare AAPL vs MSFT" }],
+      messages: [{ role: "user", content: "compare BTC-USD vs ETH-USD" }],
       contextData: {
         chatMode: "compare",
         region: "US",
         compareContext: [
-          { symbol: "AAPL", name: "Apple", price: 180, changePercent: 1.5 },
-          { symbol: "MSFT", name: "Microsoft", price: 410, changePercent: -0.3 },
+          { symbol: "BTC-USD", name: "Bitcoin", price: 104000, changePercent: 1.5 },
+          { symbol: "ETH-USD", name: "Ethereum", price: 3400, changePercent: -0.3 },
         ],
       },
     });
@@ -197,9 +197,9 @@ describe("ChatMessageSchema — contextData integration (I3)", () => {
 
   it("accepts contextData without compareContext (optional)", () => {
     const result = ChatMessageSchema.safeParse({
-      messages: [{ role: "user", content: "What is AAPL?" }],
-      symbol: "AAPL",
-      contextData: { symbol: "AAPL", assetType: "STOCK", region: "US" },
+      messages: [{ role: "user", content: "What is BTC-USD?" }],
+      symbol: "BTC-USD",
+      contextData: { symbol: "BTC-USD", assetType: "CRYPTO", region: "US" },
     });
     expect(result.success).toBe(true);
   });

@@ -16,9 +16,9 @@ function makeDynamics(momentum: number, trend = "STABLE"): ScoreDynamicsEntry {
 function baseInput(overrides: Partial<DRSInput> = {}): DRSInput {
   return {
     assetId: "asset-1",
-    symbol: "AAPL",
-    name: "Apple Inc",
-    type: "STOCK",
+    symbol: "BTC-USD",
+    name: "Bitcoin",
+    type: "CRYPTO",
     region: "US",
     scoreDynamics: {
       TREND: makeDynamics(5),
@@ -27,7 +27,7 @@ function baseInput(overrides: Partial<DRSInput> = {}): DRSInput {
     latestScores: { TREND: 70, MOMENTUM: 65 },
     peerMedians: { TREND: 50, MOMENTUM: 50 },
     regimeAlignment: { arcsScore: 70, transitionProbability: 50, transitionDirection: "UP" },
-    etfLookthrough: null,
+    portfolioLookthrough: null,
     signalStrength: { score: 70, label: "Bullish" },
     lastSyncAge: 12,
     ...overrides,
@@ -75,7 +75,7 @@ describe("DRS — score inflection", () => {
     });
     const result = computeDRS(input);
     // inflectionScore ≈ 7.5, peerScore = 0, regimeScore ≈ 0, sentimentScore = 0
-    // For STOCK (non-ETF): weights = {scoreInflection:0.333, peerDivergence:0.278, regimeRelevance:0.222, sentimentShift:0.167}
+    // For CRYPTO: weights = {scoreInflection:0.333, peerDivergence:0.278, regimeRelevance:0.222, sentimentShift:0.167}
     // DRS ≈ round(0.333*7.5 + 0.278*0 + 0.222*0 + 0.167*0) = round(2.5) = 3
     expect(result.drs).toBeLessThan(15);
   });
@@ -196,7 +196,7 @@ describe("DRS — regime relevance", () => {
       latestScores: { TREND: 50, MOMENTUM: 50 },
       peerMedians: { TREND: 50, MOMENTUM: 50 },
     });
-    // regimeScore = 44; for STOCK: DRS = round(0.333*0 + 0.278*0 + 0.222*44 + 0.167*0) = round(9.77) = 10
+    // regimeScore = 44; for CRYPTO: DRS = round(0.333*0 + 0.278*0 + 0.222*44 + 0.167*0) = round(9.77) = 10
     const result = computeDRS(input);
     expect(result.drs).toBeGreaterThan(5);
     expect(result.drs).toBeLessThan(30);
@@ -246,36 +246,13 @@ describe("DRS — sentiment shift", () => {
   });
 });
 
-// ─── Structural Signal (ETF only) ────────────────────────────────────────────
+// ─── Structural Signal ────────────────────────────────────────────────────────
+// Platform is crypto-only; structural_anomaly archetype not applicable
 
 describe("DRS — structural signal", () => {
-  it("non-ETF type → structuralScore = 0, weights redistributed", () => {
-    const stock = computeDRS(baseInput({ type: "STOCK" }));
-    const etf = computeDRS(baseInput({
-      type: "ETF",
-      etfLookthrough: { concentration: { hhi: 0.8, level: "high" }, lookthroughScores: { matchRate: 40 } },
-    }));
-    // ETF with high concentration should score differently
-    expect(typeof stock.drs).toBe("number");
-    expect(typeof etf.drs).toBe("number");
-  });
-
-  it("ETF with high concentration → structuralScore = 60+", () => {
-    const input = baseInput({
-      type: "ETF",
-      etfLookthrough: { concentration: { hhi: 0.9, level: "high" } },
-    });
-    const result = computeDRS(input);
-    expect(result.drs).toBeGreaterThan(0);
-  });
-
-  it("ETF with low match rate → adds to structural score", () => {
-    const noLookthrough = computeDRS(baseInput({ type: "ETF", etfLookthrough: null }));
-    const withLookthrough = computeDRS(baseInput({
-      type: "ETF",
-      etfLookthrough: { concentration: { hhi: 0.8, level: "high" }, lookthroughScores: { matchRate: 30 } },
-    }));
-    expect(withLookthrough.drs).toBeGreaterThanOrEqual(noLookthrough.drs);
+  it("CRYPTO type → structuralScore = 0, weights redistributed", () => {
+    const crypto = computeDRS(baseInput({ type: "CRYPTO" }));
+    expect(typeof crypto.drs).toBe("number");
   });
 });
 
@@ -376,41 +353,15 @@ describe("DRS — archetype detection", () => {
     expect(result.archetype).toBe("peer_divergence");
   });
 
-  it("ETF with high structural signal → archetype = structural_anomaly", () => {
-    const result = computeDRS(baseInput({
-      type: "ETF",
-      scoreDynamics: { TREND: makeDynamics(0.5) },
-      latestScores: { TREND: 51 },
-      peerMedians: { TREND: 50 },
-      regimeAlignment: { arcsScore: 10, transitionProbability: 10, transitionDirection: "FLAT" },
-      etfLookthrough: {
-        concentration: { hhi: 0.9, level: "high" },
-        lookthroughScores: { matchRate: 20 },
-      },
-    }));
-    expect(result.archetype).toBe("structural_anomaly");
-  });
+  // structural_anomaly archetype removed — platform is crypto-only
 });
 
 // ─── Weight Configuration ─────────────────────────────────────────────────────
 
 describe("DRS — weight configuration", () => {
-  it("ETF uses DEFAULT_WEIGHTS (structuralSignal = 0.10)", () => {
-    // ETF should use structural signal weight
-    const etf = computeDRS(baseInput({
-      type: "ETF",
-      etfLookthrough: { concentration: { hhi: 0.8, level: "high" } },
-    }));
-    expect(etf.drs).toBeGreaterThanOrEqual(0);
-  });
-
-  it("non-ETF redistributes structural weight (structuralSignal = 0)", () => {
-    // STOCK and ETF with same signals should differ due to weight redistribution
-    const stock = computeDRS(baseInput({ type: "STOCK" }));
-    const etf = computeDRS(baseInput({ type: "ETF", etfLookthrough: null }));
-    // Both valid, just different weights
-    expect(typeof stock.drs).toBe("number");
-    expect(typeof etf.drs).toBe("number");
+  it("CRYPTO uses DEFAULT_WEIGHTS", () => {
+    const crypto = computeDRS(baseInput({ type: "CRYPTO" }));
+    expect(crypto.drs).toBeGreaterThanOrEqual(0);
   });
 });
 

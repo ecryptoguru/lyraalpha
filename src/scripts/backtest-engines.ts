@@ -112,7 +112,7 @@ async function runBacktest() {
     SELECT a.id as "assetId", a.symbol, COUNT(ph.id)::bigint as cnt
     FROM "Asset" a
     JOIN "PriceHistory" ph ON ph."assetId" = a.id
-    WHERE a.type IN ('STOCK', 'ETF', 'CRYPTO')
+    WHERE a.type IN ('CRYPTO')
     GROUP BY a.id, a.symbol
     HAVING COUNT(ph.id) >= ${MIN_HISTORY}
     ORDER BY COUNT(ph.id) DESC
@@ -151,7 +151,7 @@ async function runBacktest() {
       // Compute engine scores on this window
       const trend = calculateTrendScore(window);
       const momentum = calculateMomentumScore(window);
-      const volatility = calculateVolatilityScore(window, "STOCK");
+      const volatility = calculateVolatilityScore(window, "CRYPTO");
       const sentiment = calculateSentimentScore(window);
 
       // Measure forward returns

@@ -9,12 +9,12 @@ import {
   AreaSeries,
 } from "lightweight-charts";
 
-interface StockChartProps {
+interface CryptoChartProps {
   symbol: string;
   data?: { date: string; price: number }[];
 }
 
-export function StockChart({ symbol, data }: StockChartProps) {
+export function CryptoChart({ symbol, data }: CryptoChartProps) {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
 

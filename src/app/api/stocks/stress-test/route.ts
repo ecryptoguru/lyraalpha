@@ -344,11 +344,7 @@ export async function POST(req: NextRequest) {
           const scenarioStart = new Date(scenario.period.start);
           const scenarioEnd = new Date(scenario.period.end);
           const normalizedType = normalizeAssetType(asset.type);
-          const proxyPath = getBestProxyPath(scenario, asset.type, asset.symbol, {
-            name: asset.name,
-            sector: asset.sector,
-            category: asset.category,
-          });
+          const proxyPath = getBestProxyPath(scenario, asset.type, asset.symbol);
 
           const [directHistory] = await Promise.all([
             prisma.priceHistory.findMany({

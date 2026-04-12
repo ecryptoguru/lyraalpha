@@ -303,7 +303,7 @@ function buildDRSInput(
     latestScores,
     peerMedians: typePeerMedians,
     regimeAlignment,
-    etfLookthrough: null,
+    portfolioLookthrough: null,
     signalStrength: asset.signalStrength as DRSInput["signalStrength"],
     lastSyncAge,
   };

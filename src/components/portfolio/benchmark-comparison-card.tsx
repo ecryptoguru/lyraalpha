@@ -27,17 +27,17 @@ interface BenchmarkComparisonCardProps {
 }
 
 const US_BENCHMARKS: BenchmarkEntry[] = [
-  { symbol: "SPY",     name: "S&P 500" },
-  { symbol: "QQQ",     name: "NASDAQ 100" },
   { symbol: "BTC-USD", name: "Bitcoin" },
-  { symbol: "GLD",     name: "Gold" },
+  { symbol: "ETH-USD", name: "Ethereum" },
+  { symbol: "SOL-USD", name: "Solana" },
+  { symbol: "BNB-USD", name: "BNB" },
 ];
 
 const IN_BENCHMARKS: BenchmarkEntry[] = [
-  { symbol: "^NSEI",   name: "Nifty 50" },
-  { symbol: "^BSESN",  name: "Sensex" },
-  { symbol: "^NSEBANK",name: "Nifty Bank" },
-  { symbol: "GLD",     name: "Gold (USD)" },
+  { symbol: "BTC-USD", name: "Bitcoin" },
+  { symbol: "ETH-USD", name: "Ethereum" },
+  { symbol: "SOL-USD", name: "Solana" },
+  { symbol: "XRP-USD", name: "XRP" },
 ];
 
 function getBenchmarks(region: string): BenchmarkEntry[] {

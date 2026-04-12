@@ -218,7 +218,7 @@ export function NSEIntelligence({
           {symbolPe > 0 && (
             <MetricCard
               icon={LineChart}
-              label="Stock P/E"
+              label="P/E"
               value={symbolPe.toFixed(1)}
               subValue={peVsSector}
               color="cyan2"
@@ -277,11 +277,11 @@ export function NSEIntelligence({
           )}
         </div>
 
-        {/* NIFTY Index Membership */}
+        {/* Index Membership */}
         {niftyIndices.length > 0 && (
           <div className="pt-2 border-t border-border/30">
             <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium block mb-2">
-              NIFTY Index Membership
+Index Membership
             </span>
             <div className="flex flex-wrap gap-1.5">
               {niftyIndices.slice(0, 12).map((idx: string) => (

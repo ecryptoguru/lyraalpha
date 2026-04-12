@@ -30,7 +30,7 @@ export type SupportedStressAssetType =
   | "LAYER2";
 
 export interface ScenarioProxyPath {
-  proxy: string; // proxy symbol label (e.g. "SPY", "NIFTY50")
+  proxy: string; // proxy symbol label (e.g. "BTC-USD", "ETH-USD")
   label: string; // human label
   path: ScenarioDayPoint[];
   totalReturn: number; // total period return, e.g. -0.38

@@ -39,7 +39,7 @@ describe("Engines Integration Tests", () => {
     it("all engines return valid score ranges", () => {
       const trend = calculateTrendScore(mockOHLCV);
       const momentum = calculateMomentumScore(mockOHLCV);
-      const volatility = calculateVolatilityScore(mockOHLCV, "STOCK");
+      const volatility = calculateVolatilityScore(mockOHLCV, "CRYPTO");
       const sentiment = calculateSentimentScore(mockOHLCV);
 
       // All scores should be 0-100
@@ -65,7 +65,7 @@ describe("Engines Integration Tests", () => {
       
       const trend = calculateTrendScore(shortData);
       const momentum = calculateMomentumScore(shortData);
-      const volatility = calculateVolatilityScore(shortData, "STOCK");
+      const volatility = calculateVolatilityScore(shortData, "CRYPTO");
       const sentiment = calculateSentimentScore(shortData);
 
       // All should return neutral for insufficient data
@@ -85,8 +85,8 @@ describe("Engines Integration Tests", () => {
       const momentum1 = calculateMomentumScore(mockOHLCV);
       const momentum2 = calculateMomentumScore(mockOHLCV);
       
-      const volatility1 = calculateVolatilityScore(mockOHLCV, "STOCK");
-      const volatility2 = calculateVolatilityScore(mockOHLCV, "STOCK");
+      const volatility1 = calculateVolatilityScore(mockOHLCV, "CRYPTO");
+      const volatility2 = calculateVolatilityScore(mockOHLCV, "CRYPTO");
       
       const sentiment1 = calculateSentimentScore(mockOHLCV);
       const sentiment2 = calculateSentimentScore(mockOHLCV);
@@ -112,7 +112,7 @@ describe("Engines Integration Tests", () => {
     });
 
     it("volatility and sentiment have independent logic", () => {
-      const volatility = calculateVolatilityScore(mockOHLCV, "STOCK");
+      const volatility = calculateVolatilityScore(mockOHLCV, "CRYPTO");
       const sentiment = calculateSentimentScore(mockOHLCV);
 
       // These should be independent - no specific correlation expected
@@ -126,7 +126,7 @@ describe("Engines Integration Tests", () => {
     it("all engines provide relevant metadata", () => {
       const trend = calculateTrendScore(mockOHLCV);
       const momentum = calculateMomentumScore(mockOHLCV);
-      const volatility = calculateVolatilityScore(mockOHLCV, "STOCK");
+      const volatility = calculateVolatilityScore(mockOHLCV, "CRYPTO");
       const sentiment = calculateSentimentScore(mockOHLCV);
 
       // Trend metadata
@@ -158,17 +158,12 @@ describe("Engines Integration Tests", () => {
   });
 
   describe("Asset Type Handling", () => {
-    it("volatility engine handles different asset types", () => {
-      const stockVol = calculateVolatilityScore(mockOHLCV, "STOCK");
+    it("volatility engine handles crypto asset type", () => {
       const cryptoVol = calculateVolatilityScore(mockOHLCV, "CRYPTO");
 
-      expect(stockVol.metadata?.assetType).toBe("STOCK");
       expect(cryptoVol.metadata?.assetType).toBe("CRYPTO");
 
-      // Scores might differ due to different scaling
-      // Both should still be in valid range
-      expect(stockVol.score).toBeGreaterThanOrEqual(0);
-      expect(stockVol.score).toBeLessThanOrEqual(100);
+      // Score should be in valid range
       expect(cryptoVol.score).toBeGreaterThanOrEqual(0);
       expect(cryptoVol.score).toBeLessThanOrEqual(100);
     });

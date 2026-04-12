@@ -7,7 +7,7 @@
  * Key decisions:
  * - ScoreInflection reads from scoreDynamics.momentum (not raw AssetScore rows)
  * - SentimentShift uses SENTIMENT engine score delta from scoreDynamics
- * - StructuralSignal gated by type: ETF uses etfLookthrough, others weight=0 (redistributed)
+ * - StructuralSignal: crypto-only platform, not applicable (weight redistributed)
  * - Graceful degradation when data is sparse
  */
 
@@ -64,7 +64,7 @@ export interface DRSInput {
   latestScores: Record<string, number>;
   peerMedians: Record<string, number>;
   regimeAlignment: { arcsScore: number; transitionProbability: number; transitionDirection: string } | null;
-  etfLookthrough: { concentration?: { hhi: number; level: string }; lookthroughScores?: { matchRate: number } } | null;
+  portfolioLookthrough: { concentration?: { hhi: number; level: string }; lookthroughScores?: { matchRate: number } } | null;
   signalStrength: { score: number; label: string } | null;
   lastSyncAge: number;
 }
@@ -218,11 +218,11 @@ function computeSentimentShift(
 }
 
 /**
- * Structural Signal: platform is crypto-only.
- * ETF lookthrough not applicable for crypto assets.
+ * Structural Signal: crypto-only platform.
+ * Not applicable for crypto assets.
  */
 function computeStructuralSignal(): number {
-  // Platform is crypto-only; ETF lookthrough not applicable
+  // Platform is crypto-only; structural signal not applicable
   return 0;
 }
 
@@ -242,8 +242,6 @@ function detectArchetype(
   peerScore: number,
   regimeScore: number,
   sentimentScore: number,
-  structuralScore: number,
-  type: AssetType,
 ): DiscoveryArchetype {
   const scores: [DiscoveryArchetype, number][] = [
     ["score_inflection", inflectionScore],
@@ -252,9 +250,7 @@ function detectArchetype(
     ["sentiment_shift", sentimentScore],
   ];
 
-  if (type === "ETF" && structuralScore > 0) {
-    scores.push(["structural_anomaly", structuralScore]);
-  }
+  // Platform is crypto-only; structural_anomaly not applicable
 
   scores.sort((a, b) => b[1] - a[1] || ARCHETYPE_PRIORITY[a[0]] - ARCHETYPE_PRIORITY[b[0]]);
   return scores[0][0];
@@ -323,7 +319,7 @@ export function computeDRS(input: DRSInput): Omit<DRSResult, "headline" | "conte
 
   // Detect dominant archetype
   const archetype = detectArchetype(
-    inflectionScore, peerScore, regimeScore, sentimentScore, structuralScore, input.type,
+    inflectionScore, peerScore, regimeScore, sentimentScore,
   );
 
   // Check suppression

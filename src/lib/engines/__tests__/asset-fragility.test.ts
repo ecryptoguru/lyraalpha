@@ -126,11 +126,11 @@ describe("Asset Fragility Score", () => {
     it("should compute fragility for multiple assets", () => {
       const assets = [
         {
-          symbol: "AAPL",
+          symbol: "BTC-USD",
           scores: { volatility: 30, liquidity: 70, momentum: 65, trend: 70 },
         },
         {
-          symbol: "TSLA",
+          symbol: "DOGE-USD",
           scores: { volatility: 85, liquidity: 40, momentum: 55, trend: 50 },
         },
         {
@@ -142,11 +142,11 @@ describe("Asset Fragility Score", () => {
       const results = computeBatchFragility(assets);
 
       expect(results.size).toBe(2);
-      expect(results.get("AAPL")).toBeDefined();
-      expect(results.get("TSLA")).toBeDefined();
-      expect(results.get("BTC")).toBeUndefined();
-      expect(results.get("AAPL")!.score).toBeLessThan(55);
-      expect(results.get("TSLA")!.score).toBeGreaterThan(45);
+      expect(results.get("BTC-USD")).toBeDefined();
+      expect(results.get("DOGE-USD")).toBeDefined();
+      expect(results.get("FAKE")).toBeUndefined();
+      expect(results.get("BTC-USD")!.score).toBeLessThan(55);
+      expect(results.get("DOGE-USD")!.score).toBeGreaterThan(45);
     });
 
     it("should skip assets with null scores", () => {

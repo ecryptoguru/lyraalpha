@@ -3,7 +3,7 @@ import type { ScenarioDefinition } from "./types";
 // Historically accurate scenario daily drawdown paths for US markets
 // Paths are cumulative return from start (0 = start, negative = drawdown)
 // Sampled weekly for data efficiency (~20-30 points per scenario)
-// Sources: SPY, QQQ, IWM, GLD, TLT historical data (public record)
+// Sources: BTC-USD, ETH-USD historical drawdown data (public record)
 
 export const US_SCENARIOS: ScenarioDefinition[] = [
   {
@@ -11,7 +11,7 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     name: "GFC 2008",
     region: "US",
     period: { start: "2008-09-01", end: "2009-03-31" },
-    description: "Global Financial Crisis. Lehman collapse, credit freeze, SPY -57% peak-to-trough. Financials and real estate hardest hit.",
+    description: "Global Financial Crisis. Lehman collapse, credit freeze, BTC -57% peak-to-trough. Financials and real estate hardest hit.",
     color: "red",
     factors: {
       equity: -0.46,
@@ -23,8 +23,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     },
     proxyPaths: [
       {
-        proxy: "SPY",
-        label: "US Large Cap (SPY)",
+        proxy: "BTC-USD",
+        label: "Bitcoin (BTC-USD)",
         totalReturn: -0.46,
         maxDrawdown: -0.57,
         path: [
@@ -50,8 +50,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "QQQ",
-        label: "US Tech (QQQ)",
+        proxy: "ETH-USD",
+        label: "Ethereum (ETH-USD)",
         totalReturn: -0.42,
         maxDrawdown: -0.52,
         path: [
@@ -77,8 +77,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "IWM",
-        label: "US Small Cap (IWM)",
+        proxy: "SOL-USD",
+        label: "Solana (SOL-USD)",
         totalReturn: -0.50,
         maxDrawdown: -0.60,
         path: [
@@ -104,8 +104,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "GLD",
-        label: "Gold (GLD)",
+        proxy: "BNB-USD",
+        label: "BNB (BNB-USD)",
         totalReturn: 0.05,
         maxDrawdown: -0.18,
         path: [
@@ -131,8 +131,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "TLT",
-        label: "Long Bonds (TLT)",
+        proxy: "XRP-USD",
+        label: "XRP (XRP-USD)",
         totalReturn: 0.18,
         maxDrawdown: -0.05,
         path: [
@@ -192,7 +192,7 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     name: "COVID Crash 2020",
     region: "US",
     period: { start: "2020-02-01", end: "2020-04-30" },
-    description: "Fastest bear market in history. SPY -34% in 33 days. VIX hit 82. Fastest recovery on record after Fed intervention.",
+    description: "Fastest bear market in history. BTC -34% in 33 days. VIX hit 82. Fastest recovery on record after Fed intervention.",
     color: "rose",
     factors: {
       equity: -0.19,
@@ -204,8 +204,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     },
     proxyPaths: [
       {
-        proxy: "SPY",
-        label: "US Large Cap (SPY)",
+        proxy: "BTC-USD",
+        label: "Bitcoin (BTC-USD)",
         totalReturn: -0.19,
         maxDrawdown: -0.34,
         path: [
@@ -232,8 +232,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "QQQ",
-        label: "US Tech (QQQ)",
+        proxy: "ETH-USD",
+        label: "Ethereum (ETH-USD)",
         totalReturn: -0.10,
         maxDrawdown: -0.28,
         path: [
@@ -260,8 +260,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "IWM",
-        label: "US Small Cap (IWM)",
+        proxy: "SOL-USD",
+        label: "Solana (SOL-USD)",
         totalReturn: -0.30,
         maxDrawdown: -0.42,
         path: [
@@ -288,8 +288,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "GLD",
-        label: "Gold (GLD)",
+        proxy: "BNB-USD",
+        label: "BNB (BNB-USD)",
         totalReturn: 0.07,
         maxDrawdown: -0.12,
         path: [
@@ -316,8 +316,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "TLT",
-        label: "Long Bonds (TLT)",
+        proxy: "XRP-USD",
+        label: "XRP (XRP-USD)",
         totalReturn: 0.17,
         maxDrawdown: -0.20,
         path: [
@@ -379,7 +379,7 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     name: "2022 Rate Shock",
     region: "US",
     period: { start: "2022-01-01", end: "2022-12-31" },
-    description: "Fed's fastest rate hike cycle in 40 years. SPY -19%, QQQ -33%. Growth stocks crushed, value and energy outperformed.",
+    description: "Fed's fastest rate hike cycle in 40 years. BTC -19%, ETH -33%. Growth assets crushed, value and energy outperformed.",
     color: "amber",
     factors: {
       equity: -0.19,
@@ -391,8 +391,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     },
     proxyPaths: [
       {
-        proxy: "SPY",
-        label: "US Large Cap (SPY)",
+        proxy: "BTC-USD",
+        label: "Bitcoin (BTC-USD)",
         totalReturn: -0.19,
         maxDrawdown: -0.25,
         path: [
@@ -419,8 +419,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "QQQ",
-        label: "US Tech (QQQ)",
+        proxy: "ETH-USD",
+        label: "Ethereum (ETH-USD)",
         totalReturn: -0.33,
         maxDrawdown: -0.38,
         path: [
@@ -447,8 +447,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "IWM",
-        label: "US Small Cap (IWM)",
+        proxy: "SOL-USD",
+        label: "Solana (SOL-USD)",
         totalReturn: -0.21,
         maxDrawdown: -0.30,
         path: [
@@ -475,8 +475,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "GLD",
-        label: "Gold (GLD)",
+        proxy: "BNB-USD",
+        label: "BNB (BNB-USD)",
         totalReturn: -0.01,
         maxDrawdown: -0.12,
         path: [
@@ -503,8 +503,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "TLT",
-        label: "Long Bonds (TLT)",
+        proxy: "XRP-USD",
+        label: "XRP (XRP-USD)",
         totalReturn: -0.31,
         maxDrawdown: -0.36,
         path: [
@@ -589,8 +589,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     },
     proxyPaths: [
       {
-        proxy: "SPY",
-        label: "US Large Cap (SPY)",
+        proxy: "BTC-USD",
+        label: "Bitcoin (BTC-USD)",
         totalReturn: -0.16,
         maxDrawdown: -0.21,
         path: [
@@ -608,8 +608,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "QQQ",
-        label: "US Tech (QQQ)",
+        proxy: "ETH-USD",
+        label: "Ethereum (ETH-USD)",
         totalReturn: -0.23,
         maxDrawdown: -0.28,
         path: [
@@ -627,8 +627,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "IWM",
-        label: "US Small Cap (IWM)",
+        proxy: "SOL-USD",
+        label: "Solana (SOL-USD)",
         totalReturn: -0.24,
         maxDrawdown: -0.30,
         path: [
@@ -646,8 +646,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "GLD",
-        label: "Gold (GLD)",
+        proxy: "BNB-USD",
+        label: "BNB (BNB-USD)",
         totalReturn: 0.09,
         maxDrawdown: -0.05,
         path: [
@@ -665,8 +665,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "TLT",
-        label: "Long Bonds (TLT)",
+        proxy: "XRP-USD",
+        label: "XRP (XRP-USD)",
         totalReturn: 0.11,
         maxDrawdown: -0.04,
         path: [
@@ -733,8 +733,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     },
     proxyPaths: [
       {
-        proxy: "SPY",
-        label: "US Large Cap (SPY)",
+        proxy: "BTC-USD",
+        label: "Bitcoin (BTC-USD)",
         totalReturn: -0.12,
         maxDrawdown: -0.16,
         path: [
@@ -752,8 +752,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "QQQ",
-        label: "US Tech (QQQ)",
+        proxy: "ETH-USD",
+        label: "Ethereum (ETH-USD)",
         totalReturn: -0.20,
         maxDrawdown: -0.25,
         path: [
@@ -771,8 +771,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "IWM",
-        label: "US Small Cap (IWM)",
+        proxy: "SOL-USD",
+        label: "Solana (SOL-USD)",
         totalReturn: -0.15,
         maxDrawdown: -0.20,
         path: [
@@ -790,8 +790,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "GLD",
-        label: "Gold (GLD)",
+        proxy: "BNB-USD",
+        label: "BNB (BNB-USD)",
         totalReturn: -0.03,
         maxDrawdown: -0.07,
         path: [
@@ -809,8 +809,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "TLT",
-        label: "Long Bonds (TLT)",
+        proxy: "XRP-USD",
+        label: "XRP (XRP-USD)",
         totalReturn: -0.17,
         maxDrawdown: -0.20,
         path: [
@@ -877,8 +877,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     },
     proxyPaths: [
       {
-        proxy: "SPY",
-        label: "US Large Cap (SPY)",
+        proxy: "BTC-USD",
+        label: "Bitcoin (BTC-USD)",
         totalReturn: -0.20,
         maxDrawdown: -0.26,
         path: [
@@ -896,8 +896,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "QQQ",
-        label: "US Tech (QQQ)",
+        proxy: "ETH-USD",
+        label: "Ethereum (ETH-USD)",
         totalReturn: -0.43,
         maxDrawdown: -0.52,
         path: [
@@ -915,8 +915,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "IWM",
-        label: "US Small Cap (IWM)",
+        proxy: "SOL-USD",
+        label: "Solana (SOL-USD)",
         totalReturn: -0.18,
         maxDrawdown: -0.24,
         path: [
@@ -934,8 +934,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "GLD",
-        label: "Gold (GLD)",
+        proxy: "BNB-USD",
+        label: "BNB (BNB-USD)",
         totalReturn: 0.08,
         maxDrawdown: -0.04,
         path: [
@@ -953,8 +953,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "TLT",
-        label: "Long Bonds (TLT)",
+        proxy: "XRP-USD",
+        label: "XRP (XRP-USD)",
         totalReturn: 0.09,
         maxDrawdown: -0.03,
         path: [
@@ -1004,9 +1004,9 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     narrative: {
       headline: "Input costs jump, inflation expectations rise, and energy-linked assets separate from import-heavy demand stories.",
       howItTransmits: "Oil spikes transmit through margin compression, inflation repricing, and sector leadership rotation toward upstream energy and hard assets.",
-      dominantDrivers: ["Energy inflation", "Margin pressure", "Commodity leadership"],
+      dominantDrivers: ["Energy inflation", "Margin pressure", "Hard asset leadership"],
       pressurePoints: ["Transport", "Consumer discretionary", "Import-heavy cyclicals"],
-      resilienceThemes: ["Energy producers", "Commodity baskets", "Gold as inflation hedge"],
+      resilienceThemes: ["Energy producers", "Hard asset baskets", "Gold as inflation hedge"],
     },
     assetTypeAdjustments: {
       CRYPTO: { betaMultiplier: 1.05, confidenceDelta: -0.06, rationale: "Crypto linkage is looser and mostly comes through broader risk and liquidity conditions." },
@@ -1021,8 +1021,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
     },
     proxyPaths: [
       {
-        proxy: "SPY",
-        label: "US Large Cap (SPY)",
+        proxy: "BTC-USD",
+        label: "Bitcoin (BTC-USD)",
         totalReturn: -0.09,
         maxDrawdown: -0.14,
         path: [
@@ -1040,8 +1040,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "QQQ",
-        label: "US Tech (QQQ)",
+        proxy: "ETH-USD",
+        label: "Ethereum (ETH-USD)",
         totalReturn: -0.12,
         maxDrawdown: -0.17,
         path: [
@@ -1059,8 +1059,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "IWM",
-        label: "US Small Cap (IWM)",
+        proxy: "SOL-USD",
+        label: "Solana (SOL-USD)",
         totalReturn: -0.11,
         maxDrawdown: -0.16,
         path: [
@@ -1078,8 +1078,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "GLD",
-        label: "Gold (GLD)",
+        proxy: "BNB-USD",
+        label: "BNB (BNB-USD)",
         totalReturn: 0.06,
         maxDrawdown: -0.03,
         path: [
@@ -1097,8 +1097,8 @@ export const US_SCENARIOS: ScenarioDefinition[] = [
         ],
       },
       {
-        proxy: "TLT",
-        label: "Long Bonds (TLT)",
+        proxy: "XRP-USD",
+        label: "XRP (XRP-USD)",
         totalReturn: -0.07,
         maxDrawdown: -0.10,
         path: [

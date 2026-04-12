@@ -74,8 +74,8 @@ describe("POST /api/chat", () => {
       method: "POST",
       body: JSON.stringify({
         messages: [{ role: "user", content: "hello" }],
-        symbol: "AAPL",
-        contextData: { symbol: "AAPL" },
+        symbol: "BTC-USD",
+        contextData: { symbol: "BTC-USD" },
       }),
     });
 
@@ -84,7 +84,7 @@ describe("POST /api/chat", () => {
     expect(auth).toHaveBeenCalled();
     expect(generateLyraStream).toHaveBeenCalledWith(
       [{ role: "user", content: "hello" }],
-      { scores: {}, symbol: "AAPL", regime: undefined, assetName: undefined, assetType: undefined, region: undefined, chatMode: undefined, compareContext: undefined },
+      { scores: {}, symbol: "BTC-USD", regime: undefined, assetName: undefined, assetType: undefined, region: undefined, chatMode: undefined, compareContext: undefined },
       "user_123",
       { sourcesLimit: undefined, skipAssetLinks: false, cacheScope: undefined, preResolvedPlan: "STARTER" },
     );
@@ -169,11 +169,11 @@ describe("POST /api/chat", () => {
       method: "POST",
       body: JSON.stringify({
         messages: [{ role: "user", content: "compare these assets" }],
-        symbol: "AAPL",
+        symbol: "BTC-USD",
         contextData: {
-          symbol: "AAPL",
-          assetType: "STOCK",
-          assetName: "Apple Inc.",
+          symbol: "BTC-USD",
+          assetType: "CRYPTO",
+          assetName: "Bitcoin",
           chatMode: "compare",
         },
       }),
@@ -185,10 +185,10 @@ describe("POST /api/chat", () => {
       [{ role: "user", content: "compare these assets" }],
       {
         scores: {},
-        symbol: "AAPL",
+        symbol: "BTC-USD",
         regime: undefined,
-        assetName: "Apple Inc.",
-        assetType: "STOCK",
+        assetName: "Bitcoin",
+        assetType: "CRYPTO",
         region: undefined,
         chatMode: "compare",
         compareContext: undefined,
@@ -208,14 +208,14 @@ describe("POST /api/chat", () => {
     } as unknown as any);
 
     const compareContext = [
-      { symbol: "AAPL", name: "Apple", price: 180, changePercent: 1.2 },
-      { symbol: "MSFT", name: "Microsoft", price: 410, changePercent: -0.5 },
+      { symbol: "BTC-USD", name: "Bitcoin", price: 104000, changePercent: 1.2 },
+      { symbol: "ETH-USD", name: "Ethereum", price: 3400, changePercent: -0.5 },
     ];
 
     const req = new Request("http://localhost/api/chat", {
       method: "POST",
       body: JSON.stringify({
-        messages: [{ role: "user", content: "compare AAPL vs MSFT" }],
+        messages: [{ role: "user", content: "compare BTC-USD vs ETH-USD" }],
         contextData: { chatMode: "compare", compareContext },
       }),
     });
@@ -223,12 +223,12 @@ describe("POST /api/chat", () => {
     await POST(req as unknown as NextRequest);
 
     expect(generateLyraStream).toHaveBeenCalledWith(
-      [{ role: "user", content: "compare AAPL vs MSFT" }],
+      [{ role: "user", content: "compare BTC-USD vs ETH-USD" }],
       expect.objectContaining({
         chatMode: "compare",
         compareContext: expect.arrayContaining([
-          expect.objectContaining({ symbol: "AAPL" }),
-          expect.objectContaining({ symbol: "MSFT" }),
+          expect.objectContaining({ symbol: "BTC-USD" }),
+          expect.objectContaining({ symbol: "ETH-USD" }),
         ]),
       }),
       "user_123",
@@ -248,8 +248,8 @@ describe("POST /api/chat", () => {
     const req = new Request("http://localhost/api/chat", {
       method: "POST",
       body: JSON.stringify({
-        messages: [{ role: "user", content: "analyse RELIANCE.NS" }],
-        contextData: { symbol: "RELI", region: "IN" },
+        messages: [{ role: "user", content: "analyse BTC-USD" }],
+        contextData: { symbol: "BTC", region: "US" },
       }),
     });
 
@@ -257,7 +257,7 @@ describe("POST /api/chat", () => {
 
     expect(generateLyraStream).toHaveBeenCalledWith(
       expect.any(Array),
-      expect.objectContaining({ region: "IN" }),
+      expect.objectContaining({ region: "US" }),
       "user_123",
       expect.any(Object),
     );

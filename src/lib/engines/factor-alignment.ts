@@ -230,8 +230,8 @@ export function calculateFactorDispersion(
   // Generate implications
   const implications =
     regime === "STOCK_PICKING"
-      ? `High factor dispersion (${Math.round(avgDispersion)}%) indicates stock-picking environment. ${dominantFactor} factor shows highest differentiation.`
-      : `Low factor dispersion (${Math.round(avgDispersion)}%) suggests macro-driven market. Sector selection more important than stock picking.`;
+      ? `High factor dispersion (${Math.round(avgDispersion)}%) indicates token-picking environment. ${dominantFactor} factor shows highest differentiation.`
+      : `Low factor dispersion (${Math.round(avgDispersion)}%) suggests macro-driven market. Sector selection more important than token picking.`;
 
   return {
     valueDispersion: Math.round(valueDispersion),

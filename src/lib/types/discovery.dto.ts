@@ -31,7 +31,6 @@ export interface CryptoMappingDTO {
   // Metrics
   metrics: {
     marketCap: string | null;
-    peRatio: number | null;
     oneYearChange: number | null;
     technicalRating: string | null;
     analystRating: string | null;

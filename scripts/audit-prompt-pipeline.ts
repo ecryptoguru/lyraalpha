@@ -114,7 +114,7 @@ const PROMPT_MATRIX: PromptTestCase[] = [
   { id: "pro-simple-edu",        plan: "PRO",    tier: "SIMPLE",   family: "educational",  query: "What is trend score in crypto?",              context: { assetType: "CRYPTO" },                              optimizationTest: "EDU_CACHE" },
   { id: "pro-simple-signal",     plan: "PRO",    tier: "SIMPLE",   family: "single-asset", query: "SOL signal",                       context: { symbol: "SOL-USD", assetType: "CRYPTO" } },
   { id: "pro-moderate-nvda",     plan: "PRO",    tier: "MODERATE", family: "single-asset", query: "What's driving SOL?",              context: { symbol: "SOL-USD", assetType: "CRYPTO", scores: { trend: 82, momentum: 58 } }, optimizationTest: "COT" },
-  { id: "pro-moderate-spy",      plan: "PRO",    tier: "MODERATE", family: "etf",          query: "Bitcoin ETF analysis",                      context: { symbol: "IBIT",  assetType: "ETF" } },
+  { id: "pro-moderate-spy",      plan: "PRO",    tier: "MODERATE", family: "single-asset", query: "Bitcoin ETF analysis",                      context: { symbol: "IBIT",  assetType: "CRYPTO" } },
   { id: "pro-complex-cmp",       plan: "PRO",    tier: "COMPLEX",  family: "comparative",  query: "Compare SOL vs ADA",               context: { assetType: "CRYPTO" } },
   { id: "pro-complex-macro",     plan: "PRO",    tier: "COMPLEX",  family: "macro",        query: "Crypto market regime analysis",            context: { assetType: "GLOBAL" } },
 

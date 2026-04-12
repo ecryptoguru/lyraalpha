@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BackButton } from "@/components/ui/back-button";
-import { CryptoCard } from "@/components/dashboard/stock-card";
+import { CryptoCard } from "@/components/dashboard/crypto-card";
 import { IntelligenceLoader } from "@/components/ui/intelligence-loader";
 import { cn, formatCompactNumber, getCurrencyConfig } from "@/lib/utils";
 
@@ -236,7 +236,6 @@ function mapDTOToCardData(
       const cfg = getCurrencyConfig(dto.currency);
       return formatCompactNumber(dto.metrics.marketCap, { symbol: cfg.symbol, region: cfg.region });
     })(),
-    peRatio: dto.metrics.peRatio?.toFixed(1) || "—",
     oneYearChange: {
       value: dto.metrics.oneYearChange
         ? (dto.metrics.oneYearChange >= 0 ? "▲ " : "▼ ") +

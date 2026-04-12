@@ -90,7 +90,7 @@ export default function AiInvestmentResearchPage() {
           answer: "Use Lyra research when the question is open-ended, scenario-heavy, or crosses multiple assets. Use the narrative tracker when you already know the market is moving and want to understand which story is driving it.",
         },
       ]}
-      seoIntro="LyraAlpha's AI investment research tool targets investors who need more than a ticker lookup or a generic AI summary. Lyra handles cross-asset scenario analysis, portfolio framing, and research that feeds forward into structured decision surfaces — not dead-end chat transcripts. This page covers queries around AI stock research, AI investment analysis, AI portfolio research tools, and regime-aware financial AI for US and India investors."
+      seoIntro="LyraAlpha's AI investment research tool targets investors who need more than a ticker lookup or a generic AI summary. Lyra handles cross-asset scenario analysis, portfolio framing, and research that feeds forward into structured decision surfaces — not dead-end chat transcripts. This page covers queries around AI crypto research, AI investment analysis, AI portfolio research tools, and regime-aware financial AI for crypto investors."
       seoBullets={[
         "Use this when the question crosses multiple assets, sectors, or scenarios — not just one name.",
         "Lyra's tiered routing means simple questions are fast and cheap; complex ELITE-tier queries get full model depth with reasoning.",
@@ -101,7 +101,7 @@ export default function AiInvestmentResearchPage() {
       relatedTools={[
         { title: "AI Portfolio Analyzer", description: "Take the research answer back into your holdings when the question is about current exposure.", href: "/tools/ai-portfolio-analyzer" },
         { title: "Market Narrative Tracker", description: "Check whether Lyra's scenario matches the dominant market story right now.", href: "/tools/market-narrative-tracker" },
-        { title: "AI Stock Analysis", description: "Go deeper on one name once the research narrows the field.", href: "/tools/ai-stock-analysis" },
+        { title: "AI Crypto Analysis", description: "Go deeper on one name once the research narrows the field.", href: "/tools/ai-crypto-analysis" },
       ]}
     />
   );

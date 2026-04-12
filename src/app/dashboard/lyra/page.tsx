@@ -92,7 +92,7 @@ interface MoverItem {
 const LYRA_FALLBACK_PROMPTS: LyraPromptQuestion[] = [
   {
     id: "fallback-1",
-    question: "What are the key technical drivers for NVDA and the AI sector this week?",
+    question: "What are the key technical drivers for BTC-USD and the crypto market this week?",
     displayOrder: 1,
   },
   {

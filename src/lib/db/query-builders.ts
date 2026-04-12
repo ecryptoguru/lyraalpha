@@ -8,7 +8,7 @@ import { cryptoAssetSelect } from "@/lib/services/asset.service";
 export class AssetQueryBuilder {
   /**
    * Build a query for crypto asset analytics data
-   * Excludes stock-specific fields for better performance
+   * Excludes legacy fields for better performance
    */
   static forCryptoAnalytics() {
     return {

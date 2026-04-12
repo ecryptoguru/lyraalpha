@@ -60,7 +60,7 @@ test.describe("Credit Deduction Logic Verification", () => {
         symbol: "AAPL",
         contextData: {
           symbol: "AAPL",
-          assetType: "STOCK",
+          assetType: "CRYPTO",
           assetName: "Apple Inc.",
           scores: {},
         },

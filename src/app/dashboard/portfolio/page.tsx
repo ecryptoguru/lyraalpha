@@ -72,8 +72,8 @@ const PORTFOLIO_TABS = [
 
 function getRegionConfig(region: "US" | "IN") {
   return region === "IN"
-    ? { currency: "INR", currencySymbol: "₹", locale: "en-IN", benchmarkLabel: "Nifty 50" }
-    : { currency: "USD", currencySymbol: "$", locale: "en-US", benchmarkLabel: "S&P 500" };
+    ? { currency: "INR", currencySymbol: "₹", locale: "en-IN", benchmarkLabel: "Bitcoin (BTC-USD)" }
+    : { currency: "USD", currencySymbol: "$", locale: "en-US", benchmarkLabel: "Bitcoin (BTC-USD)" };
 }
 
 function formatCurrency(value: number, symbol: string, locale: string): string {

@@ -25,8 +25,6 @@ import { cn } from "@/lib/utils";
 
 const TYPE_LABEL: Record<string, string> = {
   CRYPTO: "Crypto",
-  COMMODITY: "Commodities",
-  MUTUAL_FUND: "Mutual Funds",
 };
 
 function SignalClusterBanner({ items }: { items: DiscoveryFeedItem[] }) {

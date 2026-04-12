@@ -142,7 +142,6 @@ function computeQualityScore(holdings: HoldingInput[]): number {
 
     let penalty = 0;
     if (h.type === "CRYPTO" && trust < 40) penalty = 10;
-    if (h.type === "COMMODITY" && liquidity < 30) penalty = 5;
 
     return sum + (composite - penalty) * h.weight;
   }, 0);

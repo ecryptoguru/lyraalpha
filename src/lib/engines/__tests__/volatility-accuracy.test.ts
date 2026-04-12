@@ -57,7 +57,7 @@ describe("Volatility — insufficient data", () => {
 describe("Volatility — NATR accuracy", () => {
   it("tiny spread (0.1%) → low natrScore for equity", () => {
     const data = flatBars(30, 100, 0.001);
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     const natrScore = result.metadata?.natrScore as number;
     // natr ≈ 0.2% → (0.2/3)*60 = 4 → very low
     expect(natrScore).toBeLessThan(15);
@@ -65,25 +65,24 @@ describe("Volatility — NATR accuracy", () => {
 
   it("large spread (5%) → high natrScore for equity", () => {
     const data = flatBars(30, 100, 0.05);
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     const natrScore = result.metadata?.natrScore as number;
     // natr ≈ 10% → 60 + (10-3)*20 = 200 → clamped 100
     expect(natrScore).toBeGreaterThanOrEqual(80);
   });
 
-  it("same spread: crypto natrScore < equity natrScore (crypto has higher tolerance)", () => {
+  it("same spread: natrScore is deterministic", () => {
     const data = flatBars(30, 100, 0.03);
     const cryptoResult = calculateVolatilityScore(data, "CRYPTO");
-    const stockResult = calculateVolatilityScore(data, "STOCK");
-    // Crypto uses (natr/5)*50 vs equity (natr/3)*60 → crypto scores lower for same natr
-    expect(cryptoResult.metadata?.natrScore as number).toBeLessThanOrEqual(
-      stockResult.metadata?.natrScore as number,
+    const cryptoResult2 = calculateVolatilityScore(data, "CRYPTO");
+    expect(cryptoResult.metadata?.natrScore as number).toBe(
+      cryptoResult2.metadata?.natrScore as number,
     );
   });
 
   it("natr metadata is non-negative", () => {
     const data = flatBars(30, 100, 0.02);
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     expect(result.metadata?.natr as number).toBeGreaterThanOrEqual(0);
   });
 });
@@ -94,7 +93,7 @@ describe("Volatility — Bollinger band width (bbScore)", () => {
   it("flat close prices → std of closes = 0 → bandWidth = 0 → bbScore = 50 (no bands)", () => {
     // Bollinger uses close prices for std. Flat closes → std=0 → bandWidth=0 → bbScore=50 (fallback)
     const data = flatBars(30, 100, 0.0001);
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     // bandWidth = 0 → the if(bandWidth > 0) branch is skipped → bbScore stays at 50
     expect(result.metadata?.bbScore as number).toBe(50);
   });
@@ -109,7 +108,7 @@ describe("Volatility — Bollinger band width (bbScore)", () => {
       close: i % 2 === 0 ? 108 : 92, // alternating closes → high std
       volume: 1_000_000,
     }));
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     expect(result.metadata?.bbScore as number).toBeGreaterThan(50);
   });
 
@@ -126,8 +125,8 @@ describe("Volatility — Bollinger band width (bbScore)", () => {
       close: i % 2 === 0 ? 115 : 85, // large spread
       volume: 1_000_000,
     }));
-    const narrowResult = calculateVolatilityScore(narrow, "STOCK");
-    const wideResult = calculateVolatilityScore(wide, "STOCK");
+    const narrowResult = calculateVolatilityScore(narrow, "CRYPTO");
+    const wideResult = calculateVolatilityScore(wide, "CRYPTO");
     expect(wideResult.metadata?.bbScore as number).toBeGreaterThan(narrowResult.metadata?.bbScore as number);
   });
 });
@@ -137,7 +136,7 @@ describe("Volatility — Bollinger band width (bbScore)", () => {
 describe("Volatility — vol regime score", () => {
   it("flat prices → recentVol = longerVol → regimeScore ≈ 50", () => {
     const data = flatBars(70, 100, 0.01);
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     // Both recentVol and longerVol are same → ratio = 1 → regimeScore = 50
     expect(result.metadata?.regimeScore as number).toBeCloseTo(50, 5);
   });
@@ -156,7 +155,7 @@ describe("Volatility — vol regime score", () => {
       volume: 1_000_000,
     }));
     const data = [...calm, ...wild];
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     expect(result.metadata?.regimeScore as number).toBeGreaterThan(50);
   });
 
@@ -173,7 +172,7 @@ describe("Volatility — vol regime score", () => {
       open: 100, high: 101, low: 99, close: 100, volume: 1_000_000,
     }));
     const data = [...wild, ...calm];
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     expect(result.metadata?.regimeScore as number).toBeLessThan(50);
   });
 });
@@ -183,7 +182,7 @@ describe("Volatility — vol regime score", () => {
 describe("Volatility — composite formula", () => {
   it("score = round(natrScore*0.40 + bbScore*0.30 + regimeScore*0.30)", () => {
     const data = flatBars(60, 100, 0.02);
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     const { natrScore, bbScore, regimeScore } = result.metadata as Record<string, number>;
     const expected = Math.round(natrScore * 0.40 + bbScore * 0.30 + regimeScore * 0.30);
     const clamped = Math.min(99, Math.max(1, expected));
@@ -197,7 +196,7 @@ describe("Volatility — composite formula", () => {
       altVolBars(30, 100, 0.05, 0.001),
     ];
     for (const data of datasets) {
-      const result = calculateVolatilityScore(data, "STOCK");
+      const result = calculateVolatilityScore(data, "CRYPTO");
       expect(result.score).toBeGreaterThanOrEqual(1);
       expect(result.score).toBeLessThanOrEqual(99);
     }
@@ -209,26 +208,26 @@ describe("Volatility — composite formula", () => {
 describe("Volatility — direction thresholds", () => {
   it("score >= 70 → direction = UP", () => {
     const data = altVolBars(60, 100, 0.08, 0.001);
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     if (result.score >= 70) expect(result.direction).toBe("UP");
   });
 
   it("score <= 30 → direction = DOWN", () => {
     const data = flatBars(60, 100, 0.001);
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     if (result.score <= 30) expect(result.direction).toBe("DOWN");
   });
 
   it("high-vol data → direction = UP", () => {
     const data = altVolBars(60, 100, 0.1, 0.001);
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     expect(result.direction).toBe("UP");
   });
 
   it("low-vol data → direction = DOWN or FLAT", () => {
     // Flat closes → natrScore low, bbScore=50, regimeScore=50 → composite may be FLAT or DOWN
     const data = flatBars(60, 100, 0.0005);
-    const result = calculateVolatilityScore(data, "STOCK");
+    const result = calculateVolatilityScore(data, "CRYPTO");
     expect(["DOWN", "FLAT"]).toContain(result.direction);
   });
 });
@@ -237,15 +236,15 @@ describe("Volatility — direction thresholds", () => {
 
 describe("Volatility — monotonicity", () => {
   it("higher spread → higher score", () => {
-    const low = calculateVolatilityScore(flatBars(30, 100, 0.005), "STOCK");
-    const high = calculateVolatilityScore(flatBars(30, 100, 0.04), "STOCK");
+    const low = calculateVolatilityScore(flatBars(30, 100, 0.005), "CRYPTO");
+    const high = calculateVolatilityScore(flatBars(30, 100, 0.04), "CRYPTO");
     expect(high.score).toBeGreaterThan(low.score);
   });
 
-  it("crypto scores differently from equity for same data", () => {
+  it("crypto score is deterministic for same data", () => {
     const data = flatBars(30, 100, 0.03);
     const crypto = calculateVolatilityScore(data, "CRYPTO");
-    const stock = calculateVolatilityScore(data, "STOCK");
-    expect(crypto.score).not.toBe(stock.score);
+    const crypto2 = calculateVolatilityScore(data, "CRYPTO");
+    expect(crypto.score).toBe(crypto2.score);
   });
 });

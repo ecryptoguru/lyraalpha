@@ -335,7 +335,7 @@ class PrismaVectorStore {
 
   /** Pre-warm Redis caches for all 6 asset types (background, non-blocking) */
   private async warmAllAssetTypeCaches(): Promise<void> {
-    const types = ["STOCK", "CRYPTO", "ETF", "MUTUAL_FUND", "COMMODITY", "GLOBAL"];
+    const types = ["CRYPTO", "GLOBAL"];
     await Promise.all(
       types.map(async (assetType) => {
         const existing = await this.getPreCachedChunks(assetType);
@@ -614,11 +614,7 @@ class PrismaVectorStore {
 
     // Use a representative query per asset type to find the most relevant chunks
     const typeQueries: Record<string, string> = {
-      STOCK: "stock equity analysis trend momentum volatility earnings valuation",
       CRYPTO: "crypto bitcoin network health volatility risk on-chain",
-      ETF: "ETF factor exposure tracking expense ratio sector rotation",
-      MUTUAL_FUND: "mutual fund NAV SIP performance fund manager returns",
-      COMMODITY: "commodity gold oil supply demand macro inflation",
       GLOBAL: "market regime risk macro cross-asset correlation",
     };
 
@@ -769,9 +765,11 @@ class PrismaVectorStore {
 
       // SEC-1: Post-retrieval injection scan — drop chunks that contain injection patterns.
       // Defends against poisoned knowledge base entries attempting to hijack LLM behaviour.
+      // R2-FIX: Normalize to NFKC before pattern matching to defeat Unicode homoglyph evasion.
       const cleanResults = mappedResults.filter((doc) => {
+        const normalizedContent = doc.content.normalize("NFKC");
         for (const pattern of INJECTION_PATTERNS) {
-          if (pattern.test(doc.content)) {
+          if (pattern.test(normalizedContent)) {
             logger.warn(
               { event: "rag_injection_filtered", docId: doc.id, similarity: doc.similarity },
               "RAG chunk dropped — matched injection pattern",
@@ -810,6 +808,14 @@ class PrismaVectorStore {
   ): Promise<Document[]> {
     const queryEmbedding = await this.getEmbedding(query, true);
     const vectorString = toPgVectorLiteral(queryEmbedding);
+
+    // R6-FIX: Guard against empty embedding — when the embedding API fails after all retries,
+    // _callEmbeddingAPI returns [] which produces an invalid vector string. Running a pgvector
+    // query with an empty vector produces undefined similarity distances and random results.
+    if (!isValidVectorString(vectorString)) {
+      logger.error({ query: query.slice(0, 80) }, "Invalid vector string from embedding API — skipping user memory search");
+      return [];
+    }
 
     try {
       type RawLog = {

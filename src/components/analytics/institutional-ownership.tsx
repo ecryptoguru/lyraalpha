@@ -60,7 +60,7 @@ export function InstitutionalOwnership({
   assetType,
   className,
 }: InstitutionalOwnershipProps) {
-  const isStock = assetType === "STOCK";
+  const isStock = false; // Platform is crypto-only
   
   // If no ownership data at all
   if (!heldPercentInstitutions && !heldPercentInsiders && !shortRatio && !beta) {

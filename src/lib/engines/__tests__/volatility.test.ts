@@ -28,15 +28,6 @@ describe("calculateVolatilityScore", () => {
     expect(result.context).toBe("Insufficient data for volatility analysis.");
   });
 
-  it("calculates volatility score for stocks", () => {
-    const result = calculateVolatilityScore(mockOHLCV, "STOCK");
-    expect(result.score).toBeGreaterThanOrEqual(0);
-    expect(result.score).toBeLessThanOrEqual(100);
-    expect(["UP", "DOWN", "FLAT", "NEUTRAL"]).toContain(result.direction);
-    expect(result.context).toBeDefined();
-    expect(result.metadata).toBeDefined();
-  });
-
   it("calculates volatility score for crypto", () => {
     const result = calculateVolatilityScore(mockOHLCV, "CRYPTO");
     expect(result.score).toBeGreaterThanOrEqual(0);
@@ -47,14 +38,14 @@ describe("calculateVolatilityScore", () => {
   });
 
   it("returns consistent results for same input", () => {
-    const result1 = calculateVolatilityScore(mockOHLCV, "STOCK");
-    const result2 = calculateVolatilityScore(mockOHLCV, "STOCK");
+    const result1 = calculateVolatilityScore(mockOHLCV, "CRYPTO");
+    const result2 = calculateVolatilityScore(mockOHLCV, "CRYPTO");
     expect(result1.score).toBe(result2.score);
     expect(result1.direction).toBe(result2.direction);
   });
 
   it("includes metadata with sub-scores", () => {
-    const result = calculateVolatilityScore(mockOHLCV, "STOCK");
+    const result = calculateVolatilityScore(mockOHLCV, "CRYPTO");
     expect(result.metadata).toHaveProperty("natr");
     expect(result.metadata).toHaveProperty("natrScore");
     expect(result.metadata).toHaveProperty("bbScore");
@@ -73,7 +64,7 @@ describe("calculateVolatilityScore", () => {
       volume: 1000000,
     }));
     
-    const result = calculateVolatilityScore(highVolData, "STOCK");
+    const result = calculateVolatilityScore(highVolData, "CRYPTO");
     expect(result.score).toBeGreaterThan(60);
   });
 
@@ -88,16 +79,14 @@ describe("calculateVolatilityScore", () => {
       volume: 1000000,
     }));
     
-    const result = calculateVolatilityScore(lowVolData, "STOCK");
+    const result = calculateVolatilityScore(lowVolData, "CRYPTO");
     expect(result.score).toBeLessThan(40);
   });
 
   it("uses crypto-specific scaling for crypto assets", () => {
     const cryptoResult = calculateVolatilityScore(mockOHLCV, "CRYPTO");
-    const stockResult = calculateVolatilityScore(mockOHLCV, "STOCK");
-    
-    // Crypto should have different scaling due to sigmoid mapping
+
+    // Crypto should have sigmoid mapping
     expect(cryptoResult.metadata?.assetType).toBe("CRYPTO");
-    expect(stockResult.metadata?.assetType).toBe("STOCK");
   });
 });

@@ -200,7 +200,7 @@ export async function calculateCorrelationRegime(
 }
 
 /**
- * Calculate sector-specific correlation score for a stock
+ * Calculate sector-specific correlation score for a crypto asset
  */
 export async function calculateSectorCorrelationScore(
   assetId: string,

@@ -26,7 +26,7 @@ test.describe("Analytics API — Enrichment Payload", () => {
     expect(res.ok()).toBeTruthy();
     const data = await res.json();
 
-    expect(data.type).toBe("STOCK");
+    expect(data.type).toBe("CRYPTO");
     expect(data).toHaveProperty("sector");
     expect(data).toHaveProperty("fundHouse");
     expect(data).toHaveProperty("description");
@@ -62,7 +62,7 @@ test.describe("Analytics API — Enrichment Payload", () => {
     expect(res.ok()).toBeTruthy();
     const data = await res.json();
 
-    expect(data.type).toBe("ETF");
+    expect(data.type).toBe("CRYPTO");
     expect(data).toHaveProperty("topHoldings");
     expect(data).toHaveProperty("fundPerformanceHistory");
     expect(data).toHaveProperty("sector");
@@ -75,7 +75,7 @@ test.describe("Analytics API — Enrichment Payload", () => {
     expect(res.ok()).toBeTruthy();
     const data = await res.json();
 
-    expect(data.type).toBe("MUTUAL_FUND");
+    expect(data.type).toBe("CRYPTO");
     expect(data).toHaveProperty("fundHouse");
     expect(data).toHaveProperty("fundPerformanceHistory");
     expect(data).toHaveProperty("sector");
@@ -96,7 +96,7 @@ test.describe("Analytics API — Enrichment Payload", () => {
     expect(res.ok()).toBeTruthy();
     const data = await res.json();
 
-    expect(data.type).toBe("STOCK");
+    expect(data.type).toBe("CRYPTO");
     expect(data.currency).toBe("INR");
     expect(data).toHaveProperty("sector");
     expect(data).toHaveProperty("industry");
@@ -128,7 +128,7 @@ test.describe("US Stock Asset Intel — Enrichment UI", () => {
     await expectNoSyncFailure(page);
 
     // Sector badge should be visible in header area
-    await expect(page.getByText("STOCK").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("CRYPTO").first()).toBeVisible({ timeout: 5000 });
 
     // Company Profile section
     await expect(page.getByText(/About.*Apple/i).first()).toBeVisible({ timeout: 10000 });
@@ -190,7 +190,7 @@ test.describe("ETF Asset Intel — Enrichment UI", () => {
     await page.goto("/dashboard/assets/SPY");
 
     await expectNoSyncFailure(page);
-    await expect(page.getByText("ETF").first()).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("CRYPTO").first()).toBeVisible({ timeout: 30000 });
   });
 });
 
@@ -214,7 +214,7 @@ test.describe("Indian Stock Asset Intel — Enrichment UI", () => {
     await page.goto("/dashboard/assets/RELIANCE.NS");
 
     await expectNoSyncFailure(page);
-    await expect(page.getByText("STOCK").first()).toBeVisible({ timeout: 30000 });
+    await expect(page.getByText("CRYPTO").first()).toBeVisible({ timeout: 30000 });
   });
 });
 
@@ -230,10 +230,10 @@ test.describe("Mutual Fund Asset Intel — Enrichment UI", () => {
     await expectNoSyncFailure(page);
 
     const assetMetaRow = page.locator("main div").filter({
-      has: page.getByText("MUTUAL_FUND").first(),
+      has: page.getByText("CRYPTO").first(),
     }).first();
 
-    await expect(assetMetaRow.getByText("MUTUAL_FUND")).toBeVisible({ timeout: 5000 });
+    await expect(assetMetaRow.getByText("CRYPTO")).toBeVisible({ timeout: 5000 });
     await expect(assetMetaRow.getByText(/.+Mutual Fund$/i)).toBeVisible({ timeout: 10000 });
   });
 
@@ -280,13 +280,13 @@ test.describe("Cross-Asset Enrichment Flow", () => {
     await page.goto("/dashboard/assets/AAPL");
     await expect(page.locator("h1").first()).toBeVisible({ timeout: 30000 });
     await expectNoSyncFailure(page);
-    await expect(page.getByText("STOCK").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("CRYPTO").first()).toBeVisible({ timeout: 5000 });
 
     // Navigate to SPY
     await page.goto("/dashboard/assets/SPY");
     await expect(page.locator("h1").first()).toBeVisible({ timeout: 30000 });
     await expectNoSyncFailure(page);
-    await expect(page.getByText("ETF").first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText("CRYPTO").first()).toBeVisible({ timeout: 5000 });
     await expect(page.getByText("ETF Data Matrix").first()).toBeVisible({ timeout: 10000 });
   });
 

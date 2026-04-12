@@ -10,7 +10,7 @@ export interface BadgeDefinition {
   name: string;
   description: string;
   icon: string; // Lucide icon name for UI
-  category: "fundamentals" | "crypto" | "etf" | "mf" | "regime" | "discovery" | "streak" | "advanced" | "signals" | "portfolio" | "intelligence" | "platform";
+  category: "fundamentals" | "crypto" | "regime" | "discovery" | "streak" | "advanced" | "signals" | "portfolio" | "intelligence" | "platform";
   isEliteOnly: boolean;
   /** Module slugs that contribute to this badge */
   requiredModules?: string[];
@@ -80,17 +80,16 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     ],
   },
   {
-    slug: "etf-transparency",
-    name: "ETF Transparency",
-    description: "Knows how to look through the ETF wrapper to understand what you actually own.",
+    slug: "portfolio-transparency",
+    name: "Portfolio Transparency",
+    description: "Knows how to look through portfolio holdings to understand what you actually own.",
     icon: "Layers",
     category: "crypto",
     isEliteOnly: false,
     requiredModules: [
-      "etf-lookthrough-basics",
       "concentration-risk",
       "factor-exposure",
-      "tracking-error",
+      "correlation-risk",
     ],
   },
   {

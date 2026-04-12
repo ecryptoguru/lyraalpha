@@ -1,52 +1,49 @@
 "use client";
 
+import { useMemo } from "react";
+import { type LucideIcon, TrendingUp, TrendingDown, Minus, Coins, Globe, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Coins,
-  Globe,
-  Landmark,
-  Target,
-} from "lucide-react";
 
 interface CorrelationMatrixProps {
   data: Record<string, number>;
   className?: string;
 }
 
-const coins = "coins";
-const globe = "globe";
-const landmark = "landmark";
-const target = "target";
+type BenchmarkMeta = { label: string; icon: LucideIcon; color: string };
 
-const BENCHMARK_METADATA: Record<
-  string,
-  { label: string; icon: string; color: string }
-> = {
-  // US Benchmarks
-  SPY: { label: "S&P 500", icon: landmark, color: "text-amber-400" },
-  QQQ: { label: "Nasdaq 100", icon: target, color: "text-cyan-400" },
-  "BTC-USD": { label: "Bitcoin", icon: globe, color: "text-orange-400" },
-  GLD: { label: "Gold", icon: coins, color: "text-amber-400" },
-  // Indian Benchmarks
-  "^NSEI": { label: "Nifty 50", icon: landmark, color: "text-amber-400" },
-  "^BSESN": { label: "Sensex", icon: landmark, color: "text-orange-400" },
-  "RELIANCE.NS": { label: "Reliance", icon: target, color: "text-emerald-400" },
-  "HDFCBANK.NS": { label: "HDFC Bank", icon: target, color: "text-cyan-400" },
+const BENCHMARK_METADATA: Record<string, BenchmarkMeta> = {
+  "BTC-USD": { label: "Bitcoin", icon: Globe, color: "text-amber-400" },
+  "ETH-USD": { label: "Ethereum", icon: Target, color: "text-cyan-400" },
+  "SOL-USD": { label: "Solana", icon: Globe, color: "text-orange-400" },
+  "BNB-USD": { label: "BNB", icon: Coins, color: "text-amber-400" },
+  "XRP-USD": { label: "XRP", icon: Target, color: "text-emerald-400" },
+  "ADA-USD": { label: "Cardano", icon: Target, color: "text-cyan-400" },
 };
 
+const FALLBACK_META: BenchmarkMeta = { label: "", icon: Globe, color: "text-muted-foreground" };
+
+function correlationColor(c: number): string {
+  if (c > 0.3) return "text-emerald-400";
+  if (c < -0.3) return "text-rose-400";
+  return "text-foreground";
+}
+
+function correlationIcon(c: number): LucideIcon {
+  if (c > 0.3) return TrendingUp;
+  if (c < -0.3) return TrendingDown;
+  return Minus;
+}
+
 export function CorrelationMatrix({ data, className }: CorrelationMatrixProps) {
-  // Render only benchmarks that exist in the data
-  const benchmarks = Object.keys(data).filter(k => k in BENCHMARK_METADATA);
-  // Fallback: if no known benchmarks in data, show all data keys
-  const entries = benchmarks.length > 0 ? benchmarks : Object.keys(data);
+  const entries = useMemo(() => {
+    const known = Object.keys(data).filter(k => k in BENCHMARK_METADATA);
+    return known.length > 0 ? known : Object.keys(data);
+  }, [data]);
 
   return (
     <div
       className={cn(
-        "bg-card/60 backdrop-blur-2xl border border-white/5 shadow-xl p-6 rounded-3xl border-primary/20 bg-primary/5 h-full flex flex-col justify-between",
+        "bg-card/60 backdrop-blur-2xl border border-white/5 shadow-xl p-6 rounded-3xl h-full flex flex-col justify-between",
         className,
       )}
     >
@@ -61,8 +58,11 @@ export function CorrelationMatrix({ data, className }: CorrelationMatrixProps) {
 
       <div className="grid grid-cols-1 gap-3 my-auto">
         {entries.map((ticker) => {
-          const meta = BENCHMARK_METADATA[ticker] || { label: ticker, icon: globe, color: "text-muted-foreground" };
-          const correlation = data[ticker] ?? 0;
+          const meta = BENCHMARK_METADATA[ticker] ?? { ...FALLBACK_META, label: ticker };
+          const raw = data[ticker];
+          const correlation = raw != null && !Number.isNaN(raw) ? raw : 0;
+          const colorCls = correlationColor(correlation);
+          const DirectionIcon = correlationIcon(correlation);
           const Icon = meta.icon;
 
           return (
@@ -77,15 +77,7 @@ export function CorrelationMatrix({ data, className }: CorrelationMatrixProps) {
                     meta.color,
                   )}
                 >
-                  {Icon === coins ? (
-                    <Coins className="h-4 w-4" />
-                  ) : Icon === globe ? (
-                    <Globe className="h-4 w-4" />
-                  ) : Icon === landmark ? (
-                    <Landmark className="h-4 w-4" />
-                  ) : (
-                    <Target className="h-4 w-4" />
-                  )}
+                  <Icon className="h-4 w-4" />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-80 leading-none mb-1">
@@ -96,38 +88,17 @@ export function CorrelationMatrix({ data, className }: CorrelationMatrixProps) {
               </div>
 
               <div className="flex items-center gap-3 text-right">
-                <div className="flex flex-col items-end">
-                  <span
-                    className={cn(
-                      "text-sm font-bold tracking-tight",
-                      correlation > 0.5
-                        ? "text-emerald-400"
-                        : correlation < -0.3
-                          ? "text-rose-400"
-                          : "text-foreground",
-                    )}
-                  >
-                    {correlation > 0 ? "+" : ""}
-                    {correlation.toFixed(2)}
-                  </span>
-                </div>
+                <span className={cn("text-sm font-bold tracking-tight", colorCls)}>
+                  {correlation > 0 ? "+" : ""}
+                  {correlation.toFixed(2)}
+                </span>
                 <div
                   className={cn(
                     "h-8 w-8 rounded-full flex items-center justify-center bg-background/60 border border-white/5 transition-colors",
-                    correlation > 0.5
-                      ? "text-emerald-400"
-                      : correlation < -0.3
-                        ? "text-rose-400"
-                        : "text-muted-foreground",
+                    colorCls,
                   )}
                 >
-                  {correlation > 0.3 ? (
-                    <TrendingUp className="h-3 w-3" />
-                  ) : correlation < -0.3 ? (
-                    <TrendingDown className="h-3 w-3" />
-                  ) : (
-                    <Minus className="h-3 w-3" />
-                  )}
+                  <DirectionIcon className="h-3 w-3" />
                 </div>
               </div>
             </div>

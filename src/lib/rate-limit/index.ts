@@ -255,9 +255,28 @@ export async function rateLimitGeneral(
   identifier: string,
   userId?: string,
 ): Promise<NextResponse | null> {
-  void identifier;
-  void userId;
-  return null;
+  try {
+    if (await shouldBypassRateLimit()) return null;
+    const tier: PlanTier = userId ? await getUserPlan(userId) : "STARTER";
+    const resolvedTier: PlanTier = tier === "ENTERPRISE" ? "ELITE" : tier;
+    const limiter = generalRateLimiter[resolvedTier];
+
+    if (!limiter) return null;
+
+    const { success, limit, remaining, reset } = await timed(
+      "general.limit",
+      () => withTimeout(limiter.limit(identifier), TIMEOUTS_MS.general),
+      { tier, timeoutMs: TIMEOUTS_MS.general },
+    );
+
+    if (!success) {
+      return createRateLimitErrorResponse(limit, remaining, reset);
+    }
+
+    return null;
+  } catch (error) {
+    return handleFailOpen(error, "general", identifier);
+  }
 }
 
 /**

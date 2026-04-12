@@ -97,7 +97,7 @@ function parseHoldingsFromText(text: string, region: string): ParsedHolding[] {
 
   // ── Pattern 1: Zerodha / Groww style ─────────────────────────────────────
   // SYMBOL   ISIN   QTY   AVG_PRICE   LTP   ...
-  // RELIANCE  INE002A01018  10  2450.00  2501.35  ...
+  // BTC-USD  INE002A01018  10  95000.00  104000.00  ...
   const zerodhaPattern =
     /([A-Z][A-Z0-9&\-]{1,19})\s+(?:INE|US)\w{10,12}\s+(\d+(?:\.\d+)?)\s+([\d,]+(?:\.\d{1,4})?)/gi;
 
@@ -120,7 +120,7 @@ function parseHoldingsFromText(text: string, region: string): ParsedHolding[] {
 
   // ── Pattern 2: Fidelity / Schwab / US brokerage style ────────────────────
   // Symbol  Description  Quantity  Price  Value
-  // AAPL    Apple Inc    10        175.50  1755.00
+  // BTC-USD  Bitcoin     0.5       95000   47500.00
   const usBrokeragePattern =
     /\b([A-Z]{1,5}(?:\.[A-Z]{1,2})?)\s+[A-Za-z][\w\s,\.]{3,40}\s+(\d+(?:\.\d+)?)\s+\$?([\d,]+\.\d{2})/g;
 
@@ -164,7 +164,7 @@ function parseHoldingsFromText(text: string, region: string): ParsedHolding[] {
   }
 
   // ── Pattern 4: Plain text with "Quantity" / "Average Price" labels ────────
-  // Handles: "AAPL 10 shares @ $175.50" or "10 AAPL @ 175.50"
+  // Handles: "BTC-USD 0.5 units @ $95000" or "0.5 BTC-USD @ 95000"
   const labeledPattern =
     /(\d+(?:\.\d+)?)\s+(?:shares?|units?|qty)?\s+(?:of\s+)?([A-Z][A-Z0-9]{1,9})\s+(?:@|at|avg\.?\s*price:?)\s+(?:₹|\$|Rs\.?)?\s*([\d,]+(?:\.\d{1,4})?)/gi;
   let lm: RegExpExecArray | null;

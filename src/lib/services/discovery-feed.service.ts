@@ -3,7 +3,6 @@ import { getPlanLimit, isElitePlan } from "@/lib/middleware/plan-gate";
 import { prisma } from "@/lib/prisma";
 import { withCache } from "@/lib/redis";
 import type { Prisma } from "@/generated/prisma/client";
-import type { AssetType } from "@/generated/prisma/client";
 
 type DiscoveryInflection = {
   scoreType: string;
@@ -94,7 +93,7 @@ export async function getDiscoveryFeedData({
     async () => {
       const baseWhere: Prisma.DiscoveryFeedItemWhereInput = {
         isSuppressed: false,
-        ...(typeFilter !== "all" && { assetType: typeFilter.toUpperCase() as AssetType }),
+        ...(typeFilter !== "all" && { assetType: typeFilter.toUpperCase() as "CRYPTO" }),
         asset: {
           region,
         },

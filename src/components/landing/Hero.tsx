@@ -190,7 +190,7 @@ export function Hero() {
                     <Search className="h-5 w-5 text-slate-400 dark:text-white/45" />
                     <input
                       type="text"
-                      placeholder="Search AAPL, BTC, Gold, semiconductors..."
+                      placeholder="Search BTC-USD, ETH-USD, SOL-USD..."
                       className="h-12 flex-1 border-none bg-transparent text-base font-medium text-slate-700 outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-white/28"
                       defaultValue=""
                       aria-label="Search financial assets"

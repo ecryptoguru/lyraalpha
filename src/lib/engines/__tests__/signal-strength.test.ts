@@ -74,7 +74,7 @@ function buildInput(overrides: Partial<SignalStrengthInput> = {}): SignalStrengt
     signals: bullishSignals,
     compatibility: strongFitCompatibility,
     marketContext: riskOnContext,
-    assetType: "STOCK",
+    assetType: "CRYPTO",
     scoreDynamics: null,
     eventAdjustedScores: null,
     factorAlignment: null,
@@ -154,8 +154,8 @@ describe("calculateSignalStrength", () => {
   });
 
   describe("Asset-Type-Aware Weighting", () => {
-    it("STOCK uses 40% DSE weight", () => {
-      const result = calculateSignalStrength(buildInput({ assetType: "STOCK" }));
+    it("CRYPTO uses 40% DSE weight", () => {
+      const result = calculateSignalStrength(buildInput({ assetType: "CRYPTO" }));
       expect(result.weights.dse).toBe(0.40);
       expect(result.weights.fundamental).toBe(0.20);
     });
@@ -166,21 +166,9 @@ describe("calculateSignalStrength", () => {
       expect(result.weights.fundamental).toBe(0.00);
     });
 
-    it("ETF uses 45% DSE weight", () => {
-      const result = calculateSignalStrength(buildInput({ assetType: "ETF" }));
-      expect(result.weights.dse).toBe(0.45);
-    });
-
-    it("MUTUAL_FUND uses 50% DSE weight", () => {
-      const result = calculateSignalStrength(buildInput({ assetType: "MUTUAL_FUND" }));
-      expect(result.weights.dse).toBe(0.50);
-    });
-
-    it("COMMODITY uses 50% DSE and 30% regime", () => {
-      const result = calculateSignalStrength(buildInput({ assetType: "COMMODITY" }));
-      expect(result.weights.dse).toBe(0.50);
-      expect(result.weights.regime).toBe(0.30);
-      expect(result.weights.fundamental).toBe(0.00);
+    it("CRYPTO uses DSE weight", () => {
+      const result = calculateSignalStrength(buildInput({ assetType: "CRYPTO" }));
+      expect(result.weights.dse).toBeGreaterThan(0);
     });
 
     it("normalizes asset type variants (cryptocurrency → CRYPTO)", () => {
@@ -189,9 +177,9 @@ describe("calculateSignalStrength", () => {
       expect(result.weights.dse).toBe(0.55);
     });
 
-    it("normalizes asset type variants (equity → STOCK)", () => {
+    it("normalizes asset type variants (equity → CRYPTO)", () => {
       const result = calculateSignalStrength(buildInput({ assetType: "equity" }));
-      expect(result.metadata.assetType).toBe("STOCK");
+      expect(result.metadata.assetType).toBe("CRYPTO");
     });
   });
 
@@ -208,7 +196,7 @@ describe("calculateSignalStrength", () => {
   });
 
   describe("Fundamental Layer", () => {
-    it("strong fundamentals boost stock signal", () => {
+    it("strong fundamentals boost crypto signal", () => {
       const withFundamentals = calculateSignalStrength(buildInput({
         fundamentals: {
           peRatio: 15,

@@ -291,6 +291,19 @@ export async function getUserCredits(userId: string): Promise<number> {
   return balances.credits;
 }
 
+/**
+ * Read-only credit balance check — skips persistCreditBalances and bootstrap.
+ * Use this for hot-path checks (e.g. credit-gate) where write amplification is undesirable.
+ * Falls back to the User row's denormalized balances which are kept in sync by write paths.
+ */
+export async function getUserCreditsReadOnly(userId: string): Promise<number> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { credits: true },
+  });
+  return user?.credits ?? 0;
+}
+
 export async function getUserCreditSnapshot(userId: string): Promise<CreditBuckets & { nextBonusExpiry: Date | null; nextPurchasedExpiry: Date | null }> {
   return prisma.$transaction(async (tx) => {
     const state = await getCreditState(tx, userId);

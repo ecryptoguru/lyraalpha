@@ -1,5 +1,5 @@
 import { EngineResult } from "./types";
-import { Asset, AssetType } from "@/generated/prisma/client";
+import { Asset } from "@/generated/prisma/client";
 import { MarketQuote } from "@/types/market-data";
 
 export function calculateTrustScore(
@@ -10,25 +10,8 @@ export function calculateTrustScore(
   const reasons: string[] = [];
 
   // 1. Base Score by Asset Class (40% weight)
-  let baseScore = 50;
-  switch (asset.type) {
-    case AssetType.STOCK:
-    case AssetType.ETF:
-    case AssetType.MUTUAL_FUND:
-      baseScore = 78;
-      reasons.push("Regulated public security");
-      break;
-    case AssetType.CRYPTO:
-      baseScore = 38;
-      reasons.push("Speculative asset class");
-      break;
-    case AssetType.COMMODITY:
-      baseScore = 72;
-      reasons.push("Established commodity markets");
-      break;
-    default:
-      baseScore = 50;
-  }
+  const baseScore = 38;
+  reasons.push("Speculative asset class");
 
   // 2. Market Cap Score — logarithmic gradient instead of discrete tiers (30% weight)
   // Maps market cap to 0-100 using log scale for smooth differentiation

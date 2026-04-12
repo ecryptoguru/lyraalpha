@@ -57,9 +57,9 @@ import { SectionErrorBoundary } from "@/components/error-boundary";
 
 type PreferredRegion = "US" | "IN" | "BOTH";
 type ExperienceLevel = "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
-type Interest = "STOCKS" | "ETF" | "CRYPTO" | "MUTUAL_FUNDS" | "COMMODITIES";
+type Interest = "CRYPTO";
 
-const INTEREST_OPTIONS: Interest[] = ["STOCKS", "ETF", "CRYPTO", "MUTUAL_FUNDS", "COMMODITIES"];
+const INTEREST_OPTIONS: Interest[] = ["CRYPTO"];
 
 function formatInterestLabel(interest: Interest) {
   return interest.replace("_", " ");
@@ -110,7 +110,7 @@ export default function SettingsPage() {
   const [blogSaving, setBlogSaving] = useState(false);
   const [preferredRegion, setPreferredRegion] = useState<PreferredRegion>("US");
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>("BEGINNER");
-  const [interests, setInterests] = useState<Interest[]>(["STOCKS", "ETF"]);
+  const [interests, setInterests] = useState<Interest[]>(["CRYPTO"]);
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
   const [tourCompleted, setTourCompleted] = useState(false);
   const [blogSubscribed, setBlogSubscribed] = useState(true);
@@ -233,7 +233,7 @@ export default function SettingsPage() {
 
       setPreferredRegion(prefs.preferredRegion || "US");
       setExperienceLevel(prefs.experienceLevel || "BEGINNER");
-      setInterests(Array.isArray(prefs.interests) && prefs.interests.length > 0 ? prefs.interests : ["STOCKS", "ETF"]);
+      setInterests(Array.isArray(prefs.interests) && prefs.interests.length > 0 ? prefs.interests as Interest[] : ["CRYPTO"]);
       setOnboardingCompleted(Boolean(prefs.onboardingCompleted));
       setTourCompleted(Boolean(prefs.tourCompleted));
       setBlogSubscribed(typeof prefs.blogSubscribed === "boolean" ? prefs.blogSubscribed : true);

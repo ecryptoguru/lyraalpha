@@ -12,7 +12,15 @@ const logger = createLogger({ service: "pii-scrub" });
 
 // ── PII patterns (ordered by specificity — most specific first) ──────────────
 
-const PII_PATTERNS: Array<{ pattern: RegExp; replacement: string; label: string }> = [
+type ReplacementFn = (match: string, ...groups: string[]) => string;
+
+interface PIIPattern {
+  pattern: RegExp;
+  replacement: string | ReplacementFn;
+  label: string;
+}
+
+const PII_PATTERNS: PIIPattern[] = [
   // Email addresses — most common PII leak vector
   {
     pattern: /\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/g,
@@ -20,10 +28,22 @@ const PII_PATTERNS: Array<{ pattern: RegExp; replacement: string; label: string 
     label: "email",
   },
   // Phone numbers: international (+XX-XXXX-XXXX), US ((XXX) XXX-XXXX), Indian (+91 XXXXX XXXXX)
-  // Broad pattern: optional country code + 2-5 digit groups separated by spaces/dashes
+  // R1-FIX: Narrowed to avoid matching financial data (prices, market caps, percentages).
+  // Three alternatives, all with negative lookbehind for currency symbols:
+  //   1. International format: + prefix + digit groups (e.g. +1-555-123-4567)
+  //   2. US parenthesized area code: (XXX) + digit groups (e.g. (555) 123-4567)
+  //   3. Plain digit groups after phone-context words (captured in group 1):
+  //      call/phone/number/reach/contact/dial/at/on followed by ": " or " "
+  //      (e.g. "Phone: 555-123-4567" → group 1 = "Phone: ")
+  // The old broad pattern matched any 3-group digit sequence, causing false positives on
+  // financial data like "$50,000" or "1,000,000" in a financial analysis platform.
+  //
+  // Note: uses (?:|: ) instead of character class [: ] inside lookbehind/alternation
+  // because V8 (Node 24) has a bug where character classes containing colon inside
+  // lookbehinds and capturing groups fail to match.
   {
-    pattern: /(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,5}\)?[-.\s]?\d{3,5}[-.\s]?\d{3,5}\b/g,
-    replacement: "[phone]",
+    pattern: /(?<![.$€₹£%\d])(?:\+\d{1,3}[-.\s]?)\(?\d{2,5}\)?[-.\s]?\d{3,5}[-.\s]?\d{3,5}\b|(?<![.$€₹£%\d])\(\d{2,5}\)[-\s]\d{3,5}[-.\s]?\d{3,5}\b|((?:call|phone|number|reach|contact|dial|at|on)(?:|: | ))\d{2,5}[-.\s]?\d{3,5}[-.\s]?\d{3,5}\b/gi,
+    replacement: (match, contextWord?: string) => contextWord ? `${contextWord}[phone]` : "[phone]",
     label: "phone",
   },
   // Clerk user IDs (user_xxxxxxxxxxxxxxxx) — should not leak into LLM context
@@ -59,7 +79,7 @@ export function scrubPII(text: string): ScrubResult {
     pattern.lastIndex = 0;
     const matches = text.match(pattern);
     if (matches && matches.length > 0) {
-      scrubbed = scrubbed.replace(pattern, replacement);
+      scrubbed = scrubbed.replace(pattern, replacement as Parameters<typeof scrubbed.replace>[1]);
       totalRedactions += matches.length;
       redactionTypes.add(label);
     }

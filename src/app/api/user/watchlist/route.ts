@@ -49,7 +49,6 @@ export async function GET(req: NextRequest) {
             region: true,
             marketCap: true,
             sector: true,
-            fundHouse: true,
             scoreDynamics: true,
             compatibilityScore: true,
           },

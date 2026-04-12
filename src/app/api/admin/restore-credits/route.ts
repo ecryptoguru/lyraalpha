@@ -1,27 +1,29 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireAdmin } from "@/lib/middleware/admin-guard";
 import { addCredits } from "@/lib/services/credit.service";
 import { CreditTransactionType } from "@/generated/prisma/enums";
 import { createLogger } from "@/lib/logger";
+import { sanitizeError } from "@/lib/logger/utils";
 
 const logger = createLogger({ service: "restore-credits" });
 
 /**
  * POST /api/admin/restore-credits
  * One-time endpoint to restore monthly credits for users affected by the reset-credits bug.
- * Requires authentication. Grants 1500 credits to ELITE/ENTERPRISE users.
+ * Requires admin authentication. Grants 1500 credits to ELITE/ENTERPRISE users.
  */
-export async function POST() {
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+export async function POST(req: Request) {
+  const check = await requireAdmin();
+  if (!check.authorized) return check.response;
+  const adminId = check.userId;
 
-    // Check if user is ELITE or ENTERPRISE
+  try {
+    const body = await req.json().catch(() => ({}));
+    const targetUserId = body.userId || adminId;
+
     const { prisma } = await import("@/lib/prisma");
     const user = await prisma.user.findUnique({
-      where: { id: userId },
+      where: { id: targetUserId },
       select: { plan: true, credits: true, email: true },
     });
 
@@ -31,32 +33,30 @@ export async function POST() {
 
     if (user.plan !== "ELITE" && user.plan !== "ENTERPRISE") {
       return NextResponse.json(
-        { error: `Only ELITE/ENTERPRISE can restore credits. Your plan: ${user.plan}` },
+        { error: "Only ELITE/ENTERPRISE users are eligible for credit restore" },
         { status: 403 }
       );
     }
 
     const amount = 1500;
     const newBalance = await addCredits(
-      userId,
+      targetUserId,
       amount,
       CreditTransactionType.ADJUSTMENT,
       "Monthly credit restore - April 2026 (bug fix)"
     );
 
-    logger.info({ userId, email: user.email, plan: user.plan, amount, newBalance }, "Credits restored");
+    logger.info({ adminId, targetUserId, email: user.email, plan: user.plan, amount, newBalance }, "Credits restored");
 
     return NextResponse.json({
       success: true,
-      previousBalance: user.credits,
       granted: amount,
       newBalance,
-      plan: user.plan,
     });
   } catch (error) {
-    logger.error({ error, userId: "unknown" }, "Failed to restore credits");
+    logger.error({ err: sanitizeError(error), adminId }, "Failed to restore credits");
     return NextResponse.json(
-      { error: "Failed to restore credits", details: String(error) },
+      { error: "Failed to restore credits" },
       { status: 500 }
     );
   }

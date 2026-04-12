@@ -46,8 +46,8 @@ const RISK_FREE_DAILY: Record<string, number> = {
 };
 
 const BENCHMARK_LABELS: Record<string, string> = {
-  US: "S&P 500 (SPY)",
-  IN: "Nifty 50",
+  US: "Bitcoin (BTC-USD)",
+  IN: "Bitcoin (BTC-USD)",
 };
 
 function computeReturns(values: number[]): number[] {

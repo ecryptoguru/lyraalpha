@@ -82,9 +82,9 @@ export class IntelligenceEventsService {
     }
 
     // C3 Fix: Check actual correlation breakdown, not volatility score
-    const spyCorr = correlations["SPY"] ?? 1;
     const btcCorr = correlations["BTC-USD"] ?? 1;
-    const avgBenchmarkCorr = (Math.abs(spyCorr) + Math.abs(btcCorr)) / 2;
+    const ethCorr = correlations["ETH-USD"] ?? 1;
+    const avgBenchmarkCorr = (Math.abs(btcCorr) + Math.abs(ethCorr)) / 2;
     if (avgBenchmarkCorr < 0.3
         && !existingKeys.has("MARKET:Benchmark Shift")) {
       await prisma.institutionalEvent.create({
@@ -95,7 +95,7 @@ export class IntelligenceEventsService {
           description: "Significant shift in correlation with core benchmarks detected. Possible regime decoupling.",
           severity: "LOW",
           date: new Date(),
-          metadata: { sentiment: "bearish", SPY: spyCorr, BTC: btcCorr, avgCorrelation: avgBenchmarkCorr } as Prisma.InputJsonValue,
+          metadata: { sentiment: "bearish", BTC: btcCorr, ETH: ethCorr, avgCorrelation: avgBenchmarkCorr } as Prisma.InputJsonValue,
         },
       });
     }

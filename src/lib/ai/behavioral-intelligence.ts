@@ -16,7 +16,7 @@ const EXTREME_VOLATILITY_THRESHOLD = 85;
 const FOMO_TIME_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 const FOMO_PATTERN_THRESHOLD = 0.3;
 const DIVERSIFICATION_THRESHOLD = 0.4;
-const MIN_ASSET_TYPES_FOR_DIVERSIFICATION = 3;
+const MIN_UNIQUE_SYMBOLS_FOR_DIVERSIFICATION = 6;  // Crypto-only platform: diversification across tokens, not asset types
 
 export type BehavioralPattern =
   | "CONCENTRATION_RISK"
@@ -159,7 +159,9 @@ export function analyzeBehavioralPatterns(
   }
 
   // Pattern 5: Healthy Diversification (positive pattern)
-  if (assetTypes.size >= MIN_ASSET_TYPES_FOR_DIVERSIFICATION && topAssetConcentration < DIVERSIFICATION_THRESHOLD) {
+  // Crypto-only platform: diversification is across distinct tokens, not asset types.
+  // All assets are CRYPTO type, so assetTypes.size is always 1. Use unique symbols instead.
+  if (assetCounts.size >= MIN_UNIQUE_SYMBOLS_FOR_DIVERSIFICATION && topAssetConcentration < DIVERSIFICATION_THRESHOLD) {
     insights.push({
       pattern: "DIVERSIFICATION_HEALTHY",
       severity: "low",

@@ -810,7 +810,7 @@ export default function StressTestPage() {
                   onSelect={addSymbol}
                   region={activeRegion}
                   global={true}
-                  placeholder={activeRegion === "IN" ? "Search REL, Reliance, Gold" : "Search AAPL, Apple, Gold"}
+                  placeholder={activeRegion === "IN" ? "Search BTC, Bitcoin, ETH" : "Search BTC, Bitcoin, ETH"}
                   className="w-[312px] max-w-full"
                 />
               )}
@@ -850,7 +850,7 @@ export default function StressTestPage() {
                 </div>
                 {proxyCount > 0 && (
                   <span className="text-[9px] text-amber-400/80 font-bold">
-                    Proxy replay uses {activeRegion === "IN" ? "NIFTY / BANKBEES / GOLDBEES" : "SPY / QQQ / GLD"} historical paths scaled by asset beta
+                    Proxy replay uses {activeRegion === "IN" ? "BTC-USD / ETH-USD / XRP-USD" : "BTC-USD / ETH-USD / SOL-USD"} historical paths scaled by asset beta
                   </span>
                 )}
               </div>
@@ -1081,7 +1081,7 @@ export default function StressTestPage() {
               <Shield className="h-12 w-12 opacity-20" />
               <p className="text-sm font-bold">Add assets and select a scenario to begin</p>
               <p className="text-xs opacity-50 text-center max-w-xs">
-                Each scenario uses historically accurate {activeRegion === "IN" ? "NIFTY / BANKNIFTY" : "S&P / Nasdaq"} drawdown paths replayed through your asset&apos;s beta
+                Each scenario uses historically accurate {activeRegion === "IN" ? "BTC-USD / ETH-USD" : "BTC-USD / ETH-USD"} drawdown paths replayed through your asset&apos;s beta
               </p>
             </div>
           )}

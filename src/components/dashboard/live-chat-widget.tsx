@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Minus, Sparkles, ExternalLink, MessageCircle, Mic } from "lucide-react";
+import { X, Send, Minus, Sparkles, ExternalLink, MessageCircle, Mic, Volume2, AlertCircle } from "lucide-react";
 import { useMyraVoice, type VoiceTranscript } from "@/hooks/use-myra-voice";
 import { MyraVoiceButton } from "@/components/dashboard/myra-voice-button";
 import { supabaseRealtime } from "@/lib/supabase-realtime";
@@ -14,11 +14,8 @@ import {
   type SupportConversation as Conversation,
   type SupportMessage as Message,
 } from "@/lib/support-chat-client";
-import type { PlanTier } from "@/lib/ai/config";
 
 interface LiveChatWidgetProps {
-  userId?: string;
-  plan?: PlanTier;
   onClose: () => void;
   onUnread: () => void;
 }
@@ -42,7 +39,7 @@ function isAiMessage(msg: Message): boolean {
 }
 
 
-function renderInline(text: string, keyPrefix: string) {
+export function renderInline(text: string, keyPrefix: string) {
   const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|\[.*?\]\(.*?\))/g);
   return parts.map((part, i) => {
     const codeMatch = part.match(/^`([^`]+)`$/);
@@ -52,16 +49,19 @@ function renderInline(text: string, keyPrefix: string) {
           {codeMatch[1]}
         </code>
       );
-    const boldMatch = part.match(/^\*\*(.+)\*\*$/);
+    const boldMatch = part.match(/^\*\*(.+?)\*\*$/);
     if (boldMatch) return <strong key={`${keyPrefix}-b${i}`}>{boldMatch[1]}</strong>;
-    const italicMatch = part.match(/^\*(.+)\*$/);
+    const italicMatch = part.match(/^\*(.+?)\*$/);
     if (italicMatch) return <em key={`${keyPrefix}-i${i}`}>{italicMatch[1]}</em>;
     const linkMatch = part.match(/^\[(.+?)\]\((.+?)\)$/);
-    if (linkMatch)
+    if (linkMatch) {
+      const href = linkMatch[2];
+      const isSafeUrl = /^(https?:\/\/|\/)/i.test(href);
+      if (!isSafeUrl) return <span key={`${keyPrefix}-l${i}`}>{linkMatch[1]}</span>;
       return (
         <a
           key={`${keyPrefix}-l${i}`}
-          href={linkMatch[2]}
+          href={href}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-0.5 text-amber-600 underline underline-offset-2 transition-colors hover:text-amber-500 dark:text-amber-300 dark:hover:text-amber-200"
@@ -70,11 +70,12 @@ function renderInline(text: string, keyPrefix: string) {
           <ExternalLink className="w-3 h-3 shrink-0" />
         </a>
       );
+    }
     return <span key={`${keyPrefix}-t${i}`}>{part}</span>;
   });
 }
 
-function renderContent(content: string) {
+export function renderContent(content: string) {
   const lines = content.split("\n");
   const elements: React.ReactNode[] = [];
   let i = 0;
@@ -92,13 +93,14 @@ function renderContent(content: string) {
         codeLines.push(lines[i]);
         i++;
       }
+      // If we found a closing fence, skip it; otherwise render what we have (unclosed block)
+      if (i < lines.length) i++;
       elements.push(
         <pre key={`block-code-${i}`} className="my-1.5 overflow-x-auto rounded-lg bg-black/10 p-2.5 font-mono text-[11px] leading-relaxed dark:bg-white/8">
           {lang && <span className="mb-1 block text-[9px] uppercase tracking-wider text-slate-400 dark:text-white/30">{lang}</span>}
           <code>{codeLines.join("\n")}</code>
         </pre>
       );
-      i++;
       continue;
     }
 
@@ -209,6 +211,8 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
   const isStreamingRef = useRef(false);
   const conversationRef = useRef<Conversation | null>(null);
   const isMinimizedRef = useRef(isMinimized);
+  const abortRef = useRef<AbortController | null>(null);
+  const sendingRef = useRef(false);
   // Throttle scroll during streaming — only scroll every ~120ms
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -226,7 +230,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
     if (isMinimizedRef.current) onUnread();
   }, [onUnread]);
 
-  const { state: voiceState, startVoice, stopVoice, prefetchSession, errorMessage: voiceError } = useMyraVoice({
+  const { state: voiceState, startVoice, stopVoice, prefetchSession, errorMessage: voiceError, isThinking: voiceThinking, isSpeaking: voiceSpeaking, silenceCountdown, keepAlive, micLevel } = useMyraVoice({
     onTranscript: handleVoiceTranscript,
   });
 
@@ -245,10 +249,12 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
   }, [conversation?.id]);
 
   useEffect(() => {
+    const controller = abortRef;
     return () => {
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
+      controller.current?.abort();
     };
   }, []);
 
@@ -275,9 +281,9 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
   }, [conversation?.messages, voiceMessages]);
 
   const scrollToBottom = useCallback((instant = false) => {
-    if (scrollTimeoutRef.current) return; // already scheduled
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
     scrollTimeoutRef.current = setTimeout(() => {
-      scrollTimeoutRef.current = null; // clear BEFORE scroll so next call isn't blocked
+      scrollTimeoutRef.current = null;
       messagesEndRef.current?.scrollIntoView({
         behavior: instant ? "instant" : "smooth",
         block: "end",
@@ -291,7 +297,8 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
       if (data) {
         setConversation(data);
       }
-    } catch {
+    } catch (err) {
+      console.warn("[LiveChat] Failed to fetch conversation:", err);
     } finally {
       setLoading(false);
     }
@@ -352,19 +359,28 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
     if (isAiTyping) scrollToBottom();
   }, [isAiTyping, scrollToBottom]);
 
+  // Tick every 60s so relative timestamps ("5m ago") stay fresh
+  const [nowTick, setNowTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setNowTick((t) => t + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   const formatTime = useCallback((dateStr: string) => {
+    // nowTick is referenced to bust the memo cache; Date.now() gives actual time
+    void nowTick;
     const date = new Date(dateStr);
-    const diffMs = Date.now() - date.getTime(); // Date.now() called at render time, not closure capture
+    const diffMs = Date.now() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     if (diffMins < 1) return "just now";
     if (diffMins < 60) return `${diffMins}m ago`;
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  }, []);
+  }, [nowTick]);
 
   const sendMessage = useCallback(async (text?: string) => {
     const content = (text ?? input).trim();
-    if (!content || sending) return;
-    
+    if (!content || sending || sendingRef.current) return;
+    sendingRef.current = true;
     setSending(true);
     setSendError(null);
     setInput("");
@@ -379,10 +395,13 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
           currentConv = createdConversation;
           setConversation(createdConversation);
         } else {
+          sendingRef.current = false;
           setSending(false);
           return;
         }
-      } catch {
+      } catch (err) {
+        console.warn("[LiveChat] Failed to create conversation:", err);
+        sendingRef.current = false;
         setSending(false);
         return;
       }
@@ -427,9 +446,12 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
       isStreamingRef.current = true;
       setIsAiTyping(true);
       setStreamingText("");
+      abortRef.current?.abort();
+      const streamAbort = new AbortController();
+      abortRef.current = streamAbort;
 
       try {
-        const accumulated = await streamSupportReply(convId, content, setStreamingText);
+        const accumulated = await streamSupportReply(convId, content, setStreamingText, streamAbort.signal);
 
         if (!accumulated) {
           setIsAiTyping(false);
@@ -456,12 +478,14 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
       } finally {
         isStreamingRef.current = false;
       }
-    } catch {
+    } catch (err) {
+      console.warn("[LiveChat] Send failed:", err);
       setIsAiTyping(false);
       setStreamingText("");
       isStreamingRef.current = false;
       setSendError("Message failed to send — please try again.");
     } finally {
+      sendingRef.current = false;
       setSending(false);
       inputRef.current?.focus();
     }
@@ -719,6 +743,79 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
           )}
         </AnimatePresence>
 
+        {/* Voice thinking indicator — Myra is generating a response but hasn't started speaking yet */}
+        <AnimatePresence>
+          {voiceThinking && voiceState === "active" && (
+            <motion.div
+              key="voice-thinking"
+              initial={{ opacity: 0, y: 8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1, transition: SPRING }}
+              exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
+              className="flex justify-start"
+            >
+              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-amber-300/40 bg-amber-50/90 px-3 py-2.5 dark:border-amber-300/22 dark:bg-amber-300/8">
+                <Sparkles className="h-3 w-3 text-amber-600 dark:text-amber-200/70" />
+                <span className="text-[10px] uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/80">Myra is thinking</span>
+                <TypingDots />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Voice speaking indicator — Myra's audio is actively playing */}
+        <AnimatePresence>
+          {voiceSpeaking && voiceState === "active" && (
+            <motion.div
+              key="voice-speaking"
+              initial={{ opacity: 0, y: 8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1, transition: SPRING }}
+              exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
+              className="flex justify-start"
+            >
+              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-amber-300/40 bg-amber-50/90 px-3 py-2.5 dark:border-amber-300/22 dark:bg-amber-300/8">
+                <Volume2 className="h-3 w-3 text-amber-600 dark:text-amber-200/70" />
+                <span className="flex items-center gap-1 text-[10px] uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/80">
+                  Myra is speaking
+                  <span className="flex items-end gap-px">
+                    {[0.4, 1, 0.65, 1, 0.4].map((h, i) => (
+                      <motion.span
+                        key={i}
+                        className="w-[2px] rounded-full bg-amber-500 dark:bg-amber-200/80"
+                        style={{ height: 3 }}
+                        animate={{ scaleY: [h, 1, h * 0.5, 1, h] }}
+                        transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.08, ease: "easeInOut" }}
+                      />
+                    ))}
+                  </span>
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Voice connecting state in chat area */}
+        <AnimatePresence>
+          {voiceState === "connecting" && (
+            <motion.div
+              key="voice-connecting"
+              initial={{ opacity: 0, y: 8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1, transition: SPRING }}
+              exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
+              className="flex justify-start"
+            >
+              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-amber-300/40 bg-amber-50/90 px-3 py-2.5 dark:border-amber-300/22 dark:bg-amber-300/8">
+                <motion.span
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Mic className="h-3 w-3 text-amber-600 dark:text-amber-200/70" />
+                </motion.span>
+                <span className="text-[10px] uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/80">Connecting voice…</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -736,8 +833,8 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-            placeholder="Ask Myra anything..."
-            disabled={sending || voiceState === "active"}
+            placeholder={voiceState === "active" ? "Type or speak…" : "Ask Myra anything..."}
+            disabled={sending}
             className="flex-1 rounded-full border border-slate-200/80 bg-white px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-amber-300/50 focus:outline-none focus:ring-1 focus:ring-amber-300/18 disabled:opacity-80 dark:border-white/10 dark:bg-white/3 dark:text-white dark:placeholder:text-white/28 dark:focus:border-amber-300/28"
           />
           <MyraVoiceButton
@@ -750,7 +847,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
             whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => sendMessage()}
-            disabled={!input.trim() || sending || voiceState === "active"}
+            disabled={!input.trim() || sending}
             className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-amber-400 text-slate-950 shadow-[0_10px_30px_rgba(245,158,11,0.22)] transition-all hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
           >
             <Send className="h-4 w-4" />
@@ -758,9 +855,51 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
         </div>
         <div className="mt-2 flex items-center justify-center gap-2">
           {voiceState === "active" ? (
+            <>
+              {silenceCountdown !== null && silenceCountdown <= 10 ? (
+                <button
+                  onClick={keepAlive}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-orange-300/60 bg-orange-50 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-orange-600 transition-colors hover:bg-orange-100 dark:border-orange-300/30 dark:bg-orange-300/10 dark:text-orange-200 dark:hover:bg-orange-300/18"
+                >
+                  <AlertCircle className="h-2.5 w-2.5" />
+                  Ending in {silenceCountdown}s — tap to continue
+                </button>
+              ) : voiceThinking ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-50 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-amber-600 dark:border-amber-300/22 dark:bg-amber-300/8 dark:text-amber-200/80">
+                  <Sparkles className="h-2.5 w-2.5" />
+                  Thinking…
+                </span>
+              ) : voiceSpeaking ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-50 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-amber-600 dark:border-amber-300/22 dark:bg-amber-300/8 dark:text-amber-200/80">
+                  <Volume2 className="h-2.5 w-2.5" />
+                  Speaking…
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/40 bg-amber-50 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-amber-600 dark:border-amber-300/22 dark:bg-amber-300/8 dark:text-amber-200/80">
+                  <Mic className="h-2.5 w-2.5" />
+                  Listening
+                  {micLevel > 0.05 && (
+                    <span className="ml-0.5 flex items-end gap-px">
+                      {[0.3, 0.6, 1, 0.6, 0.3].map((h, i) => (
+                        <motion.span
+                          key={i}
+                          className="w-[2px] rounded-full bg-amber-500 dark:bg-amber-200/80"
+                          style={{ height: 3 }}
+                          animate={{ scaleY: micLevel > 0.1 ? [h * micLevel, micLevel, h * micLevel] : [0.2, 0.3, 0.2] }}
+                          transition={{ duration: 0.3, repeat: Infinity, delay: i * 0.04, ease: "easeInOut" }}
+                        />
+                      ))}
+                    </span>
+                  )}
+                </span>
+              )}
+            </>
+          ) : voiceState === "connecting" ? (
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-50 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-amber-600 dark:border-amber-300/22 dark:bg-amber-300/8 dark:text-amber-200/80">
-              <Mic className="h-2.5 w-2.5" />
-              Listening
+              <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.8, repeat: Infinity }}>
+                <Mic className="h-2.5 w-2.5" />
+              </motion.span>
+              Connecting…
             </span>
           ) : voiceError && voiceState === "error" ? (
             <span

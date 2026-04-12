@@ -1,5 +1,4 @@
 import { OHLCV, EngineResult, SignalDirection } from "./types";
-import { AssetType } from "@/generated/prisma/client";
 
 /**
  * Calculates Volatility Score using three sub-signals:
@@ -14,7 +13,7 @@ import { AssetType } from "@/generated/prisma/client";
  */
 export function calculateVolatilityScore(
   data: OHLCV[],
-  assetType: AssetType | string = "STOCK",
+  assetType: string = "CRYPTO",
 ): EngineResult {
   if (data.length < 20) {
     return {
@@ -26,7 +25,7 @@ export function calculateVolatilityScore(
 
   const prices = data.map(d => d.close);
   const latestPrice = prices[prices.length - 1];
-  const isCrypto = assetType === AssetType.CRYPTO || assetType === "CRYPTO";
+  // Platform is crypto-only
 
   // ─── 1. NATR-14 with percentile scaling (40%) ────────────────────
   const trueRanges: number[] = [];
@@ -46,19 +45,11 @@ export function calculateVolatilityScore(
 
   // Percentile-based scaling using empirical ranges
   // Instead of fixed divisors, use asset-class-specific percentile bands
-  let natrScore: number;
-  if (isCrypto) {
-    // Crypto NATR typical range: 1% (very calm) to 12% (extreme)
-    // Median ~3.5%. Use sigmoid-like mapping for better spread.
-    natrScore = Math.min(100, Math.max(0, (natr / 5) * 50));
-    // Apply diminishing returns above 5% to avoid ceiling
-    if (natr > 5) natrScore = 50 + Math.min(50, (natr - 5) * 7);
-  } else {
-    // Equities NATR typical range: 0.3% (mega-cap calm) to 5% (small-cap stress)
-    // Median ~1.2%
-    natrScore = Math.min(100, Math.max(0, (natr / 3) * 60));
-    if (natr > 3) natrScore = 60 + Math.min(40, (natr - 3) * 20);
-  }
+  // Crypto NATR typical range: 1% (very calm) to 12% (extreme)
+  // Median ~3.5%. Use sigmoid-like mapping for better spread.
+  let natrScore = Math.min(100, Math.max(0, (natr / 5) * 50));
+  // Apply diminishing returns above 5% to avoid ceiling
+  if (natr > 5) natrScore = 50 + Math.min(50, (natr - 5) * 7);
   natrScore = Math.min(100, Math.max(0, natrScore));
 
   // ─── 2. Bollinger %B (30%) ────────────────────────────────────────
@@ -81,13 +72,8 @@ export function calculateVolatilityScore(
     // Near middle (0.5) = calm
     // We care about band WIDTH more than position for volatility
     const bandWidthPct = (bandWidth / bbMean) * 100;
-    if (isCrypto) {
-      bbScore = Math.min(100, Math.max(0, (bandWidthPct / 15) * 50));
-      if (bandWidthPct > 15) bbScore = 50 + Math.min(50, (bandWidthPct - 15) * 5);
-    } else {
-      bbScore = Math.min(100, Math.max(0, (bandWidthPct / 8) * 50));
-      if (bandWidthPct > 8) bbScore = 50 + Math.min(50, (bandWidthPct - 8) * 10);
-    }
+    bbScore = Math.min(100, Math.max(0, (bandWidthPct / 15) * 50));
+    if (bandWidthPct > 15) bbScore = 50 + Math.min(50, (bandWidthPct - 15) * 5);
     // Bonus if price is outside bands (extreme vol)
     if (pctB > 1 || pctB < 0) bbScore = Math.min(100, bbScore + 10);
   }
@@ -134,7 +120,7 @@ export function calculateVolatilityScore(
     context = `Low volatility (${natr.toFixed(1)}% NATR).${regime} Price compressing.`;
   } else {
     direction = "FLAT";
-    context = `Moderate volatility for ${isCrypto ? "crypto" : "equities"}.`;
+    context = `Moderate volatility for crypto.`;
   }
 
   return {
