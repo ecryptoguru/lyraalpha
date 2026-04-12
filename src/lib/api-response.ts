@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger({ service: "api-response" });
 
 export type ApiResponse<T = unknown> = 
   | { success: true; data: T; error?: never }
@@ -17,10 +20,7 @@ export function apiError(error: string, status = 400, details?: unknown) {
   
   // Log original error for debugging (only in production)
   if (isProduction && status >= 500 && typeof error === "string") {
-    import("@/lib/logger").then(({ createLogger }) => {
-      const logger = createLogger({ service: "api-response" });
-      logger.error({ originalError: error, status }, "Internal API error sanitized");
-    }).catch(() => {});
+    logger.error({ originalError: error, status }, "Internal API error sanitized");
   }
   
   return NextResponse.json<ApiResponse>({ success: false, error: sanitizedError, details }, { status });

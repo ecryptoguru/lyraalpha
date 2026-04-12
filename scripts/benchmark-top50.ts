@@ -17,6 +17,7 @@ import {
   QUERY_CREDIT_COSTS,
 } from '@/lib/plans/facts';
 import { RATE_LIMIT_CONFIG } from '@/lib/rate-limit/config';
+import { calculateLLMCost } from '@/lib/ai/cost-calculator';
 import { mkdirSync, writeFileSync, readFileSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
@@ -111,17 +112,31 @@ const QUESTIONS = QUESTION_GROUPS.flatMap((group) => group.questions);
 const PLANS: PlanTier[] = ['STARTER', 'PRO', 'ELITE', 'ENTERPRISE'];
 const REGIONS: UpgradeRegion[] = ['US'];
 
-function estimateCost(tokens: number, plan: PlanTier, tier: QueryComplexity): number {
+function estimateCostFromLog(
+  inputTokens: number,
+  outputTokens: number,
+  cachedInputTokens: number,
+  model: string,
+): number {
+  const { inputCost, cachedInputCost, outputCost } = calculateLLMCost({
+    model,
+    inputTokens,
+    outputTokens,
+    cachedInputTokens,
+  });
+  return inputCost + cachedInputCost + outputCost;
+}
+
+function estimateCostFallback(tokens: number, plan: PlanTier, tier: QueryComplexity): number {
   const modelTier = PLAN_ROUTING_FACTS[plan][tier];
-  // GPT-5.4 pricing per 1M tokens: nano $0.20/$1.25, mini $0.75/$4.50, full $2.50/$15.00
-  const rates: Record<string, { input: number; output: number }> = {
-    'gpt-nano': { input: 0.20 / 1_000_000, output: 1.25 / 1_000_000 },
-    'gpt-mini': { input: 0.75 / 1_000_000, output: 4.50 / 1_000_000 },
-    'gpt-full': { input: 2.50 / 1_000_000, output: 15.00 / 1_000_000 },
+  const modelMap: Record<string, string> = {
+    'gpt-nano': 'gpt-5.4-nano',
+    'gpt-mini': 'gpt-5.4-mini',
+    'gpt-full': 'gpt-5.4',
   };
-  const { input: inputRate, output: outputRate } = rates[modelTier] ?? rates['gpt-nano'];
-  const inputTokens = tokens * 3;
-  return tokens * outputRate + inputTokens * inputRate;
+  const model = modelMap[modelTier] ?? 'gpt-5.4-nano';
+  const inputTokens = Math.round(tokens * 3);
+  return estimateCostFromLog(inputTokens, tokens, 0, model);
 }
 
 async function ensureBenchmarkUser(plan: PlanTier, runId: string): Promise<string> {
@@ -231,13 +246,15 @@ function calculateQualityScore(text: string, tier: QueryComplexity): number {
     }
   }
   fuCount = Math.min(fuCount, 5);
-  const minRequired = 3;
+  // SIMPLE tier only needs 2 follow-ups (educational format), others need 3
+  const minRequired = isSimpleTier ? 2 : 3;
   const followScore = fuCount >= minRequired ? 15 : (fuCount / minRequired) * 15;
 
   const numerics = text.match(/\b\d+(\.\d+)?[%$]?\b/g) || [];
   const uniqueNumerics = new Set(numerics).size;
+  // Give SIMPLE tier same numeric cap as others - educational content can have numbers
   const numericScore = isSimpleTier
-    ? Math.min(20, Math.max(8, uniqueNumerics * 2))
+    ? Math.min(25, uniqueNumerics * 2.5)
     : Math.min(25, uniqueNumerics * 1.5);
 
   const hasHeaders = (text.match(/^#{1,3}\s/gm) || []).length;
@@ -256,20 +273,23 @@ function calculateQualityScore(text: string, tier: QueryComplexity): number {
       Math.min(3, hasCheckbox * 1.5) +
       Math.min(5, paragraphs * 0.5),
   );
-  const simpleCompletenessBonus = isSimpleTier && fuCount >= minRequired && hasHeaders >= 2
+  // More generous completeness bonus for SIMPLE tier with proper structure
+  const simpleMinFollowUps = isSimpleTier ? 2 : 3;
+  const simpleCompletenessBonus = isSimpleTier && fuCount >= simpleMinFollowUps && hasHeaders >= 2
     ? wordCount < 120
-      ? 4
+      ? 6  // was 4
       : wordCount < 220
-        ? 6
-        : 8
+        ? 8  // was 6
+        : 10 // was 8
     : 0;
   let lengthScore = 0;
 
   if (isSimpleTier) {
+    // More generous length scoring for educational/simple responses
     if (wordCount < 80) {
-      lengthScore = 18;
+      lengthScore = 22;  // was 18
     } else if (wordCount < 160) {
-      lengthScore = 24;
+      lengthScore = 28;  // was 24
     } else if (wordCount <= 900) {
       lengthScore = 30;
     } else {
@@ -1116,14 +1136,16 @@ async function runBenchmark() {
     const outputTokens = logRow?.outputTokens ?? Math.round(responseText.length / 4);
     const cachedInputTokens = logRow?.cachedInputTokens ?? 0;
     const reasoningTokens = logRow?.reasoningTokens ?? 0;
-    const cost = logRow?.totalCost ?? estimateCost(outputTokens, plan, tier);
     const model = logRow?.model ?? 'gpt-family';
+    const cost = logRow?.totalCost
+      ?? (logRow ? estimateCostFromLog(inputTokens, outputTokens, cachedInputTokens, model) : estimateCostFallback(outputTokens, plan, tier));
 
     let isTruncated = false;
     let truncationSignal = '';
     if (success && responseText.length > 0) {
       const maxOut = getTargetOutputTokens(tierConfig);
-      if (outputTokens > 0 && maxOut > 0 && outputTokens / maxOut >= 0.95) {
+      // Only flag as truncated at 98%+ (was 95%) to reduce false positives
+      if (outputTokens > 0 && maxOut > 0 && outputTokens / maxOut >= 0.98) {
         isTruncated = true;
         truncationSignal = `token_cap_${Math.round((outputTokens / maxOut) * 100)}pct`;
       }

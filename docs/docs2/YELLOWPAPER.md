@@ -83,7 +83,7 @@ The platform ships a public blog system with a hybrid static + DB architecture.
 **Public routes:**
 - `/blog` — paginated index, featured posts, all categories
 - `/blog/[slug]` — full post with OG hero image, reading progress bar, share card, sidebar CTA, related posts
-- `/blog/category/[category]` — programmatic category landing pages
+- `/blog/category/[category]` — programmatic category pages
 - `/blog/feed.xml` — RSS 2.0 feed with ISR revalidation (1 hour)
 
 **AMI 2.0 webhook bridge:**
@@ -160,7 +160,7 @@ The user model also supports:
 
 The current implementation has two distinct onboarding contexts:
 
-- a public prelaunch onboarding path centered on waitlist / access guidance (Myra handles this on the landing page)
+- a public prelaunch onboarding path centered on waitlist / access guidance (Myra handles this at the public support entry point)
 - an authenticated dashboard onboarding gate with 3 steps: `Market`, `Experience`, and `Interests`
 
 The authenticated gate completes directly from the final step and no longer uses a separate fourth completion modal.
@@ -375,7 +375,7 @@ Myra uses a separate support knowledge surface rather than sharing Lyra's analyt
 
 Myra responses are cached using normalized query hashing (stop-word removal + sorted tokens + SHA-256):
 - 4h TTL for authenticated sessions
-- 8h TTL for public landing page sessions
+- 8h TTL for public support entry-point sessions
 
 ---
 
@@ -413,9 +413,9 @@ Myra is the platform-support agent.
 - navigation help
 - redirecting analysis questions to Lyra
 
-### 10.2 Public Landing Page Context
+### 10.2 Public Support Entry Point Context
 
-Myra is fully operational for unauthenticated visitors on the landing page. The `/api/support/public-chat` endpoint is exempted from Clerk middleware in `src/proxy.ts` via the `isPublicApiRoute` matcher. This is the authoritative public Myra endpoint and should not be removed from that matcher.
+Myra is fully operational for unauthenticated visitors at the public support entry point. The `/api/support/public-chat` endpoint is exempted from Clerk middleware in `src/proxy.ts` via the `isPublicApiRoute` matcher. This is the authoritative public Myra endpoint and should not be removed from that matcher.
 
 ### 10.3 Dashboard Context
 

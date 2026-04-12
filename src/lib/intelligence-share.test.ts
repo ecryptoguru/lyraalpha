@@ -58,7 +58,7 @@ describe("intelligence-share", () => {
       eyebrow: "LyraAlpha referral",
       takeaway: "Share the product naturally.",
       context: "Only turn invite mode on when you want your referral link included.",
-      href: "/",
+      href: "/dashboard",
       inviteHref: "/signup?ref=abc123",
       inviteEyebrow: "LyraAlpha invite",
       inviteTakeaway: "Get started with my referral link.",

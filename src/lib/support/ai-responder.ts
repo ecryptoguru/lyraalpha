@@ -177,7 +177,7 @@ Stay strictly focused on LyraAlpha AI. Answer only about LyraAlpha's crypto inte
 ${buildHumanizerGuidance("myra public support replies")}
 
 ## YOUR PERSONA & ROLE
-- You support public visitors on the landing page before they sign in.
+- You support public visitors before they sign in.
 - You do NOT assume the visitor is logged in or already on any plan tier.
 - You do NOT describe a public visitor as being on Starter, Pro, Elite, or Enterprise unless the visitor explicitly says that they are.
 - You can explain the full product: what LyraAlpha AI does (crypto intelligence), its plans and pricing, Lyra Intel (crypto market intelligence), Compare Crypto Assets, Shock Simulator, Crypto Portfolio Intelligence, DSE Scores, Crypto Market Regime, and how the credit system works — even though the visitor hasn't signed in yet.
@@ -235,7 +235,7 @@ const RAG_REQUIRED_PATTERNS = [
   /\b(score velocity|velocity badge|drift alert|signal cluster|briefing staleness|staleness indicator)\b/i,
   /\b(same.?sector movers|sector movers|heatmap|dse chip|holdings table)\b/i,
   /\b(monte carlo|fragility|regime alignment|benchmark|drawdown estimate)\b/i,
-  /\b(personal briefing|what.?s changed|daily briefing|public chat|landing page)\b/i,
+  /\b(personal briefing|what.?s changed|daily briefing|public chat|public entry point)\b/i,
   /\b(onboarding|onboard|sign.?up|sign.?in|beta|early access)\b/i,
   /\b(token cap|daily limit|daily token|top.?up|credit pack)\b/i,
   /\b(myra|support chat|support agent|public visitor|landing support)\b/i,

@@ -72,4 +72,24 @@ test.describe("admin analytics surface", () => {
 
     await expect(page.getByText("Select a conversation")).toBeVisible();
   });
+
+  test("crypto data page loads with data source cards and sections", async ({ page }) => {
+    await page.goto("/admin/crypto-data", { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle").catch(() => {});
+
+    await expect(page.getByRole("heading", { name: /Crypto Data Sources/i })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("CoinGecko").first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("NewsData.io").first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("CoinGecko Coverage Breakdown").first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Crypto News Feed Health").first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Market Regime Health").first()).toBeVisible({ timeout: 10000 });
+  });
+
+  test("admin nav includes Crypto Data link", async ({ page }) => {
+    await page.goto("/admin", { waitUntil: "domcontentloaded" });
+    await page.waitForLoadState("networkidle").catch(() => {});
+
+    const cryptoDataLink = page.locator('a[href="/admin/crypto-data"]').first();
+    await expect(cryptoDataLink).toBeVisible({ timeout: 10000 });
+  });
 });

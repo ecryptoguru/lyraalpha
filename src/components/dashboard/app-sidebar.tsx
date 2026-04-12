@@ -7,6 +7,7 @@ import {
   FlaskConical,
   Gift,
   GitCompare,
+  Globe,
   GraduationCap,
   Newspaper,
   PieChart,
@@ -47,6 +48,7 @@ const navIcons: Record<DashboardRouteKey, React.ComponentType<{ className?: stri
   portfolio:          PieChart,
   assets:             ChartLine,
   discovery:          Radar,
+  "sector-pulse":     Globe,
   narratives:         Newspaper,
   learning:           GraduationCap,
   timeline:           Zap,
@@ -140,26 +142,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="hover:bg-muted/45 dark:hover:bg-white/5 transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:mx-auto!"
             >
-              <Link href="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-secondary/10 border border-primary/25 shadow-[0_0_15px_rgba(245,158,11,0.2)] text-foreground dark:text-white">
+              <Link href="/dashboard/lyra" className="flex w-full items-start gap-3 group-data-[collapsible=icon]:justify-center">
+                <div className="hidden aspect-square size-10 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-secondary/10 border border-primary/25 shadow-[0_0_15px_rgba(245,158,11,0.2)] text-foreground dark:text-white group-data-[collapsible=icon]:flex">
                   <Image 
-                    src="/logo.png" 
+                    src="/brand/lyraalpha-ai-symbol.svg" 
                     alt="LyraAlpha AI" 
-                    width={32} 
-                    height={32} 
-                    className="w-full h-full object-contain p-0.5"
+                    width={40} 
+                    height={40} 
+                    className="w-full h-full object-contain p-1"
                   />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden ml-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="truncate font-bold text-base tracking-tight text-foreground dark:bg-linear-to-r dark:from-white dark:to-white/60 dark:bg-clip-text dark:text-transparent">
-                      LyraAlpha AI
-                    </span>
-                    <span className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.14em] text-primary">
+                <div className="grid min-w-0 flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Image
+                      src="/brand/lyraalpha-ai-logo-lockup.svg"
+                      alt="LyraAlpha AI"
+                      width={307}
+                      height={95}
+                      className="h-14 w-auto max-w-[280px] object-contain object-left"
+                    />
+                    <span className="shrink-0 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.14em] text-primary">
                       Beta
                     </span>
                   </div>
-                  <span className="truncate text-[10px] uppercase tracking-widest text-primary font-bold opacity-80">
+                  <span className="mt-1 truncate text-[10px] uppercase tracking-widest text-primary font-bold opacity-80">
                     {planLabel} Edition
                   </span>
                 </div>

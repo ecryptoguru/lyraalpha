@@ -11,7 +11,13 @@ export async function POST(req: NextRequest) {
     const { userId } = await auth();
     if (!userId) return apiError("Unauthorized", 401);
 
-    const { subscription, enabled } = await req.json();
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return apiError("Request body must be valid JSON", 400);
+    }
+    const { subscription, enabled } = body as { subscription?: unknown; enabled?: boolean };
 
     await prisma.userPreference.upsert({
       where: { userId },

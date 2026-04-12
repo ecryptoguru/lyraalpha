@@ -23,7 +23,7 @@ Each week should:
 - **Content engine** — SEO + GEO + educational blog system optimized for AI search visibility
 - **Founder-led distribution** — X and LinkedIn as primary attention channels with platform-native adaptation
 - **Community distribution** — Reddit (90/10 value-to-promotion discipline), Discord, and Telegram for authenticity
-- **Conversion system** — landing pages, lead magnets, email onboarding, and referral loops optimized for 7-9 touchpoint crypto user journey
+- **Conversion system** — signup entry pages, lead magnets, email onboarding, and referral loops optimized for 7-9 touchpoint crypto user journey
 - **Partnership leverage** — newsletters, creators, crypto communities, and ecosystem partners
 - **Product-led loops** — shareable insights, referrals, onboarding, and ongoing email value
 - **SEO keyword routing** — use `50-SEO-IN.md` and `50-SEO-US.md` to map search intent into `100-SEO-pages.md`, blog posts, and tool pages
@@ -39,7 +39,7 @@ The first two weeks should create the minimum viable growth stack:
 
 - a clear ICP (crypto-native retail investors in India + US)
 - a strong promise (demonstrated utility over hype, addressing trust deficit)
-- a homepage with conversion-ready messaging and E-E-A-T signals (team bios, audit reports, transparency)
+- a dashboard entry point with conversion-ready messaging and E-E-A-T signals (team bios, audit reports, transparency)
 - a blog engine with SEO + GEO structure optimized for AI answerability
 - a basic social distribution engine (platform-native content for X, LinkedIn, Discord, Telegram)
 - a measurable funnel with crypto-specific metrics (wallet connections, on-chain behavior)
@@ -102,7 +102,7 @@ The final month should maximize:
 
 ### Detailed execution checklist
 
-- homepage hero should answer: what is LyraAlpha, who is it for, and why now (crypto-specific context)
+- dashboard entry copy should answer: what is LyraAlpha, who is it for, and why now (crypto-specific context)
 - the CTA should be visible above the fold and repeated near proof sections
 - add E-E-A-T trust layer: founder bio, product claims, engine/AI split explanation, audit reports, transparency
 - create a reusable content brief template with GEO optimization requirements (clear structure, direct answers, semantic depth)
@@ -112,7 +112,7 @@ The final month should maximize:
 ### Success criteria
 
 - attribution is working
-- homepage messaging is aligned
+- dashboard entry messaging is aligned
 - signup flow is live
 - social profiles are consistent
 - content backlog is ready
@@ -286,12 +286,12 @@ The final month should maximize:
 - publish one founder narrative post on LinkedIn
 - launch social proof assets: quotes, screenshots, mini case studies
 - secure 2-3 partner mentions or cross-promotions
-- optimize landing pages for conversion rate
+- optimize signup entry pages for conversion rate
 
 ### Detailed execution checklist
 
 - add screenshots that show product clarity, not feature clutter (crypto-specific use cases)
-- add quote cards to landing pages and social posts (verifiable user outcomes)
+- add quote cards to signup entry pages and social posts (verifiable user outcomes)
 - turn one strong user quote into a broader proof story with metrics
 - reach out to partners with a very specific collaboration ask (cross-promotion, not generic)
 - add E-E-A-T signals: audit reports, team credentials, transparent roadmap
@@ -468,7 +468,7 @@ The final month should maximize:
 - **Monday:** publish or draft one high-intent article; set weekly targets
 - **Tuesday:** founder commentary on X and LinkedIn; comment on community posts
 - **Wednesday:** community engagement + Reddit value post; review message resonance
-- **Thursday:** social repurposing + email send; update landing page copy if needed
+- **Thursday:** social repurposing + email send; update signup entry copy if needed
 - **Friday:** live session, AMA, or insight roundup; collect questions and objections
 - **Saturday:** comment engagement and light social touchpoints; schedule next content
 - **Sunday:** metrics review and next-week planning; reassign priorities

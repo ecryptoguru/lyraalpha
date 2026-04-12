@@ -93,11 +93,12 @@ export async function POST(req: Request) {
             id: data.id,
             email,
             plan,
-            credits: SIGNUP_BONUS_CREDITS,
+            // Start with zero balances — grantCreditsInTransaction will set the correct values
+            credits: 0,
             monthlyCreditsBalance: 0,
-            bonusCreditsBalance: SIGNUP_BONUS_CREDITS,
+            bonusCreditsBalance: 0,
             purchasedCreditsBalance: 0,
-            totalCreditsEarned: SIGNUP_BONUS_CREDITS,
+            totalCreditsEarned: 0,
             totalCreditsSpent: 0,
             updatedAt: new Date(),
           },
@@ -108,15 +109,15 @@ export async function POST(req: Request) {
           },
         });
 
-        // Grant 500 bonus credits as a proper credit lot (3-month expiry)
+        // Grant bonus credits as a proper credit lot (3-month expiry)
         // only on first creation — upsert update path skips this
         try {
           const existingUser = await prisma.user.findUnique({
             where: { id: data.id },
             select: { totalCreditsEarned: true },
           });
-          // Only grant if this is a fresh signup (totalCreditsEarned matches the bonus)
-          if (existingUser && existingUser.totalCreditsEarned === SIGNUP_BONUS_CREDITS) {
+          // Only grant if this is a fresh signup (totalCreditsEarned is still zero)
+          if (existingUser && existingUser.totalCreditsEarned === 0) {
             await prisma.$transaction(async (tx) => {
               await grantCreditsInTransaction(
                 tx,
@@ -125,7 +126,7 @@ export async function POST(req: Request) {
                 "BONUS" as never,
                 "Beta sign-up bonus — welcome to LyraAlpha!",
                 undefined,
-                { countTowardEarned: false }, // already counted in upsert
+                { countTowardEarned: true },
               );
             });
             logger.info({ userId: data.id, credits: SIGNUP_BONUS_CREDITS }, "Sign-up bonus credits granted");
@@ -229,17 +230,53 @@ export async function POST(req: Request) {
       }
 
       case "user.deleted": {
-        // GDPR: anonymize PII and purge user-generated content
+        // GDPR: anonymize PII and purge all user-generated content
         await prisma.$transaction([
+          // Anonymize the User row — keep the row so FK cascades don't break,
+          // but scrub all PII fields
           prisma.user.updateMany({
             where: { id: data.id },
-            data: { email: `deleted-${data.id}@removed.invalid` },
+            data: {
+              email: `deleted-${data.id}@removed.invalid`,
+              plan: "STARTER",
+              trialEndsAt: null,
+              credits: 0,
+              monthlyCreditsBalance: 0,
+              bonusCreditsBalance: 0,
+              purchasedCreditsBalance: 0,
+              totalCreditsEarned: 0,
+              totalCreditsSpent: 0,
+            },
           }),
+          // AI & content
           prisma.aIRequestLog.deleteMany({ where: { userId: data.id } }),
+          prisma.lyraFeedback.deleteMany({ where: { userId: data.id } }),
+          prisma.userMemoryNote.deleteMany({ where: { userId: data.id } }),
+          // Portfolio & watchlist
           prisma.watchlistItem.deleteMany({ where: { userId: data.id } }),
           prisma.portfolio.deleteMany({ where: { userId: data.id } }),
+          // Preferences & notifications
           prisma.userPreference.deleteMany({ where: { userId: data.id } }),
+          prisma.notification.deleteMany({ where: { userId: data.id } }),
+          // Billing & credits
           prisma.creditTransaction.deleteMany({ where: { userId: data.id } }),
+          prisma.creditLot.deleteMany({ where: { userId: data.id } }),
+          prisma.subscription.deleteMany({ where: { userId: data.id } }),
+          prisma.billingAuditLog.deleteMany({ where: { userId: data.id } }),
+          // Gamification & XP
+          prisma.pointTransaction.deleteMany({ where: { userId: data.id } }),
+          prisma.userProgress.deleteMany({ where: { userId: data.id } }),
+          prisma.userBadge.deleteMany({ where: { userId: data.id } }),
+          prisma.xPTransaction.deleteMany({ where: { userId: data.id } }),
+          prisma.xPRedemption.deleteMany({ where: { userId: data.id } }),
+          prisma.learningCompletion.deleteMany({ where: { userId: data.id } }),
+          // Sessions & activity
+          prisma.userSession.deleteMany({ where: { userId: data.id } }),
+          prisma.userActivityEvent.deleteMany({ where: { userId: data.id } }),
+          // Referrals (user can be referrer or referee)
+          prisma.referral.deleteMany({ where: { referrerId: data.id } }),
+          prisma.referral.deleteMany({ where: { refereeId: data.id } }),
+          // Support
           prisma.supportMessage.deleteMany({ where: { senderId: data.id } }),
           prisma.supportConversation.deleteMany({ where: { userId: data.id } }),
         ]);

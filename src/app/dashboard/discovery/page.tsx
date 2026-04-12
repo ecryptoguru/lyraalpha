@@ -7,16 +7,10 @@ import { getDashboardViewer } from "@/lib/server/dashboard-viewer";
 import { getDiscoveryFeedData } from "@/lib/services/discovery-feed.service";
 import { DiscoveryTabsClient } from "./discovery-tabs-client";
 
-export default async function DiscoveryPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ tab?: string }>;
-}) {
+export default async function DiscoveryPage() {
   const cookieStore = await cookies();
   const initialRegion = cookieStore.get("user_region_preference")?.value === "IN" ? "IN" : "US";
   const viewer = await getDashboardViewer();
-  const resolvedParams = await searchParams;
-  const initialTab = resolvedParams?.tab === "sectors" ? "sectors" : "radar";
 
   const initialData = await getDiscoveryFeedData({
     typeFilter: "CRYPTO",
@@ -35,17 +29,15 @@ export default async function DiscoveryPage({
         <div className="relative z-10 animate-slide-up-fade">
           <PageHeader
             icon={<Radar className="h-5 w-5" />}
-            title={initialTab === "sectors" ? "Sector Pulse" : "Crypto Discovery"}
-            eyebrow={initialTab === "sectors" ? "Where the groups are moving" : "On-chain signals surfaced today"}
+            title="Crypto Discovery"
+            eyebrow="On-chain signals surfaced today"
             chips={
               <>
-                {initialTab === "radar" && (
-                  <StatChip
-                    value={initialData.total ?? initialData.items?.length ?? 0}
-                    label="Signals"
-                    variant="amber"
-                  />
-                )}
+                <StatChip
+                  value={initialData.total ?? initialData.items?.length ?? 0}
+                  label="Signals"
+                  variant="amber"
+                />
                 <StatChip value={initialRegion} label="Market" variant="muted" />
               </>
             }
@@ -54,7 +46,6 @@ export default async function DiscoveryPage({
 
         <div className="animate-slide-up-fade animation-delay-200">
           <DiscoveryTabsClient
-            initialTab={initialTab}
             initialData={initialData}
             initialRegion={initialRegion}
           />

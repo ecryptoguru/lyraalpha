@@ -106,7 +106,7 @@ This stage measures whether attention becomes a user, lead, or subscriber.
 #### Key metrics
 
 - Signup conversion rate (wallet connections)
-- Landing page conversion rate (E-E-A-T signals)
+- Signup entry conversion rate (E-E-A-T signals)
 - Cost per signup (crypto-native ad networks where permissible)
 - Cost per lead
 - Trial start rate
@@ -119,7 +119,7 @@ This stage measures whether attention becomes a user, lead, or subscriber.
 
 #### Interpretation rules
 
-- if top-of-funnel is healthy but conversion is weak, fix landing pages and CTA clarity (add E-E-A-T signals)
+- if top-of-funnel is healthy but conversion is weak, fix signup entry pages and CTA clarity (add E-E-A-T signals)
 - if conversion is strong but activation is weak, fix onboarding (address 7-9 touchpoint journey)
 - if signup conversion is above target, test scaling the channel further (crypto-specific metrics)
 - track AI citation rate for GEO performance
@@ -148,7 +148,7 @@ This stage measures whether the user experiences the product value quickly.
 - First briefing open rate
 - First watchlist creation rate
 - First portfolio connection rate (wallet connection)
-- First tool interaction rate from SEO landing pages
+- First tool interaction rate from SEO signup entry pages
 - On-chain behavior tracking (wallet activity)
 
 #### Interpretation rules
@@ -182,7 +182,7 @@ This stage measures whether users come back.
 - Email click-through rate
 - Repeat briefing reads
 - Alert click rate (on-chain behavior)
-- Repeat visits from SEO landing pages (GEO-optimized)
+- Repeat visits from SEO signup entry pages (GEO-optimized)
 - Returning user rate
 - Wallet holder retention rate (on-chain)
 - Governance participation percentage
@@ -256,8 +256,8 @@ These are the top-line metrics the team should review every week:
 - Keyword cluster performance by region (crypto-specific)
 - Page type performance: blog vs tool vs answer vs comparison
 - Indexation coverage for 100-page roadmap
-- Top landing pages from India keyword map (crypto-specific)
-- Top landing pages from US keyword map (crypto-specific)
+- Top signup entry pages from India keyword map (crypto-specific)
+- Top signup entry pages from US keyword map (crypto-specific)
 - Non-branded vs branded traffic split
 - Schema markup coverage (FAQ, article, how-to)
 - E-E-A-T compliance score
@@ -368,7 +368,7 @@ Show:
 - traffic by channel
 - signup by channel
 - CAC by channel
-- best landing pages
+- best signup entry pages
 - best content posts
 - AI citation / mention trends
 
@@ -376,7 +376,7 @@ Show:
 
 Show:
 
-- landing page conversion rate
+- signup entry conversion rate
 - signup completion rate
 - lead magnet conversion rate
 - trial start rate
@@ -418,7 +418,7 @@ Show:
 These are working targets, not promises. Adjust by region and channel quality.
 
 - Organic traffic growth: 20-30% month-over-month after week 4
-- Signup conversion rate: 3-8% depending on landing page (wallet connections)
+- Signup conversion rate: 3-8% depending on signup entry page (wallet connections)
 - Email opt-in rate: 20-40% on lead magnets (crypto intelligence)
 - Activation rate: 30-50% of signups (7-9 touchpoint journey)
 - Referral contribution: 5-15% of total signups by day 90 (asymmetric incentives)
@@ -429,7 +429,7 @@ These are working targets, not promises. Adjust by region and channel quality.
 
 ## Funnel health rules
 
-- If traffic is high but signups are low, fix landing pages (add E-E-A-T signals, trust markers)
+- If traffic is high but signups are low, fix signup entry pages (add E-E-A-T signals, trust markers)
 - If signups are high but activation is low, fix onboarding (address 7-9 touchpoint journey)
 - If activation is strong but retention is weak, improve ongoing value (demonstrated utility)
 - If organic is weak, increase content quality and distribution (GEO optimization)

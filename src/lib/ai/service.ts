@@ -26,7 +26,7 @@ import { calculateRiskRewardAsymmetry, formatRiskRewardContext } from "@/lib/eng
 import { classifyQuery } from "./query-classifier";
 import { AssetEnrichment } from "./types";
 import { calculateLLMCost } from "./cost-calculator";
-import { redis, getCache, setCache } from "@/lib/redis";
+import { redis, getCache, setCache, redisSetNX } from "@/lib/redis";
 import { compressKnowledgeContext } from "./compress";
 import { distillSessionNotes, getGlobalNotes, getSessionNotes } from "./memory";
 import { validateOutput, logValidationResult } from "./output-validation";
@@ -406,9 +406,9 @@ export async function generateLyraStream(
   const isMultiAssetMode = isCompareMode || isStressTestMode || isMacroResearchMode;
   const hasRichCompareContext = isCompareMode && Array.isArray(context.compareContext) && context.compareContext.length >= 2;
   const hasPortfolioContext = !!(
-    (context as unknown as Record<string, unknown>).portfolioHealth ||
-    (context as unknown as Record<string, unknown>).portfolioFragility ||
-    (context as unknown as Record<string, unknown>).portfolioSimulation
+    context.portfolioHealth ||
+    context.portfolioFragility ||
+    context.portfolioSimulation
   );
   const responseMode: "default" | "compare" | "stress-test" | "portfolio" | "macro-research" = isCompareMode
     ? "compare"
@@ -451,15 +451,15 @@ export async function generateLyraStream(
     ? extractMentionedSymbols([{ role: "user", content: query }])
     : [];
   let resolvedSymbol = context.symbol || "GLOBAL";
-  let resolvedAssetType = (context.assetType || "GLOBAL") as string;
-  let resolvedRegion: string | undefined = context.region as string | undefined;
+  let resolvedAssetType = context.assetType || "GLOBAL";
+  let resolvedRegion: string | undefined = context.region;
   if (!isTrivial && resolvedSymbol === "GLOBAL" && mentionedFromQuery.length > 0 && tier !== "SIMPLE") {
     resolvedSymbol = mentionedFromQuery[0];
     logger.info({ resolvedSymbol, from: "auto-detect" }, "Resolved asset from user message");
   }
   if (!isTrivial && resolvedSymbol === "GLOBAL" && !context.chatMode && tier !== "SIMPLE") {
-    const preferredRegion = typeof (context as Record<string, unknown>).region === "string"
-      ? String((context as Record<string, unknown>).region)
+    const preferredRegion = typeof context.region === "string"
+      ? context.region
       : undefined;
     const shortQueryAsset = await resolveAssetFromShortQuery(query, preferredRegion);
     if (shortQueryAsset) {
@@ -504,6 +504,34 @@ export async function generateLyraStream(
       awardXP(userId, "lyra_question", "Asked Lyra a question").catch((e: unknown) =>
         logger.warn({ err: sanitizeError(e) }, "XP award failed"),
       );
+
+      // Cache-hit cost tracking: estimate tokens so audit/billing doesn't report $0
+      // Input tokens estimated by tier (prompt not built yet at early hit point)
+      const earlyCacheDeployment = resolveGptDeployment(tierConfig.gpt54Role);
+      const estimatedInputTokens = tier === "SIMPLE" ? 1500 : tier === "MODERATE" ? 3500 : 5000;
+      const earlyCacheInputTokens = estimatedInputTokens;
+      const earlyCacheOutputTokens = Math.round(earlyCacheText.length / 4);
+      const earlyCacheCostBreakdown = calculateLLMCost({
+        model: earlyCacheDeployment,
+        inputTokens: earlyCacheInputTokens,
+        outputTokens: earlyCacheOutputTokens,
+        cachedInputTokens: earlyCacheInputTokens,
+      });
+      storeConversationLog(
+        userId, query, earlyCacheText, earlyCacheDeployment,
+        {
+          tokensUsed: earlyCacheInputTokens + earlyCacheOutputTokens,
+          inputTokens: earlyCacheInputTokens,
+          outputTokens: earlyCacheOutputTokens,
+          cachedInputTokens: earlyCacheInputTokens,
+          reasoningTokens: 0,
+          totalCost: earlyCacheCostBreakdown.totalCost,
+        },
+        tier, 1, false,
+      ).catch((e: unknown) =>
+        logger.warn({ err: sanitizeError(e), userId }, "Failed to log early-cache-hit interaction"),
+      );
+
       return {
         result: { textStream: singleChunkStream(earlyCacheText) },
         sources: cachedSources ?? [],
@@ -548,15 +576,7 @@ export async function generateLyraStream(
   // Plain setCache always overwrites — it cannot detect a pre-existing key.
   // redis.set with nx:true returns "OK" only when the key was absent; null when already set.
   const inFlightKey = `lyra:inflight:${userId}`;
-  let lockAcquired = false;
-  try {
-    const nx = await (redis as unknown as { set(k: string, v: string, opts: { nx: boolean; ex: number }): Promise<string | null> })
-      .set(inFlightKey, "1", { nx: true, ex: 60 });
-    lockAcquired = nx === "OK";
-  } catch {
-    // Redis unavailable — allow the request through rather than blocking all users.
-    lockAcquired = true;
-  }
+  const lockAcquired = await redisSetNX(inFlightKey, 60);
   if (!lockAcquired) {
     logger.warn({ userId }, "In-flight request already active — rejecting duplicate");
     throw new Error("A request is already in progress. Please wait for it to complete before sending another.");
@@ -655,12 +675,10 @@ export async function generateLyraStream(
             fiftyTwoWeekHigh: true, fiftyTwoWeekLow: true, lastPriceUpdate: true,
             performanceData: true, signalStrength: true,
             scoreDynamics: includeScoreDynamics, factorAlignment: includeScoreDynamics,
-            peRatio: true, priceToBook: true, roe: true, eps: true,
-            dividendYield: true, marketCap: true, metadata: true, type: true, region: true,
+            marketCap: true, metadata: true, type: true, region: true,
             description: true, industry: true, sector: true,
-            financials: deepFields, topHoldings: deepFields,
-            cryptoIntelligence: deepFields, fundPerformanceHistory: deepFields,
-            category: true, fundHouse: true, nav: true, currency: true,
+            cryptoIntelligence: deepFields,
+            category: true, currency: true,
             coingeckoId: true,
           };
 
@@ -669,7 +687,7 @@ export async function generateLyraStream(
             select: assetSelect,
           });
           if (asset) {
-            if (asset.price != null || asset.nav != null) {
+            if (asset.price != null) {
               priceData = asset;
             }
             assetEnrichment = {
@@ -677,21 +695,14 @@ export async function generateLyraStream(
               signalStrength: asset.signalStrength as Record<string, unknown> | null,
               scoreDynamics: asset.scoreDynamics as Record<string, unknown> | null,
               factorAlignment: asset.factorAlignment as Record<string, unknown> | null,
-              peRatio: asset.peRatio, priceToBook: asset.priceToBook,
-              roe: asset.roe, eps: asset.eps,
-              dividendYield: asset.dividendYield, marketCap: asset.marketCap,
+              marketCap: asset.marketCap,
               metadata: asset.metadata as Record<string, unknown> | null,
               type: asset.type,
               description: asset.description,
               industry: asset.industry,
               sector: asset.sector,
-              financials: asset.financials as Record<string, unknown> | null,
-              topHoldings: asset.topHoldings as Record<string, unknown> | null,
               cryptoIntelligence: asset.cryptoIntelligence as Record<string, unknown> | null,
-              fundPerformanceHistory: asset.fundPerformanceHistory as Record<string, unknown> | null,
               category: asset.category,
-              fundHouse: asset.fundHouse,
-              nav: asset.nav,
               currency: asset.currency,
               coingeckoId: asset.coingeckoId,
               region: asset.region,
@@ -877,8 +888,8 @@ export async function generateLyraStream(
           try {
             const searchRegion = inferSearchRegion(
               resolvedSymbol,
-              typeof (context as Record<string, unknown>).region === "string"
-                ? String((context as Record<string, unknown>).region)
+              typeof context.region === "string"
+                ? context.region
                 : assetEnrichment?.region ?? undefined,
             );
             // Tavily handles domain steering natively via includeDomains + topic:"finance"
@@ -954,7 +965,7 @@ export async function generateLyraStream(
       parallelTasks.push(
         (async () => {
           try {
-            const region = (context as unknown as Record<string, unknown>).region as string || "US";
+            const region = context.region || "US";
             const analogResult = await findHistoricalAnalogs(region);
             
             let riskRewardStr = "";
@@ -1062,7 +1073,7 @@ logRetrievalMetric({
 
   // 1.8 Build Final Context (Compressed — saves ~2000 tokens vs raw JSON)
   // Override symbol/assetType in context when auto-detected from user message
-  const enrichedContext = { ...(context as unknown as Record<string, unknown>) };
+  const enrichedContext: Record<string, unknown> = { ...context };
   if (resolvedSymbol !== (context.symbol || "GLOBAL")) {
     enrichedContext.symbol = resolvedSymbol;
     if (resolvedAssetType !== "GLOBAL") {
@@ -1328,6 +1339,43 @@ logRetrievalMetric({
   if (cachedGptText) {
     emitCacheEvent({ modelFamily: "gpt", operation: "read", outcome: "hit" });
     logger.info({ tier, cacheKey: gptCacheKey }, "GPT response cache HIT");
+
+    // Cache-hit cost tracking: estimate tokens from cached text so audit/billing
+    // doesn't report $0. Use the deployment that would have been used for this tier.
+    const cacheHitDeployment = resolveGptDeployment(tierConfig.gpt54Role);
+    const cacheHitInputTokens = Math.round(staticPrompt.length / 4);
+    const cacheHitOutputTokens = Math.round(cachedGptText.length / 4);
+    const cacheHitCostBreakdown = calculateLLMCost({
+      model: cacheHitDeployment,
+      inputTokens: cacheHitInputTokens,
+      outputTokens: cacheHitOutputTokens,
+      cachedInputTokens: cacheHitInputTokens, // entire prompt was cached
+    });
+    logger.info({
+      tier, tokens: cacheHitInputTokens + cacheHitOutputTokens,
+      inputTokens: cacheHitInputTokens, outputTokens: cacheHitOutputTokens,
+      cachedTokens: cacheHitInputTokens, cost: cacheHitCostBreakdown.totalCost,
+      model: cacheHitDeployment,
+    }, "LLM generation finished (cache hit)");
+
+    storeConversationLog(
+      userId, query, cachedGptText, cacheHitDeployment,
+      {
+        tokensUsed: cacheHitInputTokens + cacheHitOutputTokens,
+        inputTokens: cacheHitInputTokens,
+        outputTokens: cacheHitOutputTokens,
+        cachedInputTokens: cacheHitInputTokens,
+        reasoningTokens: 0,
+        inputCost: cacheHitCostBreakdown.inputCost,
+        outputCost: cacheHitCostBreakdown.outputCost,
+        cachedInputCost: cacheHitCostBreakdown.cachedInputCost,
+        totalCost: cacheHitCostBreakdown.totalCost,
+      },
+      tier, 1, false,
+    ).catch((e: unknown) =>
+      logger.warn({ err: sanitizeError(e), userId }, "Failed to log cache-hit interaction"),
+    );
+
     return { result: { textStream: singleChunkStream(cachedGptText) }, sources: finalSources, remainingCredits, contextTruncated: costCeiling.exceeded };
   }
   emitCacheEvent({ modelFamily: "gpt", operation: "read", outcome: "miss" });
@@ -1352,8 +1400,11 @@ logRetrievalMetric({
   // B1-FIX: Enforce latency budget with AbortController — prevents indefinite hangs.
   // Budget × 1.5 gives the model grace to finish a nearly-complete stream without
   // cutting off responses that are just barely over budget.
+  // Multi-asset modes (compare/stress-test/macro-research) need RAG + web search +
+  // cross-sector before LLM, so the effective floor is higher — use 2.0× for those.
   const latencyAbortController = new AbortController();
-  const latencyAbortTimeoutMs = tierConfig.latencyBudgetMs * 1.5;
+  const latencyAbortMultiplier = isMultiAssetMode ? 2.0 : 1.5;
+  const latencyAbortTimeoutMs = tierConfig.latencyBudgetMs * latencyAbortMultiplier;
   const latencyAbortTimer = setTimeout(() => {
     logger.warn({ tier, budgetMs: tierConfig.latencyBudgetMs, abortMs: latencyAbortTimeoutMs }, "Latency budget exceeded — aborting stream");
     latencyAbortController.abort();

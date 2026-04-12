@@ -25,7 +25,7 @@ export function StatChip({ value, label, variant = "default", className }: StatC
   return (
     <div
       className={cn(
-        "inline-flex flex-col items-center justify-center rounded-2xl border px-3 py-2 backdrop-blur-sm min-w-[60px]",
+        "inline-flex shrink-0 flex-col items-center justify-center rounded-2xl border px-3 py-2 backdrop-blur-sm min-w-[60px]",
         CHIP_VARIANTS[variant],
         className,
       )}
@@ -73,7 +73,7 @@ export function PageHeader({
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(245,158,11,0.06),transparent_60%)]" />
 
       <div className="relative px-4 sm:px-5 md:px-6 py-4">
-        <div className="flex flex-wrap items-center gap-3 min-w-0">
+        <div className="flex flex-wrap items-center gap-3 min-w-0 overflow-hidden">
           {/* Icon */}
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-[0_0_12px_rgba(245,158,11,0.15)]">
             {icon}
@@ -91,9 +91,9 @@ export function PageHeader({
             </h1>
           </div>
 
-          {/* Chips row */}
+          {/* Chips row — full width on mobile, inline on md+ */}
           {chips && (
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <div className="w-full md:w-auto md:flex-none flex items-center gap-2 overflow-x-auto scrollbar-hide pb-0.5">
               {chips}
             </div>
           )}

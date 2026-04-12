@@ -232,7 +232,7 @@ export default function AdminOverviewPage() {
             icon={Database}
           />
           <KPICard
-            label="Assets Tracked"
+            label="Crypto Assets Tracked"
             value={data.totalAssets?.toLocaleString() ?? 0}
             icon={Database}
             subtitle="In universe"
@@ -312,7 +312,7 @@ export default function AdminOverviewPage() {
             <StatRow label="AI Requests Today" value={(data.aiRequestsToday ?? 0).toLocaleString()} />
             <StatRow label="AI Requests (7d)" value={(data.aiRequestsLast7d ?? 0).toLocaleString()} />
             <StatRow label="Lifetime AI Requests" value={(data.totalAIRequests ?? 0).toLocaleString()} />
-            <StatRow label="Assets Tracked" value={(data.totalAssets ?? 0).toLocaleString()} />
+            <StatRow label="Crypto Assets Tracked" value={(data.totalAssets ?? 0).toLocaleString()} />
           </div>
         </div>
       </div>

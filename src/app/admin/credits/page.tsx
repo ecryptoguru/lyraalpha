@@ -72,7 +72,8 @@ function BulkCreditAward({ onAwarded }: { onAwarded: () => Promise<unknown> | un
 
       const payload = await response.json();
       setUsers(Array.isArray(payload.users) ? payload.users : []);
-    } catch {
+    } catch (err) {
+      console.error("Failed to load users:", err);
     }
   };
 

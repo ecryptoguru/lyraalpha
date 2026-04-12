@@ -6,6 +6,7 @@ export type DashboardRouteKey =
   | "lyra"
   | "portfolio"
   | "discovery"
+  | "sector-pulse"
   | "narratives"
   | "compare"
   | "timeline"
@@ -40,12 +41,13 @@ const formatUppercase = (segment: string) => decodeURIComponent(segment).toUpper
 
 export const DASHBOARD_ROUTES: DashboardRouteMeta[] = [
   // ── Main nav (flat, ordered by usage frequency) ──────────────────────────
-  { key: "dashboard",  title: "Home",             url: "/dashboard",             section: "Main",     navOnly: true },
+  { key: "dashboard",  title: "Dashboard",        url: "/dashboard",             section: "Main" },
   { key: "lyra",       title: "Ask Lyra",          url: "/dashboard/lyra",        section: "Main",     navOnly: true },
   { key: "macro",      title: "Research",          url: "/dashboard/macro",       section: "Main",     navOnly: true },
   { key: "assets",     title: "Asset Intel",      url: "/dashboard/assets",      section: "Main",     navOnly: true, detailSegmentFormatter: formatUppercase },
   { key: "portfolio",  title: "Portfolio Intel",   url: "/dashboard/portfolio",   section: "Main",     navOnly: true },
   { key: "discovery",  title: "Multibagger Radar", url: "/dashboard/discovery",   section: "Main",     navOnly: true, detailSegmentFormatter: formatTitleWords },
+  { key: "sector-pulse", title: "Sector Pulse",     url: "/dashboard/sector-pulse", section: "Main",   navOnly: true },
   { key: "compare",    title: "Compare Assets",    url: "/dashboard/compare",     section: "Main",     navOnly: true, eliteOnly: true },
   { key: "timeline",   title: "Market Events",     url: "/dashboard/timeline",    section: "Main",     navOnly: true },
   { key: "watchlist",  title: "Watchlist",         url: "/dashboard/watchlist",   section: "Main",     navOnly: true },

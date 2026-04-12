@@ -21,7 +21,12 @@ export async function POST(req: NextRequest) {
       return apiError("Unauthorized", 401);
     }
 
-    const body = await req.json();
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return apiError("Request body must be valid JSON", 400);
+    }
     const parsed = LearningXPSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(

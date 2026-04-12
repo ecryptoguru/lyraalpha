@@ -390,7 +390,7 @@ export default function AdminUsagePage() {
 
         {/* Region Distribution */}
         <div className="rounded-2xl border border-white/5 bg-card/80 backdrop-blur-xl p-5">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Region Preference</h3>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">User Region Preference</h3>
           {chartsReady && regionData.length > 0 ? (
             <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">

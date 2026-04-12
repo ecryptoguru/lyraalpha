@@ -1,8 +1,8 @@
 /**
- * Prompt Pipeline Real-World Audit Harness v10
+ * Prompt Pipeline Real-World Audit Harness v11
  * ──────────────────────────────────────────────
  * Validates latency, cost, quality, and word-count targets across ALL tiers,
- * plans, and the multi-asset chatMode (compare / stress-test).
+ * plans, and the multi-asset chatMode (compare / stress-test / macro-research).
  *
  * Current routing (from config.ts — all orchestrationMode=single, reasoningEffort=none):
  *   STARTER     SIMPLE → nano · single   MODERATE → nano · single   COMPLEX → mini · single
@@ -29,6 +29,11 @@
  *   - ENTERPRISE COMPLEX word target corrected: 0.430 wbm → 950w
  *   - Multi-asset chatMode target corrected: 1000w (was stale 740w)
  *   - Header routing comment updated: all paths single+reasoningEffort:none
+ * v11 updates:
+ *   - Added macro-research chatMode test cases (ELITE + PRO)
+ *   - macro-research inherits ELITE COMPLEX specs like compare/stress-test
+ *   - WORD_TARGETS: MACRO-RESEARCH entry added (1000w, tolerance 0.50)
+ *   - NewsData.io integration: crypto news context now from NewsData.io endpoint
  */
 
 import { generateLyraStream } from "@/lib/ai/service";
@@ -76,10 +81,11 @@ const WORD_TARGETS: Record<string, Record<string, { target: number; tolerance: n
   // Audit Mar-24: macro-to-micro queries average 1318w (30-40% over wbm). Tolerance widened to 0.50
   // to reflect legitimate over-depth on macro family without generating false WARN/FAIL verdicts.
   ENTERPRISE: { SIMPLE: { target: 450, tolerance: 0.55 }, MODERATE: { target: 800, tolerance: 0.40 }, COMPLEX: { target: 950, tolerance: 0.50 } },
-  // Multi-asset mode: compare/stress-test receive ELITE COMPLEX specs (full model + RAG + web search)
+  // Multi-asset mode: compare/stress-test/macro-research receive ELITE COMPLEX specs (full model + RAG + web search)
   // Inherits ELITE COMPLEX target of 1000w; tolerance wide for structural variation
-  COMPARE:       { COMPLEX: { target: 1000, tolerance: 0.50 } },
-  "STRESS-TEST": { COMPLEX: { target: 1000, tolerance: 0.50 } },
+  COMPARE:         { COMPLEX: { target: 1000, tolerance: 0.50 } },
+  "STRESS-TEST":   { COMPLEX: { target: 1000, tolerance: 0.50 } },
+  "MACRO-RESEARCH": { COMPLEX: { target: 1000, tolerance: 0.50 } },
 };
 
 interface PromptTestCase {
@@ -243,6 +249,39 @@ const PROMPT_MATRIX: PromptTestCase[] = [
     },
     optimizationTest: "STRESS_TEST_MODE",
     wordBudgetKey: "STRESS-TEST",
+  },
+
+  // ── v11: MACRO-RESEARCH CHATMODE ──────────────────────────────────────────────
+  // macro-research receives ELITE COMPLEX specs (like compare/stress-test)
+  {
+    id: "macro-research-elite",
+    plan: "ELITE",
+    tier: "COMPLEX",
+    family: "macro-research-mode",
+    query: "Research the current macro landscape: GDP trends, inflation trajectory, Fed policy outlook, and how each factor cascades into crypto sector allocation. Provide a regime-anchored investment thesis with specific crypto sector picks.",
+    context: {
+      symbol: "GLOBAL",
+      assetType: "GLOBAL",
+      assetName: "Macro Research: Global Crypto Regime",
+      chatMode: "macro-research",
+    },
+    optimizationTest: "MACRO_RESEARCH_MODE",
+    wordBudgetKey: "MACRO-RESEARCH",
+  },
+  {
+    id: "macro-research-pro",
+    plan: "PRO",           // PRO user — should still get Elite COMPLEX via chatMode override
+    tier: "COMPLEX",
+    family: "macro-research-mode",
+    query: "Macro research: Analyze the current interest rate cycle, its impact on DeFi yields, and identify which crypto sectors benefit most from a rate-cutting regime. Include specific token recommendations.",
+    context: {
+      symbol: "GLOBAL",
+      assetType: "GLOBAL",
+      assetName: "Macro Research: Rate Cycle & DeFi",
+      chatMode: "macro-research",
+    },
+    optimizationTest: "MACRO_RESEARCH_MODE",
+    wordBudgetKey: "MACRO-RESEARCH",
   },
 
   // ── v9: LYRA WORKFLOW / PLATFORM KNOWLEDGE ─────────────────────────────────
@@ -894,7 +933,7 @@ async function runAudit() {
   writeFileSync(outPath, JSON.stringify({
     generatedAt: new Date().toISOString(),
     mode: writeAsBaseline ? "baseline" : "current",
-    auditVersion: "v10",
+    auditVersion: "v11",
     summary,
     latencyPercentiles,
     monthlyProjections,
@@ -1119,12 +1158,22 @@ async function runAudit() {
 
   // ─── New v9 optimization test breakdown ────────────────────────────────────
   const v9OptTests = ["ARCS_CONTEXT", "INDIA_MARKET", "MACRO_MICRO", "PLATFORM_KNOWLEDGE"];
+  const v11OptTests = ["MACRO_RESEARCH_MODE"];
   const newTests = Object.entries(summary.byOptimization).filter(([k]) => v9OptTests.includes(k));
+  const v11NewTests = Object.entries(summary.byOptimization).filter(([k]) => v11OptTests.includes(k));
   if (newTests.length > 0) {
     console.log(`\n${sep}`);
     console.log(`🆕  V9 NEW TEST GROUPS`);
     console.log(`${sep}`);
     for (const [o, s] of newTests) {
+      console.log(`  ${o.padEnd(22)} Q=${s.avgQuality.toFixed(1).padStart(5)} | $${s.totalCost.toFixed(5)} | ${s.count} tests`);
+    }
+  }
+  if (v11NewTests.length > 0) {
+    console.log(`\n${sep}`);
+    console.log(`🆕  V11 NEW TEST GROUPS (macro-research chatMode)`);
+    console.log(`${sep}`);
+    for (const [o, s] of v11NewTests) {
       console.log(`  ${o.padEnd(22)} Q=${s.avgQuality.toFixed(1).padStart(5)} | $${s.totalCost.toFixed(5)} | ${s.count} tests`);
     }
   }

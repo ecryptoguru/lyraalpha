@@ -9,7 +9,7 @@ This document is written for AI coding agents (Cursor/Windsurf/Copilot/etc.) so 
 - A **crypto-native discovery + intelligence dashboard** (on-chain data, DeFi metrics, network signals)
 - **Asset pages** with computed analytics/scores and AI summaries
 - **Lyra**: an AI analyst (crypto market intelligence)
-- **Myra**: a support agent (platform help) — available on both the public landing page and inside the authenticated dashboard
+- **Myra**: a support agent (platform help) — available both as a public support entry point and inside the authenticated dashboard
 - Plan-gated **Elite tools** (e.g., Compare Assets, Shock Simulator)
 - A Prisma/Postgres-backed data layer, Redis/Upstash caching + rate limiting, and Clerk auth
 - A **public blog system** with hybrid static + DB posts, AMI 2.0 webhook bridge, and QStash-scheduled email digest
@@ -70,9 +70,9 @@ The following routes are explicitly included in `isPublicApiRoute` in `src/proxy
 - `/api/share(.*)`
 - `/api/waitlist(.*)`
 - `/api/prelaunch/validate-coupon`
-- `/api/support/public-chat` — **Myra public landing page endpoint**
+- `/api/support/public-chat` — **Myra public support entry point endpoint**
 
-**Do not remove `/api/support/public-chat` from `isPublicApiRoute`.** Removing it will cause the landing page Myra widget to return 401 Unauthorized for all unauthenticated visitors.
+**Do not remove `/api/support/public-chat` from `isPublicApiRoute`.** Removing it will cause the public support Myra widget to return 401 Unauthorized for all unauthenticated visitors.
 
 ### 3.4 Plan gating
 
@@ -535,7 +535,7 @@ Persona injection note:
 
 ### 9.4 Support / Myra surfaces
 
-- Public landing page Myra widget: `src/components/landing/public-myra-widget.tsx` → `PublicMyraPanel`
+- Public support entry-point Myra widget: `src/components/landing/public-myra-widget.tsx` → `PublicMyraPanel`
 - Public API endpoint: `src/app/api/support/public-chat/route.ts` (in `isPublicApiRoute` — no auth required)
 - Dashboard Myra widget: `src/components/dashboard/live-chat-widget.tsx`
 - Dashboard Myra bubble wrapper: `src/components/dashboard/live-chat-bubble.tsx` (renders `LiveChatWidget` in `fixed bottom-6 right-4 z-50` when open)

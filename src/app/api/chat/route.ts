@@ -39,7 +39,12 @@ export async function POST(req: NextRequest) {
     }
     const rateLimitHeaders = success?.headers;
 
-    const body = await req.json();
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return apiError("Request body must be valid JSON", 400);
+    }
     const validation = ChatMessageSchema.safeParse(body);
 
     if (!validation.success) {
@@ -171,9 +176,8 @@ export async function POST(req: NextRequest) {
     return response;
 
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to process chat request";
     logger.error({ err: sanitizeError(error) }, "Chat request failed");
-    return apiError(message, 500);
+    return apiError("Failed to process chat request", 500);
   } finally {
     logger.info({ duration: timer.endFormatted() }, "Chat request completed");
   }

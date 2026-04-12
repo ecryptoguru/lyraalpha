@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAdminEngines, useAdminRegime } from "@/hooks/use-admin";
-import { Loader2, ShieldAlert, Cpu, Target, Layers, Activity, TrendingUp, AlertTriangle, Clock } from "lucide-react";
+import { Loader2, ShieldAlert, Cpu, Target, Layers, Activity, TrendingUp, AlertTriangle, Clock, Shield, Radio, Users, Droplets } from "lucide-react";
 import dynamic from "next/dynamic";
 import {
   LineChart,
@@ -173,6 +173,95 @@ function EnginesTab({ data }: { data: Awaited<ReturnType<typeof useAdminEngines>
   );
 }
 
+const CRYPTO_INTEL_COLORS: Record<string, string> = {
+  NETWORK_ACTIVITY: "#3b82f6",
+  HOLDER_STABILITY: "#22c55e",
+  LIQUIDITY_RISK: "#ef4444",
+  ENHANCED_TRUST: "#06b6d4",
+};
+
+const SIGNAL_WEIGHT_COLORS: Record<string, string> = {
+  HIGH: "#22c55e",
+  MEDIUM: "#f59e0b",
+  LOW: "#ef4444",
+  NONE: "#64748b",
+};
+
+function CryptoIntelTab({ data }: { data: Awaited<ReturnType<typeof useAdminEngines>['data']> }) {
+  if (!data) return null;
+  const ci = data.cryptoIntelligenceStats;
+  if (!ci) {
+    return (
+      <div className="rounded-2xl border border-white/5 bg-card/80 backdrop-blur-xl p-8 text-center">
+        <Shield className="h-8 w-8 mx-auto text-muted-foreground/40 mb-3" />
+        <p className="text-sm text-muted-foreground">No crypto intelligence data available yet.</p>
+        <p className="text-xs text-muted-foreground/60 mt-1">Data will appear once crypto assets have intelligence metadata populated.</p>
+      </div>
+    );
+  }
+
+  const coveragePct = ci.totalCryptoAssets > 0 ? Math.round((ci.assetsWithCryptoIntel / ci.totalCryptoAssets) * 100) : 0;
+
+  const intelMetrics = [
+    { label: "Network Activity", value: ci.avgNetworkActivity, icon: Radio, color: CRYPTO_INTEL_COLORS.NETWORK_ACTIVITY },
+    { label: "Holder Stability", value: ci.avgHolderStability, icon: Users, color: CRYPTO_INTEL_COLORS.HOLDER_STABILITY },
+    { label: "Liquidity Risk", value: ci.avgLiquidityRisk, icon: Droplets, color: CRYPTO_INTEL_COLORS.LIQUIDITY_RISK },
+    { label: "Enhanced Trust", value: ci.avgEnhancedTrust, icon: Shield, color: CRYPTO_INTEL_COLORS.ENHANCED_TRUST },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <MetricCard label="Coverage" value={`${coveragePct}%`} icon={Target} color={coveragePct >= 80 ? "#22c55e" : coveragePct >= 50 ? "#f59e0b" : "#ef4444"} />
+        <MetricCard label="Assets with Intel" value={ci.assetsWithCryptoIntel.toLocaleString()} icon={Shield} color="#06b6d4" />
+        <MetricCard label="Total Crypto Assets" value={ci.totalCryptoAssets.toLocaleString()} icon={Cpu} />
+        <MetricCard label="Avg Trust Score" value={ci.avgEnhancedTrust.toFixed(1)} icon={Shield} color={ci.avgEnhancedTrust >= 60 ? "#22c55e" : ci.avgEnhancedTrust >= 40 ? "#f59e0b" : "#ef4444"} />
+      </div>
+
+      {/* Intelligence Score Averages */}
+      <div className="rounded-2xl border border-white/5 bg-card/80 backdrop-blur-xl p-5">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+          <Shield className="h-3.5 w-3.5" />Crypto Intelligence Score Averages
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {intelMetrics.map((m) => (
+            <div key={m.label} className="rounded-xl border border-border/30 bg-muted/20 p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{m.label}</span>
+                <m.icon className="h-3.5 w-3.5" style={{ color: m.color }} />
+              </div>
+              <div className="text-2xl font-bold" style={{ color: m.color }}>{m.value.toFixed(1)}</div>
+              <div className="w-full bg-muted/30 rounded-full h-1.5">
+                <div className="h-1.5 rounded-full" style={{ width: `${Math.min(m.value, 100)}%`, background: m.color, opacity: 0.7 }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Signal Weight Breakdown */}
+      {ci.signalWeightBreakdown.length > 0 && (
+        <div className="rounded-2xl border border-white/5 bg-card/80 backdrop-blur-xl p-5">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Signal Weight Distribution</h3>
+          <div className="space-y-3">
+            {ci.signalWeightBreakdown.map((sw: { weight: string; count: number }) => (
+              <div key={sw.weight} className="flex items-center gap-3">
+                <div className="w-2.5 h-2.5 rounded-full" style={{ background: SIGNAL_WEIGHT_COLORS[sw.weight] || "#64748b" }} />
+                <span className="text-xs font-bold text-foreground w-20">{sw.weight}</span>
+                <div className="flex-1 bg-muted/30 rounded-full h-2">
+                  <div className="h-2 rounded-full" style={{ width: `${ci.totalCryptoAssets > 0 ? (sw.count / ci.totalCryptoAssets) * 100 : 0}%`, background: SIGNAL_WEIGHT_COLORS[sw.weight] || "#64748b", opacity: 0.7 }} />
+                </div>
+                <span className="text-xs text-muted-foreground w-16 text-right">{sw.count} assets</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function RegimeTab({ data }: { data: Awaited<ReturnType<typeof useAdminRegime>['data']> }) {
   if (!data) return null;
 
@@ -200,7 +289,7 @@ function RegimeTab({ data }: { data: Awaited<ReturnType<typeof useAdminRegime>['
           icon={TrendingUp}
         />
         <MetricCard
-          label="VIX Value"
+          label="Volatility Score"
           value={data.currentRegime?.vixValue?.toFixed(1) ?? "—"}
           icon={AlertTriangle}
         />
@@ -303,10 +392,10 @@ function RegimeTab({ data }: { data: Awaited<ReturnType<typeof useAdminRegime>['
         </div>
       )}
 
-      {/* Cross-Sector Correlation */}
+      {/* Cross-Asset Correlation */}
       {data.crossSectorCorrelation && (
         <div className="rounded-2xl border border-white/5 bg-card/80 backdrop-blur-xl p-5">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Cross-Sector Correlation</h3>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Cross-Asset Correlation</h3>
           <div className="grid grid-cols-3 gap-4">
             <div className="rounded-xl border border-border/30 bg-muted/20 p-3 space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Regime</span>
@@ -341,12 +430,12 @@ function RegimeTab({ data }: { data: Awaited<ReturnType<typeof useAdminRegime>['
 }
 
 export default function AdminEnginesRegimePage() {
-  const [tab, setTab] = useState<"engines" | "regime">("engines");
+  const [tab, setTab] = useState<"engines" | "regime" | "crypto-intel">("engines");
   const { data: enginesData, error: enginesError, isLoading: enginesLoading } = useAdminEngines();
   const { data: regimeData, error: regimeError, isLoading: regimeLoading } = useAdminRegime();
 
-  const isLoading = tab === "engines" ? enginesLoading : regimeLoading;
-  const error = tab === "engines" ? enginesError : regimeError;
+  const isLoading = tab === "regime" ? regimeLoading : enginesLoading;
+  const error = tab === "regime" ? regimeError : enginesError;
 
   if (isLoading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   if (error) return <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3"><ShieldAlert className="h-8 w-8 text-destructive" /><p className="text-sm text-muted-foreground">Failed to load data.</p></div>;
@@ -360,11 +449,14 @@ export default function AdminEnginesRegimePage() {
         </div>
         <div className="flex items-center gap-2">
           <TabButton active={tab === "engines"} onClick={() => setTab("engines")} label="Engines" icon={Cpu} />
+          <TabButton active={tab === "crypto-intel"} onClick={() => setTab("crypto-intel")} label="Crypto Intel" icon={Shield} />
           <TabButton active={tab === "regime"} onClick={() => setTab("regime")} label="Regime" icon={Activity} />
         </div>
       </div>
 
-      {tab === "engines" ? <EnginesTab data={enginesData} /> : <RegimeTab data={regimeData} />}
+      {tab === "engines" && <EnginesTab data={enginesData} />}
+      {tab === "crypto-intel" && <CryptoIntelTab data={enginesData} />}
+      {tab === "regime" && <RegimeTab data={regimeData} />}
     </div>
   );
 }

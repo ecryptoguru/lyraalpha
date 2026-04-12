@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useAdminInfrastructure } from "@/hooks/use-admin";
-import { Loader2, ShieldAlert, Server, Database, HardDrive, Gauge } from "lucide-react";
+import { Loader2, ShieldAlert, Server, Database, HardDrive, Gauge, RefreshCw, AlertTriangle, CheckCircle2 } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -42,6 +42,12 @@ export default function AdminInfrastructurePage() {
     name: table,
     count: count as number,
   }));
+
+  const csh = data.cryptoSyncHealth;
+  const cgSync = csh?.lastCoinGeckoSync ? new Date(csh.lastCoinGeckoSync) : null;
+  const ndSync = csh?.lastNewsDataSync ? new Date(csh.lastNewsDataSync) : null;
+  const cgAgeH = csh?.lastCoinGeckoSyncAgeH ?? null;
+  const ndAgeH = csh?.lastNewsDataSyncAgeH ?? null;
 
   return (
     <div className="space-y-6">
@@ -102,6 +108,52 @@ export default function AdminInfrastructurePage() {
           <span>100%</span>
         </div>
       </div>
+
+      {/* Crypto Sync Health */}
+      {data.cryptoSyncHealth && (
+        <div className="rounded-2xl border border-white/5 bg-card/80 backdrop-blur-xl p-5">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4 flex items-center gap-2">
+            <RefreshCw className="h-3.5 w-3.5" />Crypto Data Sync Health
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <MetricCard
+              label="CoinGecko Last Sync"
+              value={cgSync ? cgSync.toLocaleTimeString() : "Never"}
+              icon={RefreshCw}
+              color={cgAgeH !== null && cgAgeH < 24 ? "#22c55e" : "#ef4444"}
+              subtitle={cgAgeH !== null ? `${cgAgeH}h ago` : "No sync recorded"}
+            />
+            <MetricCard
+              label="NewsData Last Sync"
+              value={ndSync ? ndSync.toLocaleTimeString() : "Never"}
+              icon={RefreshCw}
+              color={ndAgeH !== null && ndAgeH < 24 ? "#22c55e" : "#f59e0b"}
+              subtitle={ndAgeH !== null ? `${ndAgeH}h ago` : "No events recorded"}
+            />
+            <MetricCard
+              label="Fresh Assets"
+              value={data.cryptoSyncHealth.freshAssetCount?.toLocaleString() ?? 0}
+              icon={CheckCircle2}
+              color="#22c55e"
+              subtitle="Price updated <24h ago"
+            />
+            <MetricCard
+              label="Stale Assets"
+              value={data.cryptoSyncHealth.staleAssetCount?.toLocaleString() ?? 0}
+              icon={AlertTriangle}
+              color={data.cryptoSyncHealth.staleAssetCount > 0 ? "#f59e0b" : "#22c55e"}
+              subtitle="Price >24h old"
+            />
+            <MetricCard
+              label="Freshness %"
+              value={`${data.cryptoSyncHealth.pctAssetsFresh}%`}
+              icon={Gauge}
+              color={data.cryptoSyncHealth.pctAssetsFresh >= 80 ? "#22c55e" : data.cryptoSyncHealth.pctAssetsFresh >= 50 ? "#f59e0b" : "#ef4444"}
+              subtitle={`${data.cryptoSyncHealth.totalCryptoAssets} total crypto assets`}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Database Table Counts */}
       <div className="rounded-2xl border border-white/5 bg-card/80 backdrop-blur-xl p-5">

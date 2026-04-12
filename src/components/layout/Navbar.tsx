@@ -9,10 +9,10 @@ import { NavbarSurface } from "@/components/layout/navbar-surface";
 export function Navbar() {
   return (
     <NavbarSurface>
-      <Link href="/" className="group flex min-w-0 items-center gap-3">
-        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3 dark:border-white/10 dark:bg-white/3">
+      <Link href="/dashboard" className="group flex min-w-0 items-center gap-3">
+        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3 sm:hidden dark:border-white/10 dark:bg-white/3">
           <Image
-            src="/logo.png"
+            src="/brand/lyraalpha-ai-symbol.svg"
             alt="LyraAlpha AI Logo"
             fill
             sizes="40px"
@@ -22,19 +22,20 @@ export function Navbar() {
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="truncate text-sm font-bold tracking-tight text-slate-900 sm:text-base dark:text-white">
-              LyraAlpha AI
-            </span>
-            <span className="hidden rounded-full border border-teal-400/30 bg-teal-50 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.24em] text-teal-700 sm:inline-flex dark:border-teal-400/25 dark:bg-teal-400/10 dark:text-teal-300">
+            <Image
+              src="/brand/lyraalpha-ai-logo-lockup.svg"
+              alt="LyraAlpha AI"
+              width={307}
+              height={95}
+              priority
+              className="hidden h-11 w-auto object-contain sm:block"
+            />
+            <span className="rounded-full border border-teal-400/30 bg-teal-50 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.24em] text-teal-700 dark:border-teal-400/25 dark:bg-teal-400/10 dark:text-teal-300">
               Beta
             </span>
           </div>
-          {/* Mobile: Beta badge below name */}
-          <span className="-ml-0.5 mt-0.5 inline-flex sm:hidden rounded-full border border-teal-400/30 bg-teal-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-[0.22em] text-teal-700 dark:border-teal-400/25 dark:bg-teal-400/10 dark:text-teal-300">
-            Beta
-          </span>
-          <p className="hidden mt-1.5 text-[10px] uppercase tracking-[0.3em] text-slate-400 sm:block dark:text-white/35">
-            Market intelligence for conviction
+          <p className="mt-1.5 text-[10px] uppercase tracking-[0.3em] text-slate-400 sm:hidden dark:text-white/35">
+            Crypto intelligence
           </p>
         </div>
       </Link>

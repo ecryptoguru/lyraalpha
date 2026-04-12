@@ -53,10 +53,25 @@ const mockPrisma = {
     updateMany: vi.fn(),
   },
   aIRequestLog: { deleteMany: vi.fn() },
+  lyraFeedback: { deleteMany: vi.fn() },
+  userMemoryNote: { deleteMany: vi.fn() },
   watchlistItem: { deleteMany: vi.fn() },
   portfolio: { deleteMany: vi.fn() },
   userPreference: { deleteMany: vi.fn(), upsert: vi.fn() },
+  notification: { deleteMany: vi.fn() },
   creditTransaction: { deleteMany: vi.fn() },
+  creditLot: { deleteMany: vi.fn() },
+  subscription: { deleteMany: vi.fn() },
+  billingAuditLog: { deleteMany: vi.fn() },
+  pointTransaction: { deleteMany: vi.fn() },
+  userProgress: { deleteMany: vi.fn() },
+  userBadge: { deleteMany: vi.fn() },
+  xPTransaction: { deleteMany: vi.fn() },
+  xPRedemption: { deleteMany: vi.fn() },
+  learningCompletion: { deleteMany: vi.fn() },
+  userSession: { deleteMany: vi.fn() },
+  userActivityEvent: { deleteMany: vi.fn() },
+  referral: { deleteMany: vi.fn() },
   supportMessage: { deleteMany: vi.fn() },
   supportConversation: { deleteMany: vi.fn() },
 };
@@ -76,6 +91,9 @@ vi.mock("@/lib/middleware/plan-gate", () => ({
 }));
 vi.mock("@/lib/auth", () => ({
   isPrivilegedEmail: vi.fn((email: string) => email.endsWith("@lyraalpha.com")),
+}));
+vi.mock("@/lib/services/credit.service", () => ({
+  grantCreditsInTransaction: vi.fn(),
 }));
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -124,7 +142,13 @@ describe("POST /api/webhooks/clerk", () => {
     mockPrisma.user.upsert.mockResolvedValue({ id: "user_abc", plan: "STARTER" });
     mockPrisma.user.findUnique.mockResolvedValue(null);
     mockPrisma.userPreference.upsert.mockResolvedValue({});
-    mockPrisma.$transaction.mockResolvedValue([]);
+    mockPrisma.$transaction.mockImplementation((arg: unknown) => {
+      // Array form (GDPR deletion) — just resolve
+      if (Array.isArray(arg)) return Promise.resolve([]);
+      // Callback form (credit grant) — execute the callback with a mock tx
+      if (typeof arg === "function") return arg(mockPrisma);
+      return Promise.resolve([]);
+    });
   });
 
   // ── Signature / config guards ──────────────────────────────────────────────
@@ -153,32 +177,34 @@ describe("POST /api/webhooks/clerk", () => {
 
   // ── user.created ─────────────────────────────────────────────────────────────
 
-  it("creates an ELITE user with 300 beta credits on user.created", async () => {
+  it("creates an ELITE user with zero balances on user.created (credits granted via transaction)", async () => {
     const event = makeUserEvent("user.created");
     mockVerify.mockReturnValue(event);
+    mockPrisma.user.findUnique.mockResolvedValue({ totalCreditsEarned: 0 });
     const { POST } = await import("./route");
     const res = await POST(makeRequest(event));
     expect(res.status).toBe(200);
     expect(mockPrisma.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ plan: "ELITE", credits: 300, bonusCreditsBalance: 300 }),
+        create: expect.objectContaining({ plan: "ELITE", credits: 0, bonusCreditsBalance: 0 }),
       }),
     );
   });
 
   // ── user.created — admin elevation ────────────────────────────────────────
 
-  it("admin email also gets ELITE plan + 300 beta credits on user.created", async () => {
+  it("admin email also gets ELITE plan on user.created", async () => {
     const event = makeUserEvent("user.created", {
       email_addresses: [{ id: "ea_1", email_address: "admin@lyraalpha.com" }],
     });
     mockVerify.mockReturnValue(event);
+    mockPrisma.user.findUnique.mockResolvedValue({ totalCreditsEarned: 0 });
     const { POST } = await import("./route");
     const res = await POST(makeRequest(event));
     expect(res.status).toBe(200);
     expect(mockPrisma.user.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
-        create: expect.objectContaining({ plan: "ELITE", credits: 300 }),
+        create: expect.objectContaining({ plan: "ELITE", credits: 0 }),
       }),
     );
   });

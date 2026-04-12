@@ -67,7 +67,7 @@ export function ReferralPanel() {
 
   const referralShare = buildReferralShareObject({
     title: "Give a friend an LyraAlpha head start",
-    href: "/",
+    href: "/dashboard",
     referralHref: data.referralLink,
     takeaway: "Share the product naturally first, then switch on invite mode when you want your personal referral link attached.",
     context: "Friends get 50 credits when they sign up. You get 75 credits after they start using the product.",

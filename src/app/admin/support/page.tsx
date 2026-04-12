@@ -135,7 +135,8 @@ export default function AdminSupportPage() {
         });
         setNextCursor(data.nextCursor ?? null);
       }
-    } catch {
+    } catch (err) {
+      console.error("Failed to fetch conversations:", err);
     } finally {
       if (cursor) {
         setLoadingMore(false);
@@ -164,7 +165,8 @@ export default function AdminSupportPage() {
         setReply("");
         fetchConversations();
       }
-    } catch {
+    } catch (err) {
+      console.error("Failed to send reply:", err);
     } finally {
       setSending(false);
     }
@@ -179,7 +181,8 @@ export default function AdminSupportPage() {
       if (res.ok) {
         fetchConversations();
       }
-    } catch {
+    } catch (err) {
+      console.error("Failed to resolve conversation:", err);
     }
   };
 

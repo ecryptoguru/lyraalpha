@@ -518,7 +518,8 @@ function LearnWhySection({ archetype }: { archetype: string }) {
 // ─── MiniSparkline Component ────────────────────────────────────────────────
 
 function MiniSparkline({ isPositive, seed }: { isPositive: boolean; seed: string }) {
-  const gradientId = React.useId();
+  const safeSeed = seed.replace(/[^a-zA-Z0-9]/g, "_");
+  const gradientId = `spark-${safeSeed}-${isPositive ? "p" : "n"}`;
   const pts = React.useMemo(() => {
     let state = 0;
     for (let i = 0; i < seed.length; i++) {

@@ -36,6 +36,12 @@ export interface LyraContext {
     factorAlignment?: Record<string, unknown> | null;
     performance?: Record<string, number | null>;
   }>;
+  /** Portfolio health data injected by dashboard context builder */
+  portfolioHealth?: unknown;
+  /** Portfolio fragility data injected by dashboard context builder */
+  portfolioFragility?: unknown;
+  /** Portfolio Monte Carlo simulation data injected by dashboard context builder */
+  portfolioSimulation?: unknown;
 }
 
 export interface ExplanationData {

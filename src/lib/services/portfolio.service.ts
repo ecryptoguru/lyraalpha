@@ -216,9 +216,7 @@ export async function computeAndStorePortfolioHealth(portfolioId: string): Promi
   let latestMarketRegime: { state: string } | null = null;
   if (portfolio.region) {
     try {
-      latestMarketRegime = await (prisma as unknown as {
-        marketRegime: { findFirst: (args: unknown) => Promise<{ state: string } | null> };
-      }).marketRegime.findFirst({
+      latestMarketRegime = await prisma.marketRegime.findFirst({
         where: { region: portfolio.region },
         orderBy: { date: "desc" },
         select: { state: true },

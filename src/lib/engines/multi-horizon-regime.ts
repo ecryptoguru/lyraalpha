@@ -6,6 +6,7 @@
 import { Prisma } from "@/generated/prisma/client";
 
 import { prisma } from "../prisma";
+import { createLogger } from "@/lib/logger";
 import {
   MarketContextSnapshot,
   MarketRegime,
@@ -14,6 +15,8 @@ import {
   MarketBreadth,
   LiquidityCondition,
 } from "./market-regime";
+
+const logger = createLogger({ service: "multi-horizon-regime" });
 
 export interface MultiHorizonRegimeData {
   current: MarketContextSnapshot;
@@ -118,7 +121,7 @@ function averageContexts(
 ): MarketContextSnapshot | null {
   if (contexts.length === 0) {
     // Graceful degradation instead of throwing
-    if (process.env.NODE_ENV === "development") console.warn("[Multi-Horizon] Attempted to average empty contexts");
+    logger.debug("Attempted to average empty contexts");
     return null;
   }
 

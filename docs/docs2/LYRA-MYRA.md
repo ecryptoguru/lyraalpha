@@ -194,7 +194,7 @@ She is responsible for:
 
 Myra operates in two contexts:
 
-**Public landing page (unauthenticated):** Myra is available to all visitors via the public Myra widget before sign-in. The `/api/support/public-chat` endpoint is explicitly included in `isPublicApiRoute` in `src/proxy.ts`, exempting it from Clerk auth middleware. This is fully operational — landing page visitors receive real AI-driven answers about the product, waitlist, early access, and how the platform works.
+**Public support entry point (unauthenticated):** Myra is available to all visitors via the public Myra widget before sign-in. The `/api/support/public-chat` endpoint is explicitly included in `isPublicApiRoute` in `src/proxy.ts`, exempting it from Clerk auth middleware. This is fully operational — visitors receive real AI-driven answers about the product, waitlist, early access, and how the platform works.
 
 **Authenticated dashboard:** The Myra chat panel is rendered by `LiveChatWidget` (`src/components/dashboard/live-chat-widget.tsx`), wrapped by `LiveChatBubble` (`src/components/dashboard/live-chat-bubble.tsx`). `LiveChatBubble` is mounted **outside** `SidebarInset` in `DashboardLayoutClient.tsx`. This is required because `SidebarInset` has `overflow-x-clip overflow-y-auto`, which clips `fixed`-positioned children to the scroll container rather than the viewport. Moving `LiveChatBubble` back inside `SidebarInset` will break its positioning.
 
@@ -231,7 +231,7 @@ Myra uses a response cache to avoid redundant LLM calls for identical support qu
 
 - Cache key: normalized query hash (stop-word removal + sorted tokens + SHA-256)
 - **4h TTL** for authenticated dashboard sessions
-- **8h TTL** for public landing page sessions
+- **8h TTL** for public support entry-point sessions
 - Cache checked before LLM call; cache written after successful stream
 
 ### 3.6 Myra Runtime Path
@@ -349,7 +349,7 @@ The moat is everything around the model:
 - premium workflow payloads that give Lyra structured computation-backed context to interpret
 - output contracts that enforce institutional-grade analytical structure
 - the safety infrastructure that makes both agents trustworthy
-- Myra's public-facing availability that converts landing page visitors with AI-driven answers before they ever sign in
+- Myra's public-facing availability that converts public support visitors with AI-driven answers before they ever sign in
 
 None of that is replicable by swapping models or copying prompts.
 

@@ -22,12 +22,21 @@ export async function POST(req: NextRequest) {
         select: { id: true, plan: true },
       });
 
-      await Promise.all(users.map((user) => resetMonthlyCredits(user.id)));
+      // Process in chunks to avoid exhausting the DB connection pool
+      const CHUNK_SIZE = 50;
+      let failedCount = 0;
+      for (let i = 0; i < users.length; i += CHUNK_SIZE) {
+        const chunk = users.slice(i, i + CHUNK_SIZE);
+        const results = await Promise.allSettled(
+          chunk.map((user) => resetMonthlyCredits(user.id)),
+        );
+        failedCount += results.filter((r) => r.status === "rejected").length;
+      }
 
       const proCount = users.filter((user) => user.plan === "PRO").length;
       const eliteCount = users.filter((user) => user.plan === "ELITE").length;
       const enterpriseCount = users.filter((user) => user.plan === "ENTERPRISE").length;
-      const resetCount = users.length;
+      const resetCount = users.length - failedCount;
       logger.info(
         { pro: proCount, elite: eliteCount, enterprise: enterpriseCount },
         "Monthly credits reset",

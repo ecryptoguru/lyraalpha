@@ -120,11 +120,11 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
   const cleanupMedia = useCallback(() => {
     mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
     mediaStreamRef.current = null;
-    try { inputWorkletRef.current?.disconnect(); } catch {}
-    try { inputSourceRef.current?.disconnect(); } catch {}
-    try { inputSilentGainRef.current?.disconnect(); } catch {}
-    try { inputAudioCtxRef.current?.close(); } catch {}
-    try { outputAudioCtxRef.current?.close(); } catch {}
+    try { inputWorkletRef.current?.disconnect(); } catch { /* already disconnected */ }
+    try { inputSourceRef.current?.disconnect(); } catch { /* already disconnected */ }
+    try { inputSilentGainRef.current?.disconnect(); } catch { /* already disconnected */ }
+    try { inputAudioCtxRef.current?.close(); } catch { /* already closed */ }
+    try { outputAudioCtxRef.current?.close(); } catch { /* already closed */ }
     inputWorkletRef.current = null;
     inputSourceRef.current = null;
     inputSilentGainRef.current = null;
@@ -149,8 +149,8 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
     clearSilenceTimer();
     const active = sessionRef.current;
     const pending = pendingSessionRef.current;
-    if (active) { try { active.close(); } catch {} sessionRef.current = null; }
-    if (pending && pending !== active) { try { pending.close(); } catch {} pendingSessionRef.current = null; }
+    if (active) { try { active.close(); } catch { /* session already closed */ } sessionRef.current = null; }
+    if (pending && pending !== active) { try { pending.close(); } catch { /* session already closed */ } pendingSessionRef.current = null; }
     emittedIds.current.clear();
     greetingResponsePendingRef.current = false;
     cleanupMedia();
@@ -598,7 +598,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
         greetingResponsePendingRef.current = false;
         setErrorMessage(msg ?? "Voice session error");
         setState("error");
-        try { session.close(); } catch {}
+        try { session.close(); } catch { /* session already closed */ }
         if (sessionRef.current === session) sessionRef.current = null;
         if (pendingSessionRef.current === session) pendingSessionRef.current = null;
         cleanupMedia();
@@ -613,7 +613,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       });
 
       if (pendingSessionRef.current !== session) {
-        try { session.close(); } catch {}
+        try { session.close(); } catch { /* session already closed */ }
         cleanupMedia();
         return;
       }
@@ -679,7 +679,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       session.close = () => {
         clearTimeout(greetingTimeout);
         clearTimeout(greetingPendingTimeout);
-        try { session.off("transport_event", onTransportEvent); } catch {}
+        try { session.off("transport_event", onTransportEvent); } catch { /* listener already removed */ }
         origClose();
       };
 

@@ -417,8 +417,8 @@ When marketing LyraAlpha, use proof in this order:
 
 Use this product story to power:
 
-- homepage copy
-- landing pages
+- dashboard copy
+- signup entry pages
 - onboarding messaging
 - blog posts
 - social content
@@ -521,7 +521,7 @@ Use this master knowledgebase to keep all marketing assets aligned.
 
 Recommended uses:
 
-- homepage copy
+- dashboard copy
 - campaign briefs
 - launch docs
 - sales and partnership outreach
@@ -567,7 +567,7 @@ These details matter because they shape what the product can honestly claim abou
 
 ## 18. Core product surfaces to market
 
-These are the main surfaces that should appear in homepage copy, launch messaging, demos, and content examples.
+These are the main surfaces that should appear in dashboard copy, launch messaging, demos, and content examples.
 
 ### Dashboard intelligence
 
@@ -786,7 +786,7 @@ Best proof:
 
 Use each channel for what it does best.
 
-### Website / landing pages
+### Website / signup entry pages
 
 - communicate the category
 - convert awareness into signups

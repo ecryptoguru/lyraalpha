@@ -88,9 +88,10 @@ export function hasFeatureAccess(plan: PlanTier, feature: EliteFeature): boolean
 /** Fetch user plan directly from DB. Returns STARTER as fallback. */
 export async function getUserPlan(userId: string): Promise<PlanTier> {
   // Audit/test override: LYRA_AUDIT_PLAN=STARTER|PRO|ELITE|ENTERPRISE bypasses DB lookup.
-  // Guarded to non-production only — prevents accidental plan override if env var is left set in prod.
+  // Only allowed in development/test — never in any Vercel environment (production or preview).
   if (process.env.LYRA_AUDIT_PLAN &&
-      (process.env.NODE_ENV !== "production" || process.env.VERCEL_ENV !== "production")) {
+      process.env.NODE_ENV !== "production" &&
+      !process.env.VERCEL_ENV) {
     return normalizePlanTier(process.env.LYRA_AUDIT_PLAN);
   }
 

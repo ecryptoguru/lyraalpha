@@ -156,9 +156,7 @@ function DashboardLayoutInner({
                 <span className="font-bold text-sm tracking-tight text-foreground/90">
                   {breadcrumbSegments.length > 0
                     ? breadcrumbSegments[breadcrumbSegments.length - 1].label
-                    : pathname === "/dashboard"
-                      ? "Dashboard"
-                      : "LyraAlpha AI"}
+                    : "LyraAlpha AI"}
                 </span>
               </div>
             </div>

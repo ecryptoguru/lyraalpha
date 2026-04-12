@@ -99,6 +99,7 @@ function readPersistedState(userId: string): PersistedLyraChatState | null {
       cacheScope: typeof parsed.cacheScope === "string" && parsed.cacheScope.length > 0 ? parsed.cacheScope : createCacheScope(),
     };
   } catch {
+    // Corrupted or outdated session data — discard silently
     return null;
   }
 }
@@ -279,6 +280,7 @@ class LyraChatSessionController {
         try {
           headerSources = JSON.parse(decodeURIComponent(sourcesHeader));
         } catch {
+          // Malformed sources header — fall back to empty
           headerSources = [];
         }
       }

@@ -88,21 +88,26 @@ export function safeJsonStringify(
 }
 
 /**
- * Deep clone an object using JSON serialization
- * This is a safe alternative to JSON.parse(JSON.stringify(value))
+ * Deep clone an object using structuredClone (structured-clone polyfill available in all modern runtimes).
+ * Falls back to JSON serialization if structuredClone fails (e.g. for non-cloneable values like functions).
  * @param value The value to clone
  * @returns Cloned value or null if cloning fails
  */
 export function safeDeepClone<T>(value: T): T | null {
   try {
-    return JSON.parse(JSON.stringify(value)) as T;
-  } catch (error) {
-    const classifiedError = classifyError(error);
-    logger.warn(
-      { type: classifiedError.type, message: classifiedError.message },
-      "Failed to deep clone value"
-    );
-    return null;
+    return structuredClone(value);
+  } catch {
+    // Fallback for values not supported by structuredClone (functions, DOM nodes, etc.)
+    try {
+      return JSON.parse(JSON.stringify(value)) as T;
+    } catch (error) {
+      const classifiedError = classifyError(error);
+      logger.warn(
+        { type: classifiedError.type, message: classifiedError.message },
+        "Failed to deep clone value"
+      );
+      return null;
+    }
   }
 }
 

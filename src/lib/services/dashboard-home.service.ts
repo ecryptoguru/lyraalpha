@@ -334,10 +334,12 @@ function selectDiversifiedDiscoveryItems<T extends {
   const selected: T[] = [];
   const seenArchetypes = new Set<string>();
   const seenTypes = new Set<string>();
+  let remaining = sorted.length;
 
   for (const item of sorted) {
+    remaining--;
     const shouldDiversify = !seenArchetypes.has(item.archetype) || !seenTypes.has(item.assetType);
-    if (shouldDiversify || selected.length + (sorted.length - sorted.indexOf(item)) <= count) {
+    if (shouldDiversify || selected.length + remaining < count) {
       selected.push(item);
       seenArchetypes.add(item.archetype);
       seenTypes.add(item.assetType);

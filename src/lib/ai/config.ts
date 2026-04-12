@@ -156,14 +156,14 @@ export interface TierConfig {
 // SIMPLE raised to 1400: educational 4-section format needs ~280+ output tokens.
 const STARTER_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
   SIMPLE: {
-    maxTokens: 1400,      // targetWords:300 → 300/((1400-450)*0.72)=0.439
+    maxTokens: 1500,      // Increased from 1400 for more headroom
     modelFamily: "gpt",
     reasoningEffort: "none",
     ragEnabled: false,
     ragMemoryEnabled: false,
     webSearchEnabled: false,
     crossSectorEnabled: false,
-    wordBudgetMultiplier: 0.439,  // targetWords: ~300
+    wordBudgetMultiplier: 0.55,  // Increased from 0.439 for more comprehensive educational responses (~400 words)
     gpt54Role: "lyra-nano",
     latencyBudgetMs: 8000,  // 8s for SIMPLE queries
   },
@@ -198,14 +198,14 @@ const STARTER_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
 // PRO MODERATE: crossSectorEnabled=false — most PRO MODERATE queries are single-asset.
 const PRO_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
   SIMPLE: {
-    maxTokens: 1700,      // targetWords:300 → 300/((1700-450)*0.72)=0.333
+    maxTokens: 1900,      // Increased from 1700 for more headroom
     modelFamily: "gpt",
     reasoningEffort: "none",
     ragEnabled: true,
     ragMemoryEnabled: true,
     webSearchEnabled: false,
     crossSectorEnabled: false,
-    wordBudgetMultiplier: 0.333,  // targetWords: ~300
+    wordBudgetMultiplier: 0.48,  // Increased from 0.333 for better educational content (~500 words)
     gpt54Role: "lyra-mini",       // upgraded from nano: nano undershoots edu target consistently
     latencyBudgetMs: 8000,  // 8s for SIMPLE queries
   },
@@ -241,14 +241,14 @@ const PRO_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
 // ELITE COMPLEX:  full single · reasoning:none
 const ELITE_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
   SIMPLE: {
-    maxTokens: 2000,      // targetWords:500 → 500/((2000-450)*0.72)=0.448
+    maxTokens: 2200,      // Increased from 2000 for more headroom
     modelFamily: "gpt",
     reasoningEffort: "none",      // SIMPLE = capacity-limited, not reasoning-limited
     ragEnabled: true,
     ragMemoryEnabled: true,
     webSearchEnabled: false,
     crossSectorEnabled: false,
-    wordBudgetMultiplier: 0.448,  // targetWords: ~500
+    wordBudgetMultiplier: 0.55,  // Increased from 0.448 for richer educational content (~600 words)
     gpt54Role: "lyra-mini",       // upgraded from nano: nano undershoots edu word target (capacity gap)
     latencyBudgetMs: 8000,  // 8s for SIMPLE queries
   },
@@ -284,14 +284,14 @@ const ELITE_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
 // ENTERPRISE COMPLEX:  full single · reasoning:none
 const ENTERPRISE_TIER_CONFIG: Record<QueryComplexity, TierConfig> = {
   SIMPLE: {
-    maxTokens: 2200,      // targetWords:450 → 450/((2200-450)*0.72)=0.357
+    maxTokens: 2400,      // Increased from 2200 for more headroom
     modelFamily: "gpt",
     reasoningEffort: "none",
     ragEnabled: true,
     ragMemoryEnabled: true,
     webSearchEnabled: false,
     crossSectorEnabled: false,
-    wordBudgetMultiplier: 0.357,  // targetWords: ~450
+    wordBudgetMultiplier: 0.50,  // Increased from 0.357 for better content (~550 words)
     gpt54Role: "lyra-mini",       // upgraded from nano: nano undershoots edu target consistently
     latencyBudgetMs: 8000,  // 8s for SIMPLE queries
   },

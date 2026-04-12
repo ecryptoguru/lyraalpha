@@ -7,6 +7,9 @@ import { prisma } from "../prisma";
 import { MarketRegime } from "./market-regime";
 import { AssetSignals } from "./compatibility";
 import { SECTOR_REGIME } from "./constants";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger({ service: "sector-regime" });
 
 export interface SectorRegimeData {
   sectorId: string;
@@ -235,7 +238,14 @@ export async function getLatestSectorRegime(
 
   if (!latest) return null;
 
-  const context = latest.context ? JSON.parse(latest.context) : { drivers: [] };
+  let context: { drivers?: string[] } = { drivers: [] };
+  if (latest.context) {
+    try {
+      context = JSON.parse(latest.context);
+    } catch (e) {
+      logger.warn({ sectorId, err: e }, "Failed to parse sector regime context");
+    }
+  }
 
   return {
     sectorId: latest.sectorId,

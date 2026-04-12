@@ -6,7 +6,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
-import { getCache, redis, setCache } from "@/lib/redis";
+import { getCache, redis, setCache, redisInfo as fetchRedisInfo } from "@/lib/redis";
 import { createLogger } from "@/lib/logger";
 import { safeJsonParse } from "@/lib/utils/json";
 import { Prisma } from "@/generated/prisma/client";
@@ -241,6 +241,15 @@ export interface EngineStats {
     withScores: number;
     withSignalStrength: number;
   }[];
+  cryptoIntelligenceStats: {
+    avgNetworkActivity: number;
+    avgHolderStability: number;
+    avgLiquidityRisk: number;
+    avgEnhancedTrust: number;
+    signalWeightBreakdown: { weight: string; count: number }[];
+    assetsWithCryptoIntel: number;
+    totalCryptoAssets: number;
+  } | null;
 }
 
 export interface RegimeStats {
@@ -283,6 +292,16 @@ export interface InfraStats {
   embeddingPipelineHealth: {
     knowledgeDocs: { pending: number; processing: number; done: number; failed: number };
     aiRequestLogs: { pending: number; processing: number; done: number; failed: number };
+  } | null;
+  cryptoSyncHealth: {
+    lastCoinGeckoSync: Date | null;
+    lastNewsDataSync: Date | null;
+    lastCoinGeckoSyncAgeH: number | null;
+    lastNewsDataSyncAgeH: number | null;
+    pctAssetsFresh: number;
+    totalCryptoAssets: number;
+    freshAssetCount: number;
+    staleAssetCount: number;
   } | null;
 }
 
@@ -1452,7 +1471,7 @@ export async function getUsageStats(range: UsageRange = "30d"): Promise<UsageSta
 // ─── Engines ────────────────────────────────────────────────────────────────
 
 export async function getEngineStats(): Promise<EngineStats> {
-  const [scoreDistributions, compatibilityDist, assetCoverage] = await Promise.all([
+  const [scoreDistributions, compatibilityDist, assetCoverage, cryptoIntelRows, signalWeightRows] = await Promise.all([
     prisma.$queryRaw<
       { type: string; avg: number; min: number; max: number; count: bigint }[]
     >(Prisma.sql`
@@ -1491,7 +1510,45 @@ export async function getEngineStats(): Promise<EngineStats> {
       LEFT JOIN scored_assets sa ON sa."assetId" = a."id"
       GROUP BY a."type"
     `),
+    // Crypto intelligence stats from Asset.metadata
+    prisma.$queryRaw<
+      { avgNetworkActivity: number; avgHolderStability: number; avgLiquidityRisk: number; avgEnhancedTrust: number; assetsWithCryptoIntel: bigint; totalCryptoAssets: bigint }[]
+    >(Prisma.sql`
+      SELECT
+        ROUND(AVG((a.metadata->'cryptoIntelligence'->'networkActivity')::numeric), 2) as "avgNetworkActivity",
+        ROUND(AVG((a.metadata->'cryptoIntelligence'->'holderStability')::numeric), 2) as "avgHolderStability",
+        ROUND(AVG((a.metadata->'cryptoIntelligence'->'liquidityRisk')::numeric), 2) as "avgLiquidityRisk",
+        ROUND(AVG((a.metadata->'cryptoIntelligence'->'enhancedTrust')::numeric), 2) as "avgEnhancedTrust",
+        COUNT(CASE WHEN a.metadata->'cryptoIntelligence' IS NOT NULL THEN 1 END)::bigint as "assetsWithCryptoIntel",
+        COUNT(*)::bigint as "totalCryptoAssets"
+      FROM "Asset" a
+      WHERE a."type" = 'CRYPTO'
+    `),
+    prisma.$queryRaw<{ weight: string; count: bigint }[]>(Prisma.sql`
+      SELECT
+        COALESCE(a.metadata->>'signalWeight', 'NONE') as weight,
+        COUNT(*)::bigint as count
+      FROM "Asset" a
+      WHERE a."type" = 'CRYPTO'
+      GROUP BY a.metadata->>'signalWeight'
+      ORDER BY count DESC
+    `),
   ]);
+
+  // Build crypto intelligence stats
+  const ciRow = cryptoIntelRows[0];
+  const cryptoIntelligenceStats = ciRow && Number(ciRow.totalCryptoAssets) > 0 ? {
+    avgNetworkActivity: Number(ciRow.avgNetworkActivity ?? 0),
+    avgHolderStability: Number(ciRow.avgHolderStability ?? 0),
+    avgLiquidityRisk: Number(ciRow.avgLiquidityRisk ?? 0),
+    avgEnhancedTrust: Number(ciRow.avgEnhancedTrust ?? 0),
+    signalWeightBreakdown: signalWeightRows.map((r) => ({
+      weight: r.weight,
+      count: Number(r.count),
+    })),
+    assetsWithCryptoIntel: Number(ciRow.assetsWithCryptoIntel),
+    totalCryptoAssets: Number(ciRow.totalCryptoAssets),
+  } : null;
 
   return {
     scoreDistributions: scoreDistributions.map((r) => ({
@@ -1512,6 +1569,7 @@ export async function getEngineStats(): Promise<EngineStats> {
       withScores: Number(r.withScores),
       withSignalStrength: Number(r.withSignalStrength),
     })),
+    cryptoIntelligenceStats,
   };
 }
 
@@ -1616,14 +1674,8 @@ export async function getInfraStats(): Promise<InfraStats> {
         };
       }
 
-      if (typeof (redis as unknown as { info?: () => Promise<string> }).info === "function") {
-        const info = await (redis as unknown as { info: () => Promise<string> }).info();
-        const lines = info.split("\r\n");
-        const infoMap: Record<string, string> = {};
-        for (const line of lines) {
-          const [key, val] = line.split(":");
-          if (key && val) infoMap[key] = val;
-        }
+      const infoMap = await fetchRedisInfo();
+      if (infoMap) {
         redisInfo = {
           used_memory_human: infoMap.used_memory_human || "N/A",
           maxmemory_human: infoMap.maxmemory_human || "N/A",
@@ -1641,7 +1693,7 @@ export async function getInfraStats(): Promise<InfraStats> {
     // Redis may not be available
   }
 
-  const [userCount, assetCount, aiLogCount, priceHistoryCount, eventCount, aiRequestLogStatus, assetScoreCount, watchlistCount] =
+  const [userCount, assetCount, aiLogCount, priceHistoryCount, eventCount, aiRequestLogStatus, assetScoreCount, watchlistCount, cryptoSyncRows] =
     await Promise.all([
       prisma.user.count(),
       prisma.asset.count(),
@@ -1654,6 +1706,17 @@ export async function getInfraStats(): Promise<InfraStats> {
       }),
       prisma.assetScore.count(),
       prisma.watchlistItem.count(),
+      // Crypto sync health: last CoinGecko sync, last NewsData sync, freshness
+      prisma.$queryRaw<
+        { lastCoinGeckoSync: Date | null; lastNewsDataSync: Date | null; totalCryptoAssets: bigint; freshAssetCount: bigint; staleAssetCount: bigint }[]
+      >(Prisma.sql`
+        SELECT
+          (SELECT MAX("lastPriceUpdate") FROM "Asset" WHERE "type" = 'CRYPTO') as "lastCoinGeckoSync",
+          (SELECT MAX("createdAt") FROM "InstitutionalEvent" WHERE "type" = 'NEWS') as "lastNewsDataSync",
+          (SELECT COUNT(*)::bigint FROM "Asset" WHERE "type" = 'CRYPTO') as "totalCryptoAssets",
+          (SELECT COUNT(*)::bigint FROM "Asset" WHERE "type" = 'CRYPTO' AND "lastPriceUpdate" >= NOW() - INTERVAL '24 hours') as "freshAssetCount",
+          (SELECT COUNT(*)::bigint FROM "Asset" WHERE "type" = 'CRYPTO' AND ("lastPriceUpdate" IS NULL OR "lastPriceUpdate" < NOW() - INTERVAL '24 hours')) as "staleAssetCount"
+      `),
     ]);
 
   // Process embedding status counts
@@ -1691,6 +1754,23 @@ export async function getInfraStats(): Promise<InfraStats> {
     },
     recentSyncInfo: null,
     embeddingPipelineHealth,
+    cryptoSyncHealth: (() => {
+      const row = cryptoSyncRows[0];
+      if (!row) return null;
+      const total = Number(row.totalCryptoAssets ?? 0);
+      const fresh = Number(row.freshAssetCount ?? 0);
+      const nowMs = Date.now();
+      return {
+        lastCoinGeckoSync: row.lastCoinGeckoSync,
+        lastNewsDataSync: row.lastNewsDataSync,
+        lastCoinGeckoSyncAgeH: row.lastCoinGeckoSync ? Math.round((nowMs - new Date(row.lastCoinGeckoSync).getTime()) / 3600000) : null,
+        lastNewsDataSyncAgeH: row.lastNewsDataSync ? Math.round((nowMs - new Date(row.lastNewsDataSync).getTime()) / 3600000) : null,
+        pctAssetsFresh: total > 0 ? Math.round((fresh / total) * 100) : 0,
+        totalCryptoAssets: total,
+        freshAssetCount: fresh,
+        staleAssetCount: Number(row.staleAssetCount ?? 0),
+      };
+    })(),
   };
 }
 
@@ -2439,5 +2519,227 @@ export async function getBillingStats(): Promise<BillingStats> {
       count: Number(r.count),
     })),
     churnRate: activeStart > 0 ? Math.round((canceledInPeriod / activeStart) * 100) : 0,
+  };
+}
+
+// ─── Crypto Data Sources ────────────────────────────────────────────────────
+
+export interface CryptoDataSourceStats {
+  coingecko: {
+    totalAssets: number;
+    withMetadata: number;
+    freshCount: number;
+    staleCount: number;
+    noMetadataCount: number;
+    lastSync: Date | null;
+  };
+  newsdata: {
+    events24h: number;
+    events7d: number;
+    avgPerDay: number;
+    lastEvent: Date | null;
+  };
+  geckoTerminal: {
+    assetsWithPoolData: number;
+    totalPools: number;
+  };
+  defiLlama: {
+    assetsWithTvl: number;
+    totalTvlUsd: number;
+  };
+  coinglass: {
+    assetsWithOiData: number;
+    assetsWithFuturesMetadata: number;
+  };
+  messari: {
+    assetsWithMessariData: number;
+  };
+  marketRegime: {
+    currentState: string | null;
+    lastCalculated: Date | null;
+    cryptoBenchmarks: string[];
+  };
+  priceFreshness: {
+    fresh: number;
+    stale: number;
+    missing: number;
+  }[];
+}
+
+export async function getCryptoDataSourceStats(): Promise<CryptoDataSourceStats> {
+  const now = new Date();
+  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const [
+    coingeckoStats,
+    newsStats,
+    geckoTerminalStats,
+    defiLlamaStats,
+    coinglassStats,
+    messariStats,
+    regimeStats,
+    priceFreshness,
+  ] = await Promise.all([
+    // CoinGecko coverage
+    prisma.$queryRaw<
+      { totalAssets: bigint; withMetadata: bigint; freshCount: bigint; staleCount: bigint; noMetadataCount: bigint; lastSync: Date | null }[]
+    >(Prisma.sql`
+      SELECT
+        COUNT(*)::bigint as "totalAssets",
+        COUNT(CASE WHEN a.metadata IS NOT NULL THEN 1 END)::bigint as "withMetadata",
+        COUNT(CASE WHEN a."lastPriceUpdate" >= NOW() - INTERVAL '24 hours' THEN 1 END)::bigint as "freshCount",
+        COUNT(CASE WHEN a."lastPriceUpdate" IS NOT NULL AND a."lastPriceUpdate" < NOW() - INTERVAL '24 hours' THEN 1 END)::bigint as "staleCount",
+        COUNT(CASE WHEN a.metadata IS NULL THEN 1 END)::bigint as "noMetadataCount",
+        MAX(a."lastPriceUpdate") as "lastSync"
+      FROM "Asset" a
+      WHERE a."type" = 'CRYPTO'
+    `),
+    // NewsData.io stats
+    prisma.$queryRaw<
+      { events24h: bigint; events7d: bigint; lastEvent: Date | null }[]
+    >(Prisma.sql`
+      SELECT
+        COUNT(CASE WHEN "createdAt" >= ${twentyFourHoursAgo} THEN 1 END)::bigint as "events24h",
+        COUNT(CASE WHEN "createdAt" >= ${sevenDaysAgo} THEN 1 END)::bigint as "events7d",
+        MAX("createdAt") as "lastEvent"
+      FROM "InstitutionalEvent"
+      WHERE "type" = 'NEWS'
+    `),
+    // GeckoTerminal - assets with pool/DEX data in metadata
+    prisma.$queryRaw<
+      { assetsWithPoolData: bigint; totalPools: bigint }[]
+    >(Prisma.sql`
+      SELECT
+        COUNT(CASE WHEN a.metadata->'geckoTerminal' IS NOT NULL THEN 1 END)::bigint as "assetsWithPoolData",
+        COALESCE(SUM(CASE
+          WHEN a.metadata->'geckoTerminal'->'pools' IS NOT NULL
+          THEN jsonb_array_length(a.metadata->'geckoTerminal'->'pools')
+          ELSE 0
+        END)::bigint, 0) as "totalPools"
+      FROM "Asset" a
+      WHERE a."type" = 'CRYPTO'
+    `),
+    // DefiLlama - assets with TVL data in metadata
+    prisma.$queryRaw<
+      { assetsWithTvl: bigint; totalTvlUsd: number }[]
+    >(Prisma.sql`
+      SELECT
+        COUNT(CASE WHEN a.metadata->'defiLlama' IS NOT NULL THEN 1 END)::bigint as "assetsWithTvl",
+        COALESCE(SUM(CASE
+          WHEN (a.metadata->'defiLlama'->'tvlUsd')::numeric IS NOT NULL
+          THEN (a.metadata->'defiLlama'->'tvlUsd')::numeric
+          ELSE 0
+        END), 0) as "totalTvlUsd"
+      FROM "Asset" a
+      WHERE a."type" = 'CRYPTO'
+    `),
+    // Coinglass - assets with OI/futures data in metadata
+    prisma.$queryRaw<
+      { assetsWithOiData: bigint; assetsWithFuturesMetadata: bigint }[]
+    >(Prisma.sql`
+      SELECT
+        COUNT(CASE WHEN a.metadata->'coinglass'->'openInterest' IS NOT NULL THEN 1 END)::bigint as "assetsWithOiData",
+        COUNT(CASE WHEN a.metadata->'coinglass' IS NOT NULL THEN 1 END)::bigint as "assetsWithFuturesMetadata"
+      FROM "Asset" a
+      WHERE a."type" = 'CRYPTO'
+    `),
+    // Messari - assets with Messari data in metadata
+    prisma.$queryRaw<
+      { assetsWithMessariData: bigint }[]
+    >(Prisma.sql`
+      SELECT
+        COUNT(CASE WHEN a.metadata->'messari' IS NOT NULL THEN 1 END)::bigint as "assetsWithMessariData"
+      FROM "Asset" a
+      WHERE a."type" = 'CRYPTO'
+    `),
+    // Market regime health
+    prisma.marketRegime.findFirst({
+      where: { assetId: null },
+      orderBy: { date: "desc" },
+      select: { state: true, date: true, context: true },
+    }),
+    // Price freshness breakdown by bucket
+    prisma.$queryRaw<
+      { bucket: string; fresh: bigint; stale: bigint; missing: bigint }[]
+    >(Prisma.sql`
+      SELECT
+        CASE
+          WHEN a."marketCapRank" <= 50 THEN 'Top 50'
+          WHEN a."marketCapRank" <= 200 THEN 'Top 200'
+          WHEN a."marketCapRank" <= 500 THEN 'Top 500'
+          ELSE 'Long Tail'
+        END as bucket,
+        COUNT(CASE WHEN a."lastPriceUpdate" >= NOW() - INTERVAL '24 hours' THEN 1 END)::bigint as fresh,
+        COUNT(CASE WHEN a."lastPriceUpdate" IS NOT NULL AND a."lastPriceUpdate" < NOW() - INTERVAL '24 hours' THEN 1 END)::bigint as stale,
+        COUNT(CASE WHEN a."lastPriceUpdate" IS NULL THEN 1 END)::bigint as missing
+      FROM "Asset" a
+      WHERE a."type" = 'CRYPTO'
+      GROUP BY bucket
+      ORDER BY bucket
+    `),
+  ]);
+
+  const cg = coingeckoStats[0];
+  const ns = newsStats[0];
+  const gt = geckoTerminalStats[0];
+  const dl = defiLlamaStats[0];
+  const cglass = coinglassStats[0];
+  const ms = messariStats[0];
+  const events7d = Number(ns?.events7d ?? 0);
+
+  // Parse crypto benchmarks from regime context
+  let cryptoBenchmarks: string[] = ["BTC", "ETH", "SOL"];
+  if (regimeStats?.context) {
+    const ctx = safeJsonParse(regimeStats.context);
+    if (ctx && typeof ctx === "object") {
+      const benchmarks = (ctx as Record<string, unknown>).benchmarks;
+      if (Array.isArray(benchmarks)) {
+        cryptoBenchmarks = benchmarks.map(String);
+      }
+    }
+  }
+
+  return {
+    coingecko: {
+      totalAssets: Number(cg?.totalAssets ?? 0),
+      withMetadata: Number(cg?.withMetadata ?? 0),
+      freshCount: Number(cg?.freshCount ?? 0),
+      staleCount: Number(cg?.staleCount ?? 0),
+      noMetadataCount: Number(cg?.noMetadataCount ?? 0),
+      lastSync: cg?.lastSync ?? null,
+    },
+    newsdata: {
+      events24h: Number(ns?.events24h ?? 0),
+      events7d,
+      avgPerDay: events7d > 0 ? Number((events7d / 7).toFixed(1)) : 0,
+      lastEvent: ns?.lastEvent ?? null,
+    },
+    geckoTerminal: {
+      assetsWithPoolData: Number(gt?.assetsWithPoolData ?? 0),
+      totalPools: Number(gt?.totalPools ?? 0),
+    },
+    defiLlama: {
+      assetsWithTvl: Number(dl?.assetsWithTvl ?? 0),
+      totalTvlUsd: Number(dl?.totalTvlUsd ?? 0),
+    },
+    coinglass: {
+      assetsWithOiData: Number(cglass?.assetsWithOiData ?? 0),
+      assetsWithFuturesMetadata: Number(cglass?.assetsWithFuturesMetadata ?? 0),
+    },
+    messari: {
+      assetsWithMessariData: Number(ms?.assetsWithMessariData ?? 0),
+    },
+    marketRegime: {
+      currentState: regimeStats?.state ?? null,
+      lastCalculated: regimeStats?.date ?? null,
+      cryptoBenchmarks,
+    },
+    priceFreshness: priceFreshness.map((r) => ({
+      bucket: r.bucket,
+      fresh: Number(r.fresh),
+      stale: Number(r.stale),
+      missing: Number(r.missing),
+    })),
   };
 }

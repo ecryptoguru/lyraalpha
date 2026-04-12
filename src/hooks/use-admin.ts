@@ -68,3 +68,7 @@ export function useAdminCredits() {
 export function useAdminWaitlist() {
   return useSWR("/api/admin/waitlist", fetcher, ADMIN_SWR_CONFIG);
 }
+
+export function useAdminCryptoData() {
+  return useSWR("/api/admin/crypto-data", fetcher, ADMIN_SWR_CONFIG);
+}

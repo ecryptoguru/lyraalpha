@@ -95,7 +95,11 @@ export async function POST(req: NextRequest) {
       return apiError("Unauthorized", 401);
     }
 
-    payload = (await req.json()) as ExplainSignalRequest;
+    try {
+      payload = (await req.json()) as ExplainSignalRequest;
+    } catch {
+      return apiError("Request body must be valid JSON", 400);
+    }
     if (!payload?.title || typeof payload.score !== "number" || !payload.definition) {
       return apiError("Invalid request", 400);
     }

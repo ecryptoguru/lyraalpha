@@ -28,7 +28,7 @@ At a practical level, the product combines:
 - crypto-market-regime awareness
 - region-aware asset intelligence (US + India)
 - **Lyra** for crypto market interpretation
-- **Myra** for platform support — available both on the public landing page and inside the authenticated dashboard
+- **Myra** for platform support — available both as a public support entry point and inside the authenticated dashboard
 - plan-aware AI routing with multi-model single-call orchestration (nano / mini / full)
 - premium analytical workflows: Compare Crypto Assets and Shock Simulator
 - broker-connected portfolio import and normalization for India and US accounts
@@ -95,9 +95,9 @@ This separation is deliberate. Crypto market interpretation and product support 
 
 Lyra is not intended to invent data or behave like a generic crypto chatbot. She is designed to reason over platform-provided crypto context.
 
-#### Myra on the Public Landing Page
+#### Myra as the Public Support Entry Point
 
-Myra is available on the landing page before a user signs in. The public chat endpoint (`/api/support/public-chat`) is explicitly exempted from auth middleware so unauthenticated visitors receive full AI-driven answers about the product, waitlist, early access, and how the platform works. The public Myra experience runs on GPT-5.4-nano via the same Azure OpenAI provider as Lyra. This is fully operational.
+Myra is available before a user signs in. The public chat endpoint (`/api/support/public-chat`) is explicitly exempted from auth middleware so unauthenticated visitors receive full AI-driven answers about the product, waitlist, early access, and how the platform works. The public Myra experience runs on GPT-5.4-nano via the same Azure OpenAI provider as Lyra. This is fully operational.
 
 ### 3.3 The Product Layer
 
@@ -153,7 +153,7 @@ The blog layer uses a hybrid static + DB architecture:
 - **Static posts** are seeded at build time in `src/lib/blog/posts.ts` and serve as the zero-dependency baseline
 - **DB posts** are written by AMI 2.0 via the `/api/webhooks/ami` endpoint and stored in the `BlogPost` Prisma model
 - DB posts take priority over static fallbacks when slugs collide
-- Category landing pages, RSS feed at `/blog/feed.xml`, OG hero images with logo overlay, reading progress bar, share cards, and contextual CTAs
+- Category pages, RSS feed at `/blog/feed.xml`, OG hero images with logo overlay, reading progress bar, share cards, and contextual CTAs
 
 #### AMI 2.0 Webhook Bridge
 
@@ -334,7 +334,7 @@ It separates:
 
 That separation improves user clarity, governance and safety, response speed, maintainability, and long-term product scalability.
 
-Myra covers public prelaunch waitlist/access questions on the landing page (unauthenticated). Lyra remains the authenticated market-intelligence surface. This is now fully operational — the public Myra endpoint is exempted from auth middleware so landing page visitors receive real AI-driven answers.
+Myra covers public prelaunch waitlist/access questions at the public support entry point (unauthenticated). Lyra remains the authenticated market-intelligence surface. This is now fully operational — the public Myra endpoint is exempted from auth middleware so visitors receive real AI-driven answers.
 
 ---
 

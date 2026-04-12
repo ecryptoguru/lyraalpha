@@ -19,10 +19,10 @@ const databaseSchema = z.object({
 const authSchema = z.object({
   CLERK_SECRET_KEY: z.string().min(1, "CLERK_SECRET_KEY is required"),
   CLERK_PUBLISHABLE_KEY: z.string().min(1, "CLERK_PUBLISHABLE_KEY is required"),
-  NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().url("NEXT_PUBLIC_CLERK_SIGN_IN_URL must be a valid URL"),
-  NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().url("NEXT_PUBLIC_CLERK_SIGN_UP_URL must be a valid URL"),
-  NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: z.string().url("NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL must be a valid URL"),
-  NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: z.string().url("NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL must be a valid URL"),
+  NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().min(1, "NEXT_PUBLIC_CLERK_SIGN_IN_URL is required"),
+  NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().min(1, "NEXT_PUBLIC_CLERK_SIGN_UP_URL is required"),
+  NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL: z.string().min(1, "NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL is required"),
+  NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL: z.string().min(1, "NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL is required"),
   ADMIN_EMAIL_ALLOWLIST: z.string().optional(),
 });
 

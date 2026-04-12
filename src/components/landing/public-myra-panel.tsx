@@ -97,7 +97,8 @@ export function PublicMyraPanel({
           setMessages([...updatedHistory, { role: "assistant", content: accumulated, id: assistantId }]);
         }
       }
-    } catch {
+    } catch (err) {
+      console.error("Myra panel stream failed:", err);
     } finally {
       setIsTyping(false);
       inputRef.current?.focus();

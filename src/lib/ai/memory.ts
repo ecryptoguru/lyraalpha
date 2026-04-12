@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSharedAISdkClient, getGpt54Deployment } from "./config";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
-import { redis } from "@/lib/redis";
+import { redis, redisSetNX } from "@/lib/redis";
 import { logMemoryEvent } from "./monitoring";
 import { INJECTION_PATTERNS } from "./guardrails";
 import { z } from "zod";
@@ -198,14 +198,7 @@ export async function distillSessionNotes(
   // Plain setCache always overwrites and cannot detect a pre-existing key.
   // TTL=90s covers worst-case: DB read + nano call (15s timeout) + transaction write.
   const lockKey = `memory:distill:${userId}:${source}`;
-  let lockAcquired = false;
-  try {
-    const nx = await (redis as unknown as { set(k: string, v: string, opts: { nx: boolean; ex: number }): Promise<string | null> })
-      .set(lockKey, "1", { nx: true, ex: 90 });
-    lockAcquired = nx === "OK";
-  } catch {
-    lockAcquired = true; // Redis unavailable — allow through, worst case is a duplicate write
-  }
+  const lockAcquired = await redisSetNX(lockKey, 90);
   if (!lockAcquired) {
     logger.debug({ userId, source }, "Memory distillation skipped — lock held by concurrent call");
     logMemoryEvent({ userId, source, outcome: "locked" });

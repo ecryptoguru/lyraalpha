@@ -45,7 +45,7 @@ Two purpose-built agents, each with a hard domain boundary:
 
 The separation keeps crypto market analysis and support behavior isolated, easier to govern, and easier to trust. It also keeps costs lower — Myra never runs on the full model.
 
-**Myra is now available on the public landing page** — unauthenticated visitors receive full AI-driven answers about the product, waitlist, early access, and how LyraAlpha works. No sign-in required. This is fully operational via the `/api/support/public-chat` endpoint.
+**Myra is now available as a public support entry point** — unauthenticated visitors receive full AI-driven answers about the product, waitlist, early access, and how LyraAlpha works. No sign-in required. This is fully operational via the `/api/support/public-chat` endpoint.
 
 ### Layer 3 — The workflows
 
@@ -87,7 +87,7 @@ Every Lyra response is anchored to deterministic engine outputs computed before 
 
 Lyra handles market intelligence. Myra handles platform support. Hard architectural boundary. The result is better output quality on both sides, lower inference cost, and simpler governance.
 
-Myra now covers the full user journey from first landing page visit (unauthenticated public chat) through every authenticated support interaction inside the dashboard.
+Myra now covers the full user journey from the first public support touchpoint (unauthenticated public chat) through every authenticated support interaction inside the dashboard.
 
 ### Workflow products, not just a chat interface
 
@@ -282,7 +282,7 @@ Myra is LyraAlpha AI's platform support agent. She handles product guidance, pla
 
 Myra operates across the entire user journey:
 
-- **Public landing page** — fully operational for unauthenticated visitors. The public Myra widget answers questions about the product, waitlist, early access, and how LyraAlpha works — before any sign-in. Runs on GPT-5.4-nano via the same Azure OpenAI provider as Lyra.
+- **Public support entry point** — fully operational for unauthenticated visitors. The public Myra widget answers questions about the product, waitlist, early access, and how LyraAlpha works — before any sign-in. Runs on GPT-5.4-nano via the same Azure OpenAI provider as Lyra.
 - **Authenticated dashboard** — the Myra chat panel (`LiveChatWidget`) renders in the bottom-right corner of the dashboard, outside the main scroll container so its fixed positioning anchors correctly to the viewport at all times.
 
 ### What makes Myra efficient
@@ -361,7 +361,7 @@ Next.js 16 App Router with React 19, streaming-first with no blocking response p
 
 For crypto investors: LyraAlpha AI is a live, revenue-generating crypto intelligence product with a defensible architecture, dual-market coverage, and a commercial model that improves margin as engagement deepens.
 
-For users: Ask Lyra anything about your crypto portfolio or the crypto markets. She will tell you what it means — backed by computation, not a confident guess. Ask Myra anything about the platform — from the landing page before you sign in, to every support question after.
+For users: Ask Lyra anything about your crypto portfolio or the crypto markets. She will tell you what it means — backed by computation, not a confident guess. Ask Myra anything about the platform — from the public support entry point before you sign in, to every support question after.
 
 For engineers: The model interprets what deterministic engines already computed. That is not a prompt trick. That is the architecture.
 

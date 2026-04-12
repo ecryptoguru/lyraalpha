@@ -6,7 +6,7 @@ import { AdaptiveDpr } from "@react-three/drei";
 import * as THREE from "three";
 import { ArrowRight, TrendingUp, Activity, Zap } from "lucide-react";
 import { ScrollToSectionButton } from "@/components/landing/scroll-to-section-button";
-import { SIGNUP_SECTION_ID } from "@/lib/config/prelaunch";
+import Link from "next/link";
 
 // ─── Module-level precomputed random data (stable across renders) ───────────
 
@@ -440,14 +440,13 @@ export function HeroWebGL() {
 
               {/* CTAs */}
               <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
-                <ScrollToSectionButton
-                  size="lg"
-                  targetId={SIGNUP_SECTION_ID}
-                  className="hero-cta-primary group h-14 rounded-full border border-amber-400/30 bg-amber-400 px-8 font-bold text-slate-950 shadow-[0_0_40px_rgba(245,158,11,0.3),0_18px_60px_rgba(245,158,11,0.2)] transition-all duration-300 hover:-translate-y-1 hover:bg-amber-300 hover:shadow-[0_0_60px_rgba(245,158,11,0.45),0_24px_80px_rgba(245,158,11,0.28)]"
+                <Link
+                  href="/sign-up"
+                  className="hero-cta-primary group inline-flex h-14 items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400 px-8 font-bold text-slate-950 shadow-[0_0_40px_rgba(245,158,11,0.3),0_18px_60px_rgba(245,158,11,0.2)] transition-all duration-300 hover:-translate-y-1 hover:bg-amber-300 hover:shadow-[0_0_60px_rgba(245,158,11,0.45),0_24px_80px_rgba(245,158,11,0.28)]"
                 >
                   Sign Up Free
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </ScrollToSectionButton>
+                </Link>
                 <ScrollToSectionButton
                   size="lg"
                   variant="outline"

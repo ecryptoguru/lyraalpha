@@ -12,11 +12,16 @@ export async function POST(req: NextRequest) {
     const { userId } = await auth();
     if (!userId) return apiError("Unauthorized", 401);
 
-    const body = await req.json();
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return apiError("Request body must be valid JSON", 400);
+    }
     const { action, symbol, id } = body as { action: "ASSET" | "SECTOR"; symbol?: string; id?: string };
 
-    if (!action) {
-      return apiError("Action required", 400);
+    if (!action || (action !== "ASSET" && action !== "SECTOR")) {
+      return apiError("Action must be ASSET or SECTOR", 400);
     }
 
     const description = action === "ASSET" 

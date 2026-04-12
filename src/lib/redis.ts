@@ -153,7 +153,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
       try {
         return JSON.parse(data, dateReviver) as T;
       } catch {
-        // If the string fails JSON.parse, it means Upstash already fully unwrapped 
+        // If the string fails JSON.parse, it means Upstash already fully unwrapped
         // the string (e.g. plain text markdown), or it was a raw string insertion.
         // Return it directly instead of crashing or deleting the key.
         return data as unknown as T;
@@ -198,6 +198,44 @@ export async function delCache(key: string): Promise<void> {
     );
   } catch (error) {
     logger.warn({ key, err: error }, "Redis del failed");
+  }
+}
+
+/**
+ * Atomic SET NX (set-if-not-exists) with expiry.
+ * Returns true if the key was set (lock acquired), false if it already existed.
+ * Falls back to true (allow through) if Redis is unavailable.
+ */
+export async function redisSetNX(key: string, ttlSeconds: number): Promise<boolean> {
+  try {
+    const nx = await (redis as unknown as { set(k: string, v: string, opts: { nx: boolean; ex: number }): Promise<string | null> })
+      .set(key, "1", { nx: true, ex: ttlSeconds });
+    return nx === "OK";
+  } catch {
+    // Redis unavailable — allow through, worst case is a duplicate write
+    return true;
+  }
+}
+
+/**
+ * Fetch Redis INFO output (only available on real Upstash/ioredis clients, not noop).
+ * Returns parsed key-value map or null if INFO is not available.
+ */
+export async function redisInfo(): Promise<Record<string, string> | null> {
+  try {
+    if (typeof (redis as unknown as { info?: () => Promise<string> }).info !== "function") {
+      return null;
+    }
+    const info = await (redis as unknown as { info: () => Promise<string> }).info();
+    const lines = info.split("\r\n");
+    const infoMap: Record<string, string> = {};
+    for (const line of lines) {
+      const [key, val] = line.split(":");
+      if (key && val) infoMap[key] = val;
+    }
+    return infoMap;
+  } catch {
+    return null;
   }
 }
 

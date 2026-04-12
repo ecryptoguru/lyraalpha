@@ -56,6 +56,9 @@ const CACHE_TTL = 60000; // 1 minute focus for high-traffic dashboard
 const CACHE_MAX_REGIONS = 20; // evict oldest entries beyond this limit
 
 import { PrismaClient } from "@/generated/prisma/client";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger({ service: "market-regime" });
 
 /**
  * Institutional getter for the latest market context.
@@ -89,10 +92,7 @@ export async function getLatestMarketContext(prisma: PrismaClient, region: strin
     // Return a deep copy to prevent callers from mutating the cache
     return structuredClone(context);
   } catch (e) {
-    // Structured logging would require importing createLogger here;
-    // keeping as console.error since this is a low-level engine module
-    // that initializes before the logger in some paths.
-    if (process.env.NODE_ENV === "development") console.error(`MCE Cache [${region}]: Failed to parse regime context`, e);
+    logger.debug({ region, err: e }, "MCE Cache: Failed to parse regime context");
     return null;
   }
 }

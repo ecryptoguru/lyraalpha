@@ -84,6 +84,15 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.redirect(normalizedLocalDevUrl);
   }
 
+  if (req.nextUrl.pathname === "/") {
+    const refCode = req.nextUrl.searchParams.get("ref");
+    if (refCode) {
+      const res = NextResponse.next();
+      setReferralCookie(res, refCode);
+      return res;
+    }
+  }
+
   // Handle CORS preflight for API routes
   if (req.method === "OPTIONS" && isApiRoute(req)) {
     const origin = req.headers.get("origin");

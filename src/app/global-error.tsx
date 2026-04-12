@@ -24,9 +24,9 @@ export default function GlobalError({
     <html lang="en">
       <head>
         <title>Critical Error | LyraAlpha AI</title>
-        <meta name="description" content="A critical error occurred. Please refresh or return home." />
+        <meta name="description" content="A critical error occurred. Please refresh or return to the dashboard." />
         <meta property="og:title" content="Critical Error | LyraAlpha AI" />
-        <meta property="og:description" content="A critical error occurred. Please refresh or return home." />
+        <meta property="og:description" content="A critical error occurred. Please refresh or return to the dashboard." />
         <meta property="og:type" content="website" />
       </head>
       <body>
@@ -126,9 +126,8 @@ export default function GlobalError({
                 Reload Page
               </button>
 
-              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
               <a
-                href="/"
+                href="/dashboard"
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -145,7 +144,7 @@ export default function GlobalError({
                   border: "1px solid rgba(255,255,255,0.15)",
                 }}
               >
-                Return Home
+                Go to Dashboard
               </a>
             </div>
           </div>
