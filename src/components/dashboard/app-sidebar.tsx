@@ -153,10 +153,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 priority
                 className="h-[84px] w-auto object-contain object-left"
               />
-              <span className="shrink-0 self-start mt-3 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.14em] text-primary">
-                Beta
-              </span>
             </div>
+            <span className="text-[10px] uppercase tracking-widest text-primary font-bold opacity-80 pl-0.5">
+              Beta
+            </span>
           </Link>
         </div>
       </SidebarHeader>
