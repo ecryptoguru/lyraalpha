@@ -157,9 +157,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 Beta
               </span>
             </div>
-            <span className="truncate text-[10px] uppercase tracking-widest text-primary font-bold opacity-80 pl-0.5">
-              {planLabel} Edition
-            </span>
           </Link>
         </div>
       </SidebarHeader>
