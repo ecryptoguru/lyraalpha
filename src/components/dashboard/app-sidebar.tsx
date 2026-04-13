@@ -143,7 +143,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
         {/* Expanded full logo view */}
         <div className="group-data-[collapsible=icon]:hidden px-2">
-          <Link href="/" className="flex flex-col rounded-xl hover:bg-muted/40 dark:hover:bg-white/5 transition-colors duration-200 px-2 py-2 -mx-2 cursor-pointer">
+          <Link href="/" className="flex items-center gap-2 rounded-xl hover:bg-muted/40 dark:hover:bg-white/5 transition-colors duration-200 px-2 py-2 -mx-2 cursor-pointer">
             {/* Logo image */}
             <Image
               src="/brand/lyraalpha-ai-logo-lockup.svg"
@@ -151,10 +151,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               width={307}
               height={95}
               priority
-              className="h-[68px] w-auto max-w-full object-contain object-left"
+              className="h-[68px] w-auto max-w-[200px] object-contain object-left shrink-0"
             />
-            {/* Beta badge below logo */}
-            <span className="mt-1 inline-flex w-fit items-center rounded-full border border-primary/40 bg-primary/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] text-primary shadow-[0_0_8px_rgba(245,158,11,0.15)]">
+            {/* Beta badge centered with logo */}
+            <span className="shrink-0 inline-flex items-center rounded-full border border-primary/40 bg-primary/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] text-primary shadow-[0_0_8px_rgba(245,158,11,0.15)]">
               Beta
             </span>
           </Link>
