@@ -187,7 +187,7 @@ function RewardsPageInner() {
             <span className="premium-gradient-text block">Credits & XP</span>
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-            Your credits are what you spend. Your XP is what you earn. The more you use the platform, the faster you accumulate XP — and the more XP you have, the more credits you can pull from it.
+            Credits are what you spend. XP is what you earn. Higher XP means faster accumulation and more credits to redeem.
           </p>
           <div className="mt-5">
             <ShareInsightButton share={rewardShare} label="Share milestone" />
@@ -457,7 +457,7 @@ function RewardsPageInner() {
       {activeTab === "tiers" && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <p className="text-xs text-muted-foreground max-w-lg">
-            Your tier is based on total lifetime XP. Each tier applies a multiplier to everything you earn going forward — so the higher you climb, the faster you keep climbing. Badges are awarded automatically when you hit a new tier.
+            Tier is based on lifetime XP. Each tier multiplies everything you earn going forward. Badges awarded automatically.
           </p>
           {TIERS.map((tier, i) => {
             const isCurrent = tier.name === tierName;
