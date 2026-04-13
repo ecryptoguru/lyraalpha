@@ -16,7 +16,7 @@ export const getCachedSectorScores = (sectorId: string) => {
   return cacheStrategy(
     async () => {
       // 1. Get all active assets in sector
-      const sectorAssets = await prisma.stockSector.findMany({
+      const sectorAssets = await prisma.assetSector.findMany({
         where: { sectorId, isActive: true },
         select: { assetId: true },
       });

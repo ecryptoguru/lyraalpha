@@ -38,7 +38,7 @@ export async function calculateSectorRegime(
   if (!sector) return null;
 
   // Get all active crypto assets in sector with scores
-  const sectorAssets = await prisma.stockSector.findMany({
+  const sectorAssets = await prisma.assetSector.findMany({
     where: { sectorId, isActive: true },
     include: {
       asset: {
@@ -361,11 +361,11 @@ export async function calculateCrossSectorCorrelation(): Promise<CrossSectorCorr
 
   // 1. Get all sectors with active crypto assets
   const sectors = await prisma.sector.findMany({
-    where: { stockSectors: { some: { isActive: true } } },
+    where: { assetSectors: { some: { isActive: true } } },
     select: {
       id: true,
       name: true,
-      stockSectors: {
+      assetSectors: {
         where: { isActive: true },
         select: { assetId: true },
       },
@@ -375,7 +375,7 @@ export async function calculateCrossSectorCorrelation(): Promise<CrossSectorCorr
   if (sectors.length < 3) return fallback;
 
   // 2. Collect asset IDs and fetch price history in bulk
-  const allAssetIds = [...new Set(sectors.flatMap(s => s.stockSectors.map(ss => ss.assetId)))];
+  const allAssetIds = [...new Set(sectors.flatMap(s => s.assetSectors.map(ss => ss.assetId)))];
 
   const priceData = await prisma.priceHistory.findMany({
     where: {
@@ -399,7 +399,7 @@ export async function calculateCrossSectorCorrelation(): Promise<CrossSectorCorr
 
   for (const sector of sectors) {
     const memberReturns: number[][] = [];
-    for (const ss of sector.stockSectors) {
+    for (const ss of sector.assetSectors) {
       const prices = assetPrices.get(ss.assetId);
       if (!prices || prices.length < 10) continue;
       const closes = prices.map(p => p.close);

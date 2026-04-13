@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Market Narrative Tracker | LyraAlpha AI",
     description:
-      "Find the market story behind the moves — not the moves themselves. Regime classification, sector rotation signals, and narrative strength tracking for US and India markets.",
+      "Find the market story behind the moves — not the moves themselves. Regime classification, sector rotation signals, and narrative strength tracking for crypto markets.",
     url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools/market-narrative-tracker`,
     images: ["/og-image.png"],
   },
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Market Narrative Tracker | LyraAlpha AI",
     description:
-      "Find the market story behind the moves — not the moves themselves. Regime classification, sector rotation signals, and narrative strength tracking for US and India markets.",
+      "Find the market story behind the moves — not the moves themselves. Regime classification, sector rotation signals, and narrative strength tracking for crypto markets.",
     images: ["/og-image.png"],
   },
 };
@@ -71,24 +71,15 @@ export default function MarketNarrativeTrackerPage() {
           thisTool: "Routes into portfolio exposure checks, discovery for aligned names, or Lyra research for deeper scenario framing from the same surface.",
           alternative: "Leaves you to manually connect the headline to a portfolio decision.",
         },
-        {
-          label: "India coverage",
-          thisTool: "Narrative tracking covers both US and Indian markets — sector rotation, regime classification, and narrative strength in both.",
-          alternative: "Most headline feeds are US-centric. India market narrative coverage is sparse or non-existent.",
-        },
       ]}
       faqs={[
         {
           question: "What is a market narrative in this context?",
-          answer: "A market narrative is the structural story most responsible for price action across a broad set of assets right now. It's different from a single headline — it's the regime-level explanation for why sectors are moving the way they are. Examples: rate sensitivity driving defensives, AI infrastructure spending driving semiconductors, rupee weakness driving Indian IT exporters.",
+          answer: "A market narrative is the structural story most responsible for price action across a broad set of assets right now. It's different from a single headline — it's the regime-level explanation for why sectors are moving the way they are. Examples: DeFi TVL growth driving L1 tokens, Bitcoin dominance shifts rotating capital into altcoins, regulatory clarity sparking stablecoin adoption.",
         },
         {
           question: "How is this different from sector rotation tools?",
           answer: "Sector rotation tools show you which sectors are outperforming. The narrative tracker explains why — what structural story is behind the rotation, whether it's strengthening or fading, and what that implies for the next move. It's the interpretation layer on top of the rotation signal.",
-        },
-        {
-          question: "Does this cover Indian market narratives?",
-          answer: "Yes. LyraAlpha tracks market narratives for both US and India markets. India-specific narratives — RBI policy, FII flow dynamics, rupee regime, domestic vs export sector rotations — are tracked alongside US macro narratives.",
         },
         {
           question: "When should I use this instead of asset analysis?",
@@ -99,7 +90,7 @@ export default function MarketNarrativeTrackerPage() {
           answer: "Once a narrative is identified, the natural next step is checking whether your portfolio is already concentrated in that story or exposed to its risk. The system routes directly into portfolio intelligence for that check.",
         },
       ]}
-      seoIntro="LyraAlpha's market narrative tracker targets investors searching for market regime analysis, sector rotation tracker, narrative-driven investing tools, and AI market intelligence for US and India markets. The difference from a standard news feed or sector heat map is the regime classification engine underneath — it tells you what story is structurally driving prices, not just what moved today. This page covers both US macro narratives and India-specific market drivers."
+      seoIntro="LyraAlpha's market narrative tracker targets investors searching for crypto market regime analysis, sector rotation tracker, narrative-driven investing tools, and AI market intelligence for crypto markets. The difference from a standard news feed or sector heat map is the regime classification engine underneath — it tells you what story is structurally driving prices, not just what moved today."
       seoBullets={[
         "Use this when the question is about the market as a system — what story is driving it, whether that story is strengthening, and where the next rotation is building.",
         "Narrative strength scoring tells you whether to lean into the current trend or position for the next regime shift.",

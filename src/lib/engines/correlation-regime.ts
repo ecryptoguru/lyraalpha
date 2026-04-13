@@ -217,7 +217,7 @@ export async function calculateSectorCorrelationScore(
   }
 
   // Get sector peers
-  const sectorPeers = await prisma.stockSector.findMany({
+  const sectorPeers = await prisma.assetSector.findMany({
     where: { sectorId, isActive: true, assetId: { not: assetId } },
     include: { asset: { select: { symbol: true } } },
     take: 50,

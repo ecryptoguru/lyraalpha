@@ -4,6 +4,7 @@
  */
 
 import { z } from "zod";
+import { Prisma } from "@/generated/prisma/client";
 import { createLogger } from "@/lib/logger";
 import { classifyError } from "@/lib/errors/classification";
 
@@ -170,10 +171,10 @@ export function safeCast<T>(
  */
 export function asPrismaJsonValue(
   value: unknown,
-  fallback?: unknown
-): unknown {
+  fallback?: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined
+): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined {
   if (value === null || value === undefined) {
-    return fallback ?? null;
+    return fallback ?? undefined;
   }
   // Prisma.InputJsonValue accepts: string, number, boolean, null, array, object
   if (
@@ -183,8 +184,8 @@ export function asPrismaJsonValue(
     Array.isArray(value) ||
     (typeof value === "object" && value !== null)
   ) {
-    return value;
+    return value as Prisma.InputJsonValue;
   }
   logger.debug({ value }, "Value is not a valid Prisma InputJsonValue, using fallback");
-  return fallback ?? null;
+  return fallback ?? undefined;
 }

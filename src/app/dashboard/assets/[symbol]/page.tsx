@@ -10,7 +10,6 @@ import { ScoreDynamicsCard } from "@/components/ui/ScoreDynamicsCard";
 import { PerformanceMatrix } from "@/components/analytics/performance-matrix";
 import { EventImpactBadge } from "@/components/ui/EventImpactBadge";
 import { RegimeBadge } from "@/components/ui/RegimeBadge";
-import { ScenarioAnalysisCard } from "@/components/stocks/scenario-analysis-card";
 import { SameSectorMovers } from "@/components/dashboard/same-sector-movers";
 import dynamic from "next/dynamic";
 import { AssetAnalyticsResponse, ScoreDynamics, EventImpact } from "@/types/analytics";
@@ -1079,13 +1078,6 @@ export default function AssetPage({
               }}
               className="rounded-2xl"
             />
-          )}
-
-          {/* Scenario Analysis — assets with factor profiles */}
-          {factorData && (
-            <div className="pt-4">
-              <ScenarioAnalysisCard symbol={symbol} plan={plan} className="rounded-2xl" />
-            </div>
           )}
 
           <AssetCryptoDiagnosticsSection

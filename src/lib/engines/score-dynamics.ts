@@ -119,7 +119,7 @@ export async function calculateScoreDynamics(
     let sectorScores = prefetchedSectorScores;
     
     if (!sectorScores) {
-      const sectorAssets = await prisma.stockSector.findMany({
+      const sectorAssets = await prisma.assetSector.findMany({
         where: { sectorId, isActive: true },
         select: { assetId: true },
       });
@@ -182,7 +182,7 @@ export async function buildBulkDynamicsContext(
       select: { value: true, type: true },
       distinct: ["assetId", "type"],
     }),
-    prisma.stockSector.findMany({
+    prisma.assetSector.findMany({
       where: { assetId: { in: assetIds }, isActive: true },
       select: { assetId: true, sectorId: true },
     }),
@@ -207,7 +207,7 @@ export async function buildBulkDynamicsContext(
   // 3. Fetch all sector peer scores in one query (all sectors at once)
   const sectorScoresByAsset = new Map<string, Map<ScoreType, { value: number; assetId: string }[]>>();
   if (uniqueSectorIds.size > 0) {
-    const allPeerMappings = await prisma.stockSector.findMany({
+    const allPeerMappings = await prisma.assetSector.findMany({
       where: { sectorId: { in: [...uniqueSectorIds] }, isActive: true },
       select: { assetId: true, sectorId: true },
     });

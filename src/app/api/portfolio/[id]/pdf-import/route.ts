@@ -191,7 +191,7 @@ function isValidHolding(symbol: string, qty: number, price: number): boolean {
   const stopwords = new Set([
     "THE", "AND", "FOR", "NET", "TAX", "FEE", "INR", "USD", "EUR", "TOTAL",
     "BALANCE", "AMOUNT", "VALUE", "COST", "PRICE", "DATE", "TYPE", "ISIN",
-    "NAME", "DEBIT", "CREDIT", "EQUITY", "FUND", "CASH", "INTEREST",
+    "NAME", "DEBIT", "CREDIT", "FUND", "CASH", "INTEREST",
   ]);
   if (stopwords.has(symbol)) return false;
   if (isNaN(qty) || qty <= 0 || qty > 10_000_000) return false;

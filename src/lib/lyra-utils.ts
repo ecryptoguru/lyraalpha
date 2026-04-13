@@ -147,8 +147,8 @@ export function parseLyraMessage(content: string): ParsedLyraResponse {
   }
 
   const related = extractInlineRelatedQuestions(text);
-  text = related.cleanedText.replace(/\.NS\b/g, "");
-  relatedQuestions = related.relatedQuestions.map(q => q.replace(/\.NS\b/g, ""));
+  text = related.cleanedText;
+  relatedQuestions = related.relatedQuestions;
 
   return { text, sources, toolResults, relatedQuestions, signalChip };
 }

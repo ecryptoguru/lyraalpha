@@ -31,8 +31,7 @@ async function main() {
   await prisma.assetScore.deleteMany({});
   await prisma.marketRegime.deleteMany({});
   await prisma.institutionalEvent.deleteMany({});
-  await prisma.evidenceReference.deleteMany({});
-  await prisma.stockSector.deleteMany({});
+  await prisma.assetSector.deleteMany({});
   await prisma.evidence.deleteMany({});
   await prisma.sectorRegime.deleteMany({});
   await prisma.sector.deleteMany({});

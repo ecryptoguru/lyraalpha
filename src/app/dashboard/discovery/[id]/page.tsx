@@ -16,7 +16,7 @@ import { IntelligenceLoader } from "@/components/ui/intelligence-loader";
 import { cn, formatCompactNumber, getCurrencyConfig } from "@/lib/utils";
 
 import { DiscoverySectorDTO, CryptoMappingDTO } from "@/lib/types/discovery.dto";
-import { StockCardData } from "@/components/dashboard/types";
+import { CryptoCardData } from "@/components/dashboard/types";
 
 import useSWR from "swr";
 
@@ -224,12 +224,11 @@ export default function SectorDetailPage() {
 function mapDTOToCardData(
   dto: CryptoMappingDTO,
   sectorId: string,
-): StockCardData {
+): CryptoCardData {
   return {
     symbol: dto.symbol,
     name: dto.name,
     type: dto.type,
-    inclusionType: dto.inclusionType,
     eligibilityScore: dto.scores.eligibility,
     confidence: dto.confidence,
     marketCap: (() => {

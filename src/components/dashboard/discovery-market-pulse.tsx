@@ -30,7 +30,7 @@ interface Sector {
   id: string;
   name: string;
   slug: string;
-  _count: { stockSectors: number };
+  _count: { assetSectors: number };
   latestRegime: SectorRegime | null;
 }
 
@@ -165,7 +165,7 @@ export function DiscoveryMarketPulse() {
                       <span className="text-[10px] font-bold text-muted-foreground/30 w-4">{i + 1}</span>
                       <div className="min-w-0">
                         <p className="text-xs font-bold tracking-tight truncate group-hover:text-primary transition-colors">{s.name}</p>
-                        <p className="text-[9px] text-muted-foreground/40">{s._count.stockSectors} assets</p>
+                        <p className="text-[9px] text-muted-foreground/40">{s._count.assetSectors} assets</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">

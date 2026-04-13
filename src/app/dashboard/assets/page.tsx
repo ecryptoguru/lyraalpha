@@ -600,7 +600,6 @@ export default function AssetsPage() {
                       price={asset.price}
                       changePercent={asset.changePercent}
                       marketCap={asset.marketCap}
-                      peRatio={asset.peRatio}
                       oneYearChange={asset.oneYearChange}
                       signals={asset.signals}
                       type={asset.type}
@@ -609,11 +608,8 @@ export default function AssetsPage() {
                       compatibilityScore={asset.compatibility?.score}
                       compatibilityLabel={asset.compatibility?.label}
                       sector={asset.sector}
-                      dividendYield={asset.dividendYield}
                       fiftyTwoWeekHigh={asset.fiftyTwoWeekHigh}
                       fiftyTwoWeekLow={asset.fiftyTwoWeekLow}
-                      fundHouse={asset.fundHouse}
-                      schemeType={asset.schemeType}
                     />
                     </div>
                   ))}

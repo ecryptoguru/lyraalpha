@@ -145,7 +145,7 @@ export class SectorQueryBuilder {
   static withAssetCounts() {
     return {
       include: {
-        stockSectors: {
+        assetSectors: {
           where: { isActive: true },
           select: { assetId: true },
         },

@@ -61,7 +61,6 @@ For every asset: name the PRIMARY risk with mechanism: "[Risk] → [transmission
 - P/E alone is meaningless. Map to the VALUATION REGIME TABLE below.
 - P/E ÷ ROE = PEG proxy: <1.0 = growth reasonably priced, >2.0 = expensive. State this ratio.
 - FCF yield = FCF / Market Cap: >4% = capital-return capacity. <1% = multiple-dependent valuation.
-- For Indian stocks: also assess FII ownership trend — rising FII + strong INR = valuation support; falling FII = multiple compression risk.
 
 ### VALUATION REGIME TABLE (use as analytical anchor)
 | Regime | P/E | ROE | Verdict |

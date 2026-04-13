@@ -17,26 +17,17 @@ interface MarketAssetCardProps {
   price: number;
   changePercent: number;
   marketCap: number | null;
-  peRatio: number | null;
   oneYearChange: number | null;
   signals: AssetSignals;
   metadata?: Record<string, unknown> | null;
-  morningstarRating?: string | null;
-  expenseRatio?: number | null;
-  nav?: number | null;
-  
   category?: string | null;
   currency?: string | null;
   className?: string;
   compatibilityScore?: number | null;
   compatibilityLabel?: string | null;
   sector?: string | null;
-  dividendYield?: number | null;
   fiftyTwoWeekHigh?: number | null;
   fiftyTwoWeekLow?: number | null;
-  fundHouse?: string | null;
-  schemeType?: string | null;
-  beta?: number | null;
   scoreDynamics?: Record<string, unknown> | null;
 }
 
@@ -65,7 +56,7 @@ function getScoreColor(score: number) {
 export function MarketAssetCard({
   symbol,
   name,
-  type = "EQUITY",
+  type = "CRYPTO",
   price,
   changePercent,
   marketCap,

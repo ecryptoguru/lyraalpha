@@ -1,17 +1,8 @@
-import { InclusionType, EvidenceSourceType } from "@/generated/prisma/client";
 import { MarketContextSnapshot } from "@/lib/engines/market-regime";
-
-export interface EvidenceReferenceDTO {
-  sourceType: EvidenceSourceType;
-  title: string;
-  url: string | null;
-  excerpt: string | null;
-}
 
 export interface CryptoMappingDTO {
   symbol: string;
   name: string;
-  inclusionType: InclusionType;
   inclusionReason: string | null;
   assetId: string;
   type: string; // CRYPTO, DEFI, NFTS, LAYER1, LAYER2, etc.
@@ -36,7 +27,7 @@ export interface CryptoMappingDTO {
     analystRating: string | null;
   };
 
-  evidence: EvidenceReferenceDTO[];
+  evidence: { sourceType: string; title: string; url: string | null; excerpt: string | null }[];
   confidence: number;
   lastValidatedAt: string | null; // ISO string
 

@@ -25,7 +25,6 @@ export function BUILD_WHY_INCLUDED_PROMPT(data: {
   assetName: string;
   assetSymbol: string;
   sectorName: string;
-  inclusionType: string;
   inclusionReason: string;
   scores: {
     R: number;
@@ -71,7 +70,6 @@ Sector:
 - Name: ${data.sectorName}
 
 Inclusion Details:
-- Inclusion type: ${data.inclusionType}
 - Inclusion reason: ${data.inclusionReason}
 - Sector relevance score (R): ${data.scores.R}
 - Event freshness score (E): ${data.scores.E}

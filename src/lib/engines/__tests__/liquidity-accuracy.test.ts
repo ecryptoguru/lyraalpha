@@ -162,46 +162,6 @@ describe("Liquidity — relative volume score", () => {
   });
 });
 
-// ─── Short Drag Dimension ─────────────────────────────────────────────────────
-
-describe("Liquidity — short drag score", () => {
-  it("no short ratio → shortDragScore = 70 (neutral-positive)", () => {
-    const quote = makeQuote({ regularMarketVolume: 1_000_000, regularMarketPrice: 100 });
-    const history = makeHistory(Array(30).fill(1_000_000));
-    const result = calculateLiquidityScore(quote, { history, shortRatio: null });
-    const dims = result.metadata?.dimensions as Record<string, number>;
-    expect(dims.shortDrag).toBe(70);
-  });
-
-  it("shortRatio = 1 → shortDragScore = 82", () => {
-    const quote = makeQuote({ regularMarketVolume: 1_000_000, regularMarketPrice: 100 });
-    const history = makeHistory(Array(30).fill(1_000_000));
-    const result = calculateLiquidityScore(quote, { history, shortRatio: 1 });
-    const dims = result.metadata?.dimensions as Record<string, number>;
-    // 90 - 1*8 = 82
-    expect(dims.shortDrag).toBe(82);
-  });
-
-  it("shortRatio = 10 → shortDragScore = 10 (clamped)", () => {
-    const quote = makeQuote({ regularMarketVolume: 1_000_000, regularMarketPrice: 100 });
-    const history = makeHistory(Array(30).fill(1_000_000));
-    const result = calculateLiquidityScore(quote, { history, shortRatio: 10 });
-    const dims = result.metadata?.dimensions as Record<string, number>;
-    // 90 - 10*8 = 10
-    expect(dims.shortDrag).toBe(10);
-  });
-
-  it("higher short ratio → lower shortDrag score", () => {
-    const quote = makeQuote({ regularMarketVolume: 1_000_000, regularMarketPrice: 100 });
-    const history = makeHistory(Array(30).fill(1_000_000));
-    const low = calculateLiquidityScore(quote, { history, shortRatio: 2 });
-    const high = calculateLiquidityScore(quote, { history, shortRatio: 8 });
-    const lowDims = low.metadata?.dimensions as Record<string, number>;
-    const highDims = high.metadata?.dimensions as Record<string, number>;
-    expect(lowDims.shortDrag).toBeGreaterThan(highDims.shortDrag);
-  });
-});
-
 // ─── Cap Tier Dimension ───────────────────────────────────────────────────────
 
 describe("Liquidity — cap tier score", () => {
@@ -233,7 +193,7 @@ describe("Liquidity — cap tier score", () => {
 // ─── Composite Formula ────────────────────────────────────────────────────────
 
 describe("Liquidity — composite formula (with enrichment)", () => {
-  it("score = round(depth*0.40 + stability*0.15 + trend*0.15 + relative*0.15 + shortDrag*0.05 + capTier*0.10)", () => {
+  it("score = round(depth*0.40 + stability*0.15 + trend*0.15 + relative*0.15 + capTier*0.15)", () => {
     const quote = makeQuote({
       regularMarketVolume: 1_000_000,
       averageDailyVolume10Day: 1_000_000,
@@ -243,13 +203,12 @@ describe("Liquidity — composite formula (with enrichment)", () => {
     const result = calculateLiquidityScore(quote, {
       history,
       avgVolume3M: 1_000_000,
-      shortRatio: 2,
       marketCap: 10000000000,
     });
     const d = result.metadata?.dimensions as Record<string, number>;
     const expected = Math.round(
       d.depth * 0.40 + d.stability * 0.15 + d.trend * 0.15 +
-      d.relative * 0.15 + d.shortDrag * 0.05 + d.capTier * 0.10,
+      d.relative * 0.15 + d.capTier * 0.15,
     );
     const clamped = Math.min(100, Math.max(1, expected));
     expect(result.score).toBe(clamped);

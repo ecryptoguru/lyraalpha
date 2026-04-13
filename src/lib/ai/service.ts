@@ -197,7 +197,7 @@ function parseMarketCapValue(marketCap?: number | null): number {
 
 function inferSearchRegion(symbol: string, contextRegion?: string): "US" | "IN" {
   if ((contextRegion || "").toUpperCase() === "IN") return "IN";
-  return symbol.toUpperCase().endsWith(".NS") ? "IN" : "US";
+  return "US";
 }
 
 function scoreAssetCandidate(

@@ -4,18 +4,15 @@
  *
  * Handles:
  * - Institutional event generation from engine signals
- * - News intelligence sync from Yahoo Finance
  * - Stale data pruning (housekeeping)
  */
 
 import { directPrisma as prisma } from "../prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { FactorProfile } from "../engines/factor-attribution";
-import { fetchAssetNews } from "../market-data";
 import { SYNC_CONFIG } from "../engines/constants";
 import { createLogger } from "@/lib/logger";
-import { createTimer, sanitizeError } from "@/lib/logger/utils";
-import crypto from "crypto";
+import { createTimer } from "@/lib/logger/utils";
 
 const logger = createLogger({ service: "intelligence-events" });
 
@@ -98,60 +95,6 @@ export class IntelligenceEventsService {
           metadata: { sentiment: "bearish", BTC: btcCorr, ETH: ethCorr, avgCorrelation: avgBenchmarkCorr } as Prisma.InputJsonValue,
         },
       });
-    }
-  }
-
-  /**
-   * Sync news intelligence for an asset from Yahoo Finance.
-   * Creates NEWS-type InstitutionalEvent records with deduplication via MD5 hash.
-   * Uses batch operations for better performance.
-   */
-  static async syncNewsIntelligence(assetId: string, symbol: string) {
-    try {
-      const newsItems = await fetchAssetNews(symbol, 5);
-      if (newsItems.length === 0) return;
-
-      // Prepare all events for batch insertion
-      const eventsToCreate = newsItems.map((item) => {
-        const hash = crypto.createHash("md5").update(item.link || item.uuid || item.title).digest("hex");
-        const eventId = `news_${hash}`;
-        return {
-          id: eventId,
-          assetId,
-          type: "NEWS" as const,
-          title: item.title,
-          description: item.publisher || "Financial Wire",
-          severity: "LOW" as const,
-          date: new Date(
-            item.providerPublishTime > 1e12
-              ? item.providerPublishTime          // already milliseconds
-              : item.providerPublishTime * 1000   // convert seconds → ms
-          ),
-          metadata: {
-            link: item.link,
-          } as Prisma.InputJsonValue,
-        };
-      });
-
-      // Get existing event IDs to avoid duplicates
-      const eventIds = eventsToCreate.map((e) => e.id);
-      const existingEvents = await prisma.institutionalEvent.findMany({
-        where: { id: { in: eventIds } },
-        select: { id: true },
-      });
-      const existingIds = new Set(existingEvents.map((e) => e.id));
-
-      // Filter out existing events and batch insert new ones
-      const newEvents = eventsToCreate.filter((e) => !existingIds.has(e.id));
-      if (newEvents.length > 0) {
-        await prisma.institutionalEvent.createMany({
-          data: newEvents,
-          skipDuplicates: true,
-        });
-        logger.debug({ symbol, count: newEvents.length }, "Created new news events");
-      }
-    } catch (error) {
-      logger.error({ symbol, err: sanitizeError(error) }, "Failed to sync news intelligence");
     }
   }
 

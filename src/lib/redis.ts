@@ -324,8 +324,13 @@ export async function withCache<T>(
   }
 
   // 3. Fetch fresh data, store in cache, clean up in-flight entry
+  // Register inFlight BEFORE calling fetcher to close the dedup window
   // Bypass dedup if map is at capacity to prevent memory accumulation
   const canDedup = _inFlight.size < MAX_IN_FLIGHT_KEYS;
+  let resolveInFlight!: (v: T | null) => void;
+  const dedupPromise = new Promise<T | null>((res) => { resolveInFlight = res; });
+  if (canDedup) _inFlight.set(key, dedupPromise as unknown as Promise<unknown>);
+
   const promise = fetcher()
     .then((fresh) => {
       if (fresh !== null) {
@@ -337,7 +342,7 @@ export async function withCache<T>(
       _inFlight.delete(key);
     });
 
-  if (canDedup) _inFlight.set(key, promise);
+  promise.then(resolveInFlight).catch(() => resolveInFlight(null));
   return promise;
 }
 

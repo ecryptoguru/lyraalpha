@@ -57,45 +57,44 @@ describe("Portfolio Health — diversification score", () => {
     expect(result.dimensions.diversificationScore).toBe(0);
   });
 
-  it("4 equal-weight different types: typeHHI = 0.25 → typeScore = clamp((0.75)*125) = 93.75", () => {
-    // 4 types, equal weight 0.25 each → HHI = 4*(0.25^2) = 0.25
-    // typeScore = clamp((1-0.25)*100*1.25) = clamp(93.75) = 93.75
-    // 4 sectors, equal weight → sectorHHI = 0.25 → sectorScore = 93.75
-    // diversification = 93.75*0.6 + 93.75*0.4 = 93.75
+  it("4 equal-weight crypto with sector diversity: typeHHI = 1.0 (all CRYPTO), sectorHHI = 0.25", () => {
+    // Crypto-only platform: all assets are CRYPTO type → typeHHI = 1.0 → typeScore = 0
+    // 4 different sectors → sectorHHI = 0.25 → sectorScore = 93.75
+    // diversification = 0*0.6 + 93.75*0.4 = 37.5
     const result = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "EQUITY", sector: "Finance" }),
-      make({ symbol: "C", weight: 0.25, type: "ETF", sector: "Crypto" }),
-      make({ symbol: "D", weight: 0.25, type: "COMMODITY", sector: "Energy" }),
+      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "DeFi" }),
+      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "L1" }),
+      make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "L2" }),
+      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Meme" }),
     ]);
-    expect(result.dimensions.diversificationScore).toBeCloseTo(93.75, 0);
+    expect(result.dimensions.diversificationScore).toBeCloseTo(37.5, 0);
   });
 
-  it("all same type → typeHHI penalizes diversification vs mixed types", () => {
-    const sameType = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance" }),
+  it("sector diversity drives diversification on crypto-only platform", () => {
+    // On crypto-only platform, type is always CRYPTO, so sector diversity is key
+    const diverseSectors = computePortfolioHealth([
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "DeFi" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "L1" }),
     ]);
-    const mixedType = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance" }),
+    const sameSector = computePortfolioHealth([
+      make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "DeFi" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "DeFi" }),
     ]);
-    // Same type → typeHHI = 2*(0.5^2) = 0.5 → typeScore = clamp(0.5*125) = 62.5
-    // Mixed type → typeHHI = 0.5 → same typeScore BUT sectorHHI differs
-    // Both have 2 sectors so sectorScore is same → diversification equal here
-    // The key property: same-type portfolio scores ≤ mixed-type portfolio
-    expect(sameType.dimensions.diversificationScore).toBeLessThanOrEqual(mixedType.dimensions.diversificationScore);
+    // Both have same type (CRYPTO) but different sector concentration
+    // diverseSectors: sectorHHI = 0.5 → sectorScore = 62.5
+    // sameSector: sectorHHI = 1.0 → sectorScore = 0
+    expect(diverseSectors.dimensions.diversificationScore).toBeGreaterThan(sameSector.dimensions.diversificationScore);
   });
 
   it("all same sector → sectorHHI = 1.0 → sectorScore = 0", () => {
     const result = computePortfolioHealth([
       make({ symbol: "A", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.5, type: "EQUITY", sector: "Tech" }),
+      make({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Tech" }),
     ]);
-    // typeHHI = 0.5 → typeScore = clamp(0.5*125) = 62.5
-    // sectorHHI = 1.0 → sectorScore = 0
-    // diversification = 62.5*0.6 + 0*0.4 = 37.5
-    expect(result.dimensions.diversificationScore).toBeCloseTo(37.5, 0);
+    // Crypto-only: typeHHI = 1.0 → typeScore = 0
+    // same sector: sectorHHI = 1.0 → sectorScore = 0
+    // diversification = 0*0.6 + 0*0.4 = 0
+    expect(result.dimensions.diversificationScore).toBeCloseTo(0, 0);
   });
 });
 
@@ -342,21 +341,23 @@ describe("Portfolio Health — correlation score", () => {
     expect(result.dimensions.correlationScore).toBe(50);
   });
 
-  it("more unique types → higher correlation score", () => {
-    // 4 holdings: 4 types vs 1 type — with 4 holdings the clamp ceiling is not hit
-    const fourTypes = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "EQUITY", sector: "Finance" }),
-      make({ symbol: "C", weight: 0.25, type: "ETF", sector: "Crypto" }),
-      make({ symbol: "D", weight: 0.25, type: "COMMODITY", sector: "Energy" }),
+  it("more unique sectors → higher correlation score (crypto-only)", () => {
+    // Crypto-only platform: all types are CRYPTO, so sector diversity drives correlation score
+    // 4 holdings with 4 different sectors vs 4 holdings with 1 sector
+    const diverseSectors = computePortfolioHealth([
+      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "DeFi" }),
+      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "L1" }),
+      make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "L2" }),
+      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Meme" }),
     ]);
-    const oneType = computePortfolioHealth([
-      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "Tech" }),
-      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "Finance" }),
-      make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "Crypto" }),
-      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "Energy" }),
+    const singleSector = computePortfolioHealth([
+      make({ symbol: "A", weight: 0.25, type: "CRYPTO", sector: "DeFi" }),
+      make({ symbol: "B", weight: 0.25, type: "CRYPTO", sector: "DeFi" }),
+      make({ symbol: "C", weight: 0.25, type: "CRYPTO", sector: "DeFi" }),
+      make({ symbol: "D", weight: 0.25, type: "CRYPTO", sector: "DeFi" }),
     ]);
-    expect(fourTypes.dimensions.correlationScore).toBeGreaterThan(oneType.dimensions.correlationScore);
+    // Sector diversity should produce higher correlation score
+    expect(diverseSectors.dimensions.correlationScore).toBeGreaterThan(singleSector.dimensions.correlationScore);
   });
 
   it("more unique sectors → higher correlation score", () => {

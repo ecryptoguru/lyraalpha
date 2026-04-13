@@ -1,10 +1,7 @@
-import { InclusionType } from "@/generated/prisma/client";
-
-export interface StockCardData {
+export interface CryptoCardData {
   symbol: string;
   name: string;
   type?: string;
-  inclusionType: InclusionType;
 
   // UI Scores
   eligibilityScore: number;
@@ -12,7 +9,6 @@ export interface StockCardData {
 
   // Key Metrics
   marketCap: string;
-  peRatio?: string;
   oneYearChange: {
     value: string;
     isPositive: boolean;

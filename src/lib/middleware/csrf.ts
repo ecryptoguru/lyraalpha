@@ -27,7 +27,8 @@ const EXEMPT_PATH_PREFIXES = [
 export function validateOrigin(request: NextRequest): ReturnType<typeof apiError> | null {
   if (!MUTATION_METHODS.has(request.method)) return null;
 
-  const pathname = new URL(request.url).pathname;
+  const url = new URL(request.url);
+  const pathname = url.pathname;
   if (EXEMPT_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return null;
 
   const origin = request.headers.get("origin");
@@ -36,7 +37,7 @@ export function validateOrigin(request: NextRequest): ReturnType<typeof apiError
   // Allow it through; SameSite=Lax cookies already protect against CSRF in this case.
   if (!origin) return null;
 
-  const requestOrigin = new URL(request.url).origin;
+  const requestOrigin = url.origin;
   const allowedOrigins = new Set([requestOrigin]);
 
   // Support explicit override for preview deploys / custom domains

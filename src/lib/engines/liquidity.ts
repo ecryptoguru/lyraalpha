@@ -5,12 +5,11 @@ import { ENGINE_THRESHOLDS } from "./constants";
 /**
  * Optional enrichment data for multi-dimensional liquidity scoring.
  * When provided, the engine blends volume-depth with stability, trend,
- * relative-volume, short-interest, and market-cap signals.
+ * relative-volume, and market-cap signals.
  */
 export interface LiquidityEnrichment {
   history?: OHLCV[];
   avgVolume3M?: number | null;
-  shortRatio?: number | null;
   marketCap?: number | null;
 }
 
@@ -20,8 +19,7 @@ const W = {
   STABILITY: 0.15,
   TREND: 0.15,
   RELATIVE: 0.15,
-  SHORT_DRAG: 0.05,
-  CAP_TIER: 0.10,
+  CAP_TIER: 0.15,
 } as const;
 
 // ─── Helpers ────────────────────────────────────────────────────────
@@ -83,14 +81,7 @@ function relativeVolumeScore(spotVolume: number, avg3M: number): number {
   return Math.round(Math.max(10, Math.min(95, 50 + (ratio - 1) * 40)));
 }
 
-/** D5: Short-interest drag — high short ratio = liquidity drag */
-function shortDragScore(shortRatio: number | null | undefined): number {
-  if (!shortRatio || shortRatio <= 0) return 70; // No data = neutral-positive
-  // shortRatio < 2 → healthy (85), > 10 → heavy drag (15)
-  return Math.round(Math.max(10, Math.min(90, 90 - shortRatio * 8)));
-}
-
-/** D6: Market-cap tier — larger caps inherently more liquid */
+/** D5: Market-cap tier — larger caps inherently more liquid */
 function capTierScore(marketCap: number | null | undefined): number {
   const cap = marketCap ?? 0;
   if (cap >= 100_000_000_000) return 95; // Mega
@@ -104,7 +95,7 @@ function capTierScore(marketCap: number | null | undefined): number {
 
 function generateContext(
   score: number,
-  dims: { depth: number; stability: number; trend: number; relative: number; shortDrag: number; capTier: number },
+  dims: { depth: number; stability: number; trend: number; relative: number; capTier: number },
 ): string {
   if (score >= 85) return "Deep institutional liquidity. Minimal slippage expected.";
   if (score >= 70) return "Strong liquidity. Suitable for most position sizes.";
@@ -113,7 +104,6 @@ function generateContext(
     const warnings: string[] = [];
     if (dims.stability < 40) warnings.push("erratic volume");
     if (dims.trend < 35) warnings.push("declining volume trend");
-    if (dims.shortDrag < 30) warnings.push("heavy short interest");
     return `Thin liquidity${warnings.length ? ` (${warnings.join(", ")})` : ""}. Use limit orders.`;
   }
   return "Low liquidity. High slippage risk. Size positions carefully.";
@@ -160,7 +150,6 @@ export function calculateLiquidityScore(
     stability: stabilityScore(volumes),
     trend: trendScore(volumes),
     relative: relativeVolumeScore(volume, enrichment.avgVolume3M || 0),
-    shortDrag: shortDragScore(enrichment.shortRatio),
     capTier: capTierScore(enrichment.marketCap),
   };
 
@@ -169,7 +158,6 @@ export function calculateLiquidityScore(
     dims.stability * W.STABILITY +
     dims.trend * W.TREND +
     dims.relative * W.RELATIVE +
-    dims.shortDrag * W.SHORT_DRAG +
     dims.capTier * W.CAP_TIER
   )));
 

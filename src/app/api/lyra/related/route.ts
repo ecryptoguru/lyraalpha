@@ -82,7 +82,7 @@ STYLE RULES:
 
       const response = NextResponse.json({
         success: true,
-        questions: object.questions.slice(0, 3).map(q => q.replace(/\.NS\b/g, '')),
+        questions: object.questions.slice(0, 3),
       });
       if (rateLimitHeaders) {
         for (const [k, v] of Object.entries(rateLimitHeaders)) response.headers.set(k, v);

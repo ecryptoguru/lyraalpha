@@ -82,7 +82,7 @@ describe("GET /api/discovery/search", () => {
       assets: [
         { symbol: "BTC-USD", name: "Bitcoin", type: "CRYPTO", sectorSlug: "crypto", sectorName: "Crypto" },
         { symbol: "ETH-USD", name: "Ethereum", type: "CRYPTO", sectorSlug: "crypto", sectorName: "Crypto" },
-        { symbol: "AAPL", name: "Apple", type: "EQUITY", sectorSlug: "tech", sectorName: "Technology" },
+        { symbol: "SOL-USD", name: "Solana", type: "CRYPTO", sectorSlug: "l1", sectorName: "Layer 1" },
       ] as any,
     });
 
@@ -113,7 +113,7 @@ describe("GET /api/discovery/search", () => {
   it("returns sectors and assets in response", async () => {
     vi.mocked(DiscoveryService.search).mockResolvedValue({
       sectors: [{ id: "1", name: "Technology", slug: "tech" }] as any,
-      assets: [{ symbol: "AAPL", name: "Apple", type: "EQUITY", sectorSlug: "tech", sectorName: "Technology" }] as any,
+      assets: [{ symbol: "SOL-USD", name: "Solana", type: "CRYPTO", sectorSlug: "l1", sectorName: "Layer 1" }] as any,
     });
 
     const res = await GET(makeRequest("apple"));

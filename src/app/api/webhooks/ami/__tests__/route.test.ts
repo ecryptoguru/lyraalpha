@@ -377,7 +377,7 @@ describe("handleArchived", () => {
 
     const firstCall = (prisma.blogPost.updateMany as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(firstCall.where.sourceContentId).toBe("content-abc-123");
-    expect(firstCall.data.status).toBe("archived");
+    expect(firstCall.data.status).toBe("ARCHIVED");
   });
 
   it("falls back to slug update when sourceContentId matches zero rows", async () => {

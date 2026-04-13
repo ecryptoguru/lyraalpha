@@ -58,10 +58,6 @@ export function isElitePlan(plan: PlanTier): boolean {
 }
 
 
-/** Market access policy by asset type — all plans have full crypto access */
-export function canAccessAssetType(plan: PlanTier, assetType?: string | null): boolean {
-  return true;
-}
 
 /** Region access policy: Starter/Pro limited to IN+US, Elite/Enterprise all */
 export function canAccessRegion(plan: PlanTier, region?: string | null): boolean {
@@ -190,6 +186,9 @@ export async function expireTrialIfNeeded(
 }
 
 /** Bust the Redis plan cache for a user — call this in Stripe/Clerk webhooks after plan changes. */
+/** Clear plan cache for all users — used in test teardown. No-op when cache is disabled. */
+export function _clearPlanCacheForTest(): void {}
+
 export async function invalidatePlanCache(userId: string): Promise<void> {
   if (process.env.PLAN_CACHE_ENABLED !== "true") return;
   try {
@@ -200,8 +199,6 @@ export async function invalidatePlanCache(userId: string): Promise<void> {
   }
 }
 
-/** No-op for test compatibility. */
-export function _clearPlanCacheForTest(): void {}
 
 // ─── Gated Response Helper ──────────────────────────────────────────────────
 

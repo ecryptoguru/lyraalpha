@@ -29,10 +29,8 @@ import {
   getUserPlan,
   expireTrialIfNeeded,
   invalidatePlanCache,
-  _clearPlanCacheForTest,
   getPlanLimit,
   isElitePlan,
-  canAccessAssetType,
   canAccessRegion,
   hasFeatureAccess,
   getFeatureLevel,
@@ -41,7 +39,6 @@ import {
 describe("plan-gate", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    _clearPlanCacheForTest();
   });
 
   // ─── getUserPlan ───────────────────────────────────────────────
@@ -161,20 +158,6 @@ describe("plan-gate", () => {
     it("returns false for STARTER and PRO", () => {
       expect(isElitePlan("STARTER")).toBe(false);
       expect(isElitePlan("PRO")).toBe(false);
-    });
-  });
-
-  describe("canAccessAssetType", () => {
-    it("allows CRYPTO for all plans — full crypto access", () => {
-      expect(canAccessAssetType("STARTER", "CRYPTO")).toBe(true);
-      expect(canAccessAssetType("PRO", "CRYPTO")).toBe(true);
-      expect(canAccessAssetType("ELITE", "CRYPTO")).toBe(true);
-      expect(canAccessAssetType("ENTERPRISE", "CRYPTO")).toBe(true);
-    });
-
-    it("allows non-CRYPTO types for all plans", () => {
-      expect(canAccessAssetType("STARTER", "EQUITY")).toBe(true);
-      expect(canAccessAssetType("PRO", "ETF")).toBe(true);
     });
   });
 

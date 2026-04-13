@@ -206,9 +206,9 @@ export default function ToolsPage() {
                     accent: "teal",
                   },
                   {
-                    label: "US & India, 5 asset classes",
+                    label: "Crypto-native, multi-chain",
                     detail:
-                      "Equities, crypto, ETFs, mutual funds, and commodities — all in one system. Most AI finance tools are US-equity-only. This one covers both markets from the same analytical engine.",
+                      "Purpose-built for crypto assets across chains and protocols. Most AI finance tools are equity-only. LyraAlpha covers the full crypto market from a single analytical engine.",
                     accent: "amber",
                   },
                   {

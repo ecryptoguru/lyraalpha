@@ -38,7 +38,7 @@ import remarkGfm from "remark-gfm";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { StockCardData } from "./types";
+import { CryptoCardData } from "./types";
 import { useState } from "react";
 import { getFriendlySymbol } from "@/lib/format-utils";
 import {
@@ -53,7 +53,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LyraInsightSheet } from "@/components/lyra/lyra-insight-sheet";
 
 interface CryptoCardProps {
-  data: StockCardData;
+  data: CryptoCardData;
   inclusionReason?: string;
 }
 
@@ -243,7 +243,7 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
                       <DetailMetric label="Data Currency" value="High" />
                       <DetailMetric
                         label="Strategic Fit"
-                        value={data.inclusionType.replace(/_/g, " ")}
+                        value={inclusionReason || "N/A"}
                       />
                     </div>
 
@@ -329,7 +329,7 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
         <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/10 bg-muted/10 -mx-5 px-5 py-4 rounded-b-3xl mt-auto font-data">
             <MetricItem
               label="Inclusion"
-              value={data.inclusionType.replace(/_/g, " ")}
+              value={inclusionReason || "N/A"}
             />
              <MetricItem 
                 label="Market Cap" 
@@ -363,7 +363,6 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
             contextData={{
               metrics: {
                 marketCap: data.marketCap,
-                peRatio: data.peRatio,
                 performance: data.oneYearChange,
               },
               signals: data.signals,

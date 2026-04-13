@@ -125,13 +125,13 @@ export async function GET(req: NextRequest) {
     // Sort by magnitude, take top 5
     const topChanges = changes.sort((a, b) => b.magnitude - a.magnitude).slice(0, 5);
 
-    // Build summary text using clean display names (no .NS/.BO suffixes)
+    // Build summary text using clean display names
     let summary: string | null = null;
     if (topChanges.length > 0) {
       const parts = topChanges.slice(0, 3).map((c) => {
-        const cleanName = (c.name && c.name !== c.symbol && !c.name.endsWith(".NS") && !c.name.endsWith(".BO"))
+        const cleanName = (c.name && c.name !== c.symbol)
           ? c.name.split(" ").slice(0, 2).join(" ")
-          : c.symbol.replace(/\.NS$/, "").replace(/\.BO$/, "");
+          : c.symbol;
         return `${cleanName} (${c.description})`;
       });
       summary = `Since your last visit: ${parts.join(", ")}.`;

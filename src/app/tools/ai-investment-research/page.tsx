@@ -83,7 +83,7 @@ export default function AiInvestmentResearchPage() {
         },
         {
           question: "What markets and asset classes does Lyra cover?",
-          answer: "US and India markets across five asset classes: equities, crypto, ETFs, mutual funds, and commodities. Most AI finance tools are US-equity-only. LyraAlpha covers both markets from the same engine.",
+          answer: "Crypto markets across chains and protocols. Most AI finance tools are equity-only. LyraAlpha covers the full crypto market from the same engine.",
         },
         {
           question: "When should I use research instead of narrative tracking?",

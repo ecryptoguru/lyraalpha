@@ -108,7 +108,7 @@ model Asset {
   institutionalEvents     InstitutionalEvent[] @relation("AssetEvents")
   marketRegimes           MarketRegime[]
   priceHistory            PriceHistory[]       @relation("PriceHistory")
-  stockSectors            StockSector[]        @relation("StockSectors")
+  assetSectors            AssetSector[]        @relation("AssetSectors")
   discoveryFeedItems      DiscoveryFeedItem[]  @relation("AssetDiscovery")
   watchlistItems          WatchlistItem[]
   portfolioHoldings       PortfolioHolding[]
@@ -154,18 +154,6 @@ model Evidence {
   @@index([assetId])
 }
 
-model EvidenceReference {
-  id            String             @id @default(cuid())
-  stockSectorId String
-  sourceType    EvidenceSourceType
-  title         String
-  url           String?
-  excerpt       String?
-  createdAt     DateTime           @default(now())
-  StockSector   StockSector        @relation(fields: [stockSectorId], references: [id])
-
-  @@index([stockSectorId])
-}
 
 model InstitutionalEvent {
   id          String   @id @default(cuid())
@@ -340,7 +328,7 @@ model Sector {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   sectorRegimes SectorRegime[]
-  stockSectors  StockSector[]
+  assetSectors  AssetSector[]
 
   @@index([name])
 }
@@ -363,11 +351,11 @@ model SectorRegime {
   @@index([sectorId, date(sort: Desc)])
 }
 
-model StockSector {
+
+model AssetSector {
   id                String              @id @default(cuid())
   assetId           String
   sectorId          String
-  inclusionType     InclusionType
   inclusionReason   String?
   relevanceScore    Float               @default(0)
   freshnessScore    Float               @default(0)
@@ -382,13 +370,13 @@ model StockSector {
   decayAfterDays    Int?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
-  EvidenceReference EvidenceReference[]
-  asset             Asset               @relation("StockSectors", fields: [assetId], references: [id], onDelete: Cascade)
+  asset             Asset               @relation("AssetSectors", fields: [assetId], references: [id], onDelete: Cascade)
   sector            Sector              @relation(fields: [sectorId], references: [id])
 
   @@unique([assetId, sectorId])
   @@index([assetId])
   @@index([sectorId, isActive, eligibilityScore(sort: Desc)])
+  @@map("StockSector")
 }
 
 model TrendingQuestion {
@@ -805,22 +793,7 @@ enum AssetType {
   CRYPTO
 }
 
-enum EvidenceSourceType {
-  ANNUAL_REPORT
-  INVESTOR_PRESENTATION
-  PRESS_RELEASE
-  EXCHANGE_FILING
-  NEWS_ARTICLE
-  MANAGEMENT_COMMENTARY
-}
 
-enum InclusionType {
-  CORE_BUSINESS
-  EVENT_DRIVEN
-  STRUCTURAL_STRENGTH
-  STRATEGIC_ALIGNMENT
-  NARRATIVE_SIGNAL
-}
 
 enum PlanTier {
   STARTER

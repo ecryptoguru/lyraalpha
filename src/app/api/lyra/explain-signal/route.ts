@@ -50,7 +50,7 @@ async function generateExplanation(payload: ExplainSignalRequest): Promise<Expla
 Explain this signal to a user in plain English.
 
 SIGNAL:
-${JSON.stringify(payload, null, 2)}
+${JSON.stringify(payload)}
 
 INSTRUCTIONS:
 - Return ONLY valid JSON.

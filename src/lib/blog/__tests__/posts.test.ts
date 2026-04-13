@@ -103,12 +103,12 @@ describe("getAllPosts", () => {
     const posts = await getAllPosts();
     expect(posts.length).toBeGreaterThan(0);
     // all static posts have known slugs
-    expect(posts.some((p) => p.slug === "why-ai-finance-tools-hallucinate-and-how-to-fix-it")).toBe(true);
+    expect(posts.some((p) => p.slug === "why-crypto-ai-tools-hallucinate-and-how-to-fix-it")).toBe(true);
   });
 
   it("deduplicates DB posts that share slug with static posts", async () => {
     // return a DB post with same slug as a static one — static should be excluded
-    const staticSlug = "why-ai-finance-tools-hallucinate-and-how-to-fix-it";
+    const staticSlug = "why-crypto-ai-tools-hallucinate-and-how-to-fix-it";
     const dbRow = makeDbRow({ slug: staticSlug, publishedAt: new Date("2026-03-20T00:00:00Z") });
     (prisma.blogPost.findMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce([dbRow]);
 
@@ -172,9 +172,9 @@ describe("getPostBySlugAsync", () => {
   it("falls back to static post when DB returns null", async () => {
     (prisma.blogPost.findFirst as ReturnType<typeof vi.fn>).mockResolvedValueOnce(null);
 
-    const post = await getPostBySlugAsync("why-ai-finance-tools-hallucinate-and-how-to-fix-it");
+    const post = await getPostBySlugAsync("why-crypto-ai-tools-hallucinate-and-how-to-fix-it");
     expect(post).toBeDefined();
-    expect(post?.slug).toBe("why-ai-finance-tools-hallucinate-and-how-to-fix-it");
+    expect(post?.slug).toBe("why-crypto-ai-tools-hallucinate-and-how-to-fix-it");
   });
 
   it("returns undefined for completely unknown slug with DB returning null", async () => {
@@ -187,8 +187,8 @@ describe("getPostBySlugAsync", () => {
   it("falls back to static post when DB throws", async () => {
     (prisma.blogPost.findFirst as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error("timeout"));
 
-    const post = await getPostBySlugAsync("why-ai-finance-tools-hallucinate-and-how-to-fix-it");
-    expect(post?.slug).toBe("why-ai-finance-tools-hallucinate-and-how-to-fix-it");
+    const post = await getPostBySlugAsync("why-crypto-ai-tools-hallucinate-and-how-to-fix-it");
+    expect(post?.slug).toBe("why-crypto-ai-tools-hallucinate-and-how-to-fix-it");
   });
 
   it("maps heroImageUrl null to undefined on the returned object", async () => {
@@ -360,7 +360,7 @@ describe("getAllSlugs", () => {
     const slugs = await getAllSlugs();
     expect(slugs).toContain("db-only-post");
     // Static slugs not already in DB should also appear
-    expect(slugs).toContain("why-ai-finance-tools-hallucinate-and-how-to-fix-it");
+    expect(slugs).toContain("why-crypto-ai-tools-hallucinate-and-how-to-fix-it");
   });
 
   it("selects only slug column", async () => {
@@ -373,7 +373,7 @@ describe("getAllSlugs", () => {
   });
 
   it("deduplicates slugs between DB and static posts", async () => {
-    const staticSlug = "why-ai-finance-tools-hallucinate-and-how-to-fix-it";
+    const staticSlug = "why-crypto-ai-tools-hallucinate-and-how-to-fix-it";
     (prisma.blogPost.findMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce([
       { slug: staticSlug },
     ]);

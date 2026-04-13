@@ -25,13 +25,6 @@ import {
   Mountain,
   LucideIcon,
   Loader2,
-  Landmark,
-  ShieldCheck,
-  Pill,
-  Factory,
-  Building2,
-  FlaskConical,
-  Layers,
   TrendingUp,
   TrendingDown,
   Minus,
@@ -75,20 +68,6 @@ const ICON_MAP: Record<string, LucideIcon> = {
   genomics: Dna,
   robotics: Cpu,
   "quantum-computing": Cpu,
-  // Indian market sectors
-  "banking-finance-in": Landmark,
-  "insurance-in": ShieldCheck,
-  "it-services-in": Cpu,
-  "pharma-healthcare-in": Pill,
-  "auto-mobility-in": Car,
-  "infrastructure-capital-in": Factory,
-  "energy-oil-gas-in": Sun,
-  "fmcg-consumer-in": Sprout,
-  "metals-mining-in": Mountain,
-  "telecom-digital-in": Globe,
-  "real-estate-cement-in": Building2,
-  "conglomerate-in": Layers,
-  "chemicals-specialty-in": FlaskConical,
 };
 
 // Color mapping helper based on sector nature
@@ -98,20 +77,6 @@ const COLOR_MAP: Record<string, string> = {
   semiconductors: "text-cyan-500",
   cybersecurity: "text-red-500",
   "clean-energy": "text-amber-400",
-  // Indian market sectors
-  "banking-finance-in": "text-amber-500",
-  "insurance-in": "text-emerald-500",
-  "it-services-in": "text-cyan-500",
-  "pharma-healthcare-in": "text-rose-500",
-  "auto-mobility-in": "text-orange-500",
-  "infrastructure-capital-in": "text-amber-500",
-  "energy-oil-gas-in": "text-yellow-500",
-  "fmcg-consumer-in": "text-green-500",
-  "metals-mining-in": "text-slate-400",
-  "telecom-digital-in": "text-amber-500",
-  "real-estate-cement-in": "text-teal-500",
-  "conglomerate-in": "text-amber-500",
-  "chemicals-specialty-in": "text-pink-500",
   default: "text-slate-400",
 };
 
@@ -155,13 +120,13 @@ interface Sector {
   name: string;
   slug: string;
   description: string | null;
-  stockSectors: {
+  assetSectors: {
     asset: {
       symbol: string;
     };
   }[];
   _count: {
-    stockSectors: number;
+    assetSectors: number;
   };
   latestRegime: SectorRegime | null;
   displayOrder: number | null;
@@ -208,7 +173,7 @@ export function DiscoverySectorGrid() {
       {sectors.map((data: Sector) => {
         const Icon = ICON_MAP[data.slug] || Globe;
         const colorClass = COLOR_MAP[data.slug] || "text-slate-400";
-        const assets = data.stockSectors.map((m) => m.asset.symbol);
+        const assets = data.assetSectors.map((m) => m.asset.symbol);
         const regime = data.latestRegime;
         const score = regime?.regimeScore ?? 0;
         const momentum = regime?.rotationMomentum ?? 0;
@@ -291,7 +256,7 @@ export function DiscoverySectorGrid() {
                 <div className="px-4 md:px-5 py-3 border-t border-white/5 bg-muted/10">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg md:text-xl font-bold tracking-tight">{data._count.stockSectors}</span>
+                      <span className="text-lg md:text-xl font-bold tracking-tight">{data._count.assetSectors}</span>
                       <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-40">Assets</span>
                     </div>
 
@@ -302,7 +267,7 @@ export function DiscoverySectorGrid() {
                           className="h-6 w-6 md:h-7 md:w-7 rounded-full border-2 border-background bg-muted flex items-center justify-center font-bold shadow-sm transition-transform duration-300 group-hover:translate-x-0.5"
                           style={{ zIndex: 3 - idx }}
                         >
-                          {symbol.replace(".NS", "").substring(0, 2)}
+                          {symbol.substring(0, 2)}
                         </div>
                       ))}
                       {assets.length > 3 && (

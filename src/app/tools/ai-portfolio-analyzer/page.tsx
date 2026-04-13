@@ -91,8 +91,8 @@ export default function AiPortfolioAnalyzerPage() {
           answer: "Shock Simulator runs historical stress scenarios on your portfolio — rate shocks, crypto drawdowns, credit events, liquidity crises. It shows how your specific holdings would have behaved, not how a generic balanced portfolio would.",
         },
         {
-          question: "Does this work for Indian portfolios?",
-          answer: "Yes. LyraAlpha covers both US and India markets. Indian equity portfolios, mutual funds, and multi-asset mixes are all supported in the portfolio intelligence system.",
+          question: "Does this work for crypto portfolios?",
+          answer: "Yes. LyraAlpha is purpose-built for crypto. Multi-chain portfolios, DeFi positions, and diversified crypto holdings are all supported in the portfolio intelligence system.",
         },
         {
           question: "What should I do after the portfolio summary?",

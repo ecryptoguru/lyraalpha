@@ -1,8 +1,6 @@
 import { prisma } from "../prisma";
 import {
   Sector,
-  InclusionType,
-  EvidenceSourceType,
   AssetType,
   ScoreType,
   Prisma,
@@ -19,12 +17,12 @@ const logger = createLogger({ service: "discovery-service" });
 
 export type Tier = "Strong" | "Moderate" | "Emerging" | "Peripheral";
 
-export type AssetMappingWithRelations = {
+// Type for AssetSector with asset include (matches the Prisma query)
+type AssetMappingWithRelations = {
   id: string;
   sectorId: string;
   assetId: string;
   isActive: boolean;
-  inclusionType: InclusionType;
   inclusionReason: string | null;
   eligibilityScore: number;
   relevanceScore: number;
@@ -51,13 +49,6 @@ export type AssetMappingWithRelations = {
       value: number;
     }[];
   };
-  EvidenceReference: {
-    sourceType: EvidenceSourceType;
-    title: string;
-    url: string | null;
-    excerpt: string | null;
-  }[];
-  sector?: Sector;
 };
 
 export interface ClusteredAssets {
@@ -109,7 +100,7 @@ export class DiscoveryService {
    */
   static calculateFreshness(lastEventDate: Date): number {
     const diffTime = Math.abs(new Date().getTime() - lastEventDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const { BASE, LAMBDA } = DISCOVERY.FRESHNESS_DECAY;
     return Math.round(BASE * Math.exp(LAMBDA * diffDays));
   }
@@ -133,7 +124,7 @@ export class DiscoveryService {
     return "Peripheral";
   }
 
-  static readonly PRIORITY_MAP: Record<InclusionType, number> = {
+  static readonly PRIORITY_MAP: Record<string, number> = {
     EVENT_DRIVEN: 5,
     CORE_BUSINESS: 4,
     STRUCTURAL_STRENGTH: 3,
@@ -161,7 +152,7 @@ export class DiscoveryService {
         const sectorRegion = sector.slug.startsWith("india-") ? "IN" : "US";
 
         // Run independent queries in parallel after sector is resolved
-        const [latestRegime, regimeData, stockMappings] = await Promise.all([
+        const [latestRegime, regimeData, assetMappings] = await Promise.all([
           prisma.marketRegime.findFirst({
             where: { region: sectorRegion, context: { startsWith: "{" } },
             orderBy: { date: "desc" },
@@ -173,7 +164,7 @@ export class DiscoveryService {
             logger.warn({ err: e }, "Failed to fetch sector regime");
             return null;
           }),
-          prisma.stockSector.findMany({
+          prisma.assetSector.findMany({
           where: {
             sectorId: sector.id,
             isActive: true,
@@ -197,9 +188,6 @@ export class DiscoveryService {
                   select: { type: true, value: true },
                 },
               },
-            },
-            EvidenceReference: {
-              select: { sourceType: true, title: true, url: true, excerpt: true },
             },
           },
           orderBy: { eligibilityScore: "desc" },
@@ -237,12 +225,12 @@ export class DiscoveryService {
             Peripheral: [],
           },
           metadata: {
-            totalAssets: stockMappings.length,
+            totalAssets: assetMappings.length,
             avgDrift: 0,
           },
         };
 
-        stockMappings.forEach((mapping: AssetMappingWithRelations) => {
+        assetMappings.forEach((mapping: AssetMappingWithRelations) => {
           let adjustedScore = mapping.eligibilityScore;
 
           if (sectorRegime) {
@@ -298,7 +286,6 @@ export class DiscoveryService {
     return {
       symbol: m.asset.symbol,
       name: m.asset.name,
-      inclusionType: m.inclusionType,
       inclusionReason: m.inclusionReason,
       assetId: m.assetId,
       currency: m.asset.currency || "USD",
@@ -319,12 +306,7 @@ export class DiscoveryService {
       type: m.asset.type,
       metadata: m.asset.metadata as Record<string, unknown> | null,
       signals, // Injected institutional signals
-      evidence: m.EvidenceReference.map((e: { sourceType: EvidenceSourceType; title: string; url: string | null; excerpt: string | null }) => ({
-        sourceType: e.sourceType,
-        title: e.title,
-        url: e.url,
-        excerpt: e.excerpt,
-      })),
+      evidence: [],
       confidence: m.confidence,
       lastValidatedAt: m.lastValidatedAt?.toISOString() || null,
     };
@@ -352,7 +334,7 @@ export class DiscoveryService {
           orderBy: { name: "asc" },
           where: region
             ? {
-                stockSectors: {
+                assetSectors: {
                   some: {
                     isActive: true,
                     asset: { OR: [{ region }, { region: null }] },
@@ -361,7 +343,7 @@ export class DiscoveryService {
               }
             : undefined,
           include: {
-            stockSectors: {
+            assetSectors: {
               where: { isActive: true, ...assetRegionFilter },
               take: 5,
               orderBy: { eligibilityScore: "desc" },
@@ -371,7 +353,7 @@ export class DiscoveryService {
             },
             _count: {
               select: {
-                stockSectors: {
+                assetSectors: {
                   where: { isActive: true, ...assetRegionFilter },
                 },
               },
@@ -453,7 +435,7 @@ export class DiscoveryService {
 
         const [sectors, assetMappings] = await Promise.all([
           sectorsPromise,
-          prisma.stockSector.findMany({
+          prisma.assetSector.findMany({
             where: {
               isActive: true,
               AND: [

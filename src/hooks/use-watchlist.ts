@@ -11,7 +11,6 @@ interface WatchlistAsset {
   region: string | null;
   marketCap: number | null;
   sector: string | null;
-  fundHouse: string | null;
   scoreDynamics: Record<string, unknown> | null;
   compatibilityScore: number | null;
 }

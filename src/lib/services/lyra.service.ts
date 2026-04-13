@@ -29,12 +29,11 @@ export class LyraService {
    * Core logic: fetch mapping, build prompt, generate explanation.
    */
   private static async generateExplanation(assetId: string, sectorId: string): Promise<string> {
-    const mapping = await prisma.stockSector.findUnique({
+    const mapping = await prisma.assetSector.findUnique({
       where: { assetId_sectorId: { assetId, sectorId } },
       include: {
         asset: { include: { scores: { take: 6, orderBy: { date: "desc" } } } },
         sector: true,
-        EvidenceReference: true,
       },
     });
 
@@ -52,16 +51,13 @@ export class LyraService {
       assetName: mapping.asset.name,
       assetSymbol: mapping.asset.symbol,
       sectorName: mapping.sector.name,
-      inclusionType: mapping.inclusionType,
-      inclusionReason: mapping.inclusionReason || "Structural business alignment",
+      inclusionReason: mapping.inclusionReason || "Structural alignment",
       scores: {
         R: mapping.relevanceScore, E: mapping.freshnessScore,
         B: mapping.strengthScore, N: mapping.densityScore, M: mapping.behaviorScore,
       },
       institutionalSignals,
-      evidenceRefs: mapping.EvidenceReference.map((e) => ({
-        sourceType: e.sourceType, title: e.title,
-      })),
+      evidenceRefs: [],
     };
 
     const openai = getOpenAIClient();

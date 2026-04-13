@@ -21,7 +21,7 @@ export interface GroupingResult {
 export function classifyAsset(
   signals: AssetSignals,
   compatibility: CompatibilityResult,
-  assetType: string = "equity",
+  assetType: string = "CRYPTO",
 ): GroupingResult {
   const arcs = compatibility.score;
   const { trend, momentum, volatility, liquidity } = signals;

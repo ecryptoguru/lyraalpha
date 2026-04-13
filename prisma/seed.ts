@@ -1,4 +1,4 @@
-import { AssetType, InclusionType } from "../src/generated/prisma/client";
+import { AssetType } from "../src/generated/prisma/client";
 import { directPrisma as prisma } from "../src/lib/prisma";
 import { blogPosts as staticBlogPosts } from "../src/lib/blog/posts";
 
@@ -301,7 +301,7 @@ async function main() {
         });
 
         // Create Mapping
-        await prisma.stockSector.upsert({
+        await prisma.assetSector.upsert({
           where: {
             assetId_sectorId: {
               assetId: asset.id,
@@ -310,14 +310,12 @@ async function main() {
           },
           update: {
             isActive: true,
-            inclusionType: InclusionType.CORE_BUSINESS,
             eligibilityScore: 85,
           },
           create: {
             assetId: asset.id,
             sectorId: dbSector.id,
             isActive: true,
-            inclusionType: InclusionType.CORE_BUSINESS,
             eligibilityScore: 85,
             inclusionReason: `Core holding in ${sector.name} sector.`,
           },

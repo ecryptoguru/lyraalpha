@@ -220,7 +220,7 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     category: "intelligence",
     isEliteOnly: false,
     requiredModules: [
-      "india-market-structure",
+      "crypto-market-structure",
       "defensive-vs-risk-on",
     ],
   },

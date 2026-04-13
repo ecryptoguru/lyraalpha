@@ -44,23 +44,7 @@ export interface SignalStrengthResult {
 }
 
 export interface FundamentalData {
-  peRatio?: number | null;
-  industryPe?: number | null;
-  pegRatio?: number | null;
-  priceToBook?: number | null;
-  roe?: number | null;
-  roce?: number | null;
-  profitMargins?: number | null;
-  operatingMargins?: number | null;
-  revenueGrowth?: number | null;
-  dividendYield?: number | null;
-  shortRatio?: number | null;
-  heldPercentInstitutions?: number | null;
-  targetMeanPrice?: number | null;
-  currentPrice?: number | null;
   distanceFrom52WHigh?: number | null;
-  beta?: number | null;
-  debtToEquity?: number | null;
 }
 
 export interface SignalStrengthInput {
@@ -111,7 +95,7 @@ export function calculateSignalStrength(input: SignalStrengthInput): SignalStren
   );
 
   // Layer 3: Fundamental Quality
-  const fundamentalScore = calculateFundamentalQuality(input.fundamentals, assetType);
+  const fundamentalScore = calculateFundamentalQuality(input.fundamentals ?? null, assetType);
 
   // Layer 4: Score Dynamics
   const dynamicsScore = calculateDynamicsScore(input.scoreDynamics);
@@ -257,178 +241,9 @@ function calculateRegimeMomentumBonus(regime: string, signals: AssetSignals): nu
 
 // ─── Layer 3: Fundamental Quality ────────────────────────────────────────────
 
-function calculateFundamentalQuality(
-  fundamentals: FundamentalData | null | undefined,
-  assetType: string,
-): number {
-  // No fundamentals for crypto/commodities — return neutral
-  if (!fundamentals || assetType === "CRYPTO") {
-    return 50;
-  }
-
-  const valuationScore = calculateValuationScore(fundamentals);
-  const profitabilityScore = calculateProfitabilityScore(fundamentals);
-  const analystScore = calculateAnalystScore(fundamentals);
-  const ownershipScore = calculateOwnershipScore(fundamentals);
-
-  return clamp(
-    valuationScore * 0.35 +
-    profitabilityScore * 0.25 +
-    analystScore * 0.25 +
-    ownershipScore * 0.15,
-    0, 100,
-  );
-}
-
-function calculateValuationScore(f: FundamentalData): number {
-  const score = 50; // Start neutral
-  let factors = 0;
-  let total = 0;
-
-  // P/E vs Industry P/E
-  if (f.peRatio != null && f.industryPe != null && f.industryPe > 0) {
-    const peRatio = f.peRatio / f.industryPe;
-    if (peRatio < 0.7) total += 85;       // Significantly undervalued
-    else if (peRatio < 0.9) total += 70;   // Moderately undervalued
-    else if (peRatio < 1.1) total += 55;   // Fair value
-    else if (peRatio < 1.3) total += 35;   // Moderately overvalued
-    else total += 20;                       // Significantly overvalued
-    factors++;
-  }
-
-  // PEG Ratio
-  if (f.pegRatio != null && f.pegRatio > 0) {
-    if (f.pegRatio < 0.5) total += 90;
-    else if (f.pegRatio < 1.0) total += 75;
-    else if (f.pegRatio < 1.5) total += 55;
-    else if (f.pegRatio < 2.0) total += 35;
-    else total += 15;
-    factors++;
-  }
-
-  // Price to Book
-  if (f.priceToBook != null && f.priceToBook > 0) {
-    if (f.priceToBook < 1.0) total += 80;
-    else if (f.priceToBook < 2.0) total += 65;
-    else if (f.priceToBook < 3.0) total += 50;
-    else if (f.priceToBook < 5.0) total += 35;
-    else total += 20;
-    factors++;
-  }
-
-  // Distance from 52W high (penalty for being near highs)
-  if (f.distanceFrom52WHigh != null) {
-    const dist = Math.abs(f.distanceFrom52WHigh);
-    if (dist > 30) total += 75;       // Far from high — potential value
-    else if (dist > 15) total += 60;
-    else if (dist > 5) total += 45;
-    else total += 30;                   // Near 52W high — expensive
-    factors++;
-  }
-
-  return factors > 0 ? total / factors : score;
-}
-
-function calculateProfitabilityScore(f: FundamentalData): number {
-  let total = 0;
-  let factors = 0;
-
-  // ROE
-  if (f.roe != null) {
-    const roePercent = Math.abs(f.roe) > 1 ? f.roe : f.roe * 100;
-    if (roePercent > 20) total += 85;
-    else if (roePercent > 15) total += 70;
-    else if (roePercent > 10) total += 55;
-    else if (roePercent > 5) total += 40;
-    else total += 20;
-    factors++;
-  }
-
-  // Operating Margins
-  if (f.operatingMargins != null) {
-    const margin = Math.abs(f.operatingMargins) > 1 ? f.operatingMargins : f.operatingMargins * 100;
-    if (margin > 25) total += 85;
-    else if (margin > 15) total += 70;
-    else if (margin > 10) total += 55;
-    else if (margin > 5) total += 40;
-    else total += 20;
-    factors++;
-  }
-
-  // Revenue Growth
-  if (f.revenueGrowth != null) {
-    const growth = Math.abs(f.revenueGrowth) > 1 ? f.revenueGrowth : f.revenueGrowth * 100;
-    if (growth > 30) total += 90;
-    else if (growth > 15) total += 75;
-    else if (growth > 5) total += 55;
-    else if (growth > 0) total += 40;
-    else total += 20;
-    factors++;
-  }
-
-  // Debt to Equity (lower is better)
-  if (f.debtToEquity != null && f.debtToEquity >= 0) {
-    if (f.debtToEquity < 30) total += 80;
-    else if (f.debtToEquity < 60) total += 65;
-    else if (f.debtToEquity < 100) total += 50;
-    else if (f.debtToEquity < 150) total += 35;
-    else total += 15;
-    factors++;
-  }
-
-  return factors > 0 ? total / factors : 50;
-}
-
-function calculateAnalystScore(f: FundamentalData): number {
-  if (!f.targetMeanPrice || !f.currentPrice || f.currentPrice <= 0) return 50;
-
-  const upsidePercent = ((f.targetMeanPrice - f.currentPrice) / f.currentPrice) * 100;
-
-  if (upsidePercent > 30) return 90;
-  if (upsidePercent > 20) return 80;
-  if (upsidePercent > 10) return 65;
-  if (upsidePercent > 5) return 55;
-  if (upsidePercent > 0) return 45;
-  if (upsidePercent > -10) return 35;
-  if (upsidePercent > -20) return 25;
-  return 15;
-}
-
-function calculateOwnershipScore(f: FundamentalData): number {
-  let total = 0;
-  let factors = 0;
-
-  // Institutional ownership (higher = more professional confidence)
-  if (f.heldPercentInstitutions != null) {
-    const pct = f.heldPercentInstitutions > 1 ? f.heldPercentInstitutions : f.heldPercentInstitutions * 100;
-    if (pct > 80) total += 80;
-    else if (pct > 60) total += 70;
-    else if (pct > 40) total += 55;
-    else if (pct > 20) total += 40;
-    else total += 25;
-    factors++;
-  }
-
-  // Short ratio (lower is better — less bearish sentiment)
-  if (f.shortRatio != null && f.shortRatio > 0) {
-    if (f.shortRatio < 2) total += 75;
-    else if (f.shortRatio < 4) total += 60;
-    else if (f.shortRatio < 6) total += 45;
-    else if (f.shortRatio < 10) total += 30;
-    else total += 15;
-    factors++;
-  }
-
-  // Beta (moderate beta preferred — not too volatile, not too defensive)
-  if (f.beta != null && f.beta > 0) {
-    if (f.beta >= 0.8 && f.beta <= 1.3) total += 70;
-    else if (f.beta >= 0.5 && f.beta <= 1.5) total += 55;
-    else if (f.beta < 0.5) total += 40; // Too defensive
-    else total += 30; // Too volatile
-    factors++;
-  }
-
-  return factors > 0 ? total / factors : 50;
+function calculateFundamentalQuality(_fundamentals: FundamentalData | null, _assetType: string): number {
+  // Crypto-only platform — fundamental quality scoring is not applicable
+  return 50;
 }
 
 // ─── Layer 4: Score Dynamics ─────────────────────────────────────────────────
@@ -608,22 +423,6 @@ function extractKeyDrivers(
     drivers.push({ text: `${input.compatibility.label} with market regime (ARCS: ${input.compatibility.score})`, weight: input.compatibility.score });
   }
 
-  // Fundamental drivers
-  if (fundamentalScore >= 65 && input.fundamentals) {
-    if (input.fundamentals.targetMeanPrice && input.fundamentals.currentPrice) {
-      const upside = ((input.fundamentals.targetMeanPrice - input.fundamentals.currentPrice) / input.fundamentals.currentPrice) * 100;
-      if (upside > 10) {
-        drivers.push({ text: `Analyst consensus targets ${upside.toFixed(1)}% upside from current price`, weight: 60 + upside });
-      }
-    }
-    if (input.fundamentals.roe != null) {
-      const roePercent = Math.abs(input.fundamentals.roe) > 1 ? input.fundamentals.roe : input.fundamentals.roe * 100;
-      if (roePercent > 15) {
-        drivers.push({ text: `Strong capital efficiency with ROE at ${roePercent.toFixed(1)}%`, weight: 60 + roePercent });
-      }
-    }
-  }
-
   // Dynamics drivers
   if (dynamicsScore >= 65 && input.scoreDynamics) {
     const improving = Object.values(input.scoreDynamics).filter(d => d.trend === "IMPROVING").length;
@@ -669,22 +468,6 @@ function extractRiskFactors(
   // Weak compatibility
   if (input.compatibility.label === "Weak Fit" || input.compatibility.label === "Poor Fit") {
     risks.push({ text: `${input.compatibility.label} with regime — asset characteristics misaligned with market conditions`, weight: 100 - input.compatibility.score });
-  }
-
-  // Fundamental risks
-  if (input.fundamentals) {
-    if (input.fundamentals.shortRatio != null && input.fundamentals.shortRatio > 5) {
-      risks.push({ text: `Elevated short interest (ratio: ${input.fundamentals.shortRatio.toFixed(1)}) — bearish institutional sentiment`, weight: 50 + input.fundamentals.shortRatio * 3 });
-    }
-    if (input.fundamentals.targetMeanPrice && input.fundamentals.currentPrice) {
-      const downside = ((input.fundamentals.currentPrice - input.fundamentals.targetMeanPrice) / input.fundamentals.currentPrice) * 100;
-      if (downside > 10) {
-        risks.push({ text: `Trading ${downside.toFixed(1)}% above analyst mean target — potential overvaluation`, weight: 50 + downside });
-      }
-    }
-    if (input.fundamentals.debtToEquity != null && input.fundamentals.debtToEquity > 100) {
-      risks.push({ text: `High debt-to-equity ratio (${input.fundamentals.debtToEquity.toFixed(0)}%) — elevated financial leverage risk`, weight: 50 + input.fundamentals.debtToEquity / 5 });
-    }
   }
 
   // Deteriorating dynamics

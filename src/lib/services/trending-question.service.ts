@@ -92,7 +92,6 @@ Return ONLY a JSON array of 6 objects with this structure:
       const cleanedResponse = response
         .replace(/```json\n?/g, "")
         .replace(/```\n?/g, "")
-        .replace(/\.NS\b/g, "")
         .trim();
       const newQuestions = safeJsonParse<{ question: string; category: string }[]>(cleanedResponse);
 

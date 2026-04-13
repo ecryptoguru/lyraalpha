@@ -405,7 +405,7 @@ export const INDIA_CEX_INTEGRATION_MATRIX: BrokerIntegrationMatrixEntry[] = [
     region: "IN",
     accessModel: "public_api",
     scope: ["holdings", "transactions", "orders", "balances"],
-    authNotes: "BuyUcoin API: API key authentication. Good coverage of Indian market.",
+    authNotes: "BuyUcoin API: API key authentication. Good coverage of Indian crypto market.",
     productionNotes: "Good retail breadth. Add as secondary source once Phase 1 connectors are live.",
     phase: "phase_2",
   },

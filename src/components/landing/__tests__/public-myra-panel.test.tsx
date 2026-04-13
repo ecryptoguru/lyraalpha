@@ -156,4 +156,34 @@ describe("renderContent", () => {
     expect(h).toContain("line1");
     expect(h).toContain("line2");
   });
+
+  it("renders complex markdown with all formatting types", () => {
+    const content = `## Welcome to LyraAlpha
+
+This is **bold** and *italic* text with \`inline code\`.
+
+- Feature one
+- Feature two
+
+1. Step one
+2. Step two
+
+\`\`\`ts
+const example = "code block";
+\`\`\`
+
+[Learn more](/sign-up)`;
+    
+    const result = renderContent(content);
+    const h = html(result);
+    
+    expect(h).toContain("Welcome to LyraAlpha");
+    expect(h).toContain("<strong>");
+    expect(h).toContain("<em>");
+    expect(h).toContain("<code");
+    expect(h).toContain("Feature one");
+    expect(h).toContain("1.");
+    expect(h).toContain("<pre");
+    expect(h).toContain('href="/sign-up"');
+  });
 });

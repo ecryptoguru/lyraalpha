@@ -1,12 +1,7 @@
 import { directPrisma as prisma } from "../prisma";
 import { Asset, AssetType, ScoreType, Prisma } from "@/generated/prisma/client";
 import { cleanHistory, dailyReturns } from "../engines/utils";
-import {
-  getQuotes,
-  fetchAssetData,
-  fetchInstitutionalSummary,
-  getRawValue,
-} from "../market-data";
+import { fetchAssetData } from "../market-data";
 import { calculateTrendScore } from "../engines/trend";
 import { calculateMomentumScore } from "../engines/momentum";
 import { calculateVolatilityScore } from "../engines/volatility";
@@ -27,7 +22,9 @@ import { EngineResult, OHLCV } from "../engines/types";
 import { MarketQuote } from "@/types/market-data";
 import { createLogger } from "@/lib/logger";
 import { createTimer, sanitizeError } from "@/lib/logger/utils";
-import { safeDeepClone } from "@/lib/utils/json";
+import { asPrismaJsonValue } from "@/lib/utils/json";
+import { getEnv } from "@/lib/env/schema";
+
 import { calculateCompatibility } from "../engines/compatibility";
 import { classifyAsset } from "../engines/grouping";
 import { SYNC_CONFIG } from "../engines/constants";
@@ -86,7 +83,7 @@ const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
 
 // Env-driven symbol extension — add extra symbols without code changes.
 // Format: EXTRA_SYNC_SYMBOLS="COIN,MARA,RIOT" (comma-separated)
-const EXTRA_SYMBOLS: string[] = (process.env.EXTRA_SYNC_SYMBOLS ?? "")
+const EXTRA_SYMBOLS: string[] = (getEnv().EXTRA_SYNC_SYMBOLS ?? "")
   .split(",")
   .map((s) => s.trim().toUpperCase())
   .filter(Boolean);
@@ -100,9 +97,9 @@ if (EXTRA_SYMBOLS.length > 0) {
 // Pre-computed Set for O(1) dedup in resolveUniverse — avoids rebuilding on every sync cycle
 const DEFAULT_SYMBOLS_SET = new Set(DEFAULT_SYMBOLS);
 
-const CRYPTO_QUOTES_SLA_HOURS = Number(process.env.CRYPTO_QUOTES_SLA_HOURS ?? 6);
-const LIQUIDITY_SLA_HOURS = Number(process.env.LIQUIDITY_SLA_HOURS ?? 72);
-const CRYPTO_DEX_SLA_HOURS = Number(process.env.CRYPTO_DEX_SLA_HOURS ?? 24);
+const CRYPTO_QUOTES_SLA_HOURS = parseInt(getEnv().CRYPTO_QUOTES_SLA_HOURS, 10);
+const LIQUIDITY_SLA_HOURS = parseInt(getEnv().LIQUIDITY_SLA_HOURS, 10);
+const CRYPTO_DEX_SLA_HOURS = parseInt(getEnv().CRYPTO_DEX_SLA_HOURS, 10);
 
 function asNumber(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
@@ -116,359 +113,56 @@ function hoursSince(date: Date | string | null | undefined): number | null {
 }
 
 function toJsonObject(value: unknown): Prisma.JsonObject {
-  const cloned = safeDeepClone(value);
-  if (!cloned) {
-    throw new Error("Failed to deep clone value for JSON object conversion");
-  }
-  return cloned as Prisma.JsonObject;
+  return value as Prisma.JsonObject;
 }
 
 export class MarketSyncService {
-  private static readonly ENABLE_LEGACY_YAHOO_INTELLIGENCE =
-    process.env.ENABLE_LEGACY_YAHOO_INTELLIGENCE === "true";
-
-  private static readonly DEFAULT_HARVEST_OPTIONS = {
-    excludeCrypto: false,
-    onlyCrypto: false,
-    skipLegacyNews: false,
-    skipIndianMutualFunds: false,
-  } as const;
 
   /**
    * Phase 1: Harvest Universe
-   * Fetches raw data from Yahoo Finance and persists to DB.
+   * Fetches crypto data from CoinGecko and persists to DB.
    */
   static async harvestUniverse(
     forceFull: boolean = false,
     targetSymbol?: string,
     region?: string,
-    options?: {
-      excludeCrypto?: boolean;
-      onlyCrypto?: boolean;
-      skipLegacyNews?: boolean;
-      skipIndianMutualFunds?: boolean;
-    },
     symbolsOverride?: string[],
   ) {
-    const harvestOptions = {
-      ...this.DEFAULT_HARVEST_OPTIONS,
-      ...(options || {}),
-    };
     const timer = createTimer();
     const currentHour = new Date().getHours();
     const isDailyWindow = currentHour === 0;
-    const isSixHourCycle = currentHour % 6 === 0;
     const shouldFetchDeepInstitutional = forceFull || isDailyWindow;
-    const shouldSyncLegacyYahooNews =
-      !harvestOptions.skipLegacyNews &&
-      this.ENABLE_LEGACY_YAHOO_INTELLIGENCE &&
-      (forceFull || isSixHourCycle);
 
     logger.info(
       {
         shouldFetchDeepInstitutional,
-        shouldSyncLegacyYahooNews,
         forceFull,
         targetSymbol,
         region,
       },
-      "📡 Phase 1: Harvesting platform universe data...",
+      "📡 Phase 1: Harvesting crypto universe data...",
     );
 
-    let symbols = symbolsOverride ?? await this.resolveUniverse(region, { excludeIndianStocks: true });
+    let symbols = symbolsOverride ?? await this.resolveUniverse(region);
     if (targetSymbol) {
       symbols = [targetSymbol.toUpperCase()];
     }
-
-    if (harvestOptions.onlyCrypto) {
-      symbols = symbols.filter(isCryptoSymbol);
-    } else if (harvestOptions.excludeCrypto) {
-      symbols = symbols.filter((s) => !isCryptoSymbol(s));
-    }
-
-    // Split universe: crypto goes to CoinGecko, everything else to Yahoo
-    const cryptoSymbols = symbols.filter(isCryptoSymbol);
-    // Platform is crypto-only, so nonCryptoSymbols should be empty
-    const nonCryptoSymbols = symbols.filter((s) => !isCryptoSymbol(s));
 
     // Sync universe definitions (upserts Asset records with type + coingeckoId)
     const syncedAssets = await this.syncUniverse(symbols);
     const assetMap = new Map<string, Asset>(syncedAssets.map((a) => [a.symbol, a]));
 
     // Phase 1-CG: Harvest crypto via CoinGecko
+    const cryptoSymbols = symbols.filter(isCryptoSymbol);
     if (cryptoSymbols.length > 0) {
       await this.harvestCryptoUniverse(cryptoSymbols, assetMap, shouldFetchDeepInstitutional);
     }
 
-    // Phase 1-YF: Harvest non-crypto via Yahoo Finance
-    if (nonCryptoSymbols.length === 0) {
-      logger.info("No non-crypto symbols to harvest via Yahoo");
-    } else {
-
-    const quotes = await getQuotes(nonCryptoSymbols);
-    if (!quotes || quotes.length === 0) {
-      logger.warn("Failed to fetch market quotes from Yahoo Finance - continuing with other harvest phases");
-      // Don't return early - allow other harvest phases (e.g., NSE) to proceed
-    } else {
-
-    const CONCURRENCY_LIMIT = SYNC_CONFIG.CONCURRENCY_LIMIT || 10;
-    const yfChunks = [];
-    for (let i = 0; i < nonCryptoSymbols.length; i += CONCURRENCY_LIMIT) {
-      yfChunks.push(nonCryptoSymbols.slice(i, i + CONCURRENCY_LIMIT));
-    }
-
-    const assetResults: { id: string; symbol: string }[] = [];
-
-    for (const chunk of yfChunks) {
-      const updates = await Promise.all(
-        chunk.map(async (symbol) => {
-          try {
-            // Delta Sync: only fetch new history since last entry
-            let history = await fetchAssetData(symbol, "1y", true);
-
-            // Split Detection & Self-Healing
-            // Check if the new history start point aligns with the last known DB point
-            const asset = assetMap.get(symbol);
-            if (asset && Array.isArray(history) && history.length > 0) {
-              const lastHistoryIdx = await prisma.priceHistory.findFirst({
-                where: { assetId: asset.id },
-                orderBy: { date: 'desc' }
-              });
-
-              if (lastHistoryIdx) {
-                const lastClose = lastHistoryIdx.close;
-                const newOpen = history[0].open; 
-                // If price jumped > 50% or dropped > 50%, suspect split/bad data
-                // Exception: Crypto can be volatile, but 50% gap between daily closes is rare even there
-                const gap = Math.abs(newOpen - lastClose) / lastClose;
-                
-                if (gap > 0.5) {
-                   logger.warn({ symbol, gap: gap.toFixed(2), lastClose, newOpen }, "📉 potential split/discontinuity detected. Determining full re-sync.");
-                   
-                   // Verify it's not just a volatile day by checking more points if available, 
-                   // but for safety, we assume split and force full refresh.
-                   await prisma.priceHistory.deleteMany({ where: { assetId: asset.id } });
-                   logger.info({ symbol }, "Purged history for split correction. Fetching full history...");
-                   history = await fetchAssetData(symbol, "1y", false); 
-                }
-              }
-            }
-
-            const rawQuote = quotes.find((q) => q.symbol === symbol);
-
-            // Frequency Throttling: only fetch summary in daily window
-            // Platform is crypto-only, so institutional summary not applicable for most assets
-            const summary = shouldFetchDeepInstitutional
-              ? await fetchInstitutionalSummary(symbol, false)
-              : null;
-
-            if (history === null || "error" in history || !rawQuote) {
-              const reason = !rawQuote ? "missing quote" : "history error";
-              logger.warn({ symbol, reason }, "Skipping harvest - essential data missing");
-              return null;
-            }
-
-            const quote: MarketQuote = {
-              symbol: rawQuote.symbol,
-              regularMarketPrice: (getRawValue(rawQuote.regularMarketPrice) as number) || 0,
-              regularMarketChangePercent: (getRawValue(rawQuote.regularMarketChangePercent) as number) || 0,
-              marketCap: (getRawValue(rawQuote.marketCap) as number),
-              trailingPE: (getRawValue(rawQuote.trailingPE) as number),
-              forwardPE: (getRawValue(rawQuote.forwardPE) as number),
-              fiftyTwoWeekChangePercent: (getRawValue(rawQuote.fiftyTwoWeekChangePercent) as number),
-              regularMarketVolume: (getRawValue(rawQuote.regularMarketVolume) as number),
-              averageDailyVolume3Month: (getRawValue(rawQuote.averageDailyVolume3Month) as number),
-              averageDailyVolume10Day: (getRawValue(rawQuote.averageDailyVolume10Day) as number),
-              dividendYield: (getRawValue(rawQuote.dividendYield) as number),
-              trailingPegRatio: (getRawValue(rawQuote.trailingPegRatio || rawQuote.pegRatio) as number),
-              epsTrailingTwelveMonths: (getRawValue(rawQuote.epsTrailingTwelveMonths) as number),
-              fiftyTwoWeekHigh: (getRawValue(rawQuote.fiftyTwoWeekHigh) as number),
-              fiftyTwoWeekLow: (getRawValue(rawQuote.fiftyTwoWeekLow) as number),
-              shortRatio: (getRawValue(rawQuote.shortRatio) as number),
-              priceToBook: (getRawValue(rawQuote.priceToBook) as number),
-              returnOnEquity: (getRawValue(rawQuote.returnOnEquity) as number), 
-            };
-
-            // Ensure summary is available for crypto enrichment if not already fetched
-            // OR if essential metrics like ROE/PEG are missing and we have a deep sync window
-            let effectiveSummary = summary;
-            const needsDeepData = false; // Platform is crypto-only, no PEG/ROE needed
-            const needsExtended = false; // Platform is crypto-only, extended institutional data not applicable
-            if (!effectiveSummary && (needsDeepData || needsExtended)) {
-               // Use restricted fetch if not in daily window but data is missing
-               effectiveSummary = await fetchInstitutionalSummary(symbol, needsExtended);
-            }
-
-            const stats = effectiveSummary?.defaultKeyStatistics || {};
-            const details = effectiveSummary?.summaryDetail || {};
-            const financial = effectiveSummary?.financialData || {};
-            const fundProfile = effectiveSummary?.fundProfile || {};
-
-            const existingMetadata = (asset?.metadata as Prisma.JsonObject) || {};
-            const incomingMetadata = {
-              beta: (getRawValue(details.beta || rawQuote.beta) || 0) as number,
-              dividendYield: (getRawValue(details.dividendYield || rawQuote.dividendYield) || 0) as number,
-              forwardPe: (getRawValue(details.forwardPE || quote.forwardPE) as number) || null,
-              exchangeName: (rawQuote.fullExchangeName || rawQuote.exchangeName || "Unknown") as string,
-              expireDate: rawQuote.expireDate ? new Date(rawQuote.expireDate).toISOString() : null,
-              dayHigh: (getRawValue(rawQuote.regularMarketDayHigh) as number) || null,
-              dayLow: (getRawValue(rawQuote.regularMarketDayLow) as number) || null,
-              heldPercentInstitutions: (getRawValue(stats.heldPercentInstitutions) as number) || null,
-              heldPercentInsiders: (getRawValue(stats.heldPercentInsiders) as number) || null,
-              profitMargins: (getRawValue(stats.profitMargins || financial.profitMargins) as number) || null,
-              operatingMargins: (getRawValue(financial.operatingMargins) as number) || null,
-              revenueGrowth: (getRawValue(financial.revenueGrowth) as number) || null,
-              expenseRatio: (getRawValue(fundProfile.feesExpensesInvestment?.annualReportExpenseRatio) as number) || (getRawValue(stats.annualReportExpenseRatio) as number) || null,
-              industry: ((details as Record<string, unknown>).industry || (rawQuote as unknown as Record<string, unknown>).industry) as string || null,
-              targetMeanPrice: (getRawValue(financial.targetMeanPrice) as number) || null,
-              targetHighPrice: (getRawValue(financial.targetHighPrice) as number) || null,
-              targetLowPrice: (getRawValue(financial.targetLowPrice) as number) || null,
-              numberOfAnalystOpinions: (getRawValue(financial.numberOfAnalystOpinions) as number) || null,
-              circulatingSupply: (getRawValue(rawQuote.circulatingSupply) as number) || (existingMetadata as Record<string, unknown>).circulatingSupply || null,
-              maxSupply: (getRawValue(rawQuote.maxSupply) as number) || (existingMetadata as Record<string, unknown>).maxSupply || null,
-              volume24Hr: (getRawValue(rawQuote.volume24Hr) as number) || (existingMetadata as Record<string, unknown>).volume24Hr || null,
-              // Asset Profile metadata (US stocks & ETFs only) - not applicable for crypto
-            } as Record<string, unknown>;
-
-            const metadataPatch = Object.entries(incomingMetadata).reduce<Record<string, unknown>>(
-              (patch, [key, value]) => {
-                if ((existingMetadata as Record<string, unknown>)[key] !== value) patch[key] = value;
-                return patch;
-              },
-              {},
-            );
-
-            // Resolve the best name: prefer existing human-readable DB name over raw API value.
-            // Only overwrite if the current name is absent, equals the raw symbol, or still has an exchange suffix.
-            const existingName = asset?.name || "";
-            const isNameStale = !existingName || existingName === symbol;
-            const resolvedName = DISPLAY_NAME_OVERRIDES[symbol]
-              || (!isNameStale ? existingName : (rawQuote.longName || rawQuote.shortName || symbol));
-
-            const updatePayload: Prisma.AssetUpdateInput = {
-              name: resolvedName,
-              price: quote.regularMarketPrice || 0,
-              changePercent: quote.regularMarketChangePercent || 0,
-              lastPriceUpdate: new Date(),
-              marketCap: quote.marketCap ?? asset?.marketCap ?? null,
-              // peRatio removed — not on Asset model
-              volume: (getRawValue(quote.regularMarketVolume || details.volume) as number) || null,
-              avgVolume: (getRawValue(quote.averageDailyVolume10Day || details.averageVolume) as number) || null,
-              fiftyTwoWeekHigh: (getRawValue(details.fiftyTwoWeekHigh || quote.fiftyTwoWeekHigh) as number) || null,
-              fiftyTwoWeekLow: (getRawValue(details.fiftyTwoWeekLow || quote.fiftyTwoWeekLow) as number) || null,
-              // roe/roce removed — not applicable for crypto-only platform
-              sector: ((details as Record<string, unknown>).sector || (rawQuote as unknown as Record<string, unknown>).sector || asset?.sector) as string || null,
-              openInterest: (getRawValue(details.openInterest || rawQuote.openInterest) as number) || null,
-              // dividendYield removed — not on Asset model
-              // Stock-specific fields removed — not on Asset model (crypto-only platform)
-              oneYearChange: (getRawValue(quote.fiftyTwoWeekChangePercent) as number) || null,
-
-              ...(Object.keys(metadataPatch).length > 0
-                ? { metadata: { ...existingMetadata, ...metadataPatch } as Prisma.JsonObject }
-                : {}),
-
-              // Fund-specific fields removed — crypto-only platform
-              updatedAt: new Date(),
-
-              // Extended data: not applicable for crypto
-
-              // Top holdings & fund performance removed — crypto-only platform
-            };
-
-            // Financial statements not applicable for crypto-only platform
-
-            return { symbol, data: updatePayload, history };
-          } catch (err) {
-            logger.error({ err: sanitizeError(err), symbol }, "Error processing asset data");
-            return null;
-          }
-        })
-      );
-
-      const validUpdates = updates.filter((u): u is NonNullable<typeof u> => u !== null);
-      if (validUpdates.length > 0) {
-        const batch = await prisma.$transaction(
-          validUpdates.map((u) => prisma.asset.update({
-            where: { symbol: u.symbol },
-            data: u.data,
-            select: { id: true, symbol: true }
-          }))
-        );
-        assetResults.push(...batch);
-
-        // Batch persist history (1-year retention policy)
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-        for (const update of validUpdates) {
-          if (Array.isArray(update.history) && update.history.length > 0) {
-            const asset = batch.find(a => a.symbol === update.symbol);
-            if (asset) {
-              // Filter to only keep last 1 year of history
-              const recentHistory = (update.history as OHLCV[]).filter(
-                h => new Date(h.date) >= oneYearAgo
-              );
-              
-              if (recentHistory.length > 0) {
-                await prisma.priceHistory.createMany({
-                  data: recentHistory.map(h => ({
-                    assetId: asset.id,
-                    date: new Date(h.date),
-                    open: h.open,
-                    high: h.high,
-                    low: h.low,
-                    close: h.close,
-                    volume: h.volume
-                  })),
-                  skipDuplicates: true
-                });
-              }
-            }
-          }
-        }
-
-        // Legacy Yahoo intelligence sync is disabled by default.
-        // Source-of-truth for intelligence domains is now:
-        // NewsData.io + India RSS.
-        if (shouldSyncLegacyYahooNews) {
-          const TWELVE_HOURS_AGO = new Date(Date.now() - 12 * 60 * 60 * 1000);
-          const recentNews = await prisma.institutionalEvent.findMany({
-            where: {
-              assetId: { in: batch.map(a => a.id) },
-              type: "NEWS",
-              date: { gte: TWELVE_HOURS_AGO },
-            },
-            select: { assetId: true },
-            distinct: ["assetId"],
-          });
-          const freshNewsIds = new Set(recentNews.map(n => n.assetId));
-          const staleAssets = batch.filter(a => !freshNewsIds.has(a.id));
-          if (staleAssets.length < batch.length) {
-            logger.debug({ skipped: batch.length - staleAssets.length, syncing: staleAssets.length }, "News: skipping assets with fresh news (<12h)");
-          }
-          await Promise.all(staleAssets.map(a => IntelligenceEventsService.syncNewsIntelligence(a.id, a.symbol)));
-        } else {
-          logger.debug("Legacy Yahoo intelligence sync skipped (replaced by NewsData.io/India RSS)");
-        }
-      }
-    }
-    logger.info({ 
-      harvested: assetResults.length, 
-      duration: timer.endFormatted() 
-    }, "✅ Phase 1-YF: Yahoo Finance Harvest Complete.");
-
-    } // end else (quotes available)
-    } // end else (nonCryptoSymbols)
-
-    logger.info({ duration: timer.endFormatted() }, "✅ Phase 1: Full Harvest Complete.");
+    logger.info({ duration: timer.endFormatted() }, "✅ Phase 1: Harvest Complete.");
   }
 
   static async runCryptoMarketSync() {
-    await this.harvestUniverse(false, undefined, undefined, {
-      onlyCrypto: true,
-      skipLegacyNews: true,
-      skipIndianMutualFunds: true,
-    });
+    await this.harvestUniverse(false);
   }
 
   /**
@@ -608,10 +302,9 @@ export class MarketSyncService {
       .map((m) => { const s = idMap.get(m.id); return s ? assetMap.get(s)?.id : undefined; })
       .filter(Boolean) as string[];
 
-    const lastHistories = await prisma.$queryRawUnsafe<{ assetId: string; maxDate: Date }[]>(
-      `SELECT "assetId", MAX(date) as "maxDate" FROM "PriceHistory" WHERE "assetId" = ANY($1::text[]) GROUP BY "assetId"`,
-      cryptoAssetIds,
-    );
+    const lastHistories = await prisma.$queryRaw<{ assetId: string; maxDate: Date }[]>`
+      SELECT "assetId", MAX(date) as "maxDate" FROM "PriceHistory" WHERE "assetId" = ANY(${cryptoAssetIds}::text[]) GROUP BY "assetId"
+    `;
     const lastHistoryMap = new Map(lastHistories.map((h) => [h.assetId, h.maxDate]));
 
     let historySkipped = 0;
@@ -778,47 +471,24 @@ export class MarketSyncService {
     }, "✅ Phase 1-CG: CoinGecko Crypto Harvest Complete.");
   }
 
-  /**
-   * Resolves the asset universe for a given phase.
-   * @param opts.excludeIndianStocks — true for Phase 1 (Yahoo sync), false for Phase 2 (analytics).
-   *   Indian equities (stocks + ETFs) are excluded from Yahoo sync because they use NSE India API (Phase 1c).
-   */
-  private static classifySymbolToAssetType(): AssetType {
-    // Crypto-only platform - all assets are CRYPTO
-    return AssetType.CRYPTO;
-  }
-
-  private static async resolveUniverseByTypes(region: string | undefined, types: AssetType[]): Promise<string[]> {
-    const symbols = await this.resolveUniverse(region, { excludeIndianStocks: true });
-    return symbols.filter(() => types.includes(this.classifySymbolToAssetType()));
-  }
-
-  private static async resolveUniverse(region?: string, opts?: { excludeIndianStocks?: boolean }): Promise<string[]> {
+  private static async resolveUniverse(region?: string): Promise<string[]> {
     const where: Prisma.AssetWhereInput = {
       ...(region ? { region } : {}),
-      ...(opts?.excludeIndianStocks
-        ? {
-            NOT: {
-              region: "IN",
-            },
-          }
-        : {}),
     };
 
     const assets = await prisma.asset.findMany({ where, select: { symbol: true } });
     const dbSymbols = assets.map(a => a.symbol);
 
-    // Use pre-computed Set for O(1) dedup — avoids rebuilding on every sync cycle
     if (region && region !== "US") {
       const finalUniverse = [...new Set(dbSymbols)];
-      logger.info({ region, count: finalUniverse.length, excludeIndianStocks: !!opts?.excludeIndianStocks }, "Resolved universe");
+      logger.info({ region, count: finalUniverse.length }, "Resolved universe");
       return finalUniverse;
     }
     const finalUniverseSet = new Set(dbSymbols);
     for (const s of DEFAULT_SYMBOLS_SET) finalUniverseSet.add(s);
     const finalUniverse = Array.from(finalUniverseSet);
 
-    logger.info({ region, count: finalUniverse.length, excludeIndianStocks: !!opts?.excludeIndianStocks }, "Resolved universe");
+    logger.info({ region, count: finalUniverse.length }, "Resolved universe");
     return finalUniverse;
   }
 
@@ -830,26 +500,20 @@ export class MarketSyncService {
     const timer = createTimer();
     logger.info({ region, force }, "⚙️ Phase 2: Computing platform analytics & correlations...");
 
-    // For analytics, include ALL assets (including Indian stocks harvested via NSE)
+    // For analytics, include ALL assets
     const symbols = await this.resolveUniverse(region);
     
-    // 1. Pre-fetch benchmark histories for correlation (region-aware)
-    const usBenchmarks = ["BTC-USD", "ETH-USD", "SOL-USD"];
-    const inBenchmarks = ["BTC-USD", "ETH-USD", "SOL-USD"];
-    const allBenchmarks = [...new Set([...usBenchmarks, ...inBenchmarks])];
+    // 1. Pre-fetch benchmark histories for correlation
+    const benchmarks = ["BTC-USD", "ETH-USD", "SOL-USD"];
     const benchmarkHistories: Record<string, OHLCV[]> = {};
     const benchmarkResults = await Promise.all(
-      allBenchmarks.map((b) => fetchAssetData(b, "1y")),
+      benchmarks.map((b) => fetchAssetData(b, "1y")),
     );
-    benchmarkResults.forEach((h, i) => {
-      if (!("error" in h) && Array.isArray(h) && h.length > 0) benchmarkHistories[allBenchmarks[i]] = h;
+    benchmarkResults.forEach((h: OHLCV[] | import("../market-data").MarketDataError, i: number) => {
+      if (!("error" in h) && Array.isArray(h) && h.length > 0) benchmarkHistories[benchmarks[i]] = h;
     });
-    // Region-specific benchmark sets for correlation computation
-    const usBenchmarkHistories: Record<string, OHLCV[]> = {};
-    const inBenchmarkHistories: Record<string, OHLCV[]> = {};
-    for (const b of usBenchmarks) { if (benchmarkHistories[b]) usBenchmarkHistories[b] = benchmarkHistories[b]; }
-    for (const b of inBenchmarks) { if (benchmarkHistories[b]) inBenchmarkHistories[b] = benchmarkHistories[b]; }
-    logger.info({ us: Object.keys(usBenchmarkHistories).length, in: Object.keys(inBenchmarkHistories).length }, "Benchmark histories loaded");
+    const benchmarkHistoriesForCorrelation = benchmarkHistories;
+    logger.info({ count: Object.keys(benchmarkHistoriesForCorrelation).length }, "Benchmark histories loaded");
 
     // 2. We need the market context FIRST to calculate compatibility
     // So we'll run a mini-pass to get signals for the context
@@ -921,10 +585,8 @@ export class MarketSyncService {
               regularMarketPrice: asset.price || 0,
               regularMarketChangePercent: asset.changePercent || 0,
               marketCap: asset.marketCap ?? undefined,
-              trailingPE: (asset.metadata as Prisma.JsonObject)?.forwardPe as number || undefined,
               fiftyTwoWeekChangePercent: asset.oneYearChange || undefined,
               regularMarketVolume: asset.volume || undefined,
-              dividendYield: (asset.metadata as Prisma.JsonObject)?.dividendYield as number || undefined,
             };
 
             const signals: EngineSignals = {
@@ -934,7 +596,6 @@ export class MarketSyncService {
               liquidity: calculateLiquidityScore(quote, {
                 history: cleanData,
                 avgVolume3M: asset.avgVolume || undefined,
-                shortRatio: (asset.metadata as Prisma.JsonObject)?.shortRatio as number || undefined,
                 marketCap: asset.marketCap ?? undefined,
               }),
               sentiment: calculateSentimentScore(cleanData),
@@ -1041,14 +702,14 @@ export class MarketSyncService {
         breadthScore: context.breadth.score,
         vixValue: context.volatility.score,
         context: JSON.stringify(context),
-        correlationMetrics: correlationMetrics as unknown as Prisma.InputJsonValue,
+        correlationMetrics: asPrismaJsonValue(correlationMetrics),
       },
       update: {
         state: context.regime.label,
         breadthScore: context.breadth.score,
         vixValue: context.volatility.score,
         context: JSON.stringify(context),
-        correlationMetrics: correlationMetrics as unknown as Prisma.InputJsonValue,
+        correlationMetrics: asPrismaJsonValue(correlationMetrics),
       },
     });
 
@@ -1133,10 +794,7 @@ export class MarketSyncService {
           roe: (assetMeta.roe as number) ?? null,
           oneYearChange: asset.oneYearChange,
         });
-        // Region-aware benchmark selection: Indian assets use Indian benchmarks
-        const isIndianAsset = asset.region === "IN";
-        const regionBenchmarks = isIndianAsset ? inBenchmarkHistories : usBenchmarkHistories;
-        const correlations = calculateCorrelations(history, regionBenchmarks);
+        const correlations = calculateCorrelations(history, benchmarkHistoriesForCorrelation);
 
         // Compatibility & Grouping
         const flatSignals = {
@@ -1167,14 +825,14 @@ export class MarketSyncService {
           let implications = "Normal correlation with market benchmarks.";
           if (avgCorr > 0.7) { regime = "MACRO_DRIVEN"; implications = "High correlation to benchmarks. Moves closely with market trends."; }
           else if (avgCorr < 0.3) { regime = "IDIOSYNCRATIC"; implications = "Low correlation to benchmarks. Moves independently of market."; }
-          assetCorrelationRegime = {
+          assetCorrelationRegime = asPrismaJsonValue({
             avgCorrelation: Math.round(avgCorr * 100) / 100,
             dispersion: Math.round(dispersion * 100) / 100,
             trend: "STABLE",
             regime,
             confidence: corrValues.length >= 3 ? "high" : "medium",
             implications,
-          } as unknown as Prisma.InputJsonValue;
+          }) as Prisma.InputJsonValue | null;
         }
 
         // Pre-compute Factor Alignment (spider chart)
@@ -1199,31 +857,8 @@ export class MarketSyncService {
         });
 
         // Pre-compute Signal Strength (composite of all layers)
-        // Note: Traditional financial metrics (PE ratio, ROE, etc.) don't apply to crypto assets
-        const fundamentalReliability: Record<string, SourcedField<number>> = {};
-        const reliabilityStats = {
-          evaluated: Object.keys(fundamentalReliability).length,
-          fallbacks: Object.values(fundamentalReliability).filter((f) => f.precedenceOverridden).length,
-          unavailable: Object.values(fundamentalReliability).filter((f) => f.qualityTier === "unavailable").length,
-        };
         const fundamentals: FundamentalData = {
-          peRatio: (assetMeta.forwardPe as number) ?? null,
-          industryPe: (assetMeta.industryPe as number) ?? null,
-          pegRatio: (assetMeta.pegRatio as number) ?? null,
-          priceToBook: (assetMeta.priceToBook as number) ?? null,
-          roe: (assetMeta.roe as number) ?? null,
-          roce: (assetMeta.roce as number) ?? null,
-          profitMargins: (assetMeta.profitMargins as number) ?? null,
-          operatingMargins: (assetMeta.operatingMargins as number) ?? null,
-          revenueGrowth: (assetMeta.revenueGrowth as number) ?? null,
-          dividendYield: (assetMeta.dividendYield as number) ?? null,
-          shortRatio: (assetMeta.shortRatio as number) ?? null,
-          heldPercentInstitutions: (assetMeta.heldPercentInstitutions as number) ?? null,
-          targetMeanPrice: (assetMeta.targetMeanPrice as number) ?? null,
-          currentPrice: asset.price,
           distanceFrom52WHigh: performance.range52W.distanceFromHigh,
-          beta: (assetMeta.beta as number) ?? null,
-          debtToEquity: (assetMeta.debtToEquity as number) ?? null,
         };
 
         const signalStrength = calculateSignalStrength({
@@ -1295,7 +930,7 @@ export class MarketSyncService {
               }),
             };
 
-            scenarioData = { ...scenarios, riskVariants } as unknown as Prisma.InputJsonValue;
+            scenarioData = asPrismaJsonValue({ ...scenarios, riskVariants }) as Prisma.InputJsonValue | null;
           } catch (err) {
             logger.warn({ symbol, err: String(err) }, "Scenario computation failed");
           }
@@ -1340,7 +975,7 @@ export class MarketSyncService {
               changePercent: asset.changePercent,
             });
             if (result) {
-              cryptoIntelData = result as unknown as Prisma.InputJsonValue;
+              cryptoIntelData = asPrismaJsonValue(result) as Prisma.InputJsonValue | null;
 
               const cgMeta = (assetMeta.coingecko as Record<string, unknown>) || {};
               const quoteFreshnessHours = hoursSince((cgMeta.lastMarketSync as string | undefined) || asset.lastPriceUpdate);
@@ -1467,8 +1102,8 @@ export class MarketSyncService {
         return {
           symbol,
           data: {
-            factorData: factorProfile as unknown as Prisma.InputJsonValue,
-            correlationData: correlations as unknown as Prisma.InputJsonValue,
+            factorData: asPrismaJsonValue(factorProfile),
+            correlationData: asPrismaJsonValue(correlations),
             updatedAt: new Date(),
             avgTrendScore: signals.trend.score,
             avgMomentumScore: signals.momentum.score,
@@ -1479,20 +1114,20 @@ export class MarketSyncService {
             compatibilityScore: compatibility.score,
             compatibilityLabel: compatibility.label,
             assetGroup: grouping.group,
-            performanceData: performance as unknown as Prisma.InputJsonValue,
+            performanceData: asPrismaJsonValue(performance),
             correlationRegime: assetCorrelationRegime ?? Prisma.JsonNull,
-            factorAlignment: factorAlignment ? factorAlignment as unknown as Prisma.InputJsonValue : Prisma.JsonNull,
-            eventAdjustedScores: eventAdjustedScores as unknown as Prisma.InputJsonValue,
-            signalStrength: signalStrength as unknown as Prisma.InputJsonValue,
+            factorAlignment: factorAlignment ? asPrismaJsonValue(factorAlignment) : Prisma.JsonNull,
+            eventAdjustedScores: asPrismaJsonValue(eventAdjustedScores),
+            signalStrength: asPrismaJsonValue(signalStrength),
             metadata: toJsonObject({
               ...assetMeta,
               reliabilityMeta: {
                 ...((assetMeta.reliabilityMeta as Record<string, unknown>) || {}),
                 updatedAt: new Date().toISOString(),
                 history: historyConfidence,
-                fundamentals: fundamentalReliability,
-                fallbackCount: Object.values(fundamentalReliability).filter((f) => f.precedenceOverridden).length,
-                unavailableCount: Object.values(fundamentalReliability).filter((f) => f.qualityTier === "unavailable").length,
+                fundamentals: {},
+                fallbackCount: 0,
+                unavailableCount: 0,
                 ...(cryptoReliability
                   ? {
                       crypto: {
@@ -1507,9 +1142,9 @@ export class MarketSyncService {
             ...(cryptoIntelData ? { cryptoIntelligence: cryptoIntelData } : {}),
             ...(scenarioData ? { scenarioData } : {}),
             // CoinGlass: add ...(coinglassOi != null ? { openInterest: coinglassOi } : {}) when activated
-            ...(messariFinancials ? { financials: messariFinancials as unknown as Prisma.InputJsonValue } : {}),
+            ...(messariFinancials ? { financials: asPrismaJsonValue(messariFinancials) } : {}),
           },
-          reliabilityStats,
+          reliabilityStats: { evaluated: 0, fallbacks: 0, unavailable: 0 },
           cryptoReliabilityStats,
           // Institutional events are still triggered during compute
           events: () => IntelligenceEventsService.generateInstitutionalEvents(asset.id, symbol, signals, factorProfile, correlations)
@@ -1727,28 +1362,13 @@ export class MarketSyncService {
 
   private static async syncUniverse(symbols: string[]) {
     logger.debug({ symbolCount: symbols.length }, "Syncing universe definitions");
-    const MCX_IN_SYMBOLS = new Set(["GOLD-MCX", "SILVER-MCX"]);
     const upserts = symbols.map((symbol) => {
-      const isCrypto = isCryptoSymbol(symbol);
-      const type = isCrypto
-        ? AssetType.CRYPTO
-        : AssetType.CRYPTO;
-
-      const coingeckoId = isCrypto ? symbolToCoingeckoId(symbol) : undefined;
-
-      // For MCX IN commodities, only update type — never overwrite region/currency set by metals.dev sync
-      if (MCX_IN_SYMBOLS.has(symbol)) {
-        return prisma.asset.upsert({
-          where: { symbol },
-          update: { type },
-          create: { symbol, name: symbol, type, region: "IN", currency: "INR" },
-        });
-      }
+      const coingeckoId = symbolToCoingeckoId(symbol);
 
       return prisma.asset.upsert({
         where: { symbol },
-        update: { type, ...(coingeckoId ? { coingeckoId } : {}) },
-        create: { symbol, name: symbol, type, ...(coingeckoId ? { coingeckoId } : {}) },
+        update: { type: AssetType.CRYPTO, ...(coingeckoId ? { coingeckoId } : {}) },
+        create: { symbol, name: symbol, type: AssetType.CRYPTO, ...(coingeckoId ? { coingeckoId } : {}) },
       });
     });
 

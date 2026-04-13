@@ -171,8 +171,8 @@ describe("calculateSignalStrength", () => {
       expect(result.weights.dse).toBe(0.55);
     });
 
-    it("normalizes asset type variants (equity → CRYPTO)", () => {
-      const result = calculateSignalStrength(buildInput({ assetType: "equity" }));
+    it("normalizes asset type variants (stock → CRYPTO)", () => {
+      const result = calculateSignalStrength(buildInput({ assetType: "stock" }));
       expect(result.metadata.assetType).toBe("CRYPTO");
     });
   });
@@ -193,17 +193,7 @@ describe("calculateSignalStrength", () => {
     it("fundamentals do NOT boost CRYPTO signal (0% weight)", () => {
       const withFundamentals = calculateSignalStrength(buildInput({
         fundamentals: {
-          peRatio: 15,
-          industryPe: 25,
-          pegRatio: 0.8,
-          priceToBook: 1.5,
-          roe: 0.22,
-          operatingMargins: 0.20,
-          revenueGrowth: 0.25,
-          targetMeanPrice: 200,
-          currentPrice: 150,
-          heldPercentInstitutions: 0.75,
-          shortRatio: 1.5,
+          distanceFrom52WHigh: -15,
         },
       }));
       const withoutFundamentals = calculateSignalStrength(buildInput());
@@ -215,22 +205,9 @@ describe("calculateSignalStrength", () => {
       const result = calculateSignalStrength(buildInput({
         assetType: "CRYPTO",
         fundamentals: {
-          peRatio: 15,
-          industryPe: 25,
-          roe: 0.22,
+          distanceFrom52WHigh: -30,
         },
       }));
-      expect(result.breakdown.fundamental).toBe(50);
-    });
-
-    it("analyst upside > 20% does NOT boost CRYPTO fundamental (0% weight)", () => {
-      const result = calculateSignalStrength(buildInput({
-        fundamentals: {
-          targetMeanPrice: 180,
-          currentPrice: 100,
-        },
-      }));
-      // CRYPTO fundamental weight is 0 — analyst upside doesn't affect composite
       expect(result.breakdown.fundamental).toBe(50);
     });
   });

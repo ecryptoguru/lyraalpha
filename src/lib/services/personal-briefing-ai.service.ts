@@ -112,10 +112,10 @@ ${args.dailyBriefing ? JSON.stringify({
   risksToWatch: args.dailyBriefing.risksToWatch,
   regimeLabel: args.dailyBriefing.regimeLabel,
   regimeSentence: args.dailyBriefing.regimeSentence,
-}, null, 2) : "No daily briefing available."}
+}) : "No daily briefing available."}
 
 PERSONALIZED WATCHLIST CONTEXT:
-${JSON.stringify(briefing, null, 2)}
+${JSON.stringify(briefing)}
 
 INSTRUCTIONS:
 - Return ONLY valid JSON.

@@ -107,7 +107,7 @@ export async function GET(req: NextRequest) {
         topSymbols: bucket
           .sort((a, b) => (b.avgMomentumScore ?? 0) - (a.avgMomentumScore ?? 0))
           .slice(0, 3)
-          .map((a) => a.symbol.replace(/\.NS$/, "").replace(/\.BO$/, "")),
+          .map((a) => a.symbol),
       };
     });
 
