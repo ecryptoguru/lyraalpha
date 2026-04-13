@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Features } from "@/components/landing/Features";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Trust } from "@/components/landing/Trust";
@@ -26,6 +27,7 @@ export default function Home() {
           <BlogPreview />
         </Suspense>
         <PublicMyraWidget />
+        <Footer />
       </main>
     </div>
   );
