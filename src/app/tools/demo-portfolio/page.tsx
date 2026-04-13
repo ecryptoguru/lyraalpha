@@ -46,30 +46,31 @@ import { motion } from "framer-motion";
 // ─── US Demo Data ─────────────────────────────────────────────────────────────
 
 const US_DEMO_HOLDINGS = [
-  { symbol: "BTC-USD", name: "Bitcoin", qty: 0.5, avgPrice: 95000, price: 104000, changePercent: 2.35, sector: "Layer 1", weight: 34.1 },
-  { symbol: "ETH-USD", name: "Ethereum", qty: 5, avgPrice: 3100, price: 3400, changePercent: 1.12, sector: "DeFi", weight: 22.2 },
-  { symbol: "SOL-USD", name: "Solana", qty: 50, avgPrice: 150, price: 180, changePercent: 3.41, sector: "Layer 1", weight: 17.8 },
-  { symbol: "BNB-USD", name: "BNB", qty: 10, avgPrice: 580, price: 620, changePercent: 0.43, sector: "Exchange", weight: 12.5 },
-  { symbol: "XRP-USD", name: "XRP", qty: 2000, avgPrice: 2.10, price: 2.35, changePercent: 0.18, sector: "Payments", weight: 9.6 },
-  { symbol: "ADA-USD", name: "Cardano", qty: 5000, avgPrice: 0.65, price: 0.72, changePercent: 0.65, sector: "Layer 1", weight: 7.2 },
-  { symbol: "DOGE-USD", name: "Dogecoin", qty: 20000, avgPrice: 0.15, price: 0.18, changePercent: -0.12, sector: "Meme", weight: 4.6 },
+  { symbol: "BTC-USD", name: "Bitcoin", qty: 0.5, avgPrice: 95000, price: 104000, changePercent: 2.35, sector: "Layer 1", weight: 51.8 },
+  { symbol: "ETH-USD", name: "Ethereum", qty: 5, avgPrice: 3100, price: 3400, changePercent: 1.12, sector: "DeFi", weight: 17.0 },
+  { symbol: "SOL-USD", name: "Solana", qty: 50, avgPrice: 150, price: 180, changePercent: 3.41, sector: "Layer 1", weight: 9.0 },
+  { symbol: "BNB-USD", name: "BNB", qty: 10, avgPrice: 580, price: 620, changePercent: 0.43, sector: "Exchange", weight: 6.2 },
+  { symbol: "XRP-USD", name: "XRP", qty: 2000, avgPrice: 2.10, price: 2.35, changePercent: 0.18, sector: "Payments", weight: 4.7 },
+  { symbol: "ADA-USD", name: "Cardano", qty: 5000, avgPrice: 0.65, price: 0.72, changePercent: 0.65, sector: "Layer 1", weight: 3.6 },
+  { symbol: "DOGE-USD", name: "Dogecoin", qty: 20000, avgPrice: 0.15, price: 0.18, changePercent: -0.12, sector: "Meme", weight: 3.6 },
   { symbol: "AVAX-USD", name: "Avalanche", qty: 100, avgPrice: 35, price: 42, changePercent: 0.61, sector: "Layer 1", weight: 4.2 },
 ];
 
 const US_DEMO_ALLOCATION = [
-  { label: "Layer 1", percent: 56.1, color: "#3b82f6" },
-  { label: "DeFi", percent: 22.2, color: "#38bdf8" },
-  { label: "Exchange", percent: 12.5, color: "#22c55e" },
-  { label: "Payments", percent: 9.6, color: "#fbbf24" },
+  { label: "Layer 1", percent: 68.6, color: "#3b82f6" },
+  { label: "DeFi", percent: 17.0, color: "#38bdf8" },
+  { label: "Exchange", percent: 6.2, color: "#22c55e" },
+  { label: "Payments", percent: 4.7, color: "#fbbf24" },
+  { label: "Meme", percent: 3.6, color: "#a78bfa" },
 ];
 
 const US_DEMO_HEALTH_DIMENSIONS = [
-  { label: "Diversification", score: 62, color: "#3b82f6", desc: "Moderate — 56% in L1 sector" },
-  { label: "Concentration", score: 74, color: "#22c55e", desc: "Reasonable spread across 8 names" },
-  { label: "Volatility Control", score: 71, color: "#fbbf24", desc: "Elevated — BTC at 34% weight" },
-  { label: "Correlation Risk", score: 58, color: "#f97316", desc: "High L1-sector correlation" },
+  { label: "Diversification", score: 48, color: "#f97316", desc: "Low — 68.6% in L1 sector" },
+  { label: "Concentration", score: 42, color: "#ef4444", desc: "BTC alone at 51.8% of portfolio" },
+  { label: "Volatility Control", score: 55, color: "#fbbf24", desc: "Elevated — single-name dominance" },
+  { label: "Correlation Risk", score: 52, color: "#fbbf24", desc: "High L1-sector correlation" },
   { label: "Quality & Trust", score: 81, color: "#22c55e", desc: "Strong fundamentals overall" },
-  { label: "Fragility Score", score: 67, color: "#fbbf24", desc: "Moderate tail risk exposure" },
+  { label: "Fragility Score", score: 58, color: "#fbbf24", desc: "Elevated tail risk from BTC concentration" },
 ];
 
 const US_DEMO_MONTE_CARLO = {
@@ -107,10 +108,10 @@ const US_DEMO_EQUITY_CURVE = [
 ];
 
 const US_DEMO_AI_INSIGHTS = [
-  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "Concentration alert", body: "BTC-USD now represents 34% of portfolio weight. A 20% drawdown in this single position would reduce total portfolio value by ~6.8%." },
-  { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Sector correlation risk", body: "BTC-USD, ETH-USD, SOL-USD, and ADA-USD are in the same narrative cluster. A L1 sector rotation could trigger correlated drawdowns across 56% of the portfolio." },
+  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "Concentration alert", body: "BTC-USD represents 51.8% of portfolio weight. A 20% drawdown in this single position would reduce total portfolio value by ~10.4%." },
+  { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Sector correlation risk", body: "BTC-USD, SOL-USD, ADA-USD, and AVAX-USD are in the same L1 cluster. A sector rotation could trigger correlated drawdowns across 68.6% of the portfolio." },
   { icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", title: "Hedge quality is strong", body: "BNB-USD and XRP-USD provide meaningful negative correlation during risk-off regimes. This reduces fragility by an estimated 8 points vs an all-L1 portfolio." },
-  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Consider trimming BTC-USD below 25% and rotating proceeds into DeFi or Payments sectors to reduce sector correlation without sacrificing expected return." },
+  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Consider trimming BTC-USD to below 30% and rotating proceeds into DeFi or Payments to reduce concentration risk and improve the diversification score above 65." },
 ];
 
 const US_DEMO_RISK_METRICS = [
@@ -124,7 +125,7 @@ const US_DEMO_RISK_METRICS = [
 
 const US_DEMO_FRAGILITY = [
   { label: "L1 Concentration", pct: 79, color: "#ef4444" },
-  { label: "BTC Single-Name Weight", pct: 64, color: "#f97316" },
+  { label: "BTC Single-Name Weight", pct: 82, color: "#ef4444" },
   { label: "Correlation Cluster Size", pct: 55, color: "#fbbf24" },
   { label: "Volatility Regime Mismatch", pct: 46, color: "#fbbf24" },
 ];
@@ -142,31 +143,31 @@ const US_DEMO_RETURN_DIST = [
 // ─── IN Demo Data ─────────────────────────────────────────────────────────────
 
 const IN_DEMO_HOLDINGS = [
-  { symbol: "BTC-USD", name: "Bitcoin", qty: 0.3, avgPrice: 95000, price: 104000, changePercent: 2.35, sector: "Layer 1", weight: 22.1 },
-  { symbol: "ETH-USD", name: "Ethereum", qty: 3, avgPrice: 3100, price: 3400, changePercent: 1.12, sector: "DeFi", weight: 18.9 },
-  { symbol: "SOL-USD", name: "Solana", qty: 40, avgPrice: 150, price: 180, changePercent: 3.41, sector: "Layer 1", weight: 20.6 },
-  { symbol: "XRP-USD", name: "XRP", qty: 1500, avgPrice: 2.10, price: 2.35, changePercent: 0.18, sector: "Payments", weight: 16.0 },
-  { symbol: "BNB-USD", name: "BNB", qty: 8, avgPrice: 580, price: 620, changePercent: 0.43, sector: "Exchange", weight: 12.2 },
-  { symbol: "ADA-USD", name: "Cardano", qty: 4000, avgPrice: 0.65, price: 0.72, changePercent: 0.65, sector: "Layer 1", weight: 9.4 },
-  { symbol: "DOT-USD", name: "Polkadot", qty: 200, avgPrice: 6.5, price: 7.2, changePercent: -0.55, sector: "Layer 0", weight: 8.8 },
-  { symbol: "AVAX-USD", name: "Avalanche", qty: 80, avgPrice: 35, price: 42, changePercent: 1.34, sector: "Layer 1", weight: 11.4 },
+  { symbol: "BTC-USD", name: "Bitcoin", qty: 0.3, avgPrice: 95000, price: 104000, changePercent: 2.35, sector: "Layer 1", weight: 48.2 },
+  { symbol: "ETH-USD", name: "Ethereum", qty: 3, avgPrice: 3100, price: 3400, changePercent: 1.12, sector: "DeFi", weight: 15.7 },
+  { symbol: "SOL-USD", name: "Solana", qty: 40, avgPrice: 150, price: 180, changePercent: 3.41, sector: "Layer 1", weight: 11.1 },
+  { symbol: "XRP-USD", name: "XRP", qty: 1500, avgPrice: 2.10, price: 2.35, changePercent: 0.18, sector: "Payments", weight: 5.4 },
+  { symbol: "BNB-USD", name: "BNB", qty: 8, avgPrice: 580, price: 620, changePercent: 0.43, sector: "Exchange", weight: 7.7 },
+  { symbol: "ADA-USD", name: "Cardano", qty: 4000, avgPrice: 0.65, price: 0.72, changePercent: 0.65, sector: "Layer 1", weight: 4.4 },
+  { symbol: "DOT-USD", name: "Polkadot", qty: 200, avgPrice: 6.5, price: 7.2, changePercent: -0.55, sector: "Layer 0", weight: 2.2 },
+  { symbol: "AVAX-USD", name: "Avalanche", qty: 80, avgPrice: 35, price: 42, changePercent: 1.34, sector: "Layer 1", weight: 5.2 },
 ];
 
 const IN_DEMO_ALLOCATION = [
-  { label: "Layer 1", percent: 51.5, color: "#3b82f6" },
-  { label: "DeFi", percent: 18.9, color: "#22c55e" },
-  { label: "Payments", percent: 16.0, color: "#f97316" },
-  { label: "Exchange", percent: 12.2, color: "#fbbf24" },
-  { label: "Layer 0", percent: 8.8, color: "#a78bfa" },
+  { label: "Layer 1", percent: 68.9, color: "#3b82f6" },
+  { label: "DeFi", percent: 15.7, color: "#22c55e" },
+  { label: "Exchange", percent: 7.7, color: "#fbbf24" },
+  { label: "Payments", percent: 5.4, color: "#f97316" },
+  { label: "Layer 0", percent: 2.2, color: "#a78bfa" },
 ];
 
 const IN_DEMO_HEALTH_DIMENSIONS = [
-  { label: "Diversification", score: 68, color: "#22c55e", desc: "Good spread — 5 sectors represented" },
-  { label: "Concentration", score: 61, color: "#fbbf24", desc: "L1 cluster at 51% warrants watch" },
-  { label: "Volatility Control", score: 74, color: "#22c55e", desc: "Payments hedge reduces drawdown risk" },
-  { label: "Correlation Risk", score: 63, color: "#fbbf24", desc: "L1 names (BTC, SOL, ADA) correlated" },
+  { label: "Diversification", score: 52, color: "#fbbf24", desc: "Moderate — 5 sectors but 68.9% in L1" },
+  { label: "Concentration", score: 44, color: "#ef4444", desc: "BTC alone at 48.2% of portfolio" },
+  { label: "Volatility Control", score: 62, color: "#fbbf24", desc: "Better than US — more names in mid-weight" },
+  { label: "Correlation Risk", score: 58, color: "#fbbf24", desc: "L1 names (BTC, SOL, ADA, AVAX) correlated" },
   { label: "Quality & Trust", score: 84, color: "#22c55e", desc: "Blue-chip crypto core holdings" },
-  { label: "Fragility Score", score: 71, color: "#22c55e", desc: "Low-moderate tail risk exposure" },
+  { label: "Fragility Score", score: 62, color: "#fbbf24", desc: "Moderate tail risk from BTC dominance" },
 ];
 
 const IN_DEMO_MONTE_CARLO = {
@@ -204,10 +205,10 @@ const IN_DEMO_EQUITY_CURVE = [
 ];
 
 const IN_DEMO_AI_INSIGHTS = [
-  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "L1 sector clustering", body: "BTC-USD, SOL-USD, and ADA-USD represent 51.5% combined weight in the same sector. A L1 rotation could compress all three simultaneously." },
+  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "L1 sector clustering", body: "BTC-USD, SOL-USD, ADA-USD, and AVAX-USD represent 68.9% combined weight in the L1 sector. A single sector rotation could compress all four simultaneously." },
   { icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", title: "Payments hedge working well", body: "XRP-USD provides meaningful negative correlation during risk-off events, reducing portfolio fragility by ~9 points." },
   { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Exchange exposure is diversified", body: "BNB-USD spans exchange and DeFi narratives, reducing single-protocol failure risk while maintaining crypto core alignment." },
-  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Consider adding a DeFi or Layer 2 position (e.g. UNI-USD or ARB-USD) to reduce L1 concentration and improve sector diversity score above 75." },
+  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Trim BTC-USD below 35% and add a Layer 2 position (e.g. ARB-USD or OP-USD) to reduce L1 concentration and push the diversification score above 65." },
 ];
 
 const IN_DEMO_RISK_METRICS = [
@@ -256,16 +257,16 @@ function getDemoConfig(region: "US" | "IN") {
       currencySymbol: "₹",
       locale: "en-IN",
       benchmarkLabel: "Bitcoin (BTC-USD)",
-      healthScore: 74,
-      healthTone: "Balanced",
-      healthDesc: "Strong blue-chip core with moderate L1 concentration. Payments hedge improves risk-adjusted return.",
+      healthScore: 60,
+      healthTone: "Concentrated",
+      healthDesc: "BTC dominates at 48.2%. L1 sector at 68.9%. 5-sector spread helps but single-name risk is elevated.",
       portfolioLabel: "Sample IN portfolio · 8 holdings",
       fragilityScore: 71,
       fragilityDesc: "Low-moderate tail risk — L1 cluster is the primary fragility driver.",
       fragilitySummary: [
-        { label: "Sector Fragility", value: "Moderate", detail: "51% in L1 cluster", color: "text-amber-400" },
-        { label: "Narrative Exposure", value: "Moderate", detail: "L1 narrative at ~51% weight", color: "text-amber-400" },
-        { label: "Tail Risk", value: "Low-Moderate", detail: "Max drawdown est. -19.4%", color: "text-emerald-400" },
+        { label: "Sector Fragility", value: "High", detail: "68.9% in L1 cluster", color: "text-rose-400" },
+        { label: "Narrative Exposure", value: "High", detail: "L1 narrative at ~68.9% weight", color: "text-rose-400" },
+        { label: "Tail Risk", value: "Moderate", detail: "Max drawdown est. -19.4%", color: "text-amber-400" },
       ],
     };
   }
@@ -285,15 +286,15 @@ function getDemoConfig(region: "US" | "IN") {
     currencySymbol: "$",
     locale: "en-US",
     benchmarkLabel: "Bitcoin (BTC-USD)",
-    healthScore: 72,
-    healthTone: "Balanced",
-    healthDesc: "Solid fundamentals, elevated concentration in Layer 1 sector warrants attention.",
+    healthScore: 55,
+    healthTone: "Concentrated",
+    healthDesc: "BTC dominates at 51.8% of portfolio. Strong fundamentals but high single-name and sector concentration risk.",
     portfolioLabel: "Sample US portfolio · 8 holdings",
     fragilityScore: 67,
     fragilityDesc: "Moderate tail risk — L1 sector concentration is the primary fragility driver.",
     fragilitySummary: [
-      { label: "Sector Fragility", value: "High", detail: "56% in Layer 1 cluster", color: "text-rose-400" },
-      { label: "Narrative Exposure", value: "Moderate", detail: "L1 narrative at ~56% weight", color: "text-amber-400" },
+      { label: "Sector Fragility", value: "High", detail: "68.6% in Layer 1 cluster", color: "text-rose-400" },
+      { label: "Narrative Exposure", value: "High", detail: "L1 narrative at ~68.6% weight", color: "text-rose-400" },
       { label: "Tail Risk", value: "Moderate", detail: "Max drawdown est. -23.1%", color: "text-amber-400" },
     ],
   };
