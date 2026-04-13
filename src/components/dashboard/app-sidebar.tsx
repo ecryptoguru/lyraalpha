@@ -142,7 +142,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="hover:bg-muted/45 dark:hover:bg-white/5 transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:mx-auto!"
             >
-              <Link href="/dashboard/lyra" className="flex w-full items-start gap-3 group-data-[collapsible=icon]:justify-center">
+              <Link href="/" className="flex w-full items-start gap-3 group-data-[collapsible=icon]:justify-center">
                 <div className="hidden aspect-square size-10 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-secondary/10 border border-primary/25 shadow-[0_0_15px_rgba(245,158,11,0.2)] text-foreground dark:text-white group-data-[collapsible=icon]:flex">
                   <Image 
                     src="/brand/lyraalpha-ai-symbol.svg" 
@@ -165,7 +165,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       Beta
                     </span>
                   </div>
-                  <span className="mt-1 truncate text-[10px] uppercase tracking-widest text-primary font-bold opacity-80">
+                  <span className="mt-1 truncate text-[15px] uppercase tracking-widest text-primary font-bold opacity-80">
                     {planLabel} Edition
                   </span>
                 </div>
