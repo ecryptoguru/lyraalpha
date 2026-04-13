@@ -47,7 +47,7 @@ const tools = [
     title: "AI Crypto Analysis",
     description:
       "Drop a single crypto ticker and get a structured read on setup, key drivers, risk, and what deserves attention next — before you spend more time on it.",
-    href: "/tools/ai-crypto-analysis",
+    href: "/tools/ai-stock-analysis",
     icon: BookOpen,
     accent: "teal",
   },
