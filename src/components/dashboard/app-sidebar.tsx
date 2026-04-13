@@ -134,7 +134,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       className="border-r border-border/70 bg-white/90 dark:border-white/5 dark:bg-black/55 backdrop-blur-2xl shadow-xl"
       {...props}
     >
-      <SidebarHeader className="pt-4 pb-3">
+      <SidebarHeader className="pt-5 pb-2">
         {/* Collapsed icon-only view */}
         <div className="hidden group-data-[collapsible=icon]:flex justify-center px-2 py-1">
           <Link href="/" className="flex items-center justify-center rounded-2xl size-10 bg-linear-to-br from-primary/20 to-secondary/10 border border-primary/25 shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:opacity-80 transition-opacity">
@@ -142,8 +142,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </Link>
         </div>
         {/* Expanded full logo view */}
-        <div className="group-data-[collapsible=icon]:hidden px-3 py-1">
-          <Link href="/" className="flex flex-col gap-1 rounded-xl hover:bg-muted/40 dark:hover:bg-white/5 transition-colors p-2 -mx-2">
+        <div className="group-data-[collapsible=icon]:hidden px-2">
+          <Link href="/" className="flex flex-col rounded-xl hover:bg-muted/40 dark:hover:bg-white/5 transition-colors duration-200 px-2 py-2 -mx-2 cursor-pointer">
+            {/* Logo image row */}
             <div className="flex items-center gap-2">
               <Image
                 src="/brand/lyraalpha-ai-logo-lockup.svg"
@@ -151,14 +152,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 width={307}
                 height={95}
                 priority
-                className="h-[84px] w-auto object-contain object-left"
+                className="h-[78px] w-auto object-contain object-left shrink-0"
               />
-            </div>
-            <div className="flex justify-center">
-              <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.24em] text-primary">
+              <span className="shrink-0 self-center inline-flex items-center rounded-full border border-primary/40 bg-primary/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] text-primary shadow-[0_0_8px_rgba(245,158,11,0.15)]">
                 Beta
               </span>
             </div>
+            {/* Plan label */}
+            <span className="mt-0.5 text-[10px] uppercase tracking-[0.22em] text-primary font-semibold opacity-70 pl-0.5">
+              {planLabel} Edition
+            </span>
           </Link>
         </div>
       </SidebarHeader>
