@@ -30,8 +30,7 @@ function PanelNoise() {
             <span className="font-light text-rose-400">noise.</span>
           </h2>
           <p className="mt-4 max-w-lg font-mono text-sm leading-7 text-white/42">
-            Fragmented signals. Conflicting narratives. 24 platforms, 47 alerts,
-            zero clarity. Traditional research leaves you drowning in data.
+            24 platforms, 47 alerts, zero clarity. Data without synthesis.
           </p>
         </div>
         <div className="relative overflow-hidden rounded-2xl border border-white/8 bg-white/3 p-5 backdrop-blur-sm">
@@ -79,8 +78,7 @@ function PanelSignal() {
             AI <span className="font-light text-amber-400">processing.</span>
           </h2>
           <p className="mt-4 max-w-lg font-mono text-sm leading-7 text-white/42">
-            The intelligence engine maps relationships across asset classes, filters signal from noise,
-            and builds a structured picture of what&apos;s actually moving markets.
+            Signals mapped across asset classes. Noise filtered. Structure built before AI speaks.
           </p>
         </div>
         <div className="relative overflow-hidden rounded-2xl border border-white/8 bg-white/3 p-5 backdrop-blur-sm">
@@ -138,7 +136,7 @@ function PanelClarity() {
             Actionable <span className="font-light text-teal-400">clarity.</span>
           </h2>
           <p className="mt-4 max-w-lg font-mono text-sm leading-7 text-white/42">
-            From noise to conviction — structured, traceable intelligence you can interrogate and act on with confidence.
+            Structured, traceable intelligence you can act on.
           </p>
         </div>
         <div className="relative overflow-hidden rounded-2xl border border-teal-400/20 bg-white/3 backdrop-blur-sm">
@@ -223,7 +221,7 @@ function PanelDualMarket() {
             <span className="font-light text-amber-400">Natively.</span>
           </h2>
           <p className="mt-4 max-w-lg font-mono text-sm leading-7 text-white/42">
-            Layer 1 foundations, Layer 2 scaling, DeFi protocols, and on-chain metrics — built for crypto from day one.
+            L1, L2, DeFi, and on-chain — built for crypto from day one.
           </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-3">

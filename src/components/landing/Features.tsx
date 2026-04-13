@@ -63,12 +63,12 @@ const signals = [
 ] as const;
 
 const lyraCapabilities = [
-  { icon: LineChart,   title: "Regime-Aware Analysis",      desc: "Reads every asset within its current market regime — macro, sector, and asset-level simultaneously.",                         accent: "amber" as const },
-  { icon: GitMerge,    title: "Multi-Asset Synthesis",       desc: "Analyzes up to 4 assets across sectors at once — identifying divergence, correlation, and relative regime alignment.",         accent: "teal" as const },
-  { icon: Zap,         title: "Shock Simulator",             desc: "Interprets deterministic stress replays — explaining what scenarios revealed and which assets showed genuine resilience.",     accent: "default" as const },
-  { icon: BookOpen,    title: "Conversation Memory",         desc: "Maintains context across sessions for deeper, continuous analysis without repeating previous context.",                        accent: "default" as const },
-  { icon: ShieldCheck, title: "Research Augmentation",       desc: "Pulls fresh web data with rigorous RAG injection scanning. Every retrieved chunk is scanned before Lyra sees it.",            accent: "default" as const },
-  { icon: Lock,        title: "Portfolio Intelligence",      desc: "Reads a portfolio as a system — regime alignment, fragility, benchmark comparison, Monte Carlo framing, and score velocity.", accent: "teal" as const },
+  { icon: LineChart,   title: "Regime-Aware Analysis",      desc: "Every asset read in its macro, sector, and asset-level regime simultaneously.",                       accent: "amber" as const },
+  { icon: GitMerge,    title: "Multi-Asset Synthesis",       desc: "Up to 4 assets across sectors — divergence, correlation, and relative regime alignment in one call.",   accent: "teal" as const },
+  { icon: Zap,         title: "Shock Simulator",             desc: "Deterministic stress replays interpreted by Lyra — what happened, and which assets held.",             accent: "default" as const },
+  { icon: BookOpen,    title: "Conversation Memory",         desc: "Context carries across sessions. No re-explaining. Deeper analysis over time.",                         accent: "default" as const },
+  { icon: ShieldCheck, title: "Research Augmentation",       desc: "Fresh web data via RAG. Every retrieved chunk scanned before Lyra sees it.",                            accent: "default" as const },
+  { icon: Lock,        title: "Portfolio Intelligence",      desc: "Portfolio read as a system — regime fit, fragility, benchmark, Monte Carlo, score velocity.",             accent: "teal" as const },
 ] as const;
 
 export function Features() {
@@ -90,7 +90,6 @@ export function Features() {
               <span className="text-amber-400">computed deterministically.</span>
             </h2>
             <p className="mt-6 text-base leading-8 text-white/42">
-              Before any AI response, the structured analytical foundation is already in place.
               The model interprets what the engines computed — it never invents the structure.
             </p>
           </div>
@@ -132,8 +131,7 @@ export function Features() {
               <span className="text-teal-400">She interprets.</span>
             </h2>
             <p className="mt-6 text-base leading-8 text-white/42">
-              Every response flows through a pipeline that computes structured context first —
-              then streams analysis under a strict output contract.
+              Structured context computed first. Analysis streamed under a strict output contract.
             </p>
           </div>
         </LandingReveal>

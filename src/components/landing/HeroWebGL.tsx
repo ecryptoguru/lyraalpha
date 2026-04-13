@@ -431,11 +431,8 @@ export function HeroWebGL() {
               </div>
 
               {/* Sub copy */}
-              <p className="max-w-2xl border-l-2 border-teal-400/50 pl-5 font-mono text-sm leading-8 text-white/75 sm:text-base">
-                LyraAlpha AI is the only financial intelligence platform that grounds every AI
-                response in deterministic engine computation — so Lyra interprets what the engines
-                already computed, and never invents a metric it should have measured. End to End deep 
-                agentic AI integration.
+              <p className="max-w-xl border-l-2 border-teal-400/50 pl-5 font-mono text-sm leading-8 text-white/75 sm:text-base">
+                Engines compute the signals. Lyra interprets them. No hallucinated metrics — ever.
               </p>
 
               {/* CTAs */}
@@ -463,9 +460,9 @@ export function HeroWebGL() {
               {/* Stats */}
               <div className="grid grid-cols-3 gap-3 pt-2">
                 {[
-                  { value: "250M+", label: "Target investors US & India", accent: "amber" },
-                  { value: "6",     label: "Deterministic signals computed first", accent: "teal" },
-                  { value: "5",     label: "Asset classes in one system", accent: "default" },
+                  { value: "250M+", label: "Investors · US & India", accent: "amber" },
+                  { value: "6",     label: "Signals computed first", accent: "teal" },
+                  { value: "5",     label: "Asset classes", accent: "default" },
                 ].map((s) => (
                   <div
                     key={s.label}

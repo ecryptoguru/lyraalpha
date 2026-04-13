@@ -6,21 +6,21 @@ const steps = [
   {
     title: "The Deterministic Engine",
     description:
-      "Proprietary engines compute structured market context before any AI speaks. DSE Scores, Market Regime, ARCS, and Stress Scenarios are all computed first. The model interprets what the engines already computed — it never invents analytical structure.",
+      "DSE Scores, Market Regime, ARCS, and Stress Scenarios are computed before any AI speaks. The model interprets output — it never invents structure.",
     tag: "DSE Scores · Market Regime · ARCS · Stress Scenarios",
     icon: Cpu,
   },
   {
     title: "The AI Agents",
     description:
-      "Two purpose-built agents with a hard architectural boundary. Lyra handles market intelligence — regime-aware analysis, cross-asset synthesis, portfolio interpretation. Myra handles product guidance and onboarding. Tiered model routing based on query complexity.",
+      "Lyra handles market intelligence. Myra handles product guidance. Hard architectural boundary between them. Model routing scales with query complexity.",
     tag: "Nano, Mini, Full Routing · Isolated Analysis",
     icon: BrainCircuit,
   },
   {
     title: "Premium Workflows",
     description:
-      "Intelligence experiences built on structured computation. Compare Assets, Shock Simulator, and Portfolio Intelligence are repeatable analytical routines that create habits and retention — not just generic chat with more tokens.",
+      "Compare Assets, Shock Simulator, and Portfolio Intelligence are repeatable routines built on computed signals — not generic chat.",
     tag: "Compare Assets · Shock Simulator · Portfolio Intelligence",
     icon: ArrowRightLeft,
   },
@@ -47,7 +47,6 @@ export function HowItWorks() {
                 Computation ›› Intelligence ›› Workflows.
               </h2>
               <p className="mt-5 text-base leading-8 text-white/52 sm:text-lg">
-                Three distinct layers working in concert to deliver grounded financial intelligence.
                 The engines compute. The AI interprets. The workflows turn it into habit.
               </p>
             </div>

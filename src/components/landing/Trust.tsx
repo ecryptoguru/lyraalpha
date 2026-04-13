@@ -3,17 +3,17 @@ import { LandingReveal } from "@/components/landing/LandingReveal";
 const trustMetrics = [
   {
     value: "01 · The Data Glut",
-    label: "400M+ crypto holders globally. 100M+ active wallets. Everyone drowning in the same fragmented streams: prices, charts, on-chain metrics, DeFi data, network signals, news — zero synthesis.",
+    label: "400M+ crypto holders, same fragmented streams: prices, charts, on-chain data, news — zero synthesis.",
     accent: "default",
   },
   {
     value: "02 · The AI Illusion",
-    label: "Generic AI finance tools sound confident but hallucinate metrics. They invent analytical structure that should have been computed. No auditability, no backbone, no trust.",
+    label: "Generic AI finance tools hallucinate metrics. They invent structure that should have been computed. No auditability, no trust.",
     accent: "amber",
   },
   {
     value: "03 · The Missing Framework",
-    label: "No institutional framework exists for crypto investors to interpret on-chain signals and regime context. The problem isn't access to information. It's the inability to synthesize it into a decision.",
+    label: "No framework exists to turn on-chain signals and regime context into a decision. The problem isn't data access — it's synthesis.",
     accent: "teal",
   },
 ] as const;
@@ -35,8 +35,7 @@ export function Trust() {
                   <span className="block text-amber-400">You lack the judgment layer.</span>
                 </h2>
                 <p className="mt-4 text-sm leading-7 text-white/42 sm:text-base">
-                  Every investor has access to the same data. The edge is in the engine that
-                  synthesizes it — and the AI that interprets it without hallucinating.
+                  The edge is in the engine that synthesizes the data — and the AI that interprets it without hallucinating.
                 </p>
               </div>
 
