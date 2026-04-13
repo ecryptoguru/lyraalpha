@@ -74,3 +74,4 @@ full_payment_docs.txt
 /demo-output/
 
 /update/
+.env*.local

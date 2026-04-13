@@ -144,6 +144,7 @@ vi.mock("@/lib/redis", () => ({
   },
   getCache: vi.fn().mockResolvedValue(null),
   setCache: vi.fn().mockResolvedValue(undefined),
+  redisSetNX: vi.fn(async () => true),
 }));
 
 vi.mock("@/lib/logger", () => ({

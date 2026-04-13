@@ -54,7 +54,6 @@ export function DiscoveryFeed({
   initialRegion,
 }: {
   initialData?: DiscoveryFeedResponse;
-  initialTypeFilter?: string;
   initialRegion?: "US" | "IN";
 }) {
   const { region } = useRegion();

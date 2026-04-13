@@ -35,6 +35,7 @@ vi.mock("@/lib/redis", () => ({
     set: vi.fn().mockResolvedValue("OK"), // returns "OK" = lock acquired, null = lock held
     del: vi.fn().mockResolvedValue(1),
   },
+  redisSetNX: vi.fn(async () => true),
 }));
 
 // ─── Mock monitoring ──────────────────────────────────────────────────────────
@@ -59,7 +60,7 @@ vi.mock("@/lib/logger/utils", () => ({
 import { getGlobalNotes, getSessionNotes, distillSessionNotes, consolidateMemory } from "../memory";
 import { prisma } from "@/lib/prisma";
 import { generateText } from "ai";
-import { setCache, redis } from "@/lib/redis";
+import { setCache, redisSetNX } from "@/lib/redis";
 import { logMemoryEvent } from "@/lib/ai/monitoring";
 
 const mockPrisma = prisma as unknown as {
@@ -74,7 +75,7 @@ const mockPrisma = prisma as unknown as {
 
 const mockGenerateText = generateText as ReturnType<typeof vi.fn>;
 const mockSetCache = setCache as ReturnType<typeof vi.fn>;
-const mockRedisSet = (redis as unknown as { set: ReturnType<typeof vi.fn> }).set;
+const mockRedisSetNX = redisSetNX as ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -83,7 +84,7 @@ beforeEach(() => {
   mockPrisma.userMemoryNote.create.mockResolvedValue({});
   mockPrisma.$executeRaw.mockResolvedValue(1);
   mockPrisma.$transaction.mockResolvedValue([]);
-  mockRedisSet.mockResolvedValue("OK"); // default: lock always acquired
+  mockRedisSetNX.mockResolvedValue(true); // default: lock always acquired
   mockSetCache.mockResolvedValue(undefined);
 });
 
@@ -462,8 +463,8 @@ describe("distillSessionNotes — extraction quality snapshots", () => {
   });
 
   it("logs 'locked' outcome and skips work when Redis lock is already held", async () => {
-    // Simulate lock already held — redis.set with NX returns null (key already exists)
-    mockRedisSet.mockResolvedValueOnce(null);
+    // Simulate lock already held — redisSetNX returns false (key already exists)
+    mockRedisSetNX.mockResolvedValueOnce(false);
 
     await distillSessionNotes("user_snap6", fourTurnMessages, "lyra");
 

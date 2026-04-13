@@ -7,7 +7,6 @@ export function DiscoveryTabsClient({
   initialData,
   initialRegion,
 }: {
-  initialTab?: "radar" | "sectors";
   initialData?: DiscoveryFeedResponse;
   initialRegion?: "US" | "IN";
 }) {

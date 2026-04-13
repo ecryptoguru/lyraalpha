@@ -57,7 +57,6 @@ export function InstitutionalOwnership({
   heldPercentInsiders,
   shortRatio,
   beta,
-  assetType,
   className,
 }: InstitutionalOwnershipProps) {
   const isStock = false; // Platform is crypto-only
