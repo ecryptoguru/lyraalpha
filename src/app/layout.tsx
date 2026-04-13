@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "LyraAlpha AI | Institutional-Grade Financial Intelligence",
     description: "Institutional-grade financial intelligence for every investor.",
-    url: "https://lyraalpha.ai",
+    url: process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz",
     siteName: "LyraAlpha AI",
     images: [
       {
@@ -70,7 +70,7 @@ export const metadata: Metadata = {
   alternates: {
     types: {
       "application/rss+xml": [
-        { url: "https://lyraalpha.ai/blog/feed.xml", title: "LyraAlpha AI Blog" },
+        { url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/blog/feed.xml`, title: "LyraAlpha AI Blog" },
       ],
     },
   },

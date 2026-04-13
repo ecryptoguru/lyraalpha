@@ -3,7 +3,7 @@ import { CryptoStructuralRiskCard } from "@/components/analytics/crypto-structur
 import { AssetExternalLinks } from "@/components/dashboard/analytics/AssetExternalLinks";
 import { cn, formatCompactNumber } from "@/lib/utils";
 import type { RegionFormat } from "@/lib/utils";
-import type { AssetAnalytics } from "./asset-page-helpers";
+import type { AssetAnalytics, AssetPageCryptoMeta } from "./asset-page-helpers";
 import type {
   CryptoStructuralRisk,
   EnhancedCryptoTrust,
@@ -11,53 +11,6 @@ import type {
   LiquidityRiskScore,
   NetworkActivityScore,
 } from "@/lib/engines/crypto-intelligence";
-
-interface AssetPageCryptoMeta {
-  marketCapRank?: number;
-  fullyDilutedValuation?: number;
-  ath?: number;
-  athDate?: string;
-  athChangePercentage?: number;
-  atl?: number;
-  atlDate?: string;
-  atlChangePercentage?: number;
-  priceChangePercentage7d?: number;
-  priceChangePercentage14d?: number;
-  priceChangePercentage30d?: number;
-  priceChangePercentage60d?: number;
-  priceChangePercentage200d?: number;
-  priceChangePercentage1y?: number;
-  image?: { large?: string };
-  description?: string;
-  categories?: string[];
-  genesisDate?: string;
-  hashingAlgorithm?: string;
-  sentimentVotesUpPercentage?: number;
-  sentimentVotesDownPercentage?: number;
-  watchlistUsers?: number;
-  developer?: {
-    forks?: number;
-    stars?: number;
-    subscribers?: number;
-    totalIssues?: number;
-    closedIssues?: number;
-    pullRequestsMerged?: number;
-    commitCount4Weeks?: number;
-  } | null;
-  community?: {
-    redditSubscribers?: number;
-    telegramUsers?: number | null;
-  } | null;
-  links?: {
-    homepage?: string[];
-    whitepaper?: string | null;
-    blockchain?: string[];
-    twitter?: string | null;
-    reddit?: string | null;
-    github?: string[];
-    telegram?: string | null;
-  };
-}
 
 interface AssetCryptoProfileSectionProps {
   analyticsComputed: AssetAnalytics;

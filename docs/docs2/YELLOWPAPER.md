@@ -39,7 +39,9 @@ The platform stores a crypto-only asset universe spanning:
 
 - crypto assets
 
-Assets carry structured metadata such as symbol, name, region, currency, exchange and asset-type-specific intelligence fields including on-chain metrics, protocol data, and DeFi analytics.
+Assets carry structured metadata such as symbol, name, region, currency, exchange and asset-type-specific intelligence fields including on-chain metrics, protocol data, DeFi analytics, and crypto news intelligence from NewsData.io.
+
+**NewsData.io integration:** `src/lib/services/newsdata.service.ts` provides trending crypto news, per-asset news feeds, and sentiment extraction. Synced every 12 hours via the `news-sync` cron (`/api/cron/news-sync`). `cryptopanic.service.ts` is a backward-compatible re-export only — no CryptoPanic-specific logic remains. Env var: `NEWSDATA_API_KEY`.
 
 ### 3.2 Scores and Derived Intelligence
 
@@ -107,17 +109,41 @@ The platform ships a public blog system with a hybrid static + DB architecture.
 
 ---
 
-### 3.5 Roadmap Features (Planned)
+### 3.5 Myra Voice (Shipped)
 
-**LYRA Voice Fintech Consultant (Q2 2026)**
+Myra now supports hands-free voice interaction via the OpenAI Realtime API. This is a shipped feature, not roadmap.
 
-Voice-enabled AI consultant interface allowing hands-free interaction with Lyra for portfolio and market analysis. Targeting mobile accessibility and multitasking scenarios. Tier: Elite+.
+**Voice session endpoint:** `GET /api/support/voice-session`
+- Returns: ephemeral token, WSS URL (`wss://api.openai.com/v1/realtime`), model config, per-user instructions
+- Plan-gated: PRO+ only (PRO, ELITE, ENTERPRISE)
+- Rate-limited via `rateLimitChat`
 
-Key capabilities:
-- Speech-to-text for natural language queries
-- Text-to-speech for audio consumption of analysis
-- Voice-activated portfolio briefings and market updates
-- Mobile-optimized audio design for noisy environments
+**Voice model:** `gpt-realtime-mini` with voice `marin`
+- Audio format: PCM 24kHz input/output
+- Turn detection: semantic VAD (`type: "semantic_vad"`, `eagerness: "medium"`)
+- Transcription: `gpt-4o-mini-transcribe` with English/Hinglish/Hindi constraint; Urdu script explicitly blocked
+- Max output tokens: 350
+
+**Voice prompt architecture:**
+- Static prefix (cache-eligible at 10× cheaper text-input rate): role, scope, opening, personality, voice rules, language rules, guardrails, pronunciation, platform facts
+- Dynamic per-user suffix: plan, credits, current page, global notes, KB docs (sanitized against `INJECTION_PATTERNS`)
+- Page param from query string is validated against injection patterns before injection into instructions
+
+**Client-side defenses:**
+- Virtual audio device filtering: enumerates devices, prefers real microphones over virtual ones (BlackHole, Soundflower, VB-Audio, etc.)
+- Silence auto-stop: runtime silence detection with user-visible error
+- PII redaction in voice transcripts (email, phone, user ID patterns)
+- Client-side injection pattern detection on voice transcripts
+
+**Voice cost calculator:** `src/lib/ai/cost-calculator.ts`
+- `calculateVoiceCost()` — per-token cost breakdown for Realtime API audio + text
+- `estimateVoiceSessionCost()` — duration-based cost estimate
+- `estimateVoiceSessionCostCached()` — cost estimate with static prefix cache hits
+- `summariseVoiceSessionCost()` — worst-case vs cache-optimised comparison for admin dashboards
+
+**Client hook:** `src/hooks/use-myra-voice.ts`
+**Voice button:** `src/components/dashboard/myra-voice-button.tsx`
+**Voice prompt builder:** `src/lib/support/voice-prompt.ts`
 
 ---
 
@@ -472,6 +498,7 @@ Related runtime hardening:
 | **Auth** | Clerk |
 | **Lyra Model** | GPT-5.4 family (nano / mini / full) via Azure OpenAI Responses API |
 | **Myra Model** | GPT-5.4-nano via Azure OpenAI |
+| **Myra Voice Model** | `gpt-realtime-mini` via OpenAI Realtime API (voice `marin`) |
 | **Orchestration** | Single (all plans) — `router` and `draft_verify` removed from `TierConfig` |
 | **Embeddings** | pgvector-backed retrieval stack |
 | **Payments** | Stripe + Razorpay |
@@ -493,6 +520,10 @@ Related runtime hardening:
 | **Web search alerting** | Alert fires at 2 consecutive failures (before circuit opens at 3) |
 | **Myra response cache** | Normalized hash, 4h TTL logged-in / 8h TTL public |
 | **Compression cache** | Context SHA-256 keyed, 2h TTL — avoids redundant nano preflight calls |
+| **Voice prompt injection scan** | KB docs sanitized against `INJECTION_PATTERNS` before injection into voice instructions |
+| **Voice page param scan** | Query string `page` param validated against injection patterns before embedding in voice prompt |
+| **Voice PII redaction** | Client-side redaction of email, phone, user ID patterns in voice transcripts |
+| **Voice device filtering** | Virtual audio devices (BlackHole, Soundflower, VB-Audio) filtered out at client level |
 
 ---
 
@@ -500,4 +531,4 @@ Related runtime hardening:
 
 This yellow paper is intentionally implementation-aligned. When a conflict exists between an older spec and the current audited code, the code is treated as authoritative unless the code is clearly incorrect or unsafe.
 
-*Version 3.0 · March 2026*
+*Version 3.1 · March 2026*

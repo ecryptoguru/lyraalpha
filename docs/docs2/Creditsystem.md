@@ -233,6 +233,7 @@ Those concepts may still exist as strategy ideas, but they are not the stable im
 - daily token cap as secondary cost backstop for all plans including ENTERPRISE (hot-patchable from `/admin/ai-limits`)
 - Myra public chat — no credits consumed by public visitors (landing page Myra is free to all)
 - Myra response caching — reduces LLM cost on repetitive support questions
+- Myra Voice — no credits consumed; plan-gated to PRO+ (separate Realtime API billing, not credit-based); voice cost tracked via `src/lib/ai/cost-calculator.ts` for admin dashboards
 
 ### Still Product-Strategy / Evolving
 
@@ -252,10 +253,11 @@ Credit-adjacent cron jobs that run on QStash schedules:
 | `/api/cron/reset-credits` | `0 0 1 * *` | Monthly credit reset by plan tier |
 | `/api/cron/blog-digest` | `0 10 * * 1` | Weekly digest email — no credit cost to users |
 | `/api/cron/reengagement` | `0 9 * * *` | Re-engagement / win-back — no credit cost |
+| `/api/cron/news-sync` | `0 */12 * * *` | Crypto news sync via NewsData.io — no credit cost |
 
 Blog-related email notifications (new post, weekly digest) are sent by LyraAlpha via Brevo and do **not** consume user credits. The AMI 2.0 marketing agent triggers these flows via the webhook bridge; LyraAlpha owns the send.
 
-> **Last reviewed:** March 2026. Credit amounts, referral rewards, and query pricing are unchanged. Myra public chat added as a zero-credit surface. Daily token caps added as secondary backstop.
+> **Last reviewed:** March 2026. Credit amounts, referral rewards, and query pricing are unchanged. Myra public chat and Myra Voice added as zero-credit surfaces. Daily token caps added as secondary backstop. NewsData.io crypto news sync added.
 
 ---
 
@@ -263,4 +265,4 @@ Blog-related email notifications (new post, weekly digest) are sent by LyraAlpha
 
 This file is implementation-aligned. If plan credits, referral rewards, or query pricing change in code, update this document to match the live behavior first.
 
-*Version 2.0 · March 2026*
+*Version 2.1 · March 2026*

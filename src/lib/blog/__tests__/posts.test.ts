@@ -157,7 +157,7 @@ describe("getPostBySlugAsync", () => {
 
     const call = (prisma.blogPost.findFirst as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(call.where.slug).toBe("some-slug");
-    expect(call.where.status).toBe("published");
+    expect(call.where.status).toBe("PUBLISHED");
   });
 
   it("fetches content field in full query", async () => {
@@ -255,7 +255,7 @@ describe("getFeaturedPostsAsync", () => {
     await getFeaturedPostsAsync();
 
     const call = (prisma.blogPost.findMany as ReturnType<typeof vi.fn>).mock.calls[0][0];
-    expect(call.where.status).toBe("published");
+    expect(call.where.status).toBe("PUBLISHED");
     expect(call.where.featured).toBe(true);
   });
 
@@ -287,7 +287,7 @@ describe("getPostsByCategory", () => {
 
     const call = (prisma.blogPost.findMany as ReturnType<typeof vi.fn>).mock.calls[0][0];
     expect(call.where.category).toEqual({ equals: "AI & Technology", mode: "insensitive" });
-    expect(call.where.status).toBe("published");
+    expect(call.where.status).toBe("PUBLISHED");
   });
 
   it("returns DB posts when available", async () => {

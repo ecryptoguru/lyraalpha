@@ -1,6 +1,9 @@
 import { headers } from "next/headers";
 import { auth as clerkAuth } from "@clerk/nextjs/server";
 import { isAuthBypassEnabled, isAuthBypassHeaderEnabled } from "@/lib/runtime-env";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger({ service: "auth" });
 
 function getAdminEmailAllowlist() {
   return (process.env.ADMIN_EMAIL_ALLOWLIST ?? "")
@@ -37,7 +40,8 @@ export async function auth() {
         debug: () => {},
         redirectToSignIn: () => {},
       };
-    } catch {
+    } catch (e) {
+      logger.warn({ err: e }, "Auth bypass: failed to find ELITE user, using fallback test-user-id");
       return {
         userId: "test-user-id",
         sessionId: "test-session-id",

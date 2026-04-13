@@ -6,12 +6,12 @@ export const metadata: Metadata = {
   title: "AI Crypto Analysis | LyraAlpha AI — DSE Scores, Regime Fit & Asset Intelligence",
   description:
     "AI crypto analysis powered by LyraAlpha's deterministic scoring engines. Get trend score, volatility regime, momentum, and sentiment signals computed first — then Lyra interprets the setup, risks, and what deserves attention next.",
-  alternates: { canonical: "https://lyraalpha.ai/tools/ai-stock-analysis" },
+  alternates: { canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools/ai-stock-analysis` },
   openGraph: {
     title: "AI Crypto Analysis | LyraAlpha AI",
     description:
       "DSE scores, regime fit, momentum, and sentiment — computed deterministically, interpreted by Lyra. Drop a crypto ticker and get a structured read on setup, risk, and next steps.",
-    url: "https://lyraalpha.ai/tools/ai-stock-analysis",
+    url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools/ai-stock-analysis`,
     images: ["/og-image.png"],
   },
   twitter: {

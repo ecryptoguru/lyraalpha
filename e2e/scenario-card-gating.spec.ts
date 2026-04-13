@@ -48,16 +48,15 @@ test.describe("Scenario Analysis Card — Asset Type Gating", () => {
     await expect(scenarioCard).toBeVisible({ timeout: 10000 });
   });
 
-  test("CRYPTO (BTC-USD) is gated for non-Elite plans", async ({ page }) => {
+  test("CRYPTO (BTC-USD) is fully accessible for all plans", async ({ page }) => {
     await setupPage(page);
     await page.goto("/dashboard/assets/BTC-USD");
 
-    // With STARTER plan, crypto analytics returns 403 → page shows error/gate screen.
-    // Either the gating error message OR an upgrade gate is visible — no full asset page renders.
-    const gatingSignal = page.getByText(/Intelligence Sync Failure|Upgrade to Elite|Elite/i).first();
-    await expect(gatingSignal).toBeVisible({ timeout: 30000 });
+    // Crypto assets are now fully accessible to Starter/Pro plans.
+    // The asset page should load successfully — no gating error or upgrade wall.
+    await expect(page.locator("h1").first()).toBeVisible({ timeout: 30000 });
 
-    // Scenario Analysis card must NOT be present in this gated state
+    // Scenario Analysis card must NOT be present for CRYPTO (not a stock/ETF)
     const scenarioCard = page.getByText("Scenario Analysis");
     await expect(scenarioCard).toHaveCount(0);
   });

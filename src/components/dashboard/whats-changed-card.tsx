@@ -64,7 +64,7 @@ export function WhatsChangedCard() {
           setSummary(data.summary);
         }
       })
-      .catch(() => {})
+      .catch((e) => console.warn("Failed to fetch what's changed:", e))
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [fetchParams?.fetch, fetchParams?.since]);

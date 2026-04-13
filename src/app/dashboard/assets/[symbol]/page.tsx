@@ -7,14 +7,9 @@ import { IntelligenceLoader } from "@/components/ui/intelligence-loader";
 import { LyraInsightSheet } from "@/components/lyra/lyra-insight-sheet";
 import { InstitutionalTimeline } from "@/components/analytics/institutional-timeline";
 import { ScoreDynamicsCard } from "@/components/ui/ScoreDynamicsCard";
-import { ValuationMatrix } from "@/components/analytics/valuation-matrix";
-import { InstitutionalOwnership } from "@/components/analytics/institutional-ownership";
 import { PerformanceMatrix } from "@/components/analytics/performance-matrix";
 import { EventImpactBadge } from "@/components/ui/EventImpactBadge";
 import { RegimeBadge } from "@/components/ui/RegimeBadge";
-import { NSEIntelligence } from "@/components/analytics/nse-intelligence";
-import { CompanyProfile } from "@/components/analytics/company-profile";
-import { FinancialHighlights } from "@/components/analytics/financial-highlights";
 import { ScenarioAnalysisCard } from "@/components/stocks/scenario-analysis-card";
 import { SameSectorMovers } from "@/components/dashboard/same-sector-movers";
 import dynamic from "next/dynamic";
@@ -59,6 +54,7 @@ import {
   buildAssetPageDerivedState,
   buildComprehensiveThesisPrompt,
   mergeAnalyticsWithData,
+  hasVisibleValue,
 } from "./asset-page-helpers";
 import {
   AssetCryptoDiagnosticsSection,
@@ -66,7 +62,7 @@ import {
 } from "./asset-page-render-sections";
 import { AssetPageSectionHeader } from "./asset-page-section-header";
 
-/** Format rating labels like STRONG_BUY → "Strong Buy" for display */
+/** Format rating labels like STRONG_BUY → "Strong Buy", BULLISH → "Bullish" for display */
 function formatRatingDisplay(rating: string | null | undefined): string {
   if (!rating) return "—";
   const map: Record<string, string> = {
@@ -75,8 +71,10 @@ function formatRatingDisplay(rating: string | null | undefined): string {
     NEUTRAL: "Neutral",
     SELL: "Sell",
     STRONG_SELL: "Strong Sell",
+    BULLISH: "Bullish",
+    BEARISH: "Bearish",
   };
-  return map[rating] || rating;
+  return map[rating] || rating.replace(/_/g, " ").toLowerCase().replace(/^./, (c) => c.toUpperCase());
 }
 
 const staggerContainer = {
@@ -158,18 +156,6 @@ const SignalStrengthCard = dynamic(
   },
 );
 
-const AnalystTargetGauge = dynamic(
-  () => import("@/components/analytics/analyst-target-gauge").then((mod) => mod.AnalystTargetGauge),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[240px] rounded-3xl border border-border/30 dark:border-white/5 bg-muted/5 overflow-hidden">
-        <div className="h-full w-full bg-linear-to-r from-transparent via-muted/30 to-transparent bg-size-[200%_100%] animate-shimmer" />
-      </div>
-    ),
-  },
-);
-
 export default function AssetPage({
   params,
 }: {
@@ -230,7 +216,7 @@ export default function AssetPage({
       const fetchHistory = async () => {
         try {
           setIsChartLoading(true);
-          const res = await fetch(`/api/stocks/history?symbol=${symbol}&range=${apiRange}`, {
+          const res = await fetch(`/api/stocks/history?symbol=${encodeURIComponent(symbol)}&range=${apiRange}`, {
             signal: controller.signal,
           });
           if (!res.ok) {
@@ -250,7 +236,7 @@ export default function AssetPage({
       // 2. Fetch Analytics independently (Institutional Intelligence)
       const fetchAnalytics = async () => {
         try {
-          const res = await fetch(`/api/stocks/${symbol.trim()}/analytics`, {
+          const res = await fetch(`/api/stocks/${encodeURIComponent(symbol.trim())}/analytics`, {
             signal: controller.signal,
           });
           if (!res.ok) {
@@ -293,17 +279,21 @@ export default function AssetPage({
   // `analytics` is excluded from deps intentionally (it would re-run on every analytics update)
   useEffect(() => {
     if (!isElite) return;
+    const controller = new AbortController();
     let cancelled = false;
     // Small delay to let analytics settle before firing
     const timer = setTimeout(() => {
-      fetch(`/api/stocks/${symbol.trim()}/score-history?days=90`)
+      fetch(`/api/stocks/${encodeURIComponent(symbol.trim())}/score-history?days=90`, { signal: controller.signal })
         .then((r) => r.ok ? r.json() : null)
         .then((d) => {
           if (!cancelled && d?.history) setScoreHistory(d.history);
         })
-        .catch(() => {});
+        .catch((e) => {
+          if (e instanceof DOMException && e.name === "AbortError") return;
+          console.warn("Score history fetch failed:", e);
+        });
     }, 600);
-    return () => { cancelled = true; clearTimeout(timer); };
+    return () => { cancelled = true; clearTimeout(timer); controller.abort(); };
   }, [symbol, isElite]);
 
   const analyticsComputed: AssetAnalytics = useMemo(
@@ -317,6 +307,11 @@ export default function AssetPage({
 
   const currencySymbol = currencyConfig.symbol;
   const currencyRegion = currencyConfig.region;
+
+  const friendlySymbol = useMemo(
+    () => getFriendlySymbol(symbol, analytics?.type, analytics?.name),
+    [symbol, analytics?.type, analytics?.name],
+  );
 
   const {
     signals,
@@ -358,6 +353,27 @@ export default function AssetPage({
     headerDayRange,
     cgMeta,
   } = derivedState;
+
+  const dayRangePosition = useMemo(
+    () => headerDayRange ? computeRangePositionPercent(latestPrice, headerDayRange.low, headerDayRange.high) : 0,
+    [headerDayRange, latestPrice],
+  );
+
+  const cryptoMatrix = useMemo(() => {
+    const meta = analyticsComputed.metadata as Record<string, unknown> | null;
+    const messari = meta?.messari as Record<string, unknown> | undefined;
+    const mktCap = analyticsComputed.technicalMetrics?.marketCap;
+    const vol24h = meta?.volume24Hr as number | undefined;
+    const circSupply = meta?.circulatingSupply as number | undefined;
+    const maxSupply = meta?.maxSupply as number | undefined;
+    const volToMcap = vol24h != null && mktCap && Number(mktCap) !== 0
+      ? `${((vol24h / Number(mktCap)) * 100).toFixed(2)}%`
+      : "—";
+    const supplyMined = circSupply != null && maxSupply != null && Number(maxSupply) > 0
+      ? `${((Number(circSupply) / Number(maxSupply)) * 100).toFixed(1)}%`
+      : null;
+    return { meta, messari, mktCap, vol24h, circSupply, maxSupply, volToMcap, supplyMined };
+  }, [analyticsComputed.metadata, analyticsComputed.technicalMetrics?.marketCap]);
 
   const [explainData, setExplainData] = useState<ExplanationData | null>(null);
   const [isExplainOpen, setIsExplainOpen] = useState(false);
@@ -420,10 +436,11 @@ export default function AssetPage({
   }
 
   return (
+    <TooltipProvider>
     <div className="relative space-y-4 sm:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-6 overflow-x-hidden min-w-0 w-full max-w-[100vw] will-change-composite p-3 sm:p-4 md:p-6">
       {/* Background Decorative Labels */}
       <div className="absolute -top-10 -right-20 text-[12vw] font-bold text-primary/5 select-none pointer-events-none tracking-tighter z-0 hidden lg:block uppercase">
-        {getFriendlySymbol(symbol)} INTEL
+        {friendlySymbol} INTEL
       </div>
 
       <div className="relative z-10 rounded-4xl border border-white/10 bg-card/70 backdrop-blur-2xl shadow-xl p-5 sm:p-6 md:p-7 mt-2">
@@ -438,7 +455,7 @@ export default function AssetPage({
               </div>
               <div className="flex items-center gap-2 min-w-0">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter text-foreground leading-none uppercase truncate">
-                  {getFriendlySymbol(symbol, analytics?.type, analytics?.name)}
+                  {friendlySymbol}
                 </h1>
                 <div className="hover:bg-primary/10 hover:text-primary p-1 rounded-full transition-colors cursor-pointer shrink-0">
                   <WatchlistStar symbol={symbol} size="md" />
@@ -499,11 +516,11 @@ export default function AssetPage({
                   <div className="h-1.5 w-16 sm:w-20 bg-muted/60 rounded-full relative overflow-hidden">
                     <div
                       className="absolute h-full bg-linear-to-r from-primary/50 to-primary rounded-full transition-all duration-1000"
-                      style={{ left: "0%", width: `${computeRangePositionPercent(latestPrice, headerDayRange.low, headerDayRange.high)}%` }}
+                      style={{ left: "0%", width: `${dayRangePosition}%` }}
                     />
                     <div
                       className="absolute w-2 h-2 bg-white rounded-full top-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(var(--primary),0.5)] border border-primary/20 transition-all duration-1000"
-                      style={{ left: `calc(${computeRangePositionPercent(latestPrice, headerDayRange.low, headerDayRange.high)}% - 4px)` }}
+                      style={{ left: `calc(${dayRangePosition}% - 4px)` }}
                     />
                   </div>
                   <span className="text-[10px] font-mono font-bold text-foreground/80">{formatPrice(headerDayRange.high, { symbol: currencySymbol, region: currencyRegion, decimals: 0 })}</span>
@@ -569,7 +586,7 @@ export default function AssetPage({
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <Button asChild size="sm" className="gap-2">
-                <Link href={`/dashboard/lyra?q=${encodeURIComponent(`Explain ${getFriendlySymbol(symbol, analytics?.type, analytics?.name)} in plain English`)}`}>
+                <Link href={`/dashboard/lyra?q=${encodeURIComponent(`Explain ${friendlySymbol} in plain English`)}`}>
                   Ask Lyra
                   <Sparkles className="h-3.5 w-3.5" />
                 </Link>
@@ -580,14 +597,12 @@ export default function AssetPage({
                   <TrendingUp className="h-3.5 w-3.5" />
                 </Link>
               </Button>
-              {true ? (
-                <Button asChild variant="outline" size="sm" className="gap-2">
-                  <Link href="/dashboard/stress-test">
-                    Stress test this theme
-                    <Zap className="h-3.5 w-3.5" />
-                  </Link>
-                </Button>
-              ) : null}
+              <Button asChild variant="outline" size="sm" className="gap-2">
+                <Link href="/dashboard/stress-test">
+                  Stress test this theme
+                  <Zap className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
               <ShareInsightButton share={assetShare} label="Share read" />
             </div>
           </div>
@@ -612,9 +627,9 @@ export default function AssetPage({
           items={[
             {
               eyebrow: "Reasoning path",
-              title: `Ask Lyra about ${getFriendlySymbol(symbol, analytics?.type, analytics?.name)}`,
+              title: `Ask Lyra about ${friendlySymbol}`,
               description: "Open Lyra when you want the setup translated into plain English, scenario logic or a cleaner action frame.",
-              href: `/dashboard/lyra?q=${encodeURIComponent(`Explain ${getFriendlySymbol(symbol, analytics?.type, analytics?.name)} in plain English`)}`,
+              href: `/dashboard/lyra?q=${encodeURIComponent(`Explain ${friendlySymbol} in plain English`)}`,
               accent: "amber",
             },
             {
@@ -713,8 +728,7 @@ export default function AssetPage({
           </Link>
         </div>
       )}
-      <TooltipProvider>
-        <motion.div variants={staggerContainer} initial="hidden" animate="show" className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <motion.div variants={staggerContainer} initial="hidden" animate="show" className="grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <motion.div variants={staggerItem}>
           <ScoreTile
             label="Backdrop fit"
@@ -821,7 +835,6 @@ export default function AssetPage({
           />
           </motion.div>
         </motion.div>
-      </TooltipProvider>
 
       <AssetPageSectionHeader
         label="Price context"
@@ -909,28 +922,6 @@ export default function AssetPage({
             </div>
           </div>
 
-          {/* Company Profile — Stocks & ETFs with description */}
-          {(analyticsComputed.description || analyticsComputed.industry) && (
-            <CompanyProfile
-              description={analyticsComputed.description}
-              industry={analyticsComputed.industry}
-              sector={analyticsComputed.sector ?? (analyticsComputed.metadata?.sector as string | undefined)}
-              website={analyticsComputed.metadata?.website as string | undefined}
-              employees={analyticsComputed.metadata?.fullTimeEmployees as number | undefined}
-              country={analyticsComputed.metadata?.country as string | undefined}
-              assetName={analyticsComputed.name}
-            />
-          )}
-
-          {/* Financial Highlights — Stocks only */}
-          {false && analyticsComputed.financials && (
-            <FinancialHighlights
-              financials={analyticsComputed.financials as Record<string, unknown>}
-              currencySymbol={currencySymbol}
-              region={currencyRegion}
-            />
-          )}
-
           <AssetCryptoProfileSection
             analyticsComputed={analyticsComputed}
             cgMeta={cgMeta}
@@ -957,41 +948,43 @@ export default function AssetPage({
             </div>
 
             {/* Matrix Selection Logic — crypto-only */}
-            {(
-              <>
+            {(() => {
+              const { meta, messari, mktCap, vol24h, circSupply, maxSupply, volToMcap, supplyMined } = cryptoMatrix;
+              return (
+                <>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                  <TechnicalMetric label="Market Cap" value={analyticsComputed.technicalMetrics?.marketCap !== null && analyticsComputed.technicalMetrics?.marketCap !== undefined ? formatCompactNumber(analyticsComputed.technicalMetrics.marketCap, { symbol: currencySymbol, region: currencyRegion }) : "—"} tooltip="Total market value of all circulating coins. Key indicator of project size and adoption." />
+                  <TechnicalMetric label="Market Cap" value={mktCap != null ? formatCompactNumber(mktCap, { symbol: currencySymbol, region: currencyRegion }) : "—"} tooltip="Total market value of all circulating coins. Key indicator of project size and adoption." />
                   <TechnicalMetric label="MCap Rank" value={cgMeta?.marketCapRank ? `#${cgMeta.marketCapRank}` : "—"} tooltip="CoinGecko market cap ranking among all cryptocurrencies." />
-                  <TechnicalMetric label="24h Volume" value={analyticsComputed.metadata?.volume24Hr !== null && analyticsComputed.metadata?.volume24Hr !== undefined ? formatCompactNumber(analyticsComputed.metadata.volume24Hr.toString(), { symbol: currencySymbol, region: currencyRegion }) : "—"} tooltip="Total trading volume over the last 24 hours across all exchanges." />
-                  <TechnicalMetric label="Vol / Mkt Cap" value={analyticsComputed.metadata?.volume24Hr !== null && analyticsComputed.metadata?.volume24Hr !== undefined && analyticsComputed.technicalMetrics?.marketCap && Number(analyticsComputed.technicalMetrics.marketCap) !== 0 ? `${(((analyticsComputed.metadata?.volume24Hr as number) / Number(analyticsComputed.technicalMetrics.marketCap)) * 100).toFixed(2)}%` : "—"} tooltip="Volume-to-Market Cap ratio. Higher values indicate more active trading relative to size. >5% is high activity." />
+                  <TechnicalMetric label="24h Volume" value={vol24h != null ? formatCompactNumber(vol24h, { symbol: currencySymbol, region: currencyRegion }) : "—"} tooltip="Total trading volume over the last 24 hours across all exchanges." />
+                  <TechnicalMetric label="Vol / Mkt Cap" value={volToMcap} tooltip="Volume-to-Market Cap ratio. Higher values indicate more active trading relative to size. >5% is high activity." />
                   <TechnicalMetric label="FDV" value={cgMeta?.fullyDilutedValuation ? formatCompactNumber(cgMeta.fullyDilutedValuation, { symbol: currencySymbol, region: currencyRegion }) : "—"} tooltip="Fully Diluted Valuation — market cap if max supply were fully circulating. Indicates potential dilution." />
-                  <TechnicalMetric label="Day Range" value={analyticsComputed.metadata?.dayHigh && analyticsComputed.metadata?.dayLow ? `${formatPrice(analyticsComputed.metadata.dayLow as number, { symbol: currencySymbol, region: currencyRegion, decimals: 2 })} – ${formatPrice(analyticsComputed.metadata.dayHigh as number, { symbol: currencySymbol, region: currencyRegion, decimals: 2 })}` : "—"} tooltip="Today's price range (24h low to high)." />
-                  <TechnicalMetric label="Circ. Supply" value={analyticsComputed.metadata?.circulatingSupply !== null && analyticsComputed.metadata?.circulatingSupply !== undefined ? formatCompactNumber(analyticsComputed.metadata.circulatingSupply as number, { isCurrency: false, region: currencyRegion }) : "—"} tooltip="Coins currently circulating in the market and available for trading." />
-                  <TechnicalMetric label="Max Supply" value={analyticsComputed.metadata?.maxSupply !== null && analyticsComputed.metadata?.maxSupply !== undefined ? formatCompactNumber(analyticsComputed.metadata.maxSupply as number, { isCurrency: false, region: currencyRegion }) : "∞"} tooltip="Maximum coins that will ever exist. ∞ means unlimited supply (inflationary token)." />
-                  {!!(analyticsComputed.metadata?.circulatingSupply && analyticsComputed.metadata?.maxSupply && Number(analyticsComputed.metadata.maxSupply) > 0) && (
-                    <TechnicalMetric label="Supply Mined" value={`${((Number(analyticsComputed.metadata.circulatingSupply) / Number(analyticsComputed.metadata.maxSupply)) * 100).toFixed(1)}%`} tooltip="Percentage of max supply already in circulation. Higher % means less future dilution." />
+                  <TechnicalMetric label="Day Range" value={meta?.dayHigh != null && meta?.dayLow != null ? `${formatPrice(meta.dayLow as number, { symbol: currencySymbol, region: currencyRegion, decimals: 2 })} – ${formatPrice(meta.dayHigh as number, { symbol: currencySymbol, region: currencyRegion, decimals: 2 })}` : "—"} tooltip="Today's price range (24h low to high)." />
+                  <TechnicalMetric label="Circ. Supply" value={circSupply != null ? formatCompactNumber(circSupply, { isCurrency: false, region: currencyRegion }) : "—"} tooltip="Coins currently circulating in the market and available for trading." />
+                  <TechnicalMetric label="Max Supply" value={maxSupply != null ? formatCompactNumber(maxSupply, { isCurrency: false, region: currencyRegion }) : "∞"} tooltip="Maximum coins that will ever exist. ∞ means unlimited supply (inflationary token)." />
+                  {supplyMined && (
+                    <TechnicalMetric label="Supply Mined" value={supplyMined} tooltip="Percentage of max supply already in circulation. Higher % means less future dilution." />
                   )}
                   <TechnicalMetric label="From 52W High" value={analyticsComputed.technicalMetrics?.distanceFrom52WHigh != null ? `${Number(analyticsComputed.technicalMetrics.distanceFrom52WHigh).toFixed(1)}%` : "—"} tooltip="Distance from 52-week high. Negative means below the high." />
                   <TechnicalMetric label="1Y Return" value={performance?.returns?.["1Y"] != null ? `${performance.returns["1Y"] > 0 ? "+" : ""}${performance.returns["1Y"].toFixed(2)}%` : "—"} tooltip="Total return over the last 1 year." />
                   <TechnicalMetric label="Technical" value={formatRatingDisplay(analyticsComputed.technicalMetrics?.technicalRating)} tooltip="Composite rating from developer activity, community health, and code quality. Derived from CoinGecko on-chain data." />
                   <TechnicalMetric label="Analyst" value={formatRatingDisplay(analyticsComputed.technicalMetrics?.analystRating)} tooltip="Community sentiment rating from CoinGecko vote data. Bullish = majority vote up, Bearish = majority vote down." />
-                  {(analyticsComputed.metadata?.messari as Record<string, unknown> | undefined)?.revenue != null && (
-                    <TechnicalMetric label="Protocol Revenue" value={formatCompactNumber((analyticsComputed.metadata?.messari as Record<string, unknown>).revenue as number, { symbol: currencySymbol, region: currencyRegion })} tooltip="Annualized protocol revenue from Messari research data." />
+                  {messari?.revenue != null && (
+                    <TechnicalMetric label="Protocol Revenue" value={formatCompactNumber(messari.revenue as number, { symbol: currencySymbol, region: currencyRegion })} tooltip="Annualized protocol revenue from Messari research data." />
                   )}
-                  {(analyticsComputed.metadata?.messari as Record<string, unknown> | undefined)?.psRatio != null && (
-                    <TechnicalMetric label="P/S Ratio" value={`${((analyticsComputed.metadata?.messari as Record<string, unknown>).psRatio as number).toFixed(2)}x`} tooltip="Price-to-Sales ratio from Messari. Lower may indicate undervaluation." />
+                  {messari?.psRatio != null && (
+                    <TechnicalMetric label="P/S Ratio" value={`${(messari.psRatio as number).toFixed(2)}x`} tooltip="Price-to-Sales ratio from Messari. Lower may indicate undervaluation." />
                   )}
-                  {(analyticsComputed.metadata?.messari as Record<string, unknown> | undefined)?.yield != null && (
-                    <TechnicalMetric label="Staking Yield" value={`${(((analyticsComputed.metadata?.messari as Record<string, unknown>).yield as number) * 100).toFixed(2)}%`} tooltip="Annual staking yield from Messari. Income earned by participating in network security." />
+                  {messari?.yield != null && (
+                    <TechnicalMetric label="Staking Yield" value={`${((messari.yield as number) * 100).toFixed(2)}%`} tooltip="Annual staking yield from Messari. Income earned by participating in network security." />
                   )}
-                  {(analyticsComputed.metadata?.messari as Record<string, unknown> | undefined)?.inflationRate != null && (
-                    <TechnicalMetric label="Inflation Rate" value={`${(((analyticsComputed.metadata?.messari as Record<string, unknown>).inflationRate as number) * 100).toFixed(2)}%`} tooltip="Annual token inflation rate from Messari. Higher inflation dilutes existing holders." />
+                  {messari?.inflationRate != null && (
+                    <TechnicalMetric label="Inflation Rate" value={`${((messari.inflationRate as number) * 100).toFixed(2)}%`} tooltip="Annual token inflation rate from Messari. Higher inflation dilutes existing holders." />
                   )}
-                  {(analyticsComputed.metadata?.tvl as number | undefined) != null && (
-                    <TechnicalMetric label="TVL" value={formatCompactNumber(analyticsComputed.metadata?.tvl as number, { symbol: currencySymbol, region: currencyRegion })} tooltip="Total Value Locked — capital deposited in DeFi protocols. Key metric for DeFi projects." />
+                  {meta?.tvl != null && (
+                    <TechnicalMetric label="TVL" value={formatCompactNumber(meta.tvl as number, { symbol: currencySymbol, region: currencyRegion })} tooltip="Total Value Locked — capital deposited in DeFi protocols. Key metric for DeFi projects." />
                   )}
-                  {(analyticsComputed.metadata?.institutionalProxy as number | undefined) != null && (
-                    <TechnicalMetric label="Inst. Interest" value={`${((analyticsComputed.metadata?.institutionalProxy as number) * 100).toFixed(1)}%`} tooltip="Proxy for institutional interest based on watchlist, Reddit, and Telegram engagement." />
+                  {meta?.institutionalProxy != null && (
+                    <TechnicalMetric label="Inst. Interest" value={`${((meta.institutionalProxy as number) * 100).toFixed(1)}%`} tooltip="Proxy for institutional interest based on watchlist, Reddit, and Telegram engagement." />
                   )}
                 </div>
 
@@ -1060,7 +1053,8 @@ export default function AssetPage({
                 )}
 
               </>
-            )}
+              );
+            })()}
           </div>
 
           <AssetPageSectionHeader
@@ -1168,17 +1162,6 @@ export default function AssetPage({
               </EliteGate>
             ) : null}
           </div>
-
-          {/* NSE Intelligence Panel — Indian Stocks Only */}
-          {analyticsComputed?.metadata?.dataSource === "NSE_INDIA" && (
-            <div className="pt-4">
-              <NSEIntelligence
-                metadata={analyticsComputed.metadata as Record<string, unknown>}
-                currencySymbol={currencySymbol}
-                region={currencyRegion}
-              />
-            </div>
-          )}
 
           {/* Performance Matrix Section */}
           {hasMeaningfulPerformanceSection && performance && (
@@ -1409,108 +1392,10 @@ export default function AssetPage({
           {/* Historical Analog Engine — Elite Only */}
           {isElite && (
             <motion.div variants={staggerItem}>
-              <HistoricalAnalogCard region={analyticsComputed.metadata?.region as string || (symbol.endsWith(".NS") || symbol.endsWith(".BO") ? "IN" : "US")} />
+              <HistoricalAnalogCard region={analyticsComputed.metadata?.region as string || "US"} />
             </motion.div>
           )}
 
-          {/* Enhanced Institutional Intelligence Section — Elite Only */}
-          {!!analyticsComputed && (
-            <EliteGate
-              plan={plan}
-              feature="Institutional Intelligence"
-              teaser={
-                <div className="space-y-4 pt-4">
-                  <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    Institutional Intelligence
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    <div className="h-[380px] rounded-3xl border border-border/30 dark:border-white/5 bg-muted/5 p-5 space-y-4">
-                      <div className="h-3 w-2/3 rounded bg-muted/40" />
-                      <div className="h-3 w-full rounded bg-muted/30" />
-                      <div className="h-3 w-5/6 rounded bg-muted/25" />
-                      <div className="h-3 w-3/4 rounded bg-muted/20" />
-                      <div className="h-8 w-full rounded-2xl bg-muted/15" />
-                      <div className="h-3 w-4/6 rounded bg-muted/20" />
-                      <div className="h-3 w-full rounded bg-muted/15" />
-                      <div className="h-8 w-full rounded-2xl bg-muted/10" />
-                      <div className="h-3 w-5/6 rounded bg-muted/15" />
-                    </div>
-                    <div className="h-[380px] rounded-3xl border border-border/30 dark:border-white/5 bg-muted/5 p-5 space-y-4">
-                      <div className="h-3 w-1/2 rounded bg-muted/40" />
-                      <div className="h-3 w-full rounded bg-muted/30" />
-                      <div className="h-3 w-4/6 rounded bg-muted/25" />
-                      <div className="h-8 w-full rounded-2xl bg-muted/15" />
-                      <div className="h-3 w-3/4 rounded bg-muted/20" />
-                      <div className="h-3 w-full rounded bg-muted/15" />
-                      <div className="h-8 w-full rounded-2xl bg-muted/10" />
-                      <div className="h-3 w-5/6 rounded bg-muted/15" />
-                    </div>
-                    <div className="h-[380px] rounded-3xl border border-border/30 dark:border-white/5 bg-muted/5 p-5 space-y-4">
-                      <div className="h-3 w-3/5 rounded bg-muted/40" />
-                      <div className="h-3 w-full rounded bg-muted/30" />
-                      <div className="h-3 w-2/3 rounded bg-muted/25" />
-                      <div className="h-8 w-full rounded-2xl bg-muted/15" />
-                      <div className="h-3 w-4/6 rounded bg-muted/20" />
-                      <div className="h-3 w-full rounded bg-muted/15" />
-                      <div className="h-8 w-full rounded-2xl bg-muted/10" />
-                      <div className="h-3 w-3/4 rounded bg-muted/15" />
-                    </div>
-                  </div>
-                </div>
-              }
-            >
-              <div className="space-y-4 pt-4">
-                <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  Institutional Intelligence
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {/* Valuation Matrix */}
-                  <ValuationMatrix
-                    peRatio={analyticsComputed.technicalMetrics?.peRatio}
-                    pegRatio={analyticsComputed.technicalMetrics?.pegRatio}
-                    priceToBook={analyticsComputed.technicalMetrics?.priceToBook}
-                    eps={analyticsComputed.technicalMetrics?.eps}
-                    roe={analyticsComputed.technicalMetrics?.roe}
-                    profitMargins={analyticsComputed.metadata?.profitMargins as number | undefined}
-                    debtToEquity={analyticsComputed.metadata?.debtToEquity as number | undefined}
-                    currentRatio={analyticsComputed.metadata?.currentRatio as number | undefined}
-                    revenueGrowth={analyticsComputed.metadata?.revenueGrowth as number | undefined}
-                    freeCashflow={analyticsComputed.metadata?.freeCashflow as number | undefined}
-                    dividendYield={analyticsComputed.technicalMetrics?.dividendYield}
-                    assetType={analyticsComputed.type}
-                    industryPe={analyticsComputed.technicalMetrics?.industryPe}
-                    currencySymbol={currencySymbol}
-                    region={currencyRegion}
-                    className="col-span-1"
-                  />
-                  
-                  {/* Analyst Target Gauge */}
-                  <AnalystTargetGauge
-                    currentPrice={analyticsComputed.price}
-                    targetMeanPrice={analyticsComputed.metadata?.targetMeanPrice as number | undefined}
-                    targetHighPrice={analyticsComputed.metadata?.targetHighPrice as number | undefined}
-                    targetLowPrice={analyticsComputed.metadata?.targetLowPrice as number | undefined}
-                    numberOfAnalysts={analyticsComputed.metadata?.numberOfAnalystOpinions as number | undefined}
-                    currencySymbol={currencySymbol}
-                    region={currencyRegion}
-                    className="col-span-1"
-                  />
-                  
-                  {/* Institutional Ownership */}
-                  <InstitutionalOwnership
-                    heldPercentInstitutions={analyticsComputed.metadata?.heldPercentInstitutions as number | undefined}
-                    heldPercentInsiders={analyticsComputed.metadata?.heldPercentInsiders as number | undefined}
-                    shortRatio={analyticsComputed.technicalMetrics?.shortRatio}
-                    beta={analyticsComputed.metadata?.beta as number | undefined}
-                    assetType={analyticsComputed.type}
-                    className="col-span-1"
-                  />
-                </div>
-              </div>
-            </EliteGate>
-          )}
           {/* Institutional Timeline — moved from sidebar */}
           <InstitutionalTimeline events={events} />
         </div>
@@ -1548,6 +1433,7 @@ export default function AssetPage({
 
 
     </div>
+    </TooltipProvider>
   );
 }
 
@@ -1560,17 +1446,7 @@ function TechnicalMetric({
   value: string | number | null | undefined;
   tooltip?: string;
 }) {
-  const hasValue = (() => {
-    if (value === null || value === undefined) return false;
-    if (typeof value === "number") return Number.isFinite(value) && value !== 0;
-    const trimmed = String(value).trim();
-    if (!trimmed || trimmed === "—") return false;
-    const numeric = Number(trimmed.replace(/[^0-9.-]/g, ""));
-    if (Number.isFinite(numeric)) return numeric !== 0;
-    return true;
-  })();
-
-  if (!hasValue) return null;
+  if (!hasVisibleValue(value)) return null;
 
   return (
     <div className="group/metric p-3.5 rounded-2xl bg-background/30 border border-border/30 dark:border-white/5 hover:border-primary/30 hover:bg-primary/5 transition-all duration-300">
@@ -1598,10 +1474,20 @@ function TechnicalMetric({
   );
 }
 
+const SCORE_BG_MAP: Record<string, string> = {
+  "text-primary": "bg-primary",
+  "text-foreground": "bg-foreground",
+  "text-emerald-400": "bg-emerald-400",
+  "text-amber-400": "bg-amber-400",
+  "text-rose-400": "bg-rose-400",
+  "text-cyan-400": "bg-cyan-400",
+};
+
 function ScoreTile({
   label,
   score,
   color = "text-foreground",
+  bgColor,
   icon,
   onClick,
   tooltip,
@@ -1612,6 +1498,7 @@ function ScoreTile({
   label: string;
   score: number;
   color?: string;
+  bgColor?: string;
   icon?: React.ReactNode;
   onClick: () => void;
   tooltip: string;
@@ -1700,7 +1587,7 @@ function ScoreTile({
               <div
                 className={cn(
                   "h-full transition-all duration-1000 opacity-80 group-hover:opacity-100",
-                  color.replace("text-", "bg-"),
+                  bgColor || SCORE_BG_MAP[color] || "bg-foreground",
                 )}
                 style={{ width: `${score}%`, boxShadow: '0 0 10px currentColor' }}
               />

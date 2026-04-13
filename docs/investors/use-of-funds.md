@@ -138,6 +138,7 @@ The product is live — but the premium layer has significant depth left to buil
 
 **AI Runtime Hardening (Foundation already shipped — ongoing)**
 - Post-retrieval injection scanning, full conversation injection scanning, user memory injection scanning, multi-asset mode plan gating, conversation log idempotency, LLM nano fallback, 5-channel proactive alerting (web search alert at 2 failures), ENTERPRISE finite daily cap (2M tokens, env-configurable) — all live as of March 2026
+- Myra Voice shipped: hands-free voice support via OpenAI Realtime API (`gpt-realtime-mini`), PRO+ plan-gated, with voice prompt injection scanning, client-side PII redaction, virtual device filtering, and silence auto-stop
 - Continued prompt contract refinement (`<output_contract>`, `<verbosity_controls>`)
 - Cache coverage expansion (Myra response cache, compression cache, educational cache)
 - Query classifier improvement for edge cases (technical-indicator language, multi-ticker parsing)
@@ -236,5 +237,6 @@ LyraAlpha AI already has the core ingredients investors want to see:
 - ✓ Referral program live in production
 - ✓ Enterprise positioning established (custom packaging, not just self-serve)
 - ✓ AMI 2.0 content pipeline live: agent-driven blog, HMAC-verified webhook bridge, weekly digest cron — distribution infrastructure that compounds from day one
+- ✓ Myra Voice shipped: hands-free voice support via OpenAI Realtime API for PRO+ users — extends the support layer to spoken interaction
 
 This raise accelerates the execution of a business model that is already structurally sound. That is a more compelling use of capital than funding an unproven product concept.

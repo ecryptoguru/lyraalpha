@@ -54,7 +54,7 @@ export interface AssetEnrichment {
   signalStrength?: Record<string, unknown> | null;
   scoreDynamics?: Record<string, unknown> | null;
   factorAlignment?: Record<string, unknown> | null;
-  marketCap?: string | null;
+  marketCap?: number | null;
   metadata?: Record<string, unknown> | null;
   type?: string;
   description?: string | null;

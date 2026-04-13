@@ -140,10 +140,11 @@ The cap check applies to **all plans including ENTERPRISE**. Caps are configurab
 | **Compare Assets** | ✗ | ✗ | ✓ | ✓ |
 | **Shock Simulator** | ✗ | ✗ | ✓ | ✓ |
 | **Markdown export / premium workflows** | ✗ | ✗ | ✓ | ✓ |
-| **LYRA Voice Fintech Consultant** | ✗ | ✗ | Roadmap Q2 2026 | Roadmap Q2 2026 |
+| **Myra Voice (hands-free support)** | ✗ | ✓ | ✓ | ✓ |
 | **Broker-connected portfolio import** | ✓ | ✓ | ✓ | ✓ |
 | **Public Myra landing page support** | ✓ (pre-auth) | ✓ | ✓ | ✓ |
 | **Dashboard Myra support agent** | ✓ | ✓ | ✓ | ✓ |
+| **Myra Voice model** | — | `gpt-realtime-mini` · Realtime API | `gpt-realtime-mini` · Realtime API | `gpt-realtime-mini` · Realtime API |
 
 ---
 
@@ -208,6 +209,10 @@ The following runtime behaviors are active across all plans:
 - **Myra response caching** — normalized query hash, 4h TTL (logged-in) / 8h TTL (public)
 - **Compression result caching** — context SHA-256 keyed, 2h TTL
 - **Conversation log idempotency** — `storeConversationLog` uses a 10-second Redis dedup window to prevent duplicate entries from retries
+- **Voice prompt injection scan** — KB docs sanitized against `INJECTION_PATTERNS` before injection into voice instructions
+- **Voice page param scan** — query string `page` param validated against injection patterns before embedding in voice prompt
+- **Voice PII redaction** — client-side redaction of email, phone, user ID patterns in voice transcripts
+- **Voice device filtering** — virtual audio devices (BlackHole, Soundflower, VB-Audio) filtered out at client level
 
 ---
 
@@ -222,6 +227,7 @@ The following cron jobs relevant to plan users are registered in `scripts/setup-
 | `/api/cron/reengagement` | `0 9 * * *` | Daily re-engagement and win-back emails |
 | `/api/cron/reset-credits` | `0 0 1 * *` | Monthly credit reset by plan tier |
 | `/api/cron/expire-trials` | `0 4 * * *` | Daily Elite trial expiry sweep |
+| `/api/cron/news-sync` | `0 */12 * * *` | Crypto news sync via NewsData.io |
 
 All cron routes use `withCronAuthAndLogging` middleware for QStash signature verification.
 
@@ -231,4 +237,4 @@ All cron routes use `withCronAuthAndLogging` middleware for QStash signature ver
 
 This file is implementation-aligned. If pricing, model routing, orchestration modes, credit policy, or premium workflow naming changes in code, this document should be updated to match the runtime behavior rather than older strategy drafts.
 
-*Version 2.0 · March 2026*
+*Version 2.1 · March 2026*

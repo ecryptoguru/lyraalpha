@@ -11,7 +11,7 @@ export interface LiquidityEnrichment {
   history?: OHLCV[];
   avgVolume3M?: number | null;
   shortRatio?: number | null;
-  marketCap?: string | null;
+  marketCap?: number | null;
 }
 
 // ─── Dimension weights ──────────────────────────────────────────────
@@ -91,8 +91,8 @@ function shortDragScore(shortRatio: number | null | undefined): number {
 }
 
 /** D6: Market-cap tier — larger caps inherently more liquid */
-function capTierScore(marketCap: string | null | undefined): number {
-  const cap = parseFloat(marketCap || "0");
+function capTierScore(marketCap: number | null | undefined): number {
+  const cap = marketCap ?? 0;
   if (cap >= 100_000_000_000) return 95; // Mega
   if (cap >= 10_000_000_000) return 80;  // Large
   if (cap >= 2_000_000_000) return 65;   // Mid

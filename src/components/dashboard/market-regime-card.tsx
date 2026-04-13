@@ -30,6 +30,7 @@ export function MarketRegimeCard({
       border: string;
       label: string;
       gradient: string;
+      dotBg: string;
     }
   > = {
     STRONG_RISK_ON: {
@@ -39,6 +40,7 @@ export function MarketRegimeCard({
       border: "border-emerald-500/30",
       label: "Strong Risk On",
       gradient: "from-emerald-500/20 via-emerald-500/5 to-transparent",
+      dotBg: "bg-emerald-400",
     },
     RISK_ON: {
       icon: Sun,
@@ -47,6 +49,7 @@ export function MarketRegimeCard({
       border: "border-green-500/30",
       label: "Risk On",
       gradient: "from-green-500/20 via-green-500/5 to-transparent",
+      dotBg: "bg-green-400",
     },
     NEUTRAL: {
       icon: Minus,
@@ -55,6 +58,7 @@ export function MarketRegimeCard({
       border: "border-slate-500/30",
       label: "Neutral",
       gradient: "from-slate-500/20 via-slate-500/5 to-transparent",
+      dotBg: "bg-slate-400",
     },
     DEFENSIVE: {
       icon: CloudFog,
@@ -63,6 +67,7 @@ export function MarketRegimeCard({
       border: "border-amber-500/30",
       label: "Defensive",
       gradient: "from-amber-500/20 via-amber-500/5 to-transparent",
+      dotBg: "bg-amber-400",
     },
     RISK_OFF: {
       icon: CloudRain,
@@ -71,6 +76,7 @@ export function MarketRegimeCard({
       border: "border-rose-500/30",
       label: "Risk Off",
       gradient: "from-rose-500/20 via-rose-500/5 to-transparent",
+      dotBg: "bg-rose-400",
     },
   };
 
@@ -81,6 +87,7 @@ export function MarketRegimeCard({
     border,
     label,
     gradient,
+    dotBg,
   } = config[state] || config.NEUTRAL;
 
   return (
@@ -111,8 +118,8 @@ export function MarketRegimeCard({
                 <div className={cn("text-2xl font-bold uppercase tracking-tight items-center flex gap-2", color)}>
                   {label}
                   <span className="relative flex h-2 w-2">
-                    <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", color.replace('text-', 'bg-'))}></span>
-                    <span className={cn("relative inline-flex rounded-full h-2 w-2", color.replace('text-', 'bg-'))}></span>
+                    <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", dotBg)}></span>
+                    <span className={cn("relative inline-flex rounded-full h-2 w-2", dotBg)}></span>
                   </span>
                 </div>
               </div>

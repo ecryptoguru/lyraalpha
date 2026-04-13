@@ -26,10 +26,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlugAsync(slug);
   if (!post) return {};
 
-  const url = `https://lyraalpha.ai/blog/${post.slug}`;
+  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz";
+  const url = `${APP_URL}/blog/${post.slug}`;
   const ogImages = post.heroImageUrl
     ? [{ url: post.heroImageUrl, width: 1200, height: 630, alt: post.title }]
-    : [{ url: "https://lyraalpha.ai/og-default.png", width: 1200, height: 630, alt: "LyraAlpha AI" }];
+    : [{ url: `${APP_URL}/og-image.png`, width: 1200, height: 630, alt: "LyraAlpha AI" }];
 
   return {
     title: `${post.title} | LyraAlpha AI Blog`,
@@ -64,22 +65,22 @@ function JsonLd({ post }: { post: NonNullable<Awaited<ReturnType<typeof getPostB
     author: {
       "@type": "Organization",
       name: post.author,
-      url: "https://lyraalpha.ai",
+      url: process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz",
     },
     publisher: {
       "@type": "Organization",
       name: "LyraAlpha AI",
-      url: "https://lyraalpha.ai",
+      url: process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz",
       logo: {
         "@type": "ImageObject",
-        url: "https://lyraalpha.ai/logo.png",
+        url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/logo.png`,
       },
     },
     datePublished: post.date,
     dateModified: post.date,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://lyraalpha.ai/blog/${post.slug}`,
+      "@id": `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/blog/${post.slug}`,
     },
     keywords: (post.keywords ?? post.tags).join(", "),
     ...(post.heroImageUrl ? { image: post.heroImageUrl } : {}),

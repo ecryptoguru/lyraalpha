@@ -1,6 +1,7 @@
 import { Redis } from "@upstash/redis";
 import { createLogger } from "@/lib/logger";
 import { timed } from "@/lib/telemetry";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "redis" });
 
@@ -131,7 +132,7 @@ function recordCacheMetric(hit: boolean, cacheKey?: string): void {
   pipeline.hincrby(CACHE_STATS_KEY, globalField, 1);
   pipeline.hincrby(CACHE_STATS_KEY, hit ? hitField : missField, 1);
   pipeline.expire(CACHE_STATS_KEY, CACHE_STATS_WEEKLY_TTL);
-  pipeline.exec().catch(() => {});
+  pipeline.exec().catch((e) => logFireAndForgetError(e, "cache-stats"));
 }
 
 export async function getCache<T>(key: string): Promise<T | null> {
@@ -295,7 +296,7 @@ export function recordPipelineMetric(event: string, increment = 1): void {
   const pipeline = redis.pipeline();
   pipeline.hincrby(key, event, increment);
   pipeline.expire(key, PIPELINE_METRICS_TTL);
-  pipeline.exec().catch(() => {});
+  pipeline.exec().catch((e) => logFireAndForgetError(e, "pipeline-metrics"));
 }
 
 // In-flight request deduplication: if multiple concurrent requests miss the cache
@@ -328,7 +329,7 @@ export async function withCache<T>(
   const promise = fetcher()
     .then((fresh) => {
       if (fresh !== null) {
-        setCache(key, fresh, ttlSeconds).catch(() => {});
+        setCache(key, fresh, ttlSeconds).catch((e) => logFireAndForgetError(e, "withCache-backfill"));
       }
       return fresh;
     })
@@ -409,7 +410,7 @@ export async function withStaleWhileRevalidate<T>(
           refreshedAt: Date.now(),
         };
         const hardTtlSeconds = Math.max(1, ttlSeconds + staleSeconds);
-        setCache(key, newEnvelope, hardTtlSeconds).catch(() => {});
+        setCache(key, newEnvelope, hardTtlSeconds).catch((e) => logFireAndForgetError(e, "swr-backfill"));
       }
       return fresh;
     })

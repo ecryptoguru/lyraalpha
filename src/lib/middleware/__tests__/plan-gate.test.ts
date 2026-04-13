@@ -165,12 +165,9 @@ describe("plan-gate", () => {
   });
 
   describe("canAccessAssetType", () => {
-    it("blocks CRYPTO for STARTER and PRO — Elite required", () => {
-      expect(canAccessAssetType("STARTER", "CRYPTO")).toBe(false);
-      expect(canAccessAssetType("PRO", "CRYPTO")).toBe(false);
-    });
-
-    it("allows CRYPTO for ELITE and ENTERPRISE", () => {
+    it("allows CRYPTO for all plans — full crypto access", () => {
+      expect(canAccessAssetType("STARTER", "CRYPTO")).toBe(true);
+      expect(canAccessAssetType("PRO", "CRYPTO")).toBe(true);
       expect(canAccessAssetType("ELITE", "CRYPTO")).toBe(true);
       expect(canAccessAssetType("ENTERPRISE", "CRYPTO")).toBe(true);
     });

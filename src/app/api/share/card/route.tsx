@@ -169,7 +169,7 @@ export async function GET(request: Request) {
                 Retail clarity for institutional-grade market context
               </span>
             </div>
-            <span style={{ color: "#CBD5E1", fontSize: 18, fontWeight: 700 }}>lyraalpha.ai</span>
+            <span style={{ color: "#CBD5E1", fontSize: 18, fontWeight: 700 }}>lyraalpha.xyz</span>
           </div>
         </div>
       </div>

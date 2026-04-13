@@ -59,7 +59,7 @@ export interface AssetAnalyticsResponse {
     metadata: Record<string, unknown> | null;
   }[];
   technicalMetrics: {
-    marketCap: string | number | null;
+    marketCap: number | null;
     peRatio: number | null;
     volume?: number | null;
     avgVolume?: number | null;

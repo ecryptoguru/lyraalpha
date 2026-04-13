@@ -3,6 +3,7 @@ import { getSharedAISdkClient, getGpt54Deployment } from "./config";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { getCache, setCache } from "@/lib/redis";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 import { createHash } from "crypto";
 
 const logger = createLogger({ service: "context-compress" });
@@ -69,7 +70,7 @@ export async function compressKnowledgeContext(rawContext: string, maxTokens: nu
         },
         "Context compressed via GPT-5.4 Nano",
       );
-      setCache(cacheKey, compressed, COMPRESS_CACHE_TTL).catch(() => {});
+      setCache(cacheKey, compressed, COMPRESS_CACHE_TTL).catch((e) => logFireAndForgetError(e, "compress-cache"));
       return compressed;
     }
     // Compression produced no improvement — return raw without caching.

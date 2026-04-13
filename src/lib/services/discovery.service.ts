@@ -41,7 +41,7 @@ export type AssetMappingWithRelations = {
     name: string;
     type: AssetType;
     currency: string | null;
-    marketCap: string | null;
+    marketCap: number | null;
     oneYearChange: number | null;
     technicalRating: string | null;
     analystRating: string | null;
@@ -159,37 +159,21 @@ export class DiscoveryService {
         if (!sector) return null;
 
         const sectorRegion = sector.slug.startsWith("india-") ? "IN" : "US";
-        const latestRegime = await prisma.marketRegime.findFirst({
-          where: { region: sectorRegion, context: { startsWith: "{" } },
-          orderBy: { date: "desc" },
-        });
 
-        let marketContext: MarketContextSnapshot | undefined;
-        if (latestRegime?.context) {
-          marketContext = safeJsonParse<MarketContextSnapshot>(latestRegime.context) ?? undefined;
-          if (marketContext && !marketContext.lastUpdated) {
-            marketContext.lastUpdated = latestRegime.date.toISOString();
-          }
-        }
-
-        let sectorRegime: ClusteredAssets["sectorRegime"];
-        try {
-          const regimeData = await getLatestSectorRegime(sector.id);
-          if (regimeData) {
-            sectorRegime = {
-              regime: regimeData.regime,
-              regimeScore: regimeData.regimeScore,
-              participationRate: regimeData.participationRate,
-              relativeStrength: regimeData.relativeStrength,
-              rotationMomentum: regimeData.rotationMomentum,
-              leadershipScore: regimeData.leadershipScore,
-            };
-          }
-        } catch (e) {
-          logger.warn({ err: e }, "Failed to fetch sector regime");
-        }
-
-        const stockMappings = await prisma.stockSector.findMany({
+        // Run independent queries in parallel after sector is resolved
+        const [latestRegime, regimeData, stockMappings] = await Promise.all([
+          prisma.marketRegime.findFirst({
+            where: { region: sectorRegion, context: { startsWith: "{" } },
+            orderBy: { date: "desc" },
+          }).catch((e) => {
+            logger.warn({ err: e }, "Failed to fetch market regime");
+            return null;
+          }),
+          getLatestSectorRegime(sector.id).catch((e) => {
+            logger.warn({ err: e }, "Failed to fetch sector regime");
+            return null;
+          }),
+          prisma.stockSector.findMany({
           where: {
             sectorId: sector.id,
             isActive: true,
@@ -219,7 +203,28 @@ export class DiscoveryService {
             },
           },
           orderBy: { eligibilityScore: "desc" },
-        });
+          }),
+        ]);
+
+        let marketContext: MarketContextSnapshot | undefined;
+        if (latestRegime?.context) {
+          marketContext = safeJsonParse<MarketContextSnapshot>(latestRegime.context) ?? undefined;
+          if (marketContext && !marketContext.lastUpdated) {
+            marketContext.lastUpdated = latestRegime.date.toISOString();
+          }
+        }
+
+        let sectorRegime: ClusteredAssets["sectorRegime"];
+        if (regimeData) {
+          sectorRegime = {
+            regime: regimeData.regime,
+            regimeScore: regimeData.regimeScore,
+            participationRate: regimeData.participationRate,
+            relativeStrength: regimeData.relativeStrength,
+            rotationMomentum: regimeData.rotationMomentum,
+            leadershipScore: regimeData.leadershipScore,
+          };
+        }
 
         const clustered: ClusteredAssets = {
           sector,

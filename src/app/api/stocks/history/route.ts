@@ -3,9 +3,6 @@ import { fetchAssetData } from "@/lib/market-data";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { getCache, setCache } from "@/lib/redis";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-import { getUserPlan, canAccessAssetType } from "@/lib/middleware/plan-gate";
 
 const logger = createLogger({ service: "stocks-api" });
 
@@ -43,21 +40,6 @@ export async function GET(req: NextRequest) {
 
     if (!symbol || symbol.toLowerCase() === "undefined" || symbol.toLowerCase() === "null") {
       return apiError("Valid symbol required", 400);
-    }
-
-    const { userId } = await auth();
-    const plan = userId ? await getUserPlan(userId) : "STARTER";
-
-    const assetTypeRecord = await prisma.asset.findUnique({
-      where: { symbol: symbol.toUpperCase() },
-      select: { type: true },
-    });
-
-    if (assetTypeRecord && !canAccessAssetType(plan, assetTypeRecord.type)) {
-      return NextResponse.json(
-        { error: "Upgrade to Elite to access crypto market history." },
-        { status: 403 },
-      );
     }
 
     const cacheKey = `history:${symbol}:${range}`;

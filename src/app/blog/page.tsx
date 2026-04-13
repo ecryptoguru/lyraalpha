@@ -11,13 +11,13 @@ export const metadata: Metadata = {
   description:
     "Deep dives on AI-grounded financial analysis, market regimes, deterministic scoring, and intelligent investing across US and India markets.",
   alternates: {
-    canonical: "https://lyraalpha.ai/blog",
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/blog`,
   },
   openGraph: {
     title: "Blog | LyraAlpha AI",
     description:
       "Deep dives on AI-grounded financial analysis, market regimes, deterministic scoring, and intelligent investing across US and India markets.",
-    url: "https://lyraalpha.ai/blog",
+    url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/blog`,
     type: "website",
   },
   twitter: {

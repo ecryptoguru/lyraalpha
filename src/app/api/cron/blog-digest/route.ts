@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
     const recentPosts = await prisma.blogPost.findMany({
-      where: { status: "published", publishedAt: { gte: oneWeekAgo } },
+      where: { status: "PUBLISHED", publishedAt: { gte: oneWeekAgo } },
       orderBy: { publishedAt: "desc" },
       select: { slug: true, title: true, description: true, category: true, publishedAt: true },
       take: 5,
@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: true, sent: 0, reason: "no_new_posts" });
     }
 
-    const BASE_URL = "https://lyraalpha.ai";
+    const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz";
     const postItems = recentPosts
       .map(
         (p) => `

@@ -41,11 +41,11 @@ This is not a slogan. It is the product's structural advantage.
 ### Three Layers
 
 **1. Deterministic Engine Layer**
-Computes structured market context before any model speaks: Trend, Momentum, Volatility, Liquidity, Trust, Sentiment, market-regime framing, compatibility overlays, and derived intelligence. The model never improvises the analytical structure — it interprets structure the engines already computed.
+Computes structured market context before any model speaks: Trend, Momentum, Volatility, Liquidity, Trust, Sentiment, market-regime framing, compatibility overlays, derived intelligence, and crypto news intelligence via NewsData.io (trending crypto news, per-asset feeds, sentiment extraction). The model never improvises the analytical structure — it interprets structure the engines already computed.
 
 **2. AI Interpretation Layer**
 - **Lyra** — market intelligence: score explanation, regime-aware analysis, premium workflow interpretation, cross-asset reasoning
-- **Myra** — support intelligence: product guidance, plan/credit help, onboarding, waitlist orientation
+- **Myra** — support intelligence: product guidance, plan/credit help, onboarding, waitlist orientation, **hands-free voice support** (shipped via OpenAI Realtime API for PRO+ users)
 
 **3. Workflow Layer**
 Premium workflows turn single interactions into repeatable product experiences: Compare Assets, Shock Simulator, Portfolio Intelligence workspace, discovery, asset intelligence pages.
@@ -221,7 +221,7 @@ Starter (free) → Pro (recurring) → Elite (premium workflows) → Enterprise 
 6. **Credit semantics** — a monetization envelope that scales with value delivered
 7. **Production AI safety** — post-retrieval injection scanning, LLM fallback, proactive observability alerting, and hot-patchable cost controls are production-hardened, not planned features
 8. **AMI 2.0 content pipeline** — an agent-driven blog and email distribution engine that compounds organic SEO, subscriber engagement, and brand authority with near-zero marginal editorial cost
-9. **Voice roadmap (Q2 2026)** — LYRA Voice Fintech Consultant will extend hands-free access for Elite+ users, opening mobile multitasking scenarios
+9. **Myra Voice (shipped)** — hands-free voice support via OpenAI Realtime API (`gpt-realtime-mini`), available to PRO+ users. Extends the support layer to spoken interaction with client-side injection detection, PII redaction, and multi-language audio design (English, Hinglish, Hindi). A product moat because it requires Realtime API integration, prompt architecture for spoken output, and multi-language audio design that cannot be replicated by wrapping a chatbot.
 
 ---
 

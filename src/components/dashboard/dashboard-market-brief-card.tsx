@@ -9,14 +9,10 @@ import { getFriendlySymbol } from "@/lib/format-utils";
 import type { DailyBriefing } from "@/lib/services/daily-briefing.service";
 import type { DashboardNarrativePreview } from "@/lib/services/dashboard-home.service";
 import { ShareInsightButton } from "@/components/dashboard/share-insight-button";
+import { formatRelativeTime } from "@/lib/format-relative-time";
 
 function formatTimeAgo(isoString: string): string {
-  const diff = Date.now() - new Date(isoString).getTime();
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  if (hours < 1) return "Just now";
-  if (hours === 1) return "1 hour ago";
-  if (hours < 24) return `${hours} hours ago`;
-  return "Yesterday";
+  return formatRelativeTime(isoString);
 }
 
 export function DashboardMarketBriefCard({

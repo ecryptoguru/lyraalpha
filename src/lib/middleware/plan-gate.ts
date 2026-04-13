@@ -58,10 +58,8 @@ export function isElitePlan(plan: PlanTier): boolean {
 }
 
 
-/** Market access policy by asset type */
+/** Market access policy by asset type — all plans have full crypto access */
 export function canAccessAssetType(plan: PlanTier, assetType?: string | null): boolean {
-  const type = (assetType || "").toUpperCase();
-  if (type === "CRYPTO") return isElitePlan(plan); // Only Elite/Enterprise get crypto quotes
   return true;
 }
 

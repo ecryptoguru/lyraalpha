@@ -7,6 +7,53 @@ import { SignalStrengthResult } from "@/lib/engines/signal-strength";
 import { getFriendlySymbol } from "@/lib/format-utils";
 import { buildAssetShareObject } from "@/lib/intelligence-share";
 
+export interface AssetPageCryptoMeta {
+  marketCapRank?: number;
+  fullyDilutedValuation?: number;
+  ath?: number;
+  athDate?: string;
+  athChangePercentage?: number;
+  atl?: number;
+  atlDate?: string;
+  atlChangePercentage?: number;
+  priceChangePercentage7d?: number;
+  priceChangePercentage14d?: number;
+  priceChangePercentage30d?: number;
+  priceChangePercentage60d?: number;
+  priceChangePercentage200d?: number;
+  priceChangePercentage1y?: number;
+  image?: { large?: string };
+  description?: string;
+  categories?: string[];
+  genesisDate?: string;
+  hashingAlgorithm?: string;
+  sentimentVotesUpPercentage?: number;
+  sentimentVotesDownPercentage?: number;
+  watchlistUsers?: number;
+  developer?: {
+    forks?: number;
+    stars?: number;
+    subscribers?: number;
+    totalIssues?: number;
+    closedIssues?: number;
+    pullRequestsMerged?: number;
+    commitCount4Weeks?: number;
+  } | null;
+  community?: {
+    redditSubscribers?: number;
+    telegramUsers?: number | null;
+  } | null;
+  links?: {
+    homepage?: string[];
+    whitepaper?: string | null;
+    blockchain?: string[];
+    twitter?: string | null;
+    reddit?: string | null;
+    github?: string[];
+    telegram?: string | null;
+  };
+}
+
 export interface AssetAnalytics {
   signals: AssetSignals | null;
   compatibility: CompatibilityResult | null;
@@ -43,23 +90,10 @@ export interface AssetAnalytics {
     explanation: string;
   };
   technicalMetrics?: {
-    marketCap: string | null;
-    peRatio: number | null;
-    dividendYield: number | null;
-    pegRatio: number | null;
-    eps: number | null;
+    marketCap: number | null;
     fiftyTwoWeekHigh: number | null;
     fiftyTwoWeekLow: number | null;
-    shortRatio: number | null;
-    priceToBook: number | null;
-    roe: number | null;
-    roce: number | null;
-    industryPe: number | null;
-    expenseRatio: number | null;
-    nav: number | null;
-    yield: number | null;
-    morningstarRating: string | null;
-    category: string | null;
+    distanceFrom52WHigh?: number | null;
     openInterest?: number | null;
     technicalRating?: string | null;
     analystRating?: string | null;
@@ -86,14 +120,8 @@ export interface AssetAnalytics {
   signalStrength?: SignalStrengthResult | null;
   metadata: Record<string, unknown> | null;
   description?: string | null;
-  industry?: string | null;
   sector?: string | null;
-  fundHouse?: string | null;
-  financials?: Record<string, unknown> | null;
-  topHoldings?: Record<string, unknown> | null;
-  portfolioLookthrough?: Record<string, unknown> | null;
   cryptoIntelligence?: Record<string, unknown> | null;
-  fundPerformanceHistory?: Record<string, unknown> | null;
   type: string;
   name: string;
   symbol?: string | null;
@@ -145,7 +173,7 @@ export function mergeAnalyticsWithData(
   };
 }
 
-function hasVisibleValue(value: unknown): boolean {
+export function hasVisibleValue(value: unknown): boolean {
   if (value === null || value === undefined) return false;
   if (typeof value === "number") return Number.isFinite(value) && value !== 0;
   if (typeof value === "string") {
@@ -184,26 +212,6 @@ export function buildAssetPageDerivedState({
   const compatibilityScore = compatibility?.score != null ? Math.round(compatibility.score) : null;
   const assetName = analyticsComputed.name || getFriendlySymbol(symbol, analytics?.type, analytics?.name);
 
-  const hasMeaningfulPortfolioLookthrough = (() => {
-    const lt = analyticsComputed.portfolioLookthrough as Record<string, unknown> | null | undefined;
-    if (!lt) return false;
-    const factor = lt.factorExposure as Record<string, unknown> | undefined;
-    const concentration = lt.concentration as Record<string, unknown> | undefined;
-    const scores = lt.lookthroughScores as Record<string, unknown> | undefined;
-    return [
-      factor?.value,
-      factor?.growth,
-      factor?.momentum,
-      factor?.quality,
-      factor?.size,
-      concentration?.top1Weight,
-      concentration?.top5Weight,
-      concentration?.top10Weight,
-      scores?.weightedAvg,
-      scores?.matchRate,
-    ].some((value) => hasVisibleValue(value));
-  })();
-
   const hasMeaningfulSignalStrength = (() => {
     const ss = analyticsComputed.signalStrength as Record<string, unknown> | null | undefined;
     if (!ss) return false;
@@ -221,38 +229,17 @@ export function buildAssetPageDerivedState({
 
   const priceCalculations = (() => {
     const rawLatest = data.length > 0 ? data[data.length - 1].close : 0;
-    const isMcxInAsset = analyticsComputed.symbol === "GOLD-MCX" || analyticsComputed.symbol === "SILVER-MCX";
-    const latestPrice = isMcxInAsset && analyticsComputed.price > 0
-      ? analyticsComputed.price
-      : rawLatest || analyticsComputed.price || 0;
-    const prevPrice = !isMcxInAsset && data.length > 1 ? data[data.length - 2].close : 0;
-    const changePercent = isMcxInAsset
-      ? (analyticsComputed.changePercent ?? 0)
-      : prevPrice
-        ? ((latestPrice - prevPrice) / prevPrice) * 100
-        : (analyticsComputed.changePercent ?? 0);
+    const latestPrice = rawLatest || analyticsComputed.price || 0;
+    const prevPrice = data.length > 1 ? data[data.length - 2].close : 0;
+    const changePercent = prevPrice
+      ? ((latestPrice - prevPrice) / prevPrice) * 100
+      : (analyticsComputed.changePercent ?? 0);
     return { latestPrice, changePercent, isUp: changePercent >= 0 };
   })();
 
   const headerDayRange = (() => {
     const meta = analyticsComputed.metadata as Record<string, unknown> | null;
     if (!meta || meta.dayLow == null || meta.dayHigh == null) return null;
-    const isMcxIn = analyticsComputed.symbol === "GOLD-MCX" || analyticsComputed.symbol === "SILVER-MCX";
-    if (isMcxIn) {
-      const mcxOz = Number(meta.mcxPricePerOz);
-      const askUsd = Number(meta.spotAsk);
-      const rate = mcxOz > 0 && askUsd > 0 ? mcxOz / askUsd : 0;
-      if (rate <= 0) return null;
-      const ozg = 31.1035;
-      const isGold = analyticsComputed.symbol === "GOLD-MCX";
-      const low = isGold
-        ? (Number(meta.dayLow) * rate / ozg) * 10
-        : (Number(meta.dayLow) * rate / ozg) * 1000;
-      const high = isGold
-        ? (Number(meta.dayHigh) * rate / ozg) * 10
-        : (Number(meta.dayHigh) * rate / ozg) * 1000;
-      return low > 0 && high > 0 ? { low, high } : null;
-    }
     const low = meta.dayLow as number;
     const high = meta.dayHigh as number;
     return low > 0 && high > 0 ? { low, high } : null;
@@ -338,12 +325,6 @@ export function buildAssetPageDerivedState({
       ? "Best next step: focus on the weak drivers first, then check whether the weakness is being reinforced by trend, momentum and the broader regime."
       : "Best next step: identify the one or two drivers that need to improve before treating this as a higher-conviction setup.";
 
-  const nextSectionLabel = (() => {
-    if ((signals?.trend ?? 50) < 45 || (signals?.momentum ?? 50) < 45) return "Core Analytics";
-    if (analyticsComputed.signalStrength) return "Signal Strength";
-    return "Price context";
-  })();
-
   const keyDrivers = analyticsComputed.signalStrength?.keyDrivers?.slice(0, 3) ?? [];
   const keyRisks = analyticsComputed.signalStrength?.riskFactors?.slice(0, 3) ?? [];
 
@@ -365,7 +346,7 @@ export function buildAssetPageDerivedState({
     },
     {
       label: "Next read",
-      value: nextSectionLabel,
+      value: "Core Analytics",
       detail: "Go deeper only if you need conviction",
     },
   ];
@@ -466,12 +447,10 @@ export function buildAssetPageDerivedState({
     beginnerHeadline,
     beginnerRiskLine,
     beginnerActionLine,
-    nextSectionLabel,
     keyDrivers,
     keyRisks,
     summaryCards,
     assetShare,
-    hasMeaningfulPortfolioLookthrough,
     hasMeaningfulSignalStrength,
     hasMeaningfulPerformanceSection,
     latestPrice: priceCalculations.latestPrice,

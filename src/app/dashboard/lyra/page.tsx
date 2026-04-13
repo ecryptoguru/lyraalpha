@@ -16,6 +16,7 @@ import { useState, useRef, useEffect, useMemo, useCallback, memo, Suspense } fro
 import dynamic from "next/dynamic";
 import useSWR, { mutate as swrMutate } from "swr";
 import { useAuth } from "@/lib/clerk-shim";
+import { formatRelativeTime as fmtRelativeTime } from "@/lib/format-relative-time";
 import { ExportButton } from "@/components/lyra/export-button";
 import { parseEliteCommand } from "@/lib/ai/elite-commands";
 import { usePlan } from "@/hooks/use-plan";
@@ -124,10 +125,26 @@ function BriefingStalenessBadge({ region }: { region: string }) {
       return;
     }
 
+    const generatedMs = new Date(generatedAt).getTime();
+    const currentAgeHours = (Date.now() - generatedMs) / 3_600_000;
+
     const updateNow = () => setNow(Date.now());
     updateNow();
-    const interval = setInterval(updateNow, 60_000);
-    return () => clearInterval(interval);
+
+    // Only run the recurring interval when the badge is visible (age >= 16h).
+    // Otherwise, set a single timeout to wake up when the badge would appear.
+    if (currentAgeHours >= 16) {
+      const interval = setInterval(updateNow, 60_000);
+      return () => clearInterval(interval);
+    }
+
+    // Schedule a single wake-up near the 16h mark
+    const msUntil16h = Math.max(60_000, (16 - currentAgeHours) * 3_600_000);
+    const timeout = setTimeout(() => {
+      updateNow();
+      // After waking up, the effect re-runs and will start the interval if needed
+    }, msUntil16h);
+    return () => clearTimeout(timeout);
   }, [generatedAt]);
 
   const ageHours = generatedAt
@@ -159,19 +176,7 @@ const trendingPromptFetcher = async (url: string): Promise<LyraPromptQuestion[]>
 };
 
 function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
+  return fmtRelativeTime(dateString);
 }
 
 function getGreeting(): { greeting: string; subtitle: string } {
@@ -363,6 +368,12 @@ function LyraPageInner() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const userHasScrolledUp = useRef(false);
   const autoSubmittedQueryRef = useRef<string | null>(null);
+  const regimeDataRef = useRef(regimeData);
+  const moversDataRef = useRef(moversData);
+
+  // Keep refs in sync with latest SWR data so sendMessage always reads current values
+  regimeDataRef.current = regimeData;
+  moversDataRef.current = moversData;
   const lyraController = useMemo(
     () => (userId ? getLyraChatSessionController(userId) : null),
     [userId],
@@ -466,6 +477,9 @@ function LyraPageInner() {
 
   const sendMessage = useCallback(async (content: string) => {
     if (!lyraController) return;
+    // Read from refs to always get latest SWR data (avoids stale closure)
+    const currentRegime = regimeDataRef.current;
+    const currentMovers = moversDataRef.current;
     await lyraController.sendMessage({
       content,
       symbol: "GLOBAL",
@@ -473,27 +487,27 @@ function LyraPageInner() {
         symbol: "GLOBAL",
         assetName: "Global Markets",
         assetType: "GLOBAL",
-        regime: regimeData?.current?.regime?.label || "Market Overview",
+        regime: currentRegime?.current?.regime?.label || "Market Overview",
         scores: {},
-        ...(regimeData?.current && {
+        ...(currentRegime?.current && {
           regimeDetail: {
-            regime: regimeData.current.regime?.label,
-            risk: regimeData.current.risk?.label,
-            volatility: regimeData.current.volatility?.label,
-            breadth: regimeData.current.breadth?.label,
+            regime: currentRegime.current.regime?.label,
+            risk: currentRegime.current.risk?.label,
+            volatility: currentRegime.current.volatility?.label,
+            breadth: currentRegime.current.breadth?.label,
           },
         }),
-        ...(moversData && {
+        ...(currentMovers && {
           topMovers: {
-            gainers: (moversData.topGainers || []).slice(0, 3).map((m: MoverItem) => `${m.symbol} +${m.changePercent?.toFixed(1)}%`),
-            losers: (moversData.topLosers || []).slice(0, 3).map((m: MoverItem) => `${m.symbol} ${m.changePercent?.toFixed(1)}%`),
+            gainers: (currentMovers.topGainers || []).slice(0, 3).map((m: MoverItem) => `${m.symbol} +${m.changePercent?.toFixed(1)}%`),
+            losers: (currentMovers.topLosers || []).slice(0, 3).map((m: MoverItem) => `${m.symbol} ${m.changePercent?.toFixed(1)}%`),
           },
         }),
         region,
       },
     });
     swrMutate("/api/points");
-  }, [lyraController, moversData, region, regimeData]);
+  }, [lyraController, region]);
 
   useEffect(() => {
     if (!mounted || isLoading || messages.length > 0) return;

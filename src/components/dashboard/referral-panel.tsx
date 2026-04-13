@@ -27,7 +27,7 @@ export function ReferralPanel() {
       .then((data) => {
         if (!data.error) setData(data);
       })
-      .catch(() => {})
+      .catch((e) => console.warn("Failed to fetch referral data:", e))
       .finally(() => setLoading(false));
   }, []);
 

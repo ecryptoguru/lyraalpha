@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { getCache, setCache } from "@/lib/redis";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "watchlist-drift-alert" });
 
@@ -41,7 +42,7 @@ export async function GET() {
     ).length;
 
     const payload = { driftCount };
-    await setCache(cacheKey, payload, 300).catch(() => {});
+    await setCache(cacheKey, payload, 300).catch((e) => logFireAndForgetError(e, "drift-alert-cache"));
 
     return NextResponse.json(payload);
   } catch (error) {

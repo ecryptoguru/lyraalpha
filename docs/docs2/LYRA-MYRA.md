@@ -44,6 +44,7 @@ Lyra's analysis is built around the platform intelligence stack:
 - **Signal Strength** and related derived context
 - **Score Dynamics** and time-based movement signals
 - asset-type-specific intelligence: crypto intelligence, on-chain metrics, protocol data, DeFi analytics
+- crypto news intelligence from NewsData.io — trending crypto news, per-asset news feeds, and sentiment extraction (synced every 12 hours)
 - broker-connected portfolio snapshots that have already been normalized and deduplicated
 
 ### 2.3 Query Classification
@@ -156,8 +157,8 @@ Elite and Enterprise unlock the deepest Lyra workflows, including:
 - **Markdown export**
 - GPT-5.4-full direct streaming on COMPLEX queries for deepest synthesis
 
-**Roadmap (Q2 2026):**
-- **LYRA Voice Fintech Consultant** — voice-enabled hands-free interface for portfolio briefings and market queries (speech-to-text input, text-to-speech output, mobile-optimized)
+**Shipped:**
+- **Myra Voice** — hands-free voice support via OpenAI Realtime API (`gpt-realtime-mini`), available to PRO+ users from the dashboard Myra widget. Supports English, Hinglish, and Hindi. Includes client-side injection detection, PII redaction, virtual device filtering, and silence auto-stop.
 
 PRO COMPLEX also uses lyra-full direct single stream, giving PRO users full model quality on complex multi-asset queries.
 
@@ -192,11 +193,13 @@ She is responsible for:
 
 ### 3.2 Where Myra Lives
 
-Myra operates in two contexts:
+Myra operates in three contexts:
 
 **Public support entry point (unauthenticated):** Myra is available to all visitors via the public Myra widget before sign-in. The `/api/support/public-chat` endpoint is explicitly included in `isPublicApiRoute` in `src/proxy.ts`, exempting it from Clerk auth middleware. This is fully operational — visitors receive real AI-driven answers about the product, waitlist, early access, and how the platform works.
 
-**Authenticated dashboard:** The Myra chat panel is rendered by `LiveChatWidget` (`src/components/dashboard/live-chat-widget.tsx`), wrapped by `LiveChatBubble` (`src/components/dashboard/live-chat-bubble.tsx`). `LiveChatBubble` is mounted **outside** `SidebarInset` in `DashboardLayoutClient.tsx`. This is required because `SidebarInset` has `overflow-x-clip overflow-y-auto`, which clips `fixed`-positioned children to the scroll container rather than the viewport. Moving `LiveChatBubble` back inside `SidebarInset` will break its positioning.
+**Authenticated dashboard (text):** The Myra chat panel is rendered by `LiveChatWidget` (`src/components/dashboard/live-chat-widget.tsx`), wrapped by `LiveChatBubble` (`src/components/dashboard/live-chat-bubble.tsx`). `LiveChatBubble` is mounted **outside** `SidebarInset` in `DashboardLayoutClient.tsx`. This is required because `SidebarInset` has `overflow-x-clip overflow-y-auto`, which clips `fixed`-positioned children to the scroll container rather than the viewport. Moving `LiveChatBubble` back inside `SidebarInset` will break its positioning.
+
+**Authenticated dashboard (voice):** The `MyraVoiceButton` (`src/components/dashboard/myra-voice-button.tsx`) enables hands-free voice support for PRO+ users. The voice session endpoint (`GET /api/support/voice-session`) returns an ephemeral token, WSS URL, model config, and per-user instructions. The voice model is `gpt-realtime-mini` with voice `marin`, using PCM 24kHz audio and semantic VAD turn detection. The voice prompt uses a static prefix (cache-eligible at 10× cheaper text-input rate) plus a small dynamic per-user suffix with KB docs sanitized against injection patterns.
 
 ### 3.3 Tone and Answer Rules
 
@@ -215,15 +218,17 @@ Implementation-aligned onboarding note:
 - on the public site, Myra primarily helps visitors with waitlist, early-access, and product-orientation questions during prelaunch
 - inside the authenticated product, onboarding is handled by a 3-step dashboard gate (`Market`, `Experience`, `Interests`) and Myra should describe that flow without implying an obsolete fourth completion modal
 
-### 3.4 Myra's AI Model
+### 3.4 Myra's AI Models
 
-Myra runs on **GPT-5.4-nano** via the same Azure OpenAI provider as Lyra. All alternative model paths (Groq, Minimax, Gemini) have been fully removed from `ai-responder.ts` and the stream routes.
+**Text mode:** Myra runs on **GPT-5.4-nano** via the same Azure OpenAI provider as Lyra. All alternative model paths (Groq, Minimax, Gemini) have been fully removed from `ai-responder.ts` and the stream routes.
 
 Configuration:
 
 - `MYRA_MAX_TOKENS = 700`
 - `MYRA_TEMPERATURE = 0.65`
 - Deployment resolved via `AZURE_OPENAI_DEPLOYMENT_MYRA` environment variable
+
+**Voice mode:** Myra voice runs on **`gpt-realtime-mini`** via the OpenAI Realtime API (direct WebSocket, not Azure). Voice `marin`, PCM 24kHz audio, semantic VAD turn detection, max output tokens 350. Transcription uses `gpt-4o-mini-transcribe` with English/Hinglish/Hindi constraint; Urdu script is explicitly blocked. Supports English, Hinglish, and Hindi.
 
 ### 3.5 Myra Response Caching
 
@@ -236,7 +241,7 @@ Myra uses a response cache to avoid redundant LLM calls for identical support qu
 
 ### 3.6 Myra Runtime Path
 
-At a high level, Myra's runtime path is:
+**Text mode:**
 
 1. support message arrives
 2. financial-advice intent is checked
@@ -247,10 +252,26 @@ At a high level, Myra's runtime path is:
 7. reply is streamed back to the user
 8. response is written to cache
 
+**Voice mode:**
+
+1. user activates `MyraVoiceButton` in the dashboard
+2. `GET /api/support/voice-session` is called with optional `page` query param
+3. auth check → plan gate (PRO+ only) → rate limit check
+4. parallel: OpenAI `client_secrets` call + user DB query + KB retrieval + global notes retrieval
+5. page param validated against injection patterns
+6. KB docs sanitized against `INJECTION_PATTERNS`
+7. voice instructions assembled (static prefix + dynamic suffix)
+8. ephemeral token + WSS URL + model config + instructions returned to client
+9. client establishes WebSocket session via `useMyraVoice` hook
+10. audio streams bidirectionally (PCM 24kHz, semantic VAD)
+11. client-side defenses: virtual device filtering, PII redaction, injection detection, silence auto-stop
+
 Implementation notes:
 
 - the end-user support widget supports lightweight markdown-style rendering for headings, lists, links, inline code, and fenced code blocks
 - the public Myra widget (`src/components/landing/public-myra-widget.tsx`) dynamically imports `PublicMyraPanel` for performance
+- the voice prompt static prefix is cache-eligible at 10× cheaper text-input rate ($0.06/M vs $0.60/M)
+- voice cost calculator in `src/lib/ai/cost-calculator.ts` provides per-session cost estimates for admin dashboards
 
 ### 3.7 Financial Advice Boundary
 
@@ -335,6 +356,10 @@ Myra's redirect behavior is one of the most important pieces of the support laye
 | History compression | Long conversation context compressed by nano before the full model call |
 | Myra response caching | Normalized query hash, 4h / 8h TTL — avoids redundant support LLM calls |
 | Compression result caching | Context SHA-256 keyed, 2h TTL — avoids redundant nano preflight calls |
+| Voice prompt injection scan | KB docs sanitized against `INJECTION_PATTERNS` before injection into voice instructions |
+| Voice page param scan | Query string `page` param validated against injection patterns before embedding in voice prompt |
+| Voice PII redaction | Client-side redaction of email, phone, user ID patterns in voice transcripts |
+| Voice device filtering | Virtual audio devices (BlackHole, Soundflower, VB-Audio) filtered out at client level |
 
 ---
 
@@ -350,10 +375,11 @@ The moat is everything around the model:
 - output contracts that enforce institutional-grade analytical structure
 - the safety infrastructure that makes both agents trustworthy
 - Myra's public-facing availability that converts public support visitors with AI-driven answers before they ever sign in
+- Myra's voice interface that extends the support layer to hands-free interaction — a product moat because it requires Realtime API integration, prompt architecture for spoken output, and multi-language audio design that cannot be replicated by simply wrapping a chatbot
 
 None of that is replicable by swapping models or copying prompts.
 
 ---
 
 *LyraAlpha AI — Financial Intelligence, Not Financial Noise*
-*Version 2.0 · March 2026*
+*Version 2.1 · March 2026*

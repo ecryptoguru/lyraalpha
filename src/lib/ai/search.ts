@@ -5,6 +5,7 @@ import { createHash } from "crypto";
 import { tavily } from "@tavily/core";
 import { alertIfWebSearchOutage } from "./alerting";
 import { INJECTION_PATTERNS } from "./guardrails";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 // ── Circuit Breaker ───────────────────────────────────────────────────────────
 // R7-FIX: Moved from in-memory counter to Redis for multi-instance accuracy.
@@ -20,7 +21,7 @@ async function incrementCircuitBreaker(): Promise<number> {
     const val = await redis.incr(CIRCUIT_BREAKER_KEY);
     // Set TTL only on first increment (key didn't exist before) — avoids resetting TTL on every hit
     if (val === 1) {
-      await redis.expire(CIRCUIT_BREAKER_KEY, CIRCUIT_BREAKER_TTL).catch(() => {});
+      await redis.expire(CIRCUIT_BREAKER_KEY, CIRCUIT_BREAKER_TTL).catch((e) => logFireAndForgetError(e, "circuit-breaker-ttl"));
     }
     return val;
   } catch {
@@ -305,7 +306,7 @@ export async function searchWeb(
   } catch (error) {
     const elapsed = Date.now() - start;
     const consecutiveFailures = await incrementCircuitBreaker();
-    alertIfWebSearchOutage(consecutiveFailures).catch(() => {});
+    alertIfWebSearchOutage(consecutiveFailures).catch((e) => logFireAndForgetError(e, "web-search-outage-alert"));
 
     const errMsg = error instanceof Error ? error.message : String(error);
     const isRateLimit = errMsg.includes("429") || errMsg.toLowerCase().includes("rate limit");

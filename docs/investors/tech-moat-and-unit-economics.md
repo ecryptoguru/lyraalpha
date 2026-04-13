@@ -44,6 +44,7 @@ This separation is intentional and defensible:
 - market analysis and product support are different jobs with different latency, tone, and governance needs
 - separating them improves quality, reduces confusion, and lowers the per-interaction cost of each
 - Myra uses a shorter-answer, faster-response architecture — support traffic does not consume premium inference budget
+- Myra now includes a **voice interface** (shipped) — hands-free voice support via OpenAI Realtime API (`gpt-realtime-mini`) for PRO+ users, with client-side injection detection, PII redaction, and multi-language audio design (English, Hinglish, Hindi)
 - governance is cleaner: Lyra's financial-context rules do not leak into support; Myra's help flows do not contaminate analysis
 
 **Why this matters:** Single-agent architectures trying to do both are harder to govern, more expensive to run, and more likely to produce boundary violations. Separation is an architectural moat, not just an engineering choice.
@@ -137,6 +138,8 @@ This creates a predictable cost envelope per query tier. The product cannot acci
 | Staged memory retrieval | Short conversations skip full memory overhead |
 | `reasoningEffort: "none"` | No reasoning token overhead — adds 3–5s TTFT with no quality benefit; prompt contracts enforce quality instead |
 | Myra cache | Repeated support queries served from cache (4h logged-in / 8h public TTL) |
+| Voice prompt prefix caching | Static voice prompt prefix is cache-eligible at 10× cheaper text-input rate — reduces Realtime API cost |
+| Voice cost tracking | `calculateVoiceCost()`, `estimateVoiceSessionCost()` in cost calculator — admin visibility into voice spend |
 | Compression result cache | Redis-cached compression results (2h TTL) — identical contexts skip nano LLM call |
 | `textVerbosity: "high"` on analysis | Maximum analytical depth on Lyra paths |
 | `textVerbosity: "low"` on compression | Dense bullet output — compressor actually compresses rather than rephrasing |
@@ -225,6 +228,7 @@ Each of these layers is harder to replicate 12 months from now than it is today.
 | Plan-aware cost routing | Easy to copy architecture, hard to tune correctly | 6–12 months |
 | Credit semantics + referral mechanics | Easy | 3–6 months |
 | AMI 2.0 content pipeline + email boundary | Medium (requires agent system + webhook infra + email governance) | 6–12 months |
+| Myra Voice interface | Medium-hard (requires Realtime API integration, prompt architecture for spoken output, multi-language audio design, client-side defenses) | 6–12 months |
 
 The hardest layers to replicate are the ones that require both domain expertise and engineering investment simultaneously: the engine outputs, the India-native intelligence, the premium workflow depth, and the agent-automated content pipeline.
 

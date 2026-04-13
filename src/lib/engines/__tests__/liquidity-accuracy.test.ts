@@ -208,7 +208,7 @@ describe("Liquidity — cap tier score", () => {
   it("mega cap ($200B) → capTierScore = 95", () => {
     const quote = makeQuote({ regularMarketVolume: 1_000_000, regularMarketPrice: 100 });
     const history = makeHistory(Array(30).fill(1_000_000));
-    const result = calculateLiquidityScore(quote, { history, marketCap: "200000000000" });
+    const result = calculateLiquidityScore(quote, { history, marketCap: 200000000000 });
     const dims = result.metadata?.dimensions as Record<string, number>;
     expect(dims.capTier).toBe(95);
   });
@@ -216,7 +216,7 @@ describe("Liquidity — cap tier score", () => {
   it("large cap ($15B) → capTierScore = 80", () => {
     const quote = makeQuote({ regularMarketVolume: 1_000_000, regularMarketPrice: 100 });
     const history = makeHistory(Array(30).fill(1_000_000));
-    const result = calculateLiquidityScore(quote, { history, marketCap: "15000000000" });
+    const result = calculateLiquidityScore(quote, { history, marketCap: 15000000000 });
     const dims = result.metadata?.dimensions as Record<string, number>;
     expect(dims.capTier).toBe(80);
   });
@@ -224,7 +224,7 @@ describe("Liquidity — cap tier score", () => {
   it("micro cap ($50M) → capTierScore = 25", () => {
     const quote = makeQuote({ regularMarketVolume: 1_000_000, regularMarketPrice: 100 });
     const history = makeHistory(Array(30).fill(1_000_000));
-    const result = calculateLiquidityScore(quote, { history, marketCap: "50000000" });
+    const result = calculateLiquidityScore(quote, { history, marketCap: 50000000 });
     const dims = result.metadata?.dimensions as Record<string, number>;
     expect(dims.capTier).toBe(25);
   });
@@ -244,7 +244,7 @@ describe("Liquidity — composite formula (with enrichment)", () => {
       history,
       avgVolume3M: 1_000_000,
       shortRatio: 2,
-      marketCap: "10000000000",
+      marketCap: 10000000000,
     });
     const d = result.metadata?.dimensions as Record<string, number>;
     const expected = Math.round(

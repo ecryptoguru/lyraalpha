@@ -108,7 +108,7 @@ interface CGMeta {
 
 interface AssetData {
   metadata: Record<string, unknown> | null;
-  marketCap: string | null;
+  marketCap: number | null;
   volume: number | null;
   avgTrustScore: number | null;
   price: number | null;
@@ -156,7 +156,7 @@ export class CryptoIntelligenceEngine {
           : Promise.resolve(null),
       ]);
 
-      const marketCap = parseFloat(asset.marketCap || "0");
+      const marketCap = asset.marketCap ?? 0;
       const volume = asset.volume || 0;
 
       // 1. Network Activity Score

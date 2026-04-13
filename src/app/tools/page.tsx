@@ -57,12 +57,12 @@ export const metadata: Metadata = {
   title: "Investor Tools | LyraAlpha AI — Portfolio, Research & Market Intelligence",
   description:
     "Free investor tools built on deterministic engine computation. Portfolio health scoring, AI investment research, market narrative tracking, and crypto analysis. No guesswork — every AI response is grounded in computed signals.",
-  alternates: { canonical: "https://lyraalpha.ai/tools" },
+  alternates: { canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools` },
   openGraph: {
     title: "Investor Tools | LyraAlpha AI",
     description:
       "Portfolio intelligence, market narrative tracking, AI research, and crypto analysis — grounded in deterministic computation, not generic AI guesswork.",
-    url: "https://lyraalpha.ai/tools",
+    url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools`,
     images: ["/og-image.png"],
   },
   twitter: {

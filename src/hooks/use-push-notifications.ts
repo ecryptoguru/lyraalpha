@@ -41,7 +41,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         reg.pushManager.getSubscription().then((sub) => {
           setIsSubscribed(!!sub);
         });
-      }).catch(() => {});
+      }).catch((e) => console.warn("Push subscription check failed:", e));
     }
   }, []);
 
@@ -71,7 +71,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         return true;
       }
 
-      await sub.unsubscribe().catch(() => {});
+      await sub.unsubscribe().catch((e) => console.warn("Push unsubscribe cleanup failed:", e));
       return false;
     } catch {
       return false;

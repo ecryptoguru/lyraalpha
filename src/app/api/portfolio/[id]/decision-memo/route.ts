@@ -8,6 +8,7 @@ import { getGpt54Model } from "@/lib/ai/service";
 import { buildHumanizerGuidance } from "@/lib/ai/prompts/humanizer";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 import { getCache, setCache } from "@/lib/redis";
 import { apiError } from "@/lib/api-response";
 
@@ -208,7 +209,7 @@ export async function GET(
       dailyBriefing,
     });
 
-    await setCache(key, memo, 6 * 60 * 60).catch(() => {});
+    await setCache(key, memo, 6 * 60 * 60).catch((e) => logFireAndForgetError(e, "decision-memo-cache"));
     return NextResponse.json({ success: true, memo });
   } catch (error) {
     logger.warn({ err: sanitizeError(error) }, "Portfolio decision memo generation failed; using fallback");

@@ -62,7 +62,8 @@ async function* streamSubscriberEmails(): AsyncGenerator<string[]> {
 
 async function notifyBlogSubscribers(title: string, description: string, slug: string) {
   try {
-    const url = `https://lyraalpha.ai/blog/${slug}`;
+    const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz";
+    const url = `${APP_URL}/blog/${slug}`;
     const safeTitle = escHtml(title);
     const safeDesc = escHtml(description);
     const html = `
@@ -71,7 +72,7 @@ async function notifyBlogSubscribers(title: string, description: string, slug: s
         <h1 style="font-size:22px;font-weight:300;line-height:1.4;color:#fff;margin:0 0 12px;">${safeTitle}</h1>
         <p style="font-size:14px;line-height:1.7;color:rgba(255,255,255,0.55);margin:0 0 24px;">${safeDesc}</p>
         <a href="${url}" style="display:inline-block;background:#f59e0b;color:#0a0a0a;font-weight:700;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;padding:12px 24px;border-radius:10px;text-decoration:none;">Read Article</a>
-        <p style="margin:24px 0 0;font-size:11px;color:rgba(255,255,255,0.25);">You're receiving this because you subscribed to LyraAlpha AI blog updates. <a href="https://lyraalpha.ai/dashboard/settings" style="color:#f59e0b;">Manage preferences</a></p>
+        <p style="margin:24px 0 0;font-size:11px;color:rgba(255,255,255,0.25);">You're receiving this because you subscribed to LyraAlpha AI blog updates. <a href="${APP_URL}/dashboard/settings" style="color:#f59e0b;">Manage preferences</a></p>
       </div>
     `;
     const subject = `New on LyraAlpha AI: ${title}`;
@@ -131,7 +132,7 @@ async function handlePublished(payload: BlogPostPayload) {
     metaDescription: data.metaDescription,
     heroImageUrl: data.heroImageUrl,
     featured: data.featured,
-    status: "published",
+    status: "PUBLISHED" as const,
     sourceAgent: data.sourceAgent,
   };
 
@@ -166,13 +167,13 @@ async function handlePublished(payload: BlogPostPayload) {
 async function handleArchived(payload: BlogPostPayload) {
   const updated = await prisma.blogPost.updateMany({
     where: { sourceContentId: payload.data.contentId },
-    data: { status: "archived" },
+    data: { status: "ARCHIVED" as const },
   });
   // Fallback: if no record matched by sourceContentId (e.g. legacy post), try by slug
   if (updated.count === 0) {
     await prisma.blogPost.updateMany({
       where: { slug: payload.data.slug },
-      data: { status: "archived" },
+      data: { status: "ARCHIVED" as const },
     });
   }
   revalidatePath("/blog");

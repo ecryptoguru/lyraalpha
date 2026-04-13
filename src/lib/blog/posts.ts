@@ -393,7 +393,7 @@ function dbPostToBlogPost(dbPost: {
 async function fetchDbSummaries(): Promise<BlogPostSummary[]> {
   try {
     const rows = await prisma.blogPost.findMany({
-      where: { status: "published" },
+      where: { status: "PUBLISHED" },
       orderBy: { publishedAt: "desc" },
       select: LIST_SELECT,
     });
@@ -416,7 +416,7 @@ export async function getAllPosts(): Promise<BlogPostSummary[]> {
 export async function getRecentPostsAsync(count = 3): Promise<BlogPostSummary[]> {
   try {
     const rows = await prisma.blogPost.findMany({
-      where: { status: "published" },
+      where: { status: "PUBLISHED" },
       orderBy: { publishedAt: "desc" },
       take: count + 1, // +1 to allow caller to filter out current slug
       select: LIST_SELECT,
@@ -431,7 +431,7 @@ export async function getRecentPostsAsync(count = 3): Promise<BlogPostSummary[]>
 export async function getFeaturedPostsAsync(): Promise<BlogPostSummary[]> {
   try {
     const rows = await prisma.blogPost.findMany({
-      where: { status: "published", featured: true },
+      where: { status: "PUBLISHED", featured: true },
       orderBy: { publishedAt: "desc" },
       select: LIST_SELECT,
     });
@@ -445,7 +445,7 @@ export async function getFeaturedPostsAsync(): Promise<BlogPostSummary[]> {
 export async function getPostsByCategory(category: string): Promise<BlogPostSummary[]> {
   try {
     const rows = await prisma.blogPost.findMany({
-      where: { status: "published", category: { equals: category, mode: "insensitive" } },
+      where: { status: "PUBLISHED", category: { equals: category, mode: "insensitive" } },
       orderBy: { publishedAt: "desc" },
       select: LIST_SELECT,
     });
@@ -461,7 +461,7 @@ export async function getPostsByCategory(category: string): Promise<BlogPostSumm
 export async function getAllCategories(): Promise<string[]> {
   try {
     const rows = await prisma.blogPost.findMany({
-      where: { status: "published" },
+      where: { status: "PUBLISHED" },
       select: { category: true },
       distinct: ["category"],
     });
@@ -482,7 +482,7 @@ export async function getAllTags(): Promise<string[]> {
 export async function getAllSlugs(): Promise<string[]> {
   try {
     const rows = await prisma.blogPost.findMany({
-      where: { status: "published" },
+      where: { status: "PUBLISHED" },
       select: { slug: true },
       orderBy: { publishedAt: "desc" },
     });
@@ -502,7 +502,7 @@ export async function getAllSlugs(): Promise<string[]> {
 export async function getPostBySlugAsync(slug: string): Promise<BlogPost | undefined> {
   try {
     const dbPost = await prisma.blogPost.findFirst({
-      where: { slug, status: "published" },
+      where: { slug, status: "PUBLISHED" },
       select: FULL_SELECT,
     });
     if (dbPost) return dbPostToBlogPost(dbPost);

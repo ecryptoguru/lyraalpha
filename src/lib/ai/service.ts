@@ -39,6 +39,7 @@ import {
   logContextBudgetMetric,
 } from "./monitoring";
 import { consumeCredits, getCreditCost } from "@/lib/services/credit.service";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 import { awardXP } from "@/lib/engines/gamification";
 import {
   EDU_CACHE_ENABLED,
@@ -172,7 +173,7 @@ async function getAvailableAssetSymbols(): Promise<string[]> {
     // Write to both fresh and stale cache
     const cachePromise = setCache(ASSET_SYMBOLS_CACHE_KEY, symbols, ASSET_SYMBOLS_CACHE_TTL);
     const stalePromise = setCache(STALE_CACHE_KEY, symbols, ASSET_SYMBOLS_CACHE_TTL * 24); // 24x TTL for stale
-    Promise.all([cachePromise, stalePromise]).catch(() => {});
+    Promise.all([cachePromise, stalePromise]).catch((e) => logFireAndForgetError(e, "asset-symbols-cache"));
     
     return symbols;
   } catch (error) {
@@ -190,24 +191,8 @@ async function getAvailableAssetSymbols(): Promise<string[]> {
   }
 }
 
-function parseMarketCapValue(marketCap?: string | null): number {
-  if (!marketCap) return 0;
-  const normalized = marketCap.replace(/[,$\s]/g, "").toUpperCase();
-  const suffixMatch = normalized.match(/^(-?\d+(?:\.\d+)?)([KMBT])$/);
-  if (suffixMatch) {
-    const base = Number(suffixMatch[1]);
-    const multiplier = suffixMatch[2] === "T"
-      ? 1e12
-      : suffixMatch[2] === "B"
-        ? 1e9
-        : suffixMatch[2] === "M"
-          ? 1e6
-          : 1e3;
-    return Number.isFinite(base) ? base * multiplier : 0;
-  }
-
-  const numeric = Number(normalized);
-  return Number.isFinite(numeric) ? numeric : 0;
+function parseMarketCapValue(marketCap?: number | null): number {
+  return marketCap ?? 0;
 }
 
 function inferSearchRegion(symbol: string, contextRegion?: string): "US" | "IN" {
@@ -852,7 +837,7 @@ export async function generateLyraStream(
                   select: { symbol: true },
                 });
                 availableAssets = peers.map((p) => p.symbol);
-                setCache(peerCacheKey, availableAssets, 3600).catch(() => {});
+                setCache(peerCacheKey, availableAssets, 3600).catch((e) => logFireAndForgetError(e, "peer-cache"));
               }
             } catch {
               // Fall back to empty list — asset links degrade gracefully without peers.
@@ -916,7 +901,7 @@ export async function generateLyraStream(
               // Let the underlying searchWeb promise continue resolving (it will write to cache)
               webSearchPromise.then((r) => {
                 if (r?.content) logger.debug({ chars: r.content.length }, "Web search resolved after soft deadline (cached for next request)");
-              }).catch(() => {});
+              }).catch((e) => logFireAndForgetError(e, "web-search-soft-deadline"));
             }
           } catch (e) {
             logger.error({ err: sanitizeError(e) }, "Web search failed");
@@ -1458,14 +1443,14 @@ logRetrievalMetric({
         // Track latency budget violations
         const latencyBudgetMs = tierConfig.latencyBudgetMs;
         const exceededBudget = durationMs > latencyBudgetMs;
-        recordLatencyViolation(exceededBudget, durationMs, tier).catch(() => {});
+        recordLatencyViolation(exceededBudget, durationMs, tier).catch((e) => logFireAndForgetError(e, "latency-violation"));
 
         // Increment daily token counter (fire-and-forget — never blocks response path)
-        incrementDailyTokens(userId, usage.totalTokens ?? (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)).catch(() => {});
+        incrementDailyTokens(userId, usage.totalTokens ?? (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)).catch((e) => logFireAndForgetError(e, "daily-tokens"));
 
         // W3-FIX: Record cost ceiling estimation accuracy — compare estimated vs actual input tokens.
         // This was defined but never called, leaving estimation accuracy unmonitored.
-        recordEstimationAccuracy(costCeiling.estimatedInputTokens, inputTokens, tier).catch(() => {});
+        recordEstimationAccuracy(costCeiling.estimatedInputTokens, inputTokens, tier).catch((e) => logFireAndForgetError(e, "cost-estimation"));
 
         try {
           logModelRouting({
@@ -1496,7 +1481,7 @@ logRetrievalMetric({
             logger.warn({ err: sanitizeError(e), cacheKey: gptCacheKey }, "GPT response cache write failed"),
           );
           if (finalSources.length > 0) {
-            setCache(`${gptCacheKey}:sources`, finalSources, modelTtl).catch(() => {});
+            setCache(`${gptCacheKey}:sources`, finalSources, modelTtl).catch((e) => logFireAndForgetError(e, "gpt-sources-cache"));
           }
           emitCacheEvent({ modelFamily: "gpt", operation: "write", outcome: "success" });
         }
@@ -1509,8 +1494,8 @@ logRetrievalMetric({
         });
 
         // OBS-1: Record non-fallback completion and check daily cost ceiling alert
-        recordFallbackResult(false).catch(() => {});
-        alertIfDailyCostExceeded(costBreakdown.totalCost).catch(() => {});
+        recordFallbackResult(false).catch((e) => logFireAndForgetError(e, "fallback-result"));
+        alertIfDailyCostExceeded(costBreakdown.totalCost).catch((e) => logFireAndForgetError(e, "daily-cost-alert"));
 
         storeConversationLog(
           userId,
@@ -1609,14 +1594,14 @@ logRetrievalMetric({
             duration: timer.endFormatted(),
             durationMs,
           });
-          recordFallbackResult(true).catch(() => {});
+          recordFallbackResult(true).catch((e) => logFireAndForgetError(e, "fallback-result"));
 
           // Track latency budget violations for fallback as well
           const latencyBudgetMs = tierConfig.latencyBudgetMs;
           const exceededBudget = durationMs > latencyBudgetMs;
-          recordLatencyViolation(exceededBudget, durationMs, tier).catch(() => {});
+          recordLatencyViolation(exceededBudget, durationMs, tier).catch((e) => logFireAndForgetError(e, "latency-violation"));
 
-          incrementDailyTokens(userId, usage.totalTokens ?? 0).catch(() => {});
+          incrementDailyTokens(userId, usage.totalTokens ?? 0).catch((e) => logFireAndForgetError(e, "daily-tokens"));
           if (text) {
             storeConversationLog(userId, query, text, nanoDeployment,
               { tokensUsed: usage.totalTokens ?? 0 }, tier, messages.length, true,
@@ -1649,6 +1634,6 @@ logRetrievalMetric({
     throw outerError;
   } finally {
     // B1: Release in-flight lock — fires on ALL exit paths including pre-LLM throws
-    redis.del(inFlightKey).catch(() => {});
+    redis.del(inFlightKey).catch((e) => logFireAndForgetError(e, "in-flight-lock-release"));
   }
 }

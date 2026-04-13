@@ -319,8 +319,8 @@ describe("handlePublished", () => {
     await POST(buildRequest(PUBLISHED_PAYLOAD));
 
     const upsertCall = (prisma.blogPost.upsert as ReturnType<typeof vi.fn>).mock.calls[0][0];
-    expect(upsertCall.create.status).toBe("published");
-    expect(upsertCall.update.status).toBe("published");
+    expect(upsertCall.create.status).toBe("PUBLISHED");
+    expect(upsertCall.update.status).toBe("PUBLISHED");
   });
 
   it("sets sourceContentId only in create block (not update)", async () => {

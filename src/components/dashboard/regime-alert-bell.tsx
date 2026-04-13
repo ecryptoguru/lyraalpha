@@ -49,7 +49,7 @@ export function RegimeAlertBell() {
         : prev,
       false,
     );
-    fetch("/api/user/notifications", { method: "PATCH" }).catch(() => {});
+    fetch("/api/user/notifications", { method: "PATCH" }).catch((e) => console.warn("Failed to mark notification read:", e));
   };
 
   const getIcon = (type: RegimeAlert["type"]) => {

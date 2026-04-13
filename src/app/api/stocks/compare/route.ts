@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { getUserPlan, canAccessAssetType } from "@/lib/middleware/plan-gate";
+import { getUserPlan } from "@/lib/middleware/plan-gate";
 import { AssetService } from "@/lib/services/asset.service";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
@@ -43,9 +43,8 @@ export async function GET(req: NextRequest) {
       symbols.map((sym) => AssetService.getAssetBySymbol(sym))
     );
 
-    const assetAccess = assets.map((asset) => (asset ? canAccessAssetType(plan, asset.type) : false));
     const accessibleAssets = assets.filter(
-      (asset, index): asset is NonNullable<typeof asset> => Boolean(asset) && assetAccess[index]
+      (asset): asset is NonNullable<typeof asset> => Boolean(asset)
     );
 
     if (accessibleAssets.length === 0) {
@@ -68,10 +67,6 @@ export async function GET(req: NextRequest) {
 
     const results = assets.map((asset, i) => {
       if (!asset) return { symbol: symbols[i], error: "Not found" };
-
-      if (!assetAccess[i]) {
-        return { symbol: symbols[i], error: "Plan restriction" };
-      }
 
       const meta = (asset.metadata || {}) as Record<string, unknown>;
       const signalStrength = asset.signalStrength as Record<string, unknown> | null;
@@ -116,7 +111,7 @@ export async function GET(req: NextRequest) {
           peRatio: meta.trailingPE as number | null ?? null,
           priceToBook: meta.priceToBook as number | null ?? null,
           roe: meta.returnOnEquity as number | null ?? null,
-          marketCap: meta.marketCap as string | null ?? null,
+          marketCap: meta.marketCap as number | null ?? null,
         },
         sector: asset.sector,
         industry: asset.industry,

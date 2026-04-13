@@ -6,6 +6,7 @@ import { getUserPlan } from "@/lib/middleware/plan-gate";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { apiError } from "@/lib/api-response";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "score-history-api" });
 
@@ -74,7 +75,7 @@ export async function GET(
 
     const result = { symbol: upperSymbol, days, history: grouped };
 
-    setCache(cacheKey, result, 300).catch(() => {});
+    setCache(cacheKey, result, 300).catch((e) => logFireAndForgetError(e, "score-history-cache"));
 
     const res = NextResponse.json(result);
     res.headers.set("Cache-Control", "private, max-age=300");

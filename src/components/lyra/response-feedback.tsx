@@ -103,7 +103,7 @@ export function ResponseFeedback({
           setChangeCount(1); // already voted once — one change left
         }
       })
-      .catch(() => {});
+      .catch((e) => console.warn("Failed to fetch existing vote:", e));
   }, [answerId]);
 
   const canVote = changeCount < 2;

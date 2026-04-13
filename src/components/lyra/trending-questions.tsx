@@ -171,7 +171,7 @@ export function TrendingQuestions({ onQuestionClick }: TrendingQuestionsProps) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ questionId: question.id }),
-    }).catch(() => {});
+    }).catch((e) => console.warn("Failed to track trending question click:", e));
     onQuestionClick(question.question, question.id);
   };
 

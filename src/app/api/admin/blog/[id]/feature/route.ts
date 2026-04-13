@@ -21,7 +21,7 @@ export async function POST(
     select: { id: true, slug: true, status: true },
   });
   if (!target) return apiError("Not found", 404);
-  if (target.status !== "published") return apiError("Cannot feature an archived post", 400);
+  if (target.status !== "PUBLISHED") return apiError("Cannot feature an archived post", 400);
 
   // Atomically clear existing featured post, then set the new one
   await prisma.$transaction([

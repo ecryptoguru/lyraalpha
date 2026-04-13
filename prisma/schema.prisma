@@ -14,6 +14,12 @@ enum EmbeddingStatus {
   FAILED
 }
 
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 model AIRequestLog {
   id                    String                 @id @default(cuid())
   userId                String
@@ -59,7 +65,7 @@ model Asset {
   sector                  String?
   exchange                String?
   description             String?
-  marketCap               String?
+  marketCap               Float?
   volume                  Float?
   avgVolume               Float?
   oneYearChange           Float?
@@ -569,8 +575,6 @@ model UserPreference {
   updatedAt                DateTime            @updatedAt
   user                     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([onboardingCompleted])
-  @@index([blogSubscribed])
 }
 
 model CreditTransaction {
@@ -691,7 +695,6 @@ model UserProgress {
   xpMultiplier   Float     @default(1.0) // cached multiplier for current tier, updated on level-up
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
   @@index([level(sort: Desc)])
 }
 
@@ -1053,7 +1056,7 @@ model BlogPost {
   category        String
   tags            String[]
   featured        Boolean   @default(false)
-  status          String    @default("published")
+  status          BlogPostStatus @default(PUBLISHED)
   publishedAt     DateTime  @default(now())
   metaDescription String?
   keywords        String[]

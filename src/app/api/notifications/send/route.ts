@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { apiError } from "@/lib/api-response";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "push-send" });
 
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
         body,
         symbol: symbol ?? null,
       },
-    }).catch(() => {});
+    }).catch((e) => logFireAndForgetError(e, "push-send"));
 
     logger.info({ userId }, "Push notification sent");
     return NextResponse.json({ success: true });
@@ -64,7 +65,7 @@ export async function POST(req: NextRequest) {
         where: { userId },
         update: { pushNotifications: false, pushSubscriptionJson: null },
         create: { userId, pushNotifications: false, pushSubscriptionJson: null },
-      }).catch(() => {});
+      }).catch((e) => logFireAndForgetError(e, "push-subscription-cleanup"));
       return apiError("Push subscription expired. Please re-enable notifications.", 410);
     }
     logger.error({ err: sanitizeError(error) }, "Push send failed");

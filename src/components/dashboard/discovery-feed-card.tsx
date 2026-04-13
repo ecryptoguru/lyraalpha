@@ -53,7 +53,7 @@ export interface DiscoveryFeedItem {
 
 // ─── Archetype Config ───────────────────────────────────────────────────────
 
-const ARCHETYPE_CONFIG: Record<string, { label: string; tooltip: string; icon: typeof Activity; color: string; bg: string; border: string }> = {
+const ARCHETYPE_CONFIG: Record<string, { label: string; tooltip: string; icon: typeof Activity; color: string; bg: string; border: string; accentBg: string; accentFrom: string }> = {
   score_inflection: {
     label: "Score Changing Fast",
     tooltip: "A key signal just flipped direction — worth investigating",
@@ -61,6 +61,8 @@ const ARCHETYPE_CONFIG: Record<string, { label: string; tooltip: string; icon: t
     color: "text-amber-400",
     bg: "bg-amber-400/10",
     border: "border-amber-400/20",
+    accentBg: "bg-amber-400",
+    accentFrom: "from-amber-400",
   },
   peer_divergence: {
     label: "Moving Differently from Peers",
@@ -69,6 +71,8 @@ const ARCHETYPE_CONFIG: Record<string, { label: string; tooltip: string; icon: t
     color: "text-amber-400",
     bg: "bg-amber-400/10",
     border: "border-amber-400/20",
+    accentBg: "bg-amber-400",
+    accentFrom: "from-amber-400",
   },
   regime_sensitive: {
     label: "Sensitive to Market Conditions",
@@ -77,6 +81,8 @@ const ARCHETYPE_CONFIG: Record<string, { label: string; tooltip: string; icon: t
     color: "text-cyan-400",
     bg: "bg-cyan-400/10",
     border: "border-cyan-400/20",
+    accentBg: "bg-cyan-400",
+    accentFrom: "from-cyan-400",
   },
   sentiment_shift: {
     label: "Buying/Selling Pressure Shift",
@@ -85,6 +91,8 @@ const ARCHETYPE_CONFIG: Record<string, { label: string; tooltip: string; icon: t
     color: "text-emerald-400",
     bg: "bg-emerald-400/10",
     border: "border-emerald-400/20",
+    accentBg: "bg-emerald-400",
+    accentFrom: "from-emerald-400",
   },
   structural_anomaly: {
     label: "Unusual Market Structure",
@@ -93,6 +101,8 @@ const ARCHETYPE_CONFIG: Record<string, { label: string; tooltip: string; icon: t
     color: "text-rose-400",
     bg: "bg-rose-400/10",
     border: "border-rose-400/20",
+    accentBg: "bg-rose-400",
+    accentFrom: "from-rose-400",
   },
   cross_asset_pattern: {
     label: "Cross-Market Pattern",
@@ -101,6 +111,8 @@ const ARCHETYPE_CONFIG: Record<string, { label: string; tooltip: string; icon: t
     color: "text-amber-400",
     bg: "bg-amber-400/10",
     border: "border-amber-400/20",
+    accentBg: "bg-amber-400",
+    accentFrom: "from-amber-400",
   },
 };
 
@@ -253,7 +265,7 @@ export function DiscoveryFeedCard({ item }: { item: DiscoveryFeedItem }) {
         data-testid="discovery-locked-card"
         className="group relative rounded-2xl border border-primary/20 bg-card/20 backdrop-blur-2xl overflow-hidden"
       >
-        <div className={cn("absolute top-0 left-0 w-full h-0.5 opacity-30", archConfig.color.replace("text-", "bg-"))} />
+        <div className={cn("absolute top-0 left-0 w-full h-0.5 opacity-30", archConfig.accentBg)} />
         <div className="p-4 md:p-5 space-y-3 blur-[3px] select-none pointer-events-none opacity-70">
           <div className="flex items-center gap-2">
             <div className={cn("flex items-center gap-1 px-2 py-0.5 rounded-2xl border text-[8px] font-bold uppercase tracking-widest", archConfig.bg, archConfig.border, archConfig.color)}>
@@ -321,7 +333,7 @@ export function DiscoveryFeedCard({ item }: { item: DiscoveryFeedItem }) {
       className="group relative rounded-2xl border border-white/5 bg-background/50 dark:bg-card/60 backdrop-blur-2xl shadow-xl overflow-hidden hover:border-primary/40 transition-all duration-500 hover:shadow-[0_0_30px_rgba(251,191,36,0.1)]"
     >
       {/* Top accent line */}
-      <div className={cn("absolute top-0 left-0 w-full h-1 opacity-60 bg-linear-to-r from-transparent via-primary/50 to-transparent", archConfig.color.replace("text-", "from-"))} />
+      <div className={cn("absolute top-0 left-0 w-full h-1 opacity-60 bg-linear-to-r from-transparent via-primary/50 to-transparent", archConfig.accentFrom)} />
 
       <div className="p-4 md:p-5 space-y-3">
         {/* Row 1: Badges */}

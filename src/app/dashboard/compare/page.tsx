@@ -69,7 +69,7 @@ interface AssetCompareResult {
     peRatio: number | null;
     priceToBook: number | null;
     roe: number | null;
-    marketCap: string | null;
+    marketCap: number | null;
   };
   sector?: string | null;
   industry?: string | null;

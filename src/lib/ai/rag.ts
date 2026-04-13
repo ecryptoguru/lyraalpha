@@ -11,6 +11,7 @@ import { createLogger } from "@/lib/logger";
 import { INJECTION_PATTERNS } from "./guardrails";
 import { scrubPIIString } from "./pii-scrub";
 import { recordRagResult } from "./alerting";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "rag" });
 
@@ -682,7 +683,7 @@ class PrismaVectorStore {
       }
       // Cache miss — fall through to full embedding search and warm cache
       logger.debug({ assetType }, "RAG fast path miss — falling through to embedding search");
-      void Promise.resolve().then(() => this.warmAssetTypeCache(assetType)).catch(() => {});
+      void Promise.resolve().then(() => this.warmAssetTypeCache(assetType)).catch((e) => logFireAndForgetError(e, "warm-asset-cache"));
     }
 
     // FULL PATH: Embed query → pgvector similarity search
@@ -741,8 +742,8 @@ class PrismaVectorStore {
       // Warm asset type cache in background if not already cached
       if (assetType && assetType !== "GLOBAL") {
         this.getPreCachedChunks(assetType).then((cached) => {
-          if (!cached) void Promise.resolve().then(() => this.warmAssetTypeCache(assetType!)).catch(() => {});
-        }).catch(() => {});
+          if (!cached) void Promise.resolve().then(() => this.warmAssetTypeCache(assetType!)).catch((e) => logFireAndForgetError(e, "warm-asset-cache"));
+        }).catch((e) => logFireAndForgetError(e, "precache-check"));
 
         this.setQueryFastPathChunks(
           query,
@@ -753,7 +754,7 @@ class PrismaVectorStore {
             metadata: r.metadata,
             similarity: r.similarity,
           })),
-        ).catch(() => {});
+        ).catch((e) => logFireAndForgetError(e, "query-fast-path-cache"));
       }
 
       const mappedResults = results.map((r) => ({
@@ -1056,10 +1057,10 @@ export async function retrieveInstitutionalKnowledge(
         );
       }
       // OBS-1: Record RAG result for zero-result rate alert window.
-      recordRagResult(localDocs.length > 0).catch(() => {});
+      recordRagResult(localDocs.length > 0).catch((e) => logFireAndForgetError(e, "rag-result"));
     } catch (e) {
       logger.error({ err: e }, "Local knowledge retrieval failed");
-      recordRagResult(false).catch(() => {});
+      recordRagResult(false).catch((e) => logFireAndForgetError(e, "rag-result-failed"));
     }
 
     return { content, sources };

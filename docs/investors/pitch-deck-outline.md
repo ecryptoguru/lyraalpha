@@ -57,7 +57,7 @@ This architectural principle separates LyraAlpha AI from every generic LLM wrapp
 
 **AI Layer** (structured interpretation)
 - **Lyra** — market intelligence: score explanation, regime analysis, premium workflow output, cross-asset reasoning
-- **Myra** — platform support: plan/credit guidance, onboarding, product navigation
+- **Myra** — platform support: plan/credit guidance, onboarding, product navigation, **hands-free voice support** (shipped via OpenAI Realtime API for PRO+ users)
 
 **Workflow Layer** (product experiences)
 - Compare Assets, Shock Simulator, Portfolio Intelligence workspace
@@ -161,7 +161,7 @@ Starter (free) → Pro ($14.99/₹1,499) → Elite ($39.99/₹3,999) → Enterpr
 
 **Activation:** First Lyra session with a scored asset or portfolio analysis. Time-to-value target: under 3 minutes from signup.
 
-**Retention levers:** Daily briefings, watchlist drift alerts, score velocity signals, portfolio regime alignment, Lyra follow-up on premium workflows, **voice consultant access (Q2 2026, Elite+)**
+**Retention levers:** Daily briefings, watchlist drift alerts, score velocity signals, portfolio regime alignment, Lyra follow-up on premium workflows, **Myra Voice — hands-free voice support (shipped, PRO+)**
 
 **Referral loop:** 50 credits (referee) + 75 credits (referrer after 10-credit activation threshold). Tier ladder: Bronze → Silver → Gold → Platinum.
 
@@ -220,7 +220,7 @@ LyraAlpha AI is the only product combining deterministic engine context, dual-ag
 5. **Region-native intelligence** — India and US treated as first-class markets with separate EOD pipelines, regional briefings, and market-context awareness.
 6. **Production AI safety** — full conversation and memory injection scanning, post-retrieval injection scanning, multi-asset mode plan gating, LLM fallback, proactive observability alerting, ENTERPRISE finite daily cap, conversation log idempotency — shipped infrastructure, not a roadmap item.
 7. **AMI 2.0 content pipeline** — agent-driven blog publishing, subscriber notification, and weekly digest via an HMAC-verified webhook bridge. Compounds SEO/GEO authority and subscriber engagement with near-zero marginal editorial cost.
-8. **Voice interface roadmap (Q2 2026)** — LYRA Voice Fintech Consultant will extend hands-free mobile access for Elite+ users, unlocking multitasking scenarios and deepening daily engagement.
+8. **Myra Voice (shipped)** — hands-free voice support via OpenAI Realtime API, available to PRO+ users. Extends the support layer to spoken interaction with client-side injection detection, PII redaction, and multi-language audio design (English, Hinglish, Hindi). A product moat because it requires Realtime API integration, prompt architecture for spoken output, and multi-language audio design that cannot be replicated by wrapping a chatbot.
 
 **Technical stack:** Next.js 16, GPT-5.4 via Azure OpenAI Responses API, Vercel AI SDK, PostgreSQL + Prisma, Upstash Redis + `hset`/`hdel` for admin overrides, Clerk auth, Stripe + Razorpay, Vitest + Playwright.
 

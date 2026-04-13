@@ -6,12 +6,12 @@ export const metadata: Metadata = {
   title: "Market Narrative Tracker | LyraAlpha AI — Regime Analysis & Sector Rotation",
   description:
     "Track the dominant market narrative in real time. LyraAlpha's narrative engine identifies regime shifts, sector rotation, and the market stories that are strengthening or fading — so you react to what's actually driving prices, not the loudest headline.",
-  alternates: { canonical: "https://lyraalpha.ai/tools/market-narrative-tracker" },
+  alternates: { canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools/market-narrative-tracker` },
   openGraph: {
     title: "Market Narrative Tracker | LyraAlpha AI",
     description:
       "Find the market story behind the moves — not the moves themselves. Regime classification, sector rotation signals, and narrative strength tracking for US and India markets.",
-    url: "https://lyraalpha.ai/tools/market-narrative-tracker",
+    url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools/market-narrative-tracker`,
     images: ["/og-image.png"],
   },
   twitter: {

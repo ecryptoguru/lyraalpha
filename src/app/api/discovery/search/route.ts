@@ -3,7 +3,6 @@ import { DiscoveryService } from "@/lib/services/discovery.service";
 import { rateLimitDiscovery } from "@/lib/rate-limit";
 import { auth } from "@/lib/auth";
 import { getClientIp } from "@/lib/rate-limit/utils";
-import { getUserPlan, canAccessAssetType } from "@/lib/middleware/plan-gate";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { DiscoverySearchSchema, parseSearchParams } from "@/lib/schemas";
@@ -44,15 +43,8 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const plan = userId ? await getUserPlan(userId) : "STARTER";
     const results = (await DiscoveryService.search(q, region, global)) ?? { sectors: [], assets: [] };
-    const gatedResults = canAccessAssetType(plan, "CRYPTO")
-      ? results
-      : {
-          ...results,
-          assets: results.assets.filter((asset) => asset.type !== "CRYPTO"),
-        };
-    const response = NextResponse.json(gatedResults);
+    const response = NextResponse.json(results);
     // Cache search results for 5 minutes
     response.headers.set(
       "Cache-Control",

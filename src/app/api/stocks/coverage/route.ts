@@ -7,7 +7,7 @@ import { sanitizeError } from "@/lib/logger/utils";
 import { rateLimitMarketData } from "@/lib/rate-limit";
 import { auth } from "@/lib/auth";
 import { getClientIp } from "@/lib/rate-limit/utils";
-import { getUserPlan, canAccessAssetType, canAccessRegion } from "@/lib/middleware/plan-gate";
+import { getUserPlan, canAccessRegion } from "@/lib/middleware/plan-gate";
 import { isRateLimitBypassEnabled } from "@/lib/runtime-env";
 
 const logger = createLogger({ service: "stocks-api" });
@@ -33,13 +33,6 @@ export async function GET(req: NextRequest) {
     if (!canAccessRegion(plan, regionParam)) {
       return NextResponse.json(
         { error: "Starter and Pro plans support IN/US markets only." },
-        { status: 403 },
-      );
-    }
-
-    if (typeParam?.toUpperCase() === "CRYPTO" && !canAccessAssetType(plan, "CRYPTO")) {
-      return NextResponse.json(
-        { error: "Upgrade to Elite to access crypto market coverage." },
         { status: 403 },
       );
     }
@@ -87,10 +80,6 @@ export async function GET(req: NextRequest) {
 
     if (typeParam && typeParam !== "ALL") {
       whereInput.type = typeParam as Prisma.EnumAssetTypeFilter;
-    }
-
-    if (!canAccessAssetType(plan, "CRYPTO") && (!typeParam || typeParam === "ALL")) {
-      whereInput.type = { not: "CRYPTO" };
     }
 
     if (query) {

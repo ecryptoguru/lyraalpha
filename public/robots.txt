@@ -6,4 +6,4 @@ Disallow: /api/
 Disallow: /sign-in/
 Disallow: /sign-up/
 
-Sitemap: https://lyraalpha.ai/sitemap.xml
+Sitemap: https://lyraalpha.xyz/sitemap.xml

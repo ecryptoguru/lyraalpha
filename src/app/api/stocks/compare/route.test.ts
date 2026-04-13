@@ -14,7 +14,6 @@ vi.mock("@/lib/auth", () => ({
 
 vi.mock("@/lib/middleware/plan-gate", () => ({
   getUserPlan: vi.fn(),
-  canAccessAssetType: vi.fn(),
 }));
 
 vi.mock("@/lib/services/asset.service", () => ({
@@ -29,7 +28,7 @@ vi.mock("@/lib/services/credit.service", () => ({
 }));
 
 import { auth } from "@/lib/auth";
-import { getUserPlan, canAccessAssetType } from "@/lib/middleware/plan-gate";
+import { getUserPlan } from "@/lib/middleware/plan-gate";
 import { AssetService } from "@/lib/services/asset.service";
 import { consumeCredits } from "@/lib/services/credit.service";
 
@@ -71,7 +70,6 @@ describe("GET /api/stocks/compare", () => {
     vi.clearAllMocks();
     vi.mocked(auth).mockResolvedValue({ userId: "user_elite" } as any);
     vi.mocked(getUserPlan).mockResolvedValue("ELITE" as any);
-    vi.mocked(canAccessAssetType).mockReturnValue(true);
   });
 
   // ── Auth & Plan Gating ────────────────────────────────────────────────────
@@ -198,23 +196,6 @@ describe("GET /api/stocks/compare", () => {
     expect(fake.error).toBe("Not found");
   });
 
-  it("does not spend credits when no accessible assets remain after plan filtering", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD", type: "CRYPTO" }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD", type: "CRYPTO" }) as any);
-    vi.mocked(canAccessAssetType).mockReturnValue(false);
-
-    const res = await GET(makeRequest("BTC-USD,ETH-USD"));
-    const json = await res.json();
-
-    expect(res.status).toBe(200);
-    expect(json.assets).toEqual([
-      { symbol: "BTC-USD", error: "Plan restriction" },
-      { symbol: "ETH-USD", error: "Plan restriction" },
-    ]);
-    expect(consumeCredits).not.toHaveBeenCalled();
-  });
-
   it("returns 402 with remaining credits when balance is insufficient", async () => {
     vi.mocked(AssetService.getAssetBySymbol)
       .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD" }) as any)
@@ -228,21 +209,6 @@ describe("GET /api/stocks/compare", () => {
     expect(json.error).toBe("Insufficient credits");
     expect(json.remaining).toBe(1);
     expect(json.message).toContain("requires 2 credits");
-  });
-
-  it("returns plan restriction error for inaccessible asset type", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD" }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD", type: "CRYPTO" }) as any);
-    vi.mocked(canAccessAssetType)
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(false);
-
-    const res = await GET(makeRequest("BTC-USD,ETH-USD"));
-    expect(res.status).toBe(200);
-    const json = await res.json();
-    const eth = json.assets.find((a: any) => a.symbol === "ETH-USD");
-    expect(eth.error).toBe("Plan restriction");
   });
 
   // ── Null / Missing Fields ─────────────────────────────────────────────────

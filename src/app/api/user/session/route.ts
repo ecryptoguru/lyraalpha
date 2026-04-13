@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { apiError } from "@/lib/api-response";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "session-api" });
 
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
             ? prisma.userSession.updateMany({
                 where: { id: sessionId, userId },
                 data: { lastActivityAt: new Date() },
-              }).catch(() => {})
+              }).catch((e) => logFireAndForgetError(e, "session-activity-update"))
             : Promise.resolve(),
         ]);
         return NextResponse.json({ success: true });

@@ -6,6 +6,7 @@ import { getCache, setCache } from "@/lib/redis";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { apiError } from "@/lib/api-response";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "factor-rotation-api" });
 
@@ -120,7 +121,7 @@ export async function GET(req: NextRequest) {
       computedAt: new Date().toISOString(),
     };
 
-    setCache(cacheKey, result, 3600).catch(() => {});
+    setCache(cacheKey, result, 3600).catch((e) => logFireAndForgetError(e, "factor-rotation-cache"));
     const res = NextResponse.json(result);
     res.headers.set("Cache-Control", "public, s-maxage=3600, stale-while-revalidate=3600");
     return res;

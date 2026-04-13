@@ -9,7 +9,7 @@ interface WatchlistAsset {
   changePercent: number | null;
   currency: string | null;
   region: string | null;
-  marketCap: string | null;
+  marketCap: number | null;
   sector: string | null;
   fundHouse: string | null;
   scoreDynamics: Record<string, unknown> | null;

@@ -423,7 +423,7 @@ All times are UTC.
 - `us-eod-crypto-sync` → `21:45` Mon-Fri
 - `us-eod-postprocess` → `22:00` Mon-Fri
 - `crypto-sync` → every `8h`
-- `news-sync` → every `6h`
+- `news-sync` → every `12h` (NewsData.io crypto endpoint)
 
 ### 8.3 Service-layer ownership
 
@@ -438,7 +438,7 @@ Primary service logic lives in:
 - `src/lib/services/market-sync.service.ts`
 - `src/lib/services/daily-briefing.service.ts`
 - `src/lib/services/market-narratives.service.ts`
-- `src/lib/services/cryptopanic.service.ts`
+- `src/lib/services/newsdata.service.ts` (crypto news via NewsData.io; `cryptopanic.service.ts` is a compatibility re-export)
 
 Important invariants:
 
@@ -541,6 +541,16 @@ Persona injection note:
 - Dashboard Myra bubble wrapper: `src/components/dashboard/live-chat-bubble.tsx` (renders `LiveChatWidget` in `fixed bottom-6 right-4 z-50` when open)
 - Dashboard Myra API: `src/app/api/support/stream/route.ts`
 - The widget supports lightweight markdown-style rendering for headings, lists, links, inline code, and fenced code blocks.
+- **Myra Voice** (shipped): hands-free voice support via OpenAI Realtime API
+  - Voice session endpoint: `GET /api/support/voice-session` — returns ephemeral token, WSS URL, model, voice, and instructions
+  - Voice model: `gpt-realtime-mini` with voice `marin`
+  - Plan-gated: PRO+ only (PRO, ELITE, ENTERPRISE)
+  - Client hook: `src/hooks/use-myra-voice.ts` — manages RealtimeSession lifecycle, mic input with virtual device filtering, silence auto-stop, PII redaction, client-side injection detection
+  - Voice button: `src/components/dashboard/myra-voice-button.tsx`
+  - Voice prompt: `src/lib/support/voice-prompt.ts` — static prefix (cache-eligible) + dynamic per-user suffix; KB docs sanitized against injection patterns
+  - Voice cost calculator: `src/lib/ai/cost-calculator.ts` — `calculateVoiceCost()`, `estimateVoiceSessionCost()`, `estimateVoiceSessionCostCached()` for admin cost dashboards
+  - Audio format: PCM 24kHz input/output, semantic VAD turn detection
+  - Supports English, Hinglish, and Hindi; Urdu script is explicitly blocked in transcription
 - Admin support inbox listing is cursor-paginated:
   - `GET /api/admin/support/conversations?limit=50`
   - optional `cursor=<conversationId>&cursorUpdatedAt=<ISO date>`
@@ -617,6 +627,7 @@ This repo reads many environment variables. The most important ones to know when
 - **AMI 2.0 bridge**: `AMI_WEBHOOK_SECRET` (shared HMAC secret with Convex AMI env vars)
 - **Clerk**: `CLERK_WEBHOOK_SECRET` (+ standard Clerk publishable/secret keys)
 - **Upstash Redis**: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
+- **News data**: `NEWSDATA_API_KEY` (NewsData.io crypto news endpoint; replaces legacy CryptoPanic)
 - **Rate limit / bypass flags**: `SKIP_AUTH`, `SKIP_RATE_LIMIT`, `E2E_BYPASS`
 - **Plan cache**: `PLAN_CACHE_ENABLED`, `LYRA_AUDIT_PLAN`
 - **AI alerting**: `AI_ALERT_WEBHOOK_URL` (Slack/Discord webhook for 5-channel AI observability alerts)
@@ -650,6 +661,8 @@ See `docs/marketing-agent/AGENT_INTEGRATION_GUIDE.md` §9 for the full ownership
 - **Public Myra route**: do not remove `/api/support/public-chat` from `isPublicApiRoute` in `src/proxy.ts`. Removing it will break landing page Myra for all unauthenticated visitors.
 - **LiveChatBubble placement**: keep `LiveChatBubble` and `EliteCommandPalette` outside `SidebarInset` in `DashboardLayoutClient.tsx`. Moving them inside will clip their fixed positioning to the overflow container instead of the viewport.
 - **textVerbosity field**: use `textVerbosity` (AI SDK field) inside `providerOptions.openai`, not a flat `verbosity` field. Flat `verbosity` is silently ignored on Azure.
+- **Voice session plan gating**: `/api/support/voice-session` requires PRO+ plan. Do not lower this gate without updating the voice cost envelope and admin cost dashboard.
+- **NewsData compatibility re-export**: `cryptopanic.service.ts` re-exports `newsdata.service.ts`. Do not reintroduce CryptoPanic-specific logic — the re-export exists only for backward-compatible imports.
 
 ## 16) Where to start when implementing a feature
 

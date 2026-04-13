@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 import { DiscoveryFeedCard, type DiscoveryFeedItem } from "./discovery-feed-card";
+import { formatRelativeTime } from "@/lib/format-relative-time";
 import { useRegion } from "@/lib/context/RegionContext";
 import type { DiscoveryFeedResponse } from "@/lib/services/discovery-feed.service";
 
@@ -285,14 +286,5 @@ export function DiscoveryFeed({
 }
 
 function formatTimeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  if (!Number.isFinite(diff) || diff < 0) return "just now";
-
-  const minutes = Math.floor(diff / 60_000);
-  if (minutes < 60) return `${minutes}m ago`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
-
-  return `${Math.floor(hours / 24)}d ago`;
+  return formatRelativeTime(dateStr);
 }

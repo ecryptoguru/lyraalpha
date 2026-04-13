@@ -11,6 +11,7 @@ export function QuickAccessGrid() {
       desc: "Breakout signals",
       href: "/dashboard/assets",
       color: "bg-amber-500",
+      gradientFrom: "from-amber-500",
       border: "border-amber-500/20",
       icon: Activity,
     },
@@ -19,6 +20,7 @@ export function QuickAccessGrid() {
       desc: "On-chain Alpha",
       href: "/dashboard/assets?type=crypto",
       color: "bg-emerald-500",
+      gradientFrom: "from-emerald-500",
       border: "border-emerald-500/20",
       icon: Globe,
     },
@@ -27,6 +29,7 @@ export function QuickAccessGrid() {
       desc: "AI Strategist",
       href: "/dashboard",
       color: "bg-amber-500",
+      gradientFrom: "from-amber-500",
       border: "border-amber-500/20",
       icon: Sparkles,
     },
@@ -35,6 +38,7 @@ export function QuickAccessGrid() {
        desc: "Risk Analysis",
        href: "/dashboard/portfolio",
        color: "bg-teal-500",
+       gradientFrom: "from-teal-500",
        border: "border-teal-500/20",
        icon: BarChart3,
     }
@@ -51,7 +55,7 @@ export function QuickAccessGrid() {
             {/* Hover Gradient */}
             <div className={cn(
               "absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 bg-linear-to-br",
-              action.color.replace("bg-", "from-").concat(" to-transparent")
+              action.gradientFrom, "to-transparent"
             )} />
             
             <div className="relative z-10 flex justify-between items-start">

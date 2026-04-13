@@ -122,6 +122,7 @@ All plans use `single` mode — one direct streaming call. `router` and `draft_v
 - No reasoning token overhead — `reasoningEffort: "none"` across all tiers
 - Premium workflows run on structured computation first, model interprets second — not unbounded inference
 - Myra handles support on a faster, shorter-answer architecture — low marginal cost
+- Myra Voice extends support to spoken interaction (PRO+); voice prompt prefix is cache-eligible at 10× cheaper text-input rate
 - History compression fires only for COMPLEX queries with large contexts (>3000 chars)
 - Prefix-cached static system prompt reduces per-request token cost
 
@@ -190,6 +191,7 @@ Enterprise ACV target: $10K–$50K. Pipeline build starts M3–M4 once product p
 | RAG / memory retrieval | Staged; short conversations skip full memory overhead |
 | Premium workflow compute | Structured computation first; model interprets result, not inference |
 | Support (Myra) | Separate architecture; shorter answers, lower per-call cost |
+| Myra Voice | PRO+ plan-gated; separate Realtime API billing (not credit-based); voice cost tracked for admin dashboards |
 | Infrastructure / hosting | Upstash Redis, Vercel, PostgreSQL — scales with usage |
 | Data access / licensing | EOD pipelines, premium data tiers — scales with market coverage depth |
 

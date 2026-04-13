@@ -7,6 +7,7 @@ import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { getCache, setCache } from "@/lib/redis";
 import { apiError } from "@/lib/api-response";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "lyra-explain-signal" });
 
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest) {
     }
 
     const explanation = await generateExplanation(payload);
-    await setCache(key, explanation, 24 * 60 * 60).catch(() => {});
+    await setCache(key, explanation, 24 * 60 * 60).catch((e) => logFireAndForgetError(e, "explain-signal-cache"));
 
     return NextResponse.json({ success: true, explanation });
   } catch (error) {

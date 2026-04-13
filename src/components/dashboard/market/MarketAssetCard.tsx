@@ -16,7 +16,7 @@ interface MarketAssetCardProps {
   type?: string;
   price: number;
   changePercent: number;
-  marketCap: string | null;
+  marketCap: number | null;
   peRatio: number | null;
   oneYearChange: number | null;
   signals: AssetSignals;

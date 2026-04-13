@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (posts.length === 0) return {};
 
   const categoryName = posts[0].category;
-  const url = `https://lyraalpha.ai/blog/category/${category}`;
+  const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/blog/category/${category}`;
 
   return {
     title: `${categoryName} | LyraAlpha AI Blog`,

@@ -72,7 +72,7 @@ function makeParams(id: string) {
   return { params: Promise.resolve({ id }) };
 }
 
-const PUBLISHED_POST = { id: "post-id-1", slug: "test-post-slug", status: "published" };
+const PUBLISHED_POST = { id: "post-id-1", slug: "test-post-slug", status: "PUBLISHED" };
 
 beforeEach(() => {
   vi.clearAllMocks();

@@ -191,7 +191,7 @@ export function useSessionTracking(options: UseSessionTrackingOptions = {}) {
     }
 
     pendingPageViewPathRef.current = null;
-    trackEvent("page_view", { path: pathname }).catch(() => {});
+    trackEvent("page_view", { path: pathname }).catch((e) => console.warn("Page view tracking failed:", e));
   }, [pathname, shouldTrackPath, userId, sessionState.sessionId]);
 
   useEffect(() => {
@@ -200,7 +200,7 @@ export function useSessionTracking(options: UseSessionTrackingOptions = {}) {
 
     currentPathRef.current = pendingPath;
     pendingPageViewPathRef.current = null;
-    trackEvent("page_view", { path: pendingPath }).catch(() => {});
+    trackEvent("page_view", { path: pendingPath }).catch((e) => console.warn("Pending page view tracking failed:", e));
   }, [sessionState.sessionId]);
 
   // End session on unmount - use ref to avoid stale closure
@@ -208,7 +208,7 @@ export function useSessionTracking(options: UseSessionTrackingOptions = {}) {
     return () => {
       // Use ref value to avoid calling setState on unmounted component
       if (sessionIdRef.current) {
-        endSession().catch(() => {});
+        endSession().catch((e) => console.warn("Session end failed:", e));
       }
     };
     // Empty deps - intentionally runs once on mount to set up cleanup

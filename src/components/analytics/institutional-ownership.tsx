@@ -15,12 +15,12 @@ interface InstitutionalOwnershipProps {
 const OwnershipBar = ({ 
   label, 
   percentage, 
-  color,
+  bgColor,
   icon: Icon,
 }: { 
   label: string; 
   percentage: number; 
-  color: string;
+  bgColor: string;
   icon: React.ComponentType<{ className?: string }>;
 }) => (
   <div className="space-y-2 group/bar">
@@ -33,7 +33,7 @@ const OwnershipBar = ({
     </div>
     <div className="h-1.5 rounded-full bg-muted/30 overflow-hidden border border-white/5">
       <div 
-        className={cn("h-full transition-all duration-1000 opacity-80 group-hover/bar:opacity-100", color.replace("text-", "bg-"))}
+        className={cn("h-full transition-all duration-1000 opacity-80 group-hover/bar:opacity-100", bgColor)}
         style={{ width: `${Math.min(100, percentage * 100)}%`, boxShadow: '0 0 10px currentColor' }}
       />
     </div>
@@ -88,7 +88,7 @@ export function InstitutionalOwnership({
             <OwnershipBar 
               label="Institutional Ownership"
               percentage={heldPercentInstitutions}
-              color="bg-amber-500"
+              bgColor="bg-amber-500"
               icon={Building2}
             />
           )}
@@ -97,7 +97,7 @@ export function InstitutionalOwnership({
             <OwnershipBar 
               label="Insider Ownership"
               percentage={heldPercentInsiders}
-              color="bg-emerald-500"
+              bgColor="bg-emerald-500"
               icon={User}
             />
           )}

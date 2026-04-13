@@ -8,6 +8,7 @@ import {
 import { classifyAsset, GroupingResult, AssetGroup } from "@/lib/engines/grouping";
 import { rateLimitMarketData } from "@/lib/rate-limit";
 import { auth } from "@/lib/auth";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 import { getClientIp } from "@/lib/rate-limit/utils";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
@@ -18,7 +19,6 @@ import { CorrelationMetrics } from "@/lib/engines/correlation-regime";
 import { AssetService, analyticsAssetSelect, AnalyticsAsset } from "@/lib/services/asset.service";
 import { getCache, setCache } from "@/lib/redis";
 import { calculateSignalStrength, FundamentalData } from "@/lib/engines/signal-strength";
-import { getUserPlan, canAccessAssetType } from "@/lib/middleware/plan-gate";
 import { isRateLimitBypassEnabled } from "@/lib/runtime-env";
 import { apiError } from "@/lib/api-response";
 
@@ -41,21 +41,13 @@ export async function GET(
       return apiError("Symbol is required.", 400);
     }
 
-    // Resolve user plan once (used for both gating + rate limits)
     const { userId } = await auth();
-    const plan = userId ? await getUserPlan(userId) : "STARTER";
 
     if (!fresh) {
       try {
         const cached = await getCache<Record<string, unknown>>(AssetService.getAnalyticsCacheKey(upperSymbol));
         const cachedPayload = cached as ({ type?: string } & Record<string, unknown>) | null;
         if (cachedPayload) {
-          if (cachedPayload.type && !canAccessAssetType(plan, cachedPayload.type as AnalyticsAsset["type"])) {
-            return NextResponse.json(
-              { error: "Upgrade to Elite to access crypto market intelligence." },
-              { status: 403 },
-            );
-          }
           const response = NextResponse.json(cached);
           response.headers.set("Cache-Control", "private, no-store");
           return response;
@@ -96,7 +88,7 @@ export async function GET(
     }
 
     const assetRegion = assetWithRegion.region || "US";
-    const currentAsset = assetWithRegion as unknown as AnalyticsAsset;
+    const currentAsset = assetWithRegion as AnalyticsAsset;
 
     // 2. Parallel Fetch: Market context + Events (asset already fetched above)
     const [latestRegime, events] = await Promise.all([
@@ -117,14 +109,6 @@ export async function GET(
     
     if (!latestRegime || !latestRegime.context) {
       return apiError("Market context not initialized.", 404);
-    }
-
-    // Market access policy: Starter/Pro cannot access crypto analytics
-    if (!canAccessAssetType(plan, currentAsset.type)) {
-      return NextResponse.json(
-        { error: "Upgrade to Elite to access crypto market intelligence." },
-        { status: 403 },
-      );
     }
 
     if (!currentAsset.lastPriceUpdate) {
@@ -249,7 +233,7 @@ export async function GET(
         dynamicsResults.forEach(r => { if (r) scoreDynamics[r.type] = r.dynamics; });
         // Cache for 15 minutes
         if (Object.keys(scoreDynamics).length > 0) {
-          await setCache(dynamicsCacheKey, scoreDynamics, 900).catch(() => {});
+          await setCache(dynamicsCacheKey, scoreDynamics, 900).catch((e) => logFireAndForgetError(e, "analytics-dynamics-cache"));
         }
       }
     }

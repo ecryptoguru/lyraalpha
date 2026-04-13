@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { streamText } from "ai";
 import { z } from "zod";
 import { createSupportMessage } from "@/lib/services/support.service";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 import {
   buildSupportPrompt,
   MYRA_MAX_TOKENS,
@@ -92,7 +93,7 @@ export async function POST(req: NextRequest) {
       senderId: "AI_ASSISTANT",
       senderRole: "AGENT",
       nextStatus: "PENDING",
-    }).catch(() => {});
+    }).catch((e) => logFireAndForgetError(e, "support-message-ai"));
     return new Response(stream, {
       headers: { "Content-Type": "text/plain; charset=utf-8", "X-Accel-Buffering": "no" },
     });
@@ -116,7 +117,7 @@ export async function POST(req: NextRequest) {
       senderId: "AI_ASSISTANT",
       senderRole: "AGENT",
       nextStatus: "PENDING",
-    }).catch(() => {});
+    }).catch((e) => logFireAndForgetError(e, "support-message-cached"));
     return new Response(cachedStream, {
       headers: { "Content-Type": "text/plain; charset=utf-8", "X-Accel-Buffering": "no" },
     });
@@ -161,8 +162,8 @@ export async function POST(req: NextRequest) {
             senderId: "AI_ASSISTANT",
             senderRole: "AGENT",
             nextStatus: "PENDING",
-          }).catch(() => {});
-          void setMyraResponseCache(content, conv.plan, isPublic, fullText.trim()).catch(() => {});
+          }).catch((e) => logFireAndForgetError(e, "support-message-stream"));
+          void setMyraResponseCache(content, conv.plan, isPublic, fullText.trim()).catch((e) => logFireAndForgetError(e, "myra-cache"));
         }
       }
     },

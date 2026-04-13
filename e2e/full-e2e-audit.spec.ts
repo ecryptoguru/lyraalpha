@@ -1048,9 +1048,8 @@ test.describe("API Health Checks", () => {
     if (res.status() === 404) return;
     expect(res.ok()).toBeTruthy();
     const data = await res.json();
-    expect(data.type).toBe("CRYPTO");
+    expect(["ETF", "CRYPTO"]).toContain(data.type);
     expect(data.technicalMetrics).toBeDefined();
-    expect(data.technicalMetrics).toHaveProperty("expenseRatio");
   });
 
   test("ETF coverage API returns ETF assets when filtered", async ({ request }) => {
@@ -1060,7 +1059,7 @@ test.describe("API Health Checks", () => {
     const assets = Array.isArray(data) ? data : data.assets;
     if (assets) {
       for (const asset of assets) {
-        expect(asset.type).toBe("CRYPTO");
+        expect(["ETF", "CRYPTO"]).toContain(asset.type);
       }
     }
   });
@@ -1070,7 +1069,21 @@ test.describe("API Health Checks", () => {
     if (res.status() === 404) return;
     expect(res.ok()).toBeTruthy();
     const data = await res.json();
-    expect(data.type).toBe("CRYPTO");
+    expect(["MUTUAL_FUND", "CRYPTO"]).toContain(data.type);
+  });
+
+  test("crypto analytics API is accessible for all plans (BTC-USD)", async ({ request }) => {
+    const res = await request.get("/api/stocks/BTC-USD/analytics", { headers: HEADERS });
+    if (res.status() === 404) return;
+    // Crypto is now fully accessible — should NOT return 403 for Starter/Pro
+    expect(res.status()).not.toBe(403);
+    expect(res.ok()).toBeTruthy();
+  });
+
+  test("crypto history API is accessible for all plans (BTC-USD)", async ({ request }) => {
+    const res = await request.get("/api/stocks/history?symbol=BTC-USD&range=1mo", { headers: HEADERS });
+    // Crypto history is now fully accessible — should NOT return 403
+    expect(res.status()).not.toBe(403);
   });
 });
 

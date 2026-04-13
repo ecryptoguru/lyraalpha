@@ -5,6 +5,7 @@ import { getCache, setCache } from "@/lib/redis";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { apiError } from "@/lib/api-response";
+import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "sector-movers-api" });
 
@@ -74,7 +75,7 @@ export async function GET(
       .slice(0, 5);
 
     const payload = { movers, groupedBy: asset.sector ? "sector" : "type", label: asset.sector ?? asset.type };
-    await setCache(cacheKey, payload, 300).catch(() => {});
+    await setCache(cacheKey, payload, 300).catch((e) => logFireAndForgetError(e, "sector-movers-cache"));
 
     return NextResponse.json(payload);
   } catch (error) {

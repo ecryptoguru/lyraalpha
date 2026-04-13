@@ -8,11 +8,11 @@ export const metadata: Metadata = {
   title: "Contact & Support | LyraAlpha AI",
   description:
     "Reach LyraAlpha AI support for account access, billing, onboarding, or product questions. Include your account email for faster resolution.",
-  alternates: { canonical: "https://lyraalpha.ai/contact" },
+  alternates: { canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/contact` },
   openGraph: {
     title: "Contact & Support | LyraAlpha AI",
     description: "Reach LyraAlpha AI support for account access, billing, onboarding, or product questions.",
-    url: "https://lyraalpha.ai/contact",
+    url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/contact`,
   },
   twitter: {
     card: "summary",

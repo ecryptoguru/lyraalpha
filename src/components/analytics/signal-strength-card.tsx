@@ -486,12 +486,12 @@ export function SignalStrengthCard({
 // ─── Engine Direction Chip ───────────────────────────────────────────────────
 
 function EngineDirectionChip({ engine, direction }: { engine: string; direction: string }) {
-  const dirConfig: Record<string, { color: string; bg: string; border: string }> = {
-    STRONG_BULLISH: { color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
-    BULLISH: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
-    NEUTRAL: { color: "text-muted-foreground", bg: "bg-muted/20", border: "border-white/5" },
-    BEARISH: { color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
-    STRONG_BEARISH: { color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20" },
+  const dirConfig: Record<string, { color: string; bg: string; border: string; dotBg: string }> = {
+    STRONG_BULLISH: { color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", dotBg: "bg-emerald-400" },
+    BULLISH: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", dotBg: "bg-green-400" },
+    NEUTRAL: { color: "text-muted-foreground", bg: "bg-muted/20", border: "border-white/5", dotBg: "bg-muted-foreground" },
+    BEARISH: { color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20", dotBg: "bg-orange-400" },
+    STRONG_BEARISH: { color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20", dotBg: "bg-rose-400" },
   };
 
   const c = dirConfig[direction] || dirConfig.NEUTRAL;
@@ -507,7 +507,7 @@ function EngineDirectionChip({ engine, direction }: { engine: string; direction:
           <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-wider opacity-80">
             {engine}
           </span>
-          <div className={cn("h-1.5 w-1.5 rounded-full", c.color.replace("text-", "bg-"))} />
+          <div className={cn("h-1.5 w-1.5 rounded-full", c.dotBg)} />
         </div>
       </TooltipTrigger>
       <TooltipContent className="p-2 bg-background/95 backdrop-blur-2xl border border-primary/20 shadow-2xl">

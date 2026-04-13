@@ -35,7 +35,7 @@ At a practical level, the product combines:
 - dashboard intelligence surfaces: score velocity badges, regime-alignment bars, drawdown estimates, watchlist drift alerts, signal-cluster banners, same-sector movers, briefing staleness indicators, holdings P&L heatmaps
 - a public **blog system** with hybrid static + DB posts, category pages, RSS feed, OG share cards, and reading progress
 - **AMI 2.0 marketing agent integration** — HMAC-verified webhook bridge for blog publishing, subscriber notification, and ISR revalidation
-- **(Roadmap: Q2 2026)** LYRA Voice Fintech Consultant — voice-enabled AI consultant for hands-free crypto portfolio and market analysis (Elite+)
+- **Myra Voice** (shipped) — hands-free voice support via OpenAI Realtime API (`gpt-realtime-mini`), available to PRO+ users from the dashboard Myra widget. Supports English, Hinglish, and Hindi with client-side injection detection, PII redaction, and silence auto-stop
 
 The result is not just an AI chatbot with crypto vocabulary. It is a structured intelligence product designed to turn quantitative crypto context into usable reasoning.
 
@@ -81,6 +81,7 @@ These signals include:
 - on-chain metrics
 - DeFi analytics
 - protocol data
+- crypto news intelligence via NewsData.io — trending crypto news, per-asset news feeds, and sentiment extraction (synced every 12 hours via the `news-sync` cron)
 
 This is the foundation of the product. It gives the platform a stable analytical backbone and reduces dependence on free-form model improvisation.
 
@@ -98,6 +99,10 @@ Lyra is not intended to invent data or behave like a generic crypto chatbot. She
 #### Myra as the Public Support Entry Point
 
 Myra is available before a user signs in. The public chat endpoint (`/api/support/public-chat`) is explicitly exempted from auth middleware so unauthenticated visitors receive full AI-driven answers about the product, waitlist, early access, and how the platform works. The public Myra experience runs on GPT-5.4-nano via the same Azure OpenAI provider as Lyra. This is fully operational.
+
+#### Myra Voice (Shipped)
+
+Myra now supports hands-free voice interaction via the OpenAI Realtime API. The voice session endpoint (`GET /api/support/voice-session`) returns an ephemeral token, WSS URL, model config, and per-user instructions. The voice model is `gpt-realtime-mini` with voice `marin`, using PCM 24kHz audio and semantic VAD turn detection. Plan-gated to PRO+ users. The voice prompt uses a static prefix (cache-eligible at 10× cheaper text-input rate) plus a small dynamic per-user suffix with KB docs sanitized against injection patterns. Client-side defenses include virtual audio device filtering, PII redaction in transcripts, and client-side injection pattern detection.
 
 ### 3.3 The Product Layer
 
@@ -291,6 +296,7 @@ Daily token caps and alert thresholds are hot-patchable from `/admin/ai-limits` 
 | **AI Runtime** | Vercel AI SDK |
 | **Lyra Model** | GPT-5.4 family (nano / mini / full) via Azure OpenAI Responses API |
 | **Myra Model** | GPT-5.4-nano via Azure OpenAI (same provider as Lyra) |
+| **Myra Voice Model** | `gpt-realtime-mini` via OpenAI Realtime API (voice `marin`) |
 | **Orchestration** | Single mode (all plans) |
 | **Web / Live Research** | Selective live augmentation for freshness-sensitive paths |
 | **Payments** | Stripe + Razorpay |
@@ -347,6 +353,9 @@ Key safeguards include:
 - financial-advice intent boundaries in both Lyra and Myra
 - support/analysis routing separation
 - post-retrieval prompt-injection scanning
+- voice prompt injection scanning (KB docs sanitized before injection into voice instructions; page param validated against injection patterns)
+- client-side voice injection detection (lightweight pattern matching on voice transcripts)
+- client-side PII redaction for voice transcripts (email, phone, user ID)
 - server-side plan gating
 - deterministic-context-first design
 - `<verification_loop>` prompt contract — enforces grounding check, signal consistency, completeness, and institutional language strengthening
@@ -441,4 +450,4 @@ This whitepaper follows audited implementation behavior while remaining readable
 If routing, orchestration modes, credits, premium tooling, workflow naming, or core runtime assumptions change in code, this document should be updated to match the implemented system.
 
 *LyraAlpha AI — Crypto Intelligence, Not Crypto Noise*
-*Version 2.0 · March 2026*
+*Version 2.1 · March 2026*

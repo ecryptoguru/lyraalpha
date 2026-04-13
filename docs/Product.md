@@ -33,6 +33,7 @@ Before any AI speaks, the platform's proprietary engines compute structured cryp
 - Stress scenarios: deterministic replay against historical crypto windows
 - Portfolio engines: health, fragility, benchmark, Monte Carlo, allocation analysis
 - On-chain metrics: protocol data, DeFi analytics, network signals
+- Crypto news intelligence: NewsData.io integration for trending crypto news, per-asset news feeds, and sentiment extraction — synced every 12 hours via the `news-sync` cron
 
 The model never invents the analytical structure. It interprets what the engines already computed.
 
@@ -46,6 +47,8 @@ Two purpose-built agents, each with a hard domain boundary:
 The separation keeps crypto market analysis and support behavior isolated, easier to govern, and easier to trust. It also keeps costs lower — Myra never runs on the full model.
 
 **Myra is now available as a public support entry point** — unauthenticated visitors receive full AI-driven answers about the product, waitlist, early access, and how LyraAlpha works. No sign-in required. This is fully operational via the `/api/support/public-chat` endpoint.
+
+**Myra Voice is now live** — hands-free voice support via the OpenAI Realtime API (`gpt-realtime-mini`). Users speak naturally and receive spoken responses. Available to PRO+ users from the dashboard Myra widget. Supports English, Hinglish, and Hindi. Includes client-side injection detection, PII redaction, virtual device filtering, and silence auto-stop.
 
 ### Layer 3 — The workflows
 
@@ -284,6 +287,7 @@ Myra operates across the entire user journey:
 
 - **Public support entry point** — fully operational for unauthenticated visitors. The public Myra widget answers questions about the product, waitlist, early access, and how LyraAlpha works — before any sign-in. Runs on GPT-5.4-nano via the same Azure OpenAI provider as Lyra.
 - **Authenticated dashboard** — the Myra chat panel (`LiveChatWidget`) renders in the bottom-right corner of the dashboard, outside the main scroll container so its fixed positioning anchors correctly to the viewport at all times.
+- **Voice interface** — the `MyraVoiceButton` inside the chat widget enables hands-free voice support for PRO+ users. Uses OpenAI Realtime API with `gpt-realtime-mini`, voice `marin`, PCM 24kHz audio, and semantic VAD turn detection. The voice prompt uses a static prefix (cache-eligible at 10× cheaper text-input rate) plus a small dynamic per-user suffix.
 
 ### What makes Myra efficient
 
@@ -342,6 +346,7 @@ AI trust is splitting. Users who tried shallow wrappers and found them unreliabl
 
 | Feature | When | Available to |
 |---|---|---|
+| Myra Voice — hands-free voice support via OpenAI Realtime API | **Shipped** | PRO and above |
 | Lyra Reports — scheduled portfolio and market analysis | Q2 2026 | Elite, Enterprise |
 | TYRA — a deep research agent for hours-long tasks | Q2 2026 | Elite, Enterprise |
 | Daily market briefings — personalized morning intelligence | Q1-Q2 2026 | PRO and above |
@@ -368,4 +373,4 @@ For engineers: The model interprets what deterministic engines already computed.
 ---
 
 *LyraAlpha AI — Crypto Intelligence, Not Crypto Noise*
-*Version 2.0 · March 2026*
+*Version 2.1 · March 2026*
