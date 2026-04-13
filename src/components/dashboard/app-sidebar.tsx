@@ -134,45 +134,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       className="border-r border-border/70 bg-white/90 dark:border-white/5 dark:bg-black/55 backdrop-blur-2xl shadow-xl"
       {...props}
     >
-      <SidebarHeader className="pt-4 pb-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              asChild
-              className="hover:bg-muted/45 dark:hover:bg-white/5 transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:mx-auto!"
-            >
-              <Link href="/" className="flex w-full items-start gap-3 group-data-[collapsible=icon]:justify-center">
-                <div className="hidden aspect-square size-10 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-primary/20 to-secondary/10 border border-primary/25 shadow-[0_0_15px_rgba(245,158,11,0.2)] text-foreground dark:text-white group-data-[collapsible=icon]:flex">
-                  <Image 
-                    src="/brand/lyraalpha-ai-symbol.svg" 
-                    alt="LyraAlpha AI" 
-                    width={40} 
-                    height={40} 
-                    className="w-full h-full object-contain p-1"
-                  />
-                </div>
-                <div className="grid min-w-0 flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <Image
-                      src="/brand/lyraalpha-ai-logo-lockup.svg"
-                      alt="LyraAlpha AI"
-                      width={307}
-                      height={95}
-                      className="h-[84px] w-auto max-w-[280px] object-contain object-left"
-                    />
-                    <span className="shrink-0 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.14em] text-primary">
-                      Beta
-                    </span>
-                  </div>
-                  <span className="mt-1 truncate text-[10px] uppercase tracking-widest text-primary font-bold opacity-80">
-                    {planLabel} Edition
-                  </span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarHeader className="pt-4 pb-3">
+        {/* Collapsed icon-only view */}
+        <div className="hidden group-data-[collapsible=icon]:flex justify-center px-2 py-1">
+          <Link href="/" className="flex items-center justify-center rounded-2xl size-10 bg-linear-to-br from-primary/20 to-secondary/10 border border-primary/25 shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:opacity-80 transition-opacity">
+            <Image src="/brand/lyraalpha-ai-symbol.svg" alt="LyraAlpha AI" width={40} height={40} className="w-full h-full object-contain p-1" />
+          </Link>
+        </div>
+        {/* Expanded full logo view */}
+        <div className="group-data-[collapsible=icon]:hidden px-3 py-1">
+          <Link href="/" className="flex flex-col gap-1 rounded-xl hover:bg-muted/40 dark:hover:bg-white/5 transition-colors p-2 -mx-2">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/brand/lyraalpha-ai-logo-lockup.svg"
+                alt="LyraAlpha AI"
+                width={307}
+                height={95}
+                priority
+                className="h-[84px] w-auto object-contain object-left"
+              />
+              <span className="shrink-0 self-start mt-3 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.14em] text-primary">
+                Beta
+              </span>
+            </div>
+            <span className="truncate text-[10px] uppercase tracking-widest text-primary font-bold opacity-80 pl-0.5">
+              {planLabel} Edition
+            </span>
+          </Link>
+        </div>
       </SidebarHeader>
 
       <SidebarContent className="mt-8 px-2">
