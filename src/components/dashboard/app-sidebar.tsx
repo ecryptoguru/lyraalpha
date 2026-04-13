@@ -154,9 +154,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 className="h-[84px] w-auto object-contain object-left"
               />
             </div>
-            <span className="text-[10px] uppercase tracking-widest text-primary font-bold opacity-80 pl-0.5">
-              Beta
-            </span>
+            <div className="flex justify-center">
+              <span className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.24em] text-primary">
+                Beta
+              </span>
+            </div>
           </Link>
         </div>
       </SidebarHeader>
