@@ -9,8 +9,9 @@ import { NavbarSurface } from "@/components/layout/navbar-surface";
 export function Navbar() {
   return (
     <NavbarSurface>
-      <Link href="/dashboard" className="group flex min-w-0 items-center gap-3">
-        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3 sm:hidden dark:border-white/10 dark:bg-white/3">
+      <Link href="/" className="group flex min-w-0 items-center gap-2">
+        {/* Mobile: symbol only */}
+        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition-opacity duration-200 group-hover:opacity-80 sm:hidden">
           <Image
             src="/brand/lyraalpha-ai-symbol.svg"
             alt="LyraAlpha AI Logo"
@@ -20,23 +21,19 @@ export function Navbar() {
             priority
           />
         </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/brand/lyraalpha-ai-logo-lockup.svg"
-              alt="LyraAlpha AI"
-              width={307}
-              height={95}
-              priority
-              className="hidden h-11 w-auto object-contain sm:block"
-            />
-            <span className="rounded-full border border-teal-400/30 bg-teal-50 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.24em] text-teal-700 dark:border-teal-400/25 dark:bg-teal-400/10 dark:text-teal-300">
-              Beta
-            </span>
-          </div>
-          <p className="mt-1.5 text-[10px] uppercase tracking-[0.3em] text-slate-400 sm:hidden dark:text-white/35">
-            Crypto intelligence
-          </p>
+        {/* Desktop: full lockup + Beta badge */}
+        <div className="hidden sm:flex items-center gap-2">
+          <Image
+            src="/brand/lyraalpha-ai-logo-lockup.svg"
+            alt="LyraAlpha AI"
+            width={307}
+            height={95}
+            priority
+            className="h-[68px] w-auto object-contain transition-opacity duration-200 group-hover:opacity-80"
+          />
+          <span className="shrink-0 inline-flex items-center rounded-full border border-primary/40 bg-primary/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] text-primary shadow-[0_0_8px_rgba(245,158,11,0.15)]">
+            Beta
+          </span>
         </div>
       </Link>
 
