@@ -134,7 +134,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       className="border-r border-border/70 bg-white/90 dark:border-white/5 dark:bg-black/55 backdrop-blur-2xl shadow-xl"
       {...props}
     >
-      <SidebarHeader className="pt-6 pb-2">
+      <SidebarHeader className="pt-4 pb-2">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
@@ -159,7 +159,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       alt="LyraAlpha AI"
                       width={307}
                       height={95}
-                      className="h-20 w-auto max-w-[280px] object-contain object-left"
+                      className="h-[84px] w-auto max-w-[280px] object-contain object-left"
                     />
                     <span className="shrink-0 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.14em] text-primary">
                       Beta
