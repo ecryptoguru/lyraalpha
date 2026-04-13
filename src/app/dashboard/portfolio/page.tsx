@@ -509,7 +509,7 @@ function EmptyPortfolioState({ onNew, onDemo }: { onNew: () => void; onDemo: () 
       <div>
         <h2 className="text-2xl font-bold text-foreground">Add your holdings</h2>
         <p className="text-sm text-muted-foreground mt-2 max-w-sm leading-relaxed">
-          Import or enter positions manually. You&apos;ll get a health score, risk breakdown, and Lyra analysis on what&apos;s working and what&apos;s exposed.
+          Import or enter positions manually. Get a health score, risk breakdown, and Lyra analysis.
         </p>
       </div>
       <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -878,7 +878,7 @@ export default function PortfolioPage() {
               </div>
               <div>
                 <p className="text-base font-bold text-foreground">No holdings yet</p>
-                <p className="text-sm text-muted-foreground mt-1.5 max-w-sm leading-relaxed">Add your first asset to get a portfolio score, health diagnostics, and AI-powered insights.</p>
+                <p className="text-sm text-muted-foreground mt-1.5 max-w-sm leading-relaxed">Add an asset to get a portfolio score, health diagnostics, and AI insights.</p>
               </div>
               <div className="flex flex-wrap justify-center items-center gap-2">
                 <Button size="sm" onClick={() => setShowAddHolding(true)} className="gap-1.5 h-9">

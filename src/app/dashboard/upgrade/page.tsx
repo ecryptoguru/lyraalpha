@@ -218,12 +218,12 @@ function getPricingFaqs(proPriceLabel: string, elitePriceLabel: string) {
   {
     question: "How do credits work?",
     answer:
-      `Credits power Lyra AI usage. ${getCreditsFaqSummary()} Monthly plan credits differ by tier, while Enterprise is sold commercially even though the runtime has an explicit managed default.`,
+      `Credits power Lyra AI usage. ${getCreditsFaqSummary()} Monthly plan credits reset each billing cycle and differ by tier.`,
   },
   {
     question: "What happens if I run out of credits?",
     answer:
-      `${CREDIT_PACK_FACTS.genericUpsell} Exact prices and pack sizes should be shown from current package data when available.`,
+      `${CREDIT_PACK_FACTS.genericUpsell} Credit packs are available for one-time purchase from the upgrade page.`,
   },
   {
     question: "Do credits expire?",
@@ -233,7 +233,7 @@ function getPricingFaqs(proPriceLabel: string, elitePriceLabel: string) {
   {
     question: "Which queries cost the most credits?",
     answer:
-      "COMPLEX queries (multi-asset comparisons, scenario analysis, cross-sector patterns) cost the most. SIMPLE educational queries cost the least. The current implementation uses one shared per-complexity cost schedule across plan tiers.",
+      "Complex queries (multi-asset comparisons, scenario analysis, cross-sector patterns) cost the most credits. Simple educational queries cost the least.",
   },
   {
     question: "How many free credits do I get?",
@@ -254,22 +254,22 @@ const PILLARS = [
   {
     icon: Brain,
     title: "Deeper Understanding",
-    description: "Elite Lyra modules provide specialist-level analysis across 3 domains — crypto on-chain, macro strategist, and cross-asset patterns.",
+    description: "Specialist-level analysis across crypto on-chain, macro, and cross-asset patterns.",
   },
   {
     icon: Layers,
     title: "Full Transparency",
-    description: "See through the wrapper. Full portfolio lookthrough, concentration & overlap detection, crypto structural risk, and correlation matrices — the data institutions use.",
+    description: "Lookthrough, overlap detection, structural risk, and correlation matrices.",
   },
   {
     icon: BarChart3,
     title: "Complete Discovery",
-    description: "Unlimited Discovery feed with cross-asset pattern detection. Every score shift, peer divergence, and structural anomaly across 669+ assets.",
+    description: "Unlimited Discovery with score shifts, peer divergence, and structural anomalies across 669+ assets.",
   },
   {
     icon: GraduationCap,
     title: "Advanced Learning",
-    description: "Cross-asset correlation, regime transitions, historical analogs — the concepts that separate informed investors from the crowd. Plus 1.5x XP multiplier.",
+    description: "Cross-asset correlation, regime transitions, and historical analogs. Plus 1.5x XP multiplier.",
   },
 ];
 
@@ -428,7 +428,7 @@ export default function UpgradePage() {
               <span className="premium-gradient-text block">the systems you actually use</span>
             </h1>
             <p className="mt-4 max-w-2xl text-sm font-medium leading-relaxed text-muted-foreground md:text-base">
-              Choose the plan that matches your system. Pro is built for heavier day-to-day analysis, while Elite unlocks Compare, Shock Simulator, deeper Lyra reasoning, and the full cross-asset intelligence layer.
+              Pro for heavier day-to-day analysis. Elite for Compare, Shock Simulator, and the full cross-asset intelligence layer.
             </p>
             <div className="mt-6 grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-3">
               <div className="rounded-3xl border border-white/10 bg-background/60 p-4">

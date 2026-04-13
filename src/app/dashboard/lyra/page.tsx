@@ -251,12 +251,12 @@ const LoadingIndicator = memo(function LoadingIndicator({
         ) : elapsed <= 14 ? (
           <>
             <p className="text-xs font-bold text-primary/80">Lyra is reasoning deeply...</p>
-            <p className="text-[10px] text-muted-foreground/70 leading-relaxed">Cross-referencing signals, market regime &amp; web data</p>
+            <p className="text-[10px] text-muted-foreground/70 leading-relaxed">Cross-referencing signals &amp; market regime</p>
           </>
         ) : (
           <>
             <p className="text-xs font-bold text-primary">Lyra is building full institutional analysis...</p>
-            <p className="text-[10px] text-muted-foreground/70 leading-relaxed">GPT deep synthesis in progress — usually 20–45s for complex queries</p>
+            <p className="text-[10px] text-muted-foreground/70 leading-relaxed">Deep synthesis in progress — 20–45s for complex queries</p>
           </>
         )}
         {elapsed > 0 && (
@@ -783,7 +783,7 @@ function LyraPageInner() {
                           <span className="block premium-gradient-text">Get a sharper next step.</span>
                         </h2>
                         <p className="max-w-2xl text-sm leading-7 text-muted-foreground sm:text-[15px]">
-                          Use Lyra when you want reasoning, not just raw data. Ask about a setup, a risk or a market change and Lyra will help you understand what matters and where to go next.
+                          Ask about a setup, a risk, or a market change. Lyra tells you what matters and where to go next.
                         </p>
                       </div>
 
@@ -853,25 +853,25 @@ function LyraPageInner() {
                         <div className="rounded-3xl border border-border/40 dark:border-white/6 bg-muted/20 dark:bg-white/3 p-4">
                           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">Ask this when</p>
                           <div className="mt-3 space-y-2 text-xs leading-6 text-muted-foreground">
-                            <p>You need to understand why a setup changed.</p>
-                            <p>You want to test a thesis before acting.</p>
-                            <p>You need context across assets or regimes.</p>
+                            <p>Setup changed and you need to understand why.</p>
+                            <p>Testing a thesis before acting.</p>
+                            <p>Cross-asset or regime context needed.</p>
                           </div>
                         </div>
                         <div className="rounded-3xl border border-border/40 dark:border-white/6 bg-muted/20 dark:bg-white/3 p-4">
                           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">Ask like this</p>
                           <div className="mt-3 space-y-2 text-xs leading-6 text-muted-foreground">
-                            <p>Be specific about the asset, theme or risk.</p>
-                            <p>Ask what changed, what matters or what breaks the thesis.</p>
+                            <p>Name the asset, theme or risk specifically.</p>
+                            <p>Ask what changed, what matters, or what breaks the thesis.</p>
                             <p>Compare two paths when you need a decision frame.</p>
                           </div>
                         </div>
                         <div className="rounded-3xl border border-border/40 dark:border-white/6 bg-muted/20 dark:bg-white/3 p-4">
                           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/70">You will get</p>
                           <div className="mt-3 space-y-2 text-xs leading-6 text-muted-foreground">
-                            <p>A clear read on setup, drivers and risk.</p>
-                            <p>A more useful follow-up question when needed.</p>
-                            <p>A practical next step such as compare, hedge or portfolio review.</p>
+                            <p>Clear read on setup, drivers and risk.</p>
+                            <p>A sharper follow-up question when needed.</p>
+                            <p>Next step: compare, hedge, or portfolio review.</p>
                           </div>
                         </div>
                       </div>
