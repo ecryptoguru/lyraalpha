@@ -1,6 +1,6 @@
 "use client";
 
-import { revalidateCreditViews, setAuthoritativeCreditBalance } from "@/lib/credits/client";
+import { applyOptimisticCreditDelta, revalidateCreditViews, setAuthoritativeCreditBalance } from "@/lib/credits/client";
 import { parseLyraMessage, type Source } from "@/lib/lyra-utils";
 
 function uid(): string {
@@ -238,6 +238,10 @@ class LyraChatSessionController {
     this.persist();
     this.emit();
 
+    // Optimistically deduct 1 credit (minimum query cost) so the UI updates instantly.
+    // The server response will correct this via X-Credits-Remaining header.
+    void applyOptimisticCreditDelta(-1);
+
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -354,6 +358,9 @@ class LyraChatSessionController {
         ),
       };
     } catch {
+      // Refund the optimistic deduction since the request failed
+      void applyOptimisticCreditDelta(1);
+      void revalidateCreditViews();
       this.snapshot = {
         ...this.snapshot,
         error: "An error occurred. Please try again.",

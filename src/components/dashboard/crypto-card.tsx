@@ -78,6 +78,16 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
         }
       } else {
         setExplanation(json.data.explanation);
+        // Update credit balance from server response
+        const creditsRemaining = res.headers.get("X-Credits-Remaining");
+        if (creditsRemaining) {
+          const nextCredits = Number(creditsRemaining);
+          if (Number.isFinite(nextCredits)) {
+            const { setAuthoritativeCreditBalance, revalidateCreditViews } = await import("@/lib/credits/client");
+            void setAuthoritativeCreditBalance(nextCredits);
+            void revalidateCreditViews();
+          }
+        }
       }
     } catch (error) {
       console.error("[Lyra Research] Failed to fetch explanation:", error);

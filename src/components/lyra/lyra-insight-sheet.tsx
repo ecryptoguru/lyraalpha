@@ -14,7 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { revalidateCreditViews, setAuthoritativeCreditBalance } from "@/lib/credits/client";
+import { applyOptimisticCreditDelta, revalidateCreditViews, setAuthoritativeCreditBalance } from "@/lib/credits/client";
 import { parseLyraMessage, Source } from "@/lib/lyra-utils";
 import { formatConversationAsText, copyToClipboard } from "@/lib/export-utils";
 import { Input } from "@/components/ui/input";
@@ -208,6 +208,10 @@ export function LyraInsightSheet({
     setIsLoading(true);
     setError(null);
 
+    // Optimistically deduct 1 credit (minimum query cost) so the UI updates instantly.
+    // The server response will correct this via X-Credits-Remaining header.
+    void applyOptimisticCreditDelta(-1);
+
     // Use messagesRef (not stale closure) so we always send the latest history.
     const apiMessages = [...messagesRef.current, { ...userMsg, content: content.trim() }];
 
@@ -288,6 +292,9 @@ export function LyraInsightSheet({
       void revalidateCreditViews();
       swrMutate("/api/points");
     } catch (err: unknown) {
+      // Refund the optimistic deduction since the request failed
+      void applyOptimisticCreditDelta(1);
+      void revalidateCreditViews();
       setError(err instanceof Error ? err.message : "Failed to connect to Lyra");
     } finally {
       setIsLoading(false);

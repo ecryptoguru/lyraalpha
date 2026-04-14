@@ -30,7 +30,9 @@ export async function POST(req: NextRequest) {
 
     // [CREDIT_UPDATE] Deduct 1 credit for exploration
     const { success, remaining } = await consumeCredits(userId, 1, description);
-    return apiSuccess({ success, remaining });
+    const response = apiSuccess({ success, remaining });
+    response.headers.set("X-Credits-Remaining", String(remaining));
+    return response;
   } catch (err) {
     logger.error({ err: sanitizeError(err) }, "Explore credits API failed");
     return apiError("Internal error", 500);

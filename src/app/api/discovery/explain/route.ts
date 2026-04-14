@@ -51,7 +51,9 @@ export async function GET(req: NextRequest) {
       logger.warn({ userId }, "Credit consumption failed after successful generation — balance may have changed concurrently");
     }
 
-    const response = apiSuccess({ explanation });
+    const response = apiSuccess({ explanation, remaining: creditResult.remaining });
+    // Include remaining credits so frontend can update instantly
+    response.headers.set("X-Credits-Remaining", String(creditResult.remaining));
     // Cache explanations for 24 hours
     response.headers.set(
       "Cache-Control",
