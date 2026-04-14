@@ -63,6 +63,7 @@ const mockPrisma = {
   creditLot: { deleteMany: vi.fn() },
   subscription: { deleteMany: vi.fn() },
   billingAuditLog: { deleteMany: vi.fn() },
+  paymentEvent: { deleteMany: vi.fn() },
   pointTransaction: { deleteMany: vi.fn() },
   userProgress: { deleteMany: vi.fn() },
   userBadge: { deleteMany: vi.fn() },
@@ -191,6 +192,36 @@ describe("POST /api/webhooks/clerk", () => {
     );
   });
 
+  it("grants 300 signup bonus credits on user.created", async () => {
+    const event = makeUserEvent("user.created");
+    mockVerify.mockReturnValue(event);
+    mockPrisma.user.findUnique.mockResolvedValue({ totalCreditsEarned: 0 });
+    const { grantCreditsInTransaction } = await import("@/lib/services/credit.service");
+    const { POST } = await import("./route");
+    const res = await POST(makeRequest(event));
+    expect(res.status).toBe(200);
+    expect(grantCreditsInTransaction).toHaveBeenCalledWith(
+      expect.anything(),
+      "user_abc",
+      300,
+      expect.anything(),
+      "Beta sign-up bonus — welcome to LyraAlpha!",
+      "signup-bonus:user_abc",
+      { countTowardEarned: true },
+    );
+  });
+
+  it("does not double-grant signup bonus if totalCreditsEarned > 0", async () => {
+    const event = makeUserEvent("user.created");
+    mockVerify.mockReturnValue(event);
+    mockPrisma.user.findUnique.mockResolvedValue({ totalCreditsEarned: 300 });
+    const { grantCreditsInTransaction } = await import("@/lib/services/credit.service");
+    const { POST } = await import("./route");
+    const res = await POST(makeRequest(event));
+    expect(res.status).toBe(200);
+    expect(grantCreditsInTransaction).not.toHaveBeenCalled();
+  });
+
   // ── user.created — admin elevation ────────────────────────────────────────
 
   it("admin email also gets ELITE plan on user.created", async () => {
@@ -264,8 +295,7 @@ describe("POST /api/webhooks/clerk", () => {
   it("handles user.updated and does not crash", async () => {
     const event = makeUserEvent("user.updated");
     mockVerify.mockReturnValue(event);
-    mockPrisma.user.findUnique.mockResolvedValue({ plan: "STARTER" });
-    mockPrisma.user.upsert.mockResolvedValue({ id: "user_abc", plan: "STARTER" });
+    mockPrisma.user.findUnique.mockResolvedValue({ plan: "STARTER", totalCreditsEarned: 300 });
     const { POST } = await import("./route");
     const res = await POST(makeRequest(event));
     expect(res.status).toBe(200);
@@ -274,8 +304,7 @@ describe("POST /api/webhooks/clerk", () => {
   it("does not downgrade an already-ELITE user on user.updated", async () => {
     const event = makeUserEvent("user.updated");
     mockVerify.mockReturnValue(event);
-    mockPrisma.user.findUnique.mockResolvedValue({ plan: "ELITE" });
-    mockPrisma.user.upsert.mockResolvedValue({ id: "user_abc", plan: "ELITE" });
+    mockPrisma.user.findUnique.mockResolvedValue({ plan: "ELITE", totalCreditsEarned: 300 });
     const { POST } = await import("./route");
     const res = await POST(makeRequest(event));
     expect(res.status).toBe(200);
@@ -284,5 +313,27 @@ describe("POST /api/webhooks/clerk", () => {
       update: Record<string, unknown>;
     };
     expect(upsertCall.update.plan).not.toBe("STARTER");
+  });
+
+  it("grants signup bonus on user.updated when user doesn't exist (out-of-order webhook)", async () => {
+    const event = makeUserEvent("user.updated");
+    mockVerify.mockReturnValue(event);
+    // First findUnique returns null (user doesn't exist yet), second returns { totalCreditsEarned: 0 }
+    mockPrisma.user.findUnique
+      .mockResolvedValueOnce(null) // pre-check
+      .mockResolvedValueOnce({ totalCreditsEarned: 0 }); // inside tx
+    const { grantCreditsInTransaction } = await import("@/lib/services/credit.service");
+    const { POST } = await import("./route");
+    const res = await POST(makeRequest(event));
+    expect(res.status).toBe(200);
+    expect(grantCreditsInTransaction).toHaveBeenCalledWith(
+      expect.anything(),
+      "user_abc",
+      300,
+      expect.anything(),
+      "Beta sign-up bonus — welcome to LyraAlpha!",
+      "signup-bonus:user_abc",
+      { countTowardEarned: true },
+    );
   });
 });

@@ -32,11 +32,11 @@ describe("createReferralCode", () => {
     expect(result).toBe("USER_ABC");
   });
 
-  it("generates new code when no existing referral", async () => {
+  it("returns deterministic prefix code when no existing referral", async () => {
     prismaMock.referral.findFirst.mockResolvedValue(null);
     const result = await createReferralCode("user_abc123");
-    expect(result).toMatch(/^[A-F0-9]{8}$/);
-    expect(result).not.toBe("USER_ABC");
+    // Always returns userId prefix for deterministic lookup in trackReferralClick
+    expect(result).toBe("USER_ABC");
   });
 });
 

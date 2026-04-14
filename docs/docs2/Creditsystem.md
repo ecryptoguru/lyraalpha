@@ -257,7 +257,7 @@ Credit-adjacent cron jobs that run on QStash schedules:
 
 Blog-related email notifications (new post, weekly digest) are sent by LyraAlpha via Brevo and do **not** consume user credits. The AMI 2.0 marketing agent triggers these flows via the webhook bridge; LyraAlpha owns the send.
 
-> **Last reviewed:** March 2026. Credit amounts, referral rewards, and query pricing are unchanged. Myra public chat and Myra Voice added as zero-credit surfaces. Daily token caps added as secondary backstop. NewsData.io crypto news sync added.
+> **Last reviewed:** April 2026. Credit amounts, referral rewards, and query pricing are unchanged. Myra public chat and Myra Voice added as zero-credit surfaces. Daily token caps added as secondary backstop. NewsData.io crypto news sync added. Service test coverage expanded to 1,750+ passing tests.
 
 ---
 
@@ -265,4 +265,4 @@ Blog-related email notifications (new post, weekly digest) are sent by LyraAlpha
 
 This file is implementation-aligned. If plan credits, referral rewards, or query pricing change in code, update this document to match the live behavior first.
 
-*Version 2.1 · March 2026*
+*Version 2.3 · April 2026*

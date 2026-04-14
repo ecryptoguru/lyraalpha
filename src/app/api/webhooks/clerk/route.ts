@@ -6,6 +6,7 @@ import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { upsertBrevoContact, sendBrevoEmail } from "@/lib/email/brevo";
 import { grantCreditsInTransaction } from "@/lib/services/credit.service";
+import { CreditTransactionType } from "@/generated/prisma/enums";
 import { buildWelcomeEmail } from "@/lib/email/templates";
 import { invalidatePlanCache } from "@/lib/middleware/plan-gate";
 import { isPrivilegedEmail } from "@/lib/auth";
@@ -86,53 +87,57 @@ export async function POST(req: Request) {
         // All new sign-ups get ELITE plan + 300 beta credits
         const plan = "ELITE" as const;
         const SIGNUP_BONUS_CREDITS = 300;
+        // Unique referenceId for dedup — prevents double-grant if two webhooks race
+        const SIGNUP_BONUS_REF = `signup-bonus:${data.id}`;
 
-        await prisma.user.upsert({
-          where: { id: data.id },
-          create: {
-            id: data.id,
-            email,
-            plan,
-            // Start with zero balances — grantCreditsInTransaction will set the correct values
-            credits: 0,
-            monthlyCreditsBalance: 0,
-            bonusCreditsBalance: 0,
-            purchasedCreditsBalance: 0,
-            totalCreditsEarned: 0,
-            totalCreditsSpent: 0,
-            updatedAt: new Date(),
-          },
-          update: {
-            email,
-            ...(isAdmin ? { plan: "ELITE" as const } : {}),
-            updatedAt: new Date(),
-          },
-        });
-
-        // Grant bonus credits as a proper credit lot (3-month expiry)
-        // only on first creation — upsert update path skips this
+        // Atomically upsert user + grant bonus credits in a single transaction.
+        // The referenceId on the CreditTransaction acts as a dedup key — if a
+        // concurrent webhook already granted the bonus, the second grant still
+        // creates a lot but the totalCreditsEarned increment is idempotent because
+        // we check totalCreditsEarned === 0 inside the tx.
         try {
-          const existingUser = await prisma.user.findUnique({
-            where: { id: data.id },
-            select: { totalCreditsEarned: true },
-          });
-          // Only grant if this is a fresh signup (totalCreditsEarned is still zero)
-          if (existingUser && existingUser.totalCreditsEarned === 0) {
-            await prisma.$transaction(async (tx) => {
+          await prisma.$transaction(async (tx) => {
+            await tx.user.upsert({
+              where: { id: data.id },
+              create: {
+                id: data.id,
+                email,
+                plan,
+                credits: 0,
+                monthlyCreditsBalance: 0,
+                bonusCreditsBalance: 0,
+                purchasedCreditsBalance: 0,
+                totalCreditsEarned: 0,
+                totalCreditsSpent: 0,
+                updatedAt: new Date(),
+              },
+              update: {
+                email,
+                ...(isAdmin ? { plan: "ELITE" as const } : {}),
+                updatedAt: new Date(),
+              },
+            });
+
+            // Grant bonus credits only if not yet received (totalCreditsEarned === 0)
+            const user = await tx.user.findUnique({
+              where: { id: data.id },
+              select: { totalCreditsEarned: true },
+            });
+            if (user && user.totalCreditsEarned === 0) {
               await grantCreditsInTransaction(
                 tx,
                 data.id,
                 SIGNUP_BONUS_CREDITS,
-                "BONUS" as never,
+                CreditTransactionType.BONUS,
                 "Beta sign-up bonus — welcome to LyraAlpha!",
-                undefined,
+                SIGNUP_BONUS_REF,
                 { countTowardEarned: true },
               );
-            });
-            logger.info({ userId: data.id, credits: SIGNUP_BONUS_CREDITS }, "Sign-up bonus credits granted");
-          }
+              logger.info({ userId: data.id, credits: SIGNUP_BONUS_CREDITS }, "Sign-up bonus credits granted");
+            }
+          });
         } catch (creditErr) {
-          logger.error({ err: sanitizeError(creditErr), userId: data.id }, "Failed to grant sign-up bonus credits — user created but credits may not be available");
+          logger.error({ err: sanitizeError(creditErr), userId: data.id }, "Failed to create user or grant sign-up bonus credits");
         }
 
         const welcome = buildWelcomeEmail({ firstName });
@@ -183,38 +188,64 @@ export async function POST(req: Request) {
           const emailAddress = primaryEmail.email_address;
           const isAdmin = isPrivilegedEmail(emailAddress);
 
-          // Check if user already exists and has been upgraded (via user.created coupon logic).
-          // Coupon application is intentionally NOT re-processed here — user.created handles
-          // coupon redemption atomically with usedCount increment. Re-applying it here without
-          // the same transaction would create a TOCTOU race that bypasses maxUses limits.
           const existingUser = await prisma.user.findUnique({
             where: { id: data.id },
-            select: { plan: true }
+            select: { plan: true, totalCreditsEarned: true }
           });
 
           const preservedPlan = existingUser?.plan === "ELITE" || isAdmin;
+          const needsSignupBonus = !existingUser; // user.updated arrived before user.created
 
           // Use upsert — webhooks can arrive out of order (updated before created)
           try {
-            await prisma.user.upsert({
-              where: { id: data.id },
-              create: {
-                id: data.id,
-                email: emailAddress,
-                plan: "ELITE" as const,
-                trialEndsAt: null,
-                updatedAt: new Date(),
-              },
-              update: {
-                email: emailAddress,
-                // Never downgrade a user who is already ELITE; admin always gets ELITE
-                ...(isAdmin
-                  ? { plan: "ELITE" as const, trialEndsAt: null }
-                  : preservedPlan
-                    ? {} // already ELITE — do not touch plan or trialEndsAt
-                    : {}),
-                updatedAt: new Date(),
-              },
+            await prisma.$transaction(async (tx) => {
+              await tx.user.upsert({
+                where: { id: data.id },
+                create: {
+                  id: data.id,
+                  email: emailAddress,
+                  plan: "ELITE" as const,
+                  trialEndsAt: null,
+                  credits: 0,
+                  monthlyCreditsBalance: 0,
+                  bonusCreditsBalance: 0,
+                  purchasedCreditsBalance: 0,
+                  totalCreditsEarned: 0,
+                  totalCreditsSpent: 0,
+                  updatedAt: new Date(),
+                },
+                update: {
+                  email: emailAddress,
+                  // Never downgrade a user who is already ELITE; admin always gets ELITE
+                  ...(isAdmin
+                    ? { plan: "ELITE" as const, trialEndsAt: null }
+                    : preservedPlan
+                      ? {} // already ELITE — do not touch plan or trialEndsAt
+                      : {}),
+                  updatedAt: new Date(),
+                },
+              });
+
+              // If this webhook created the user (out-of-order), grant signup bonus
+              // user.created will also try, but totalCreditsEarned === 0 check prevents double-grant
+              if (needsSignupBonus) {
+                const user = await tx.user.findUnique({
+                  where: { id: data.id },
+                  select: { totalCreditsEarned: true },
+                });
+                if (user && user.totalCreditsEarned === 0) {
+                  await grantCreditsInTransaction(
+                    tx,
+                    data.id,
+                    300,
+                    CreditTransactionType.BONUS,
+                    "Beta sign-up bonus — welcome to LyraAlpha!",
+                    `signup-bonus:${data.id}`,
+                    { countTowardEarned: true },
+                  );
+                  logger.info({ userId: data.id, credits: 300 }, "Sign-up bonus granted via user.updated (out-of-order webhook)");
+                }
+              }
             });
           } catch (error) {
             if (typeof error === "object" && error !== null && (error as { code?: string }).code === "P2002") {
@@ -263,6 +294,7 @@ export async function POST(req: Request) {
           prisma.creditLot.deleteMany({ where: { userId: data.id } }),
           prisma.subscription.deleteMany({ where: { userId: data.id } }),
           prisma.billingAuditLog.deleteMany({ where: { userId: data.id } }),
+          prisma.paymentEvent.deleteMany({ where: { userId: data.id } }),
           // Gamification & XP
           prisma.pointTransaction.deleteMany({ where: { userId: data.id } }),
           prisma.userProgress.deleteMany({ where: { userId: data.id } }),
@@ -280,6 +312,8 @@ export async function POST(req: Request) {
           prisma.supportMessage.deleteMany({ where: { senderId: data.id } }),
           prisma.supportConversation.deleteMany({ where: { userId: data.id } }),
         ]);
+        // Invalidate plan cache so stale ELITE isn't served
+        void invalidatePlanCache(data.id);
         logger.info({ userId: data.id }, "User deleted — PII anonymized and content purged");
         break;
       }

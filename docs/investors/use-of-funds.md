@@ -137,7 +137,8 @@ The product is live — but the premium layer has significant depth left to buil
 - SLA-grade reliability and support infrastructure for Enterprise customers
 
 **AI Runtime Hardening (Foundation already shipped — ongoing)**
-- Post-retrieval injection scanning, full conversation injection scanning, user memory injection scanning, multi-asset mode plan gating, conversation log idempotency, LLM nano fallback, 5-channel proactive alerting (web search alert at 2 failures), ENTERPRISE finite daily cap (2M tokens, env-configurable) — all live as of March 2026
+- Post-retrieval injection scanning, full conversation injection scanning, user memory injection scanning, multi-asset mode plan gating, conversation log idempotency, LLM nano fallback, 5-channel proactive alerting (web search alert at 2 failures), ENTERPRISE finite daily cap (2M tokens, env-configurable) — all live as of March–April 2026
+- Comprehensive test coverage expanded to 1,750+ passing tests across 97 test files (Vitest + Playwright)
 - Myra Voice shipped: hands-free voice support via OpenAI Realtime API (`gpt-realtime-mini`), PRO+ plan-gated, with voice prompt injection scanning, client-side PII redaction, virtual device filtering, and silence auto-stop
 - Continued prompt contract refinement (`<output_contract>`, `<verbosity_controls>`)
 - Cache coverage expansion (Myra response cache, compression cache, educational cache)
@@ -236,7 +237,9 @@ LyraAlpha AI already has the core ingredients investors want to see:
 - ✓ Dual-market coverage (India + US) with first-class regional intelligence
 - ✓ Referral program live in production
 - ✓ Enterprise positioning established (custom packaging, not just self-serve)
-- ✓ AMI 2.0 content pipeline live: agent-driven blog, HMAC-verified webhook bridge, weekly digest cron — distribution infrastructure that compounds from day one
-- ✓ Myra Voice shipped: hands-free voice support via OpenAI Realtime API for PRO+ users — extends the support layer to spoken interaction
+- ✓ AMI 2.0 content pipeline live: agent-driven blog with crypto-focused content, HMAC-verified webhook bridge, weekly digest cron
+- ✓ Myra Voice shipped: hands-free voice support via OpenAI Realtime API for PRO+ users
+- ✓ Beta branding deployed (replacing Elite Edition), new static pages (pricing, methodology, about, careers, legal)
+- ✓ Comprehensive test coverage: 1,750+ tests passing across 97 test files
 
 This raise accelerates the execution of a business model that is already structurally sound. That is a more compelling use of capital than funding an unproven product concept.

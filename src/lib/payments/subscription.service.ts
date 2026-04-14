@@ -107,6 +107,12 @@ export async function activateSubscription(params: {
         id: userId,
         email: `${userId}@stripe-webhook.pending`,
         plan,
+        credits: 0,
+        monthlyCreditsBalance: 0,
+        bonusCreditsBalance: 0,
+        purchasedCreditsBalance: 0,
+        totalCreditsEarned: 0,
+        totalCreditsSpent: 0,
         updatedAt: new Date(),
       },
       update: { plan, updatedAt: new Date() },
@@ -265,7 +271,19 @@ export async function linkCustomerId(
 
     await prisma.user.upsert({
       where: { id: userId },
-      create: { id: userId, email: `${userId}@stripe-webhook.pending`, updatedAt: new Date(), ...data },
+      create: {
+        id: userId,
+        email: `${userId}@stripe-webhook.pending`,
+        plan: "ELITE",
+        credits: 0,
+        monthlyCreditsBalance: 0,
+        bonusCreditsBalance: 0,
+        purchasedCreditsBalance: 0,
+        totalCreditsEarned: 0,
+        totalCreditsSpent: 0,
+        updatedAt: new Date(),
+        ...data,
+      },
       update: { ...data, updatedAt: new Date() },
     });
 

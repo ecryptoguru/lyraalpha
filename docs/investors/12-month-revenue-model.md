@@ -55,7 +55,7 @@ All plans use `single` mode — one direct streaming call. `router` and `draft_v
 | **Elite** | mini · single | mini · single | full · single |
 | **Enterprise** | mini · single | mini · single | full · single |
 
-**Cost protection (shipped March 2026):** A secondary per-user daily token cap acts as a backstop against runaway spend from compromised tokens or loop clients. The cap applies to **all plans including ENTERPRISE** (2,000,000 tokens/day ~$500/day ceiling, env-configurable). Caps are hot-patchable by admins without a deploy. Combined with query classification and credit gating, the AI cost envelope is structurally controlled at three independent layers.
+**Cost protection (shipped March–April 2026):** A secondary per-user daily token cap acts as a backstop against runaway spend from compromised tokens or loop clients. The cap applies to **all plans including ENTERPRISE** (2,000,000 tokens/day ~$500/day ceiling, env-configurable). Caps are hot-patchable by admins without a deploy. Combined with query classification and credit gating, the AI cost envelope is structurally controlled at three independent layers. Comprehensive test coverage (1,750+ passing tests) ensures production reliability.
 
 ---
 
@@ -264,6 +264,8 @@ LyraAlpha AI's model is credible because:
 4. **Referral mechanics are live.** Not a roadmap item — the program is implemented and adding signups today.
 5. **Both India and US markets are open.** Dual pricing (USD + INR) means the product can compound across two large, fast-growing retail investor bases simultaneously.
 6. **Blog distribution pipeline is live.** AMI 2.0 powers agent-automated publishing to `/blog` via a secure webhook bridge. Weekly Monday digest to opted-in subscribers is a recurring retention touchpoint with near-zero marginal cost — not a planned content strategy, a shipped infrastructure.
+7. **Beta branding deployed.** Replaced "Elite Edition" with "Beta" badge, signaling live product status and enabling clearer communication with users.
+8. **Comprehensive test coverage.** 1,750+ tests passing across 97 test files — production reliability is verified, not assumed.
 
 ---
 

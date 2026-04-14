@@ -3,7 +3,9 @@
 
 > **Fork note:** This document reflects the current LyraAlpha repository and should be read alongside `CODEBASE.md` and `docs/ENV_SETUP.md`.
 
-**Version 3.0 — Audited Against Current Code (March 2026)**
+**Version 3.3 — Audited Against Current Code (April 2026)**
+
+> **Latest updates:** Beta branding deployed, new static pages added, crypto-focused blog content, search placeholder refined.
 
 ---
 
@@ -531,4 +533,4 @@ Related runtime hardening:
 
 This yellow paper is intentionally implementation-aligned. When a conflict exists between an older spec and the current audited code, the code is treated as authoritative unless the code is clearly incorrect or unsafe.
 
-*Version 3.1 · March 2026*
+*Version 3.3 · April 2026*

@@ -3,7 +3,9 @@
 
 > **Fork note:** This document reflects the current LyraAlpha repository and should be read alongside `CODEBASE.md` and `docs/ENV_SETUP.md`.
 
-**Version 2.0 — Audited Against Current Code (March 2026)**
+**Version 2.3 — Audited Against Current Code (April 2026)**
+
+> **Latest updates:** Beta branding (replacing Elite Edition), new static pages (pricing, methodology, about, careers, legal), crypto-focused blog content, BTC search placeholder, UI copy trimming for clarity.
 
 ---
 
@@ -450,4 +452,4 @@ This whitepaper follows audited implementation behavior while remaining readable
 If routing, orchestration modes, credits, premium tooling, workflow naming, or core runtime assumptions change in code, this document should be updated to match the implemented system.
 
 *LyraAlpha AI — Crypto Intelligence, Not Crypto Noise*
-*Version 2.1 · March 2026*
+*Version 2.3 · April 2026*

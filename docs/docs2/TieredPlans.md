@@ -4,7 +4,7 @@
 
 This document describes the currently implemented plan behavior for LyraAlpha AI. Where earlier product concepts differed, this file follows the stable code path and active runtime behavior.
 
-> **Last reviewed:** March 2026. Reflects all updates through the current release cycle including Myra public chat, dashboard UI fixes, and AI stack consolidation to GPT-5.4 exclusively.
+> **Last reviewed:** April 2026. Reflects all updates including Beta branding (replacing Elite Edition), new static pages (pricing, methodology, about, careers, legal), crypto-focused blog content, Myra public chat, Myra Voice, comprehensive test coverage (1,750+ tests), and AI stack consolidation to GPT-5.4 exclusively.
 
 ---
 
@@ -237,4 +237,4 @@ All cron routes use `withCronAuthAndLogging` middleware for QStash signature ver
 
 This file is implementation-aligned. If pricing, model routing, orchestration modes, credit policy, or premium workflow naming changes in code, this document should be updated to match the runtime behavior rather than older strategy drafts.
 
-*Version 2.1 · March 2026*
+*Version 2.3 · April 2026*

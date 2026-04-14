@@ -1,6 +1,14 @@
 # CODEBASE.md — LyraAlpha AI (AI/Agent Reference)
+## Version 2.3 · April 2026
 
-This document is written for AI coding agents (Cursor/Windsurf/Copilot/etc.) so they can quickly build an accurate mental model of the LyraAlpha repository and safely continue development.
+### Recent Changes (Last 24 Hours)
+- **Beta branding** — Replaced "Elite Edition" with "Beta" badge across sidebar and landing navbar
+- **New static pages** — Added pricing, methodology, about, careers, legal pages with Footer integration
+- **Landing page refinements** — Trimmed hero/trust/how-it-works copy for clarity, updated logo styling with amber Beta badge
+- **Blog content** — Replaced static posts with crypto-focused content (on-chain signals, regime cycles, AI hallucination)
+- **Discovery search** — Changed placeholder from BTC-USD → BTC for broader crypto coverage
+
+This document is written for AI coding agents (Cursor/Windsurf/Copilot/Codex/Claude/etc.) so they can quickly build an accurate mental model of the LyraAlpha repository and safely continue development.
 
 ## 1) What this app is
 
@@ -41,7 +49,7 @@ Core product constraints:
   - LLM fallback: primary model failure degrades to `lyra-nano` automatically before surfacing a 500
   - Prompt system in `src/lib/ai/*`
   - Alerting module in `src/lib/ai/alerting.ts` — 5 alert channels with Redis sliding windows and webhook delivery
-- **Testing**: Vitest + Testing Library + Playwright E2E
+- **Testing**: Vitest + Testing Library + Playwright E2E (1,750+ tests passing)
 
 ## 3) High-level architecture (request/data flow)
 
@@ -172,7 +180,9 @@ Key landing page components:
 
 - `src/components/landing/public-myra-widget.tsx` — entry point for public Myra chat (dynamically imports `PublicMyraPanel`)
 - `src/components/landing/public-myra-panel.tsx` — public Myra chat UI and message send logic
-- `src/components/layout/Navbar.tsx` — landing page navbar (Pre-launch badge, no theme toggle)
+- `src/components/layout/Navbar.tsx` — landing page navbar (Beta badge, larger logo matching sidebar style, no theme toggle)
+- New static pages: `pricing`, `methodology`, `about`, `careers`, `legal` — complete site structure with Footer
+- Updated logo assets with Beta branding (amber badge inline with logo, tight spacing)
 
 Key API surfaces:
 

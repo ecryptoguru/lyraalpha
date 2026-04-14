@@ -382,4 +382,4 @@ None of that is replicable by swapping models or copying prompts.
 ---
 
 *LyraAlpha AI — Financial Intelligence, Not Financial Noise*
-*Version 2.1 · March 2026*
+*Version 2.3 · April 2026*

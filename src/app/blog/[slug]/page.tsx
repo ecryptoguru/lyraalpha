@@ -229,6 +229,15 @@ function renderContent(content: string) {
           {trimmed.slice(2)}
         </h3>,
       );
+    } else if (trimmed.startsWith("### ")) {
+      elements.push(
+        <h4
+          key={key++}
+          className="mt-6 mb-2 text-base font-semibold tracking-tight text-white/85"
+        >
+          {trimmed.slice(4)}
+        </h4>,
+      );
     } else if (trimmed === "---") {
       elements.push(<hr key={key++} className="my-8 border-white/8" />);
     } else {

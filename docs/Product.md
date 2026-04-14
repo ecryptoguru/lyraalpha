@@ -58,7 +58,7 @@ Premium intelligence experiences built on structured crypto engine computation:
 - **Shock Simulator** — stress-scenario replay with Lyra hedge interpretation
 - **Crypto Portfolio Intelligence Workspace** — health, fragility, benchmark, Monte Carlo, regime alignment, holdings heatmap in sequence
 - **Asset Intelligence Pages** — scored, regime-aware, Lyra-interpreted per-crypto-asset views
-- **Public Blog** — structured intelligence content at `/blog`, with category pages, RSS feed, OG share cards, and reading progress. Fed by the AMI 2.0 marketing agent via a secure webhook bridge. Weekly digest delivered every Monday to opted-in subscribers.
+- **Public Blog** — crypto-focused content (on-chain signals, regime cycles, AI hallucination risks), hybrid static + DB posts, category pages, RSS feed, OG share cards, reading progress. Fed by AMI 2.0 via secure webhook bridge. Weekly digest Mondays.
 
 These are workflow products. Not chat with more tokens.
 
@@ -358,7 +358,7 @@ AI trust is splitting. Users who tried shallow wrappers and found them unreliabl
 
 ## The stack
 
-Next.js 16 App Router with React 19, streaming-first with no blocking response paths. GPT-5.4 exclusively via Azure OpenAI Responses API with nano/mini/full routing for Lyra and nano for Myra — Gemini, OpenRouter, and Groq fully removed. Vercel AI SDK. PostgreSQL and Prisma for the credit ledger, asset universe, and `BlogPost` model. Upstash Redis for caching, daily token counters, and alerting windows. Upstash QStash for cron scheduling (weekly digest, re-engagement, reports, credit reset, trial expiry). Clerk for auth and plan metadata. Stripe and Razorpay for US and India payment rails. Brevo for all email delivery (transactional + lifecycle owned by LyraAlpha; outbound marketing owned by AMI 2.0 via its own API key). Vitest and Playwright for testing.
+Next.js 16 App Router with React 19, streaming-first with no blocking response paths. GPT-5.4 exclusively via Azure OpenAI Responses API with nano/mini/full routing for Lyra and nano for Myra — Gemini, OpenRouter, and Groq fully removed. Vercel AI SDK. PostgreSQL and Prisma for the credit ledger, asset universe, and `BlogPost` model. Upstash Redis for caching windows. Upstash QStash for cron scheduling (weekly digest, re-engagement, reports, credit reset, trial expiry). Clerk for auth and plan metadata. Stripe and Razorpay for US and India payment rails. Brevo for all email delivery (transactional + lifecycle owned by LyraAlpha; outbound marketing owned by AMI 2.0 via its own API key). Vitest and Playwright for testing (1,750+ tests passing).
 
 ---
 
@@ -373,4 +373,4 @@ For engineers: The model interprets what deterministic engines already computed.
 ---
 
 *LyraAlpha AI — Crypto Intelligence, Not Crypto Noise*
-*Version 2.1 · March 2026*
+*Version 2.3 · April 2026*

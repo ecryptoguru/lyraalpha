@@ -142,8 +142,8 @@ Show:
 - 3-step dashboard onboarding gate live
 - Promo-code trial system operational (ELITE15 / ELITE30)
 - Referral program live: 50 credits referee / 75 credits referrer
-- **Public blog + AMI 2.0 content pipeline (March 2026):** agent-driven blog live at `/blog` with category pages, RSS feed, and OG share cards; HMAC-verified webhook bridge to AMI 2.0 for automated publishing; weekly Monday digest to opted-in subscribers
-- **AI runtime hardened (March 2026):** full conversation + memory injection scanning, post-retrieval injection scanning, multi-asset mode plan gating, conversation log idempotency, LLM nano fallback, 5-channel proactive alerting (web search alert at 2 failures), ENTERPRISE finite daily cap (2M tokens) — all in production
+- **Public blog + AMI 2.0 content pipeline (March–April 2026):** agent-driven blog with crypto-focused content (on-chain signals, regime cycles, AI hallucination), live at `/blog` with category pages, RSS feed, and OG share cards; HMAC-verified webhook bridge; weekly Monday digest
+- **AI runtime hardened (March–April 2026):** full conversation + memory injection scanning, post-retrieval injection scanning, multi-asset mode plan gating, conversation log idempotency, LLM nano fallback, 5-channel proactive alerting (web search alert at 2 failures), ENTERPRISE finite daily cap (2M tokens), comprehensive test coverage (1,750+ passing tests) — all in production
 
 *[Insert live user count, active sessions, or revenue figures as available]*
 

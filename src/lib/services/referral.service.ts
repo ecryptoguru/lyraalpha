@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { randomBytes } from "crypto";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { grantCreditsInTransaction } from "@/lib/services/credit.service";
+import { CreditTransactionType } from "@/generated/prisma/enums";
 
 const logger = createLogger({ service: "referral" });
 
@@ -38,9 +38,10 @@ export async function createReferralCode(userId: string): Promise<string> {
     return userId.slice(0, 8).toUpperCase();
   }
 
-  // Create a new unique code
-  const code = randomBytes(4).toString("hex").toUpperCase();
-  return code;
+  // No referral row exists — but we don't create one here because
+  // a referral requires both referrer and referee. The code is derived
+  // from the userId prefix for deterministic lookup in trackReferralClick.
+  return userId.slice(0, 8).toUpperCase();
 }
 
 export async function getReferralStats(userId: string) {
@@ -151,12 +152,18 @@ export async function activateReferral(refereeId: string): Promise<{ success: bo
 
     if (!referral) return { success: false, creditsAwarded: 0 };
 
+    // Verify referee exists in DB before granting credits
     const referee = await prisma.user.findUnique({
       where: { id: refereeId },
       select: { totalCreditsSpent: true },
     });
 
-    const thresholdMet = (referee?.totalCreditsSpent || 0) >= REFERRAL_CREDITS.ACTIVATION_THRESHOLD;
+    if (!referee) {
+      logger.warn({ refereeId }, "Cannot activate referral — referee not found in DB");
+      return { success: false, creditsAwarded: 0 };
+    }
+
+    const thresholdMet = referee.totalCreditsSpent >= REFERRAL_CREDITS.ACTIVATION_THRESHOLD;
 
     // Phase 1: Award signup bonus to referee (once)
     if (!referral.refereeCreditsAwarded) {
@@ -165,7 +172,7 @@ export async function activateReferral(refereeId: string): Promise<{ success: bo
           tx,
           refereeId,
           REFERRAL_CREDITS.REFERREE,
-          "REFERRAL_REDEEMED" as never,
+          CreditTransactionType.REFERRAL_REDEEMED,
           "Referral signup bonus",
         );
         await tx.referral.update({
@@ -182,7 +189,7 @@ export async function activateReferral(refereeId: string): Promise<{ success: bo
           tx,
           referral.referrerId,
           REFERRAL_CREDITS.REFERRER,
-          "REFERRAL_BONUS" as never,
+          CreditTransactionType.REFERRAL_BONUS,
           `Referral bonus — ${referral.referrer?.email || "new user"} activated`,
           referral.id,
         );

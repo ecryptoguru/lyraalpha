@@ -399,11 +399,11 @@ model User {
   plan                 PlanTier              @default(STARTER)
   trialEndsAt          DateTime?
   stripeCustomerId     String?               @unique
-  credits              Int                   @default(50) // Current credit balance
-  monthlyCreditsBalance Int                  @default(50)
+  credits              Int                   @default(0) // Current credit balance
+  monthlyCreditsBalance Int                  @default(0)
   bonusCreditsBalance  Int                   @default(0)
   purchasedCreditsBalance Int                @default(0)
-  totalCreditsEarned   Int                   @default(50) // Lifetime credits earned (for loyalty)
+  totalCreditsEarned   Int                   @default(0) // Lifetime credits earned (for loyalty)
   totalCreditsSpent    Int                   @default(0) // Lifetime credits spent
   points               Int                   @default(0) // Loyalty points balance
   totalPointsEarned    Int                   @default(0) // Lifetime points earned

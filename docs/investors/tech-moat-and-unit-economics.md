@@ -212,6 +212,7 @@ The moat strengthens as the product matures because the value moves from "what t
 | India + US markets covered | Deeper broker connectivity, more regional intelligence | Regional data advantage compounds |
 | Credit semantics control economics | Credit packages, loyalty economics expand | Usage history creates personalization layer |
 | Dual-agent architecture | More agent specialization | Agent specialization becomes organizational muscle |
+| Comprehensive test coverage (1,750+ tests) | Test-driven confidence enables faster iteration | Quality infrastructure becomes competitive advantage |
 
 Each of these layers is harder to replicate 12 months from now than it is today. That is the definition of a compounding moat.
 
@@ -229,8 +230,9 @@ Each of these layers is harder to replicate 12 months from now than it is today.
 | Credit semantics + referral mechanics | Easy | 3–6 months |
 | AMI 2.0 content pipeline + email boundary | Medium (requires agent system + webhook infra + email governance) | 6–12 months |
 | Myra Voice interface | Medium-hard (requires Realtime API integration, prompt architecture for spoken output, multi-language audio design, client-side defenses) | 6–12 months |
+| Comprehensive test coverage | Medium (requires 1,750+ tests across 97 files, Vitest + Playwright, service-level test patterns) | 6–12 months |
 
-The hardest layers to replicate are the ones that require both domain expertise and engineering investment simultaneously: the engine outputs, the India-native intelligence, the premium workflow depth, and the agent-automated content pipeline.
+The hardest layers to replicate are the ones that require both domain expertise and engineering investment simultaneously: the engine outputs, the India-native intelligence, the premium workflow depth, the agent-automated content pipeline, and the comprehensive test infrastructure.
 
 ---
 
@@ -262,3 +264,5 @@ LyraAlpha AI's technical and economic advantage is architectural discipline:
 - cost controls are system properties, not hopeful pricing assumptions
 
 In a market where most AI finance products are essentially expensive prompt wrappers, this architecture creates a structurally stronger and more durable product business.
+
+*Updated to April 2026*

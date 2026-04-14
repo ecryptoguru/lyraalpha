@@ -343,6 +343,11 @@ export async function consumeCredits(
     let remainingToSpend = amount;
     const sortedLots = sortCreditLots(currentState.lots);
 
+    // Track per-bucket deductions to compute new balances without a second getCreditState call
+    let monthlyDeduction = 0;
+    let bonusDeduction = 0;
+    let purchasedDeduction = 0;
+
     for (const lot of sortedLots) {
       if (remainingToSpend <= 0) break;
       const spendAmount = Math.min(lot.remainingAmount, remainingToSpend);
@@ -352,6 +357,10 @@ export async function consumeCredits(
         data: { remainingAmount: { decrement: spendAmount } },
       });
       remainingToSpend -= spendAmount;
+
+      if (lot.bucket === CreditLotBucket.MONTHLY) monthlyDeduction += spendAmount;
+      else if (lot.bucket === CreditLotBucket.BONUS) bonusDeduction += spendAmount;
+      else purchasedDeduction += spendAmount;
     }
 
     await tx.creditTransaction.create({
@@ -363,9 +372,15 @@ export async function consumeCredits(
       },
     });
 
-    const nextState = await getCreditState(tx, userId);
-    await persistCreditBalances(tx, userId, nextState.balances, { totalCreditsSpentIncrement: amount });
-    return { success: true, remaining: nextState.balances.credits };
+    // Compute new balances from the first getCreditState result — avoids 6+ extra DB queries
+    const newBalances: CreditBuckets = {
+      credits: currentState.balances.credits - amount,
+      monthlyCreditsBalance: currentState.balances.monthlyCreditsBalance - monthlyDeduction,
+      bonusCreditsBalance: currentState.balances.bonusCreditsBalance - bonusDeduction,
+      purchasedCreditsBalance: currentState.balances.purchasedCreditsBalance - purchasedDeduction,
+    };
+    await persistCreditBalances(tx, userId, newBalances, { totalCreditsSpentIncrement: amount });
+    return { success: true, remaining: newBalances.credits };
   }, { isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead });
 }
 

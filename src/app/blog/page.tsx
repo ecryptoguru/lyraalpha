@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Clock, Tag } from "lucide-react";
+import { ArrowRight, Clock, Tag, PieChart, Search, BarChart3, TrendingUp, Brain, BookOpen, Coins, Layers } from "lucide-react";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { getAllPosts, getAllTags, getAllCategories, formatDate } from "@/lib/blog/posts";
+import { BLOG_SECTIONS, SECTION_COLORS } from "@/lib/blog/blog-sections";
 
 export const metadata: Metadata = {
   title: "Blog | LyraAlpha AI — Market Intelligence & Financial Analysis",
@@ -28,10 +29,27 @@ export const metadata: Metadata = {
   },
 };
 
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  PieChart,
+  Search,
+  BarChart3,
+  TrendingUp,
+  Brain,
+  BookOpen,
+  Coins,
+  Layers,
+};
+
 const accentColors: Record<string, string> = {
   "AI & Technology": "border-teal-400/20 bg-teal-400/6 text-teal-300",
   "Market Intelligence": "border-amber-400/20 bg-amber-400/6 text-amber-300",
   Markets: "border-white/15 bg-white/5 text-white/60",
+  "Portfolio Intelligence": "border-blue-400/20 bg-blue-400/6 text-blue-300",
+  "Crypto Discovery": "border-green-400/20 bg-green-400/6 text-green-300",
+  "Crypto Analysis": "border-purple-400/20 bg-purple-400/6 text-purple-300",
+  "AI & DeFAI": "border-cyan-400/20 bg-cyan-400/6 text-cyan-300",
+  "Investing Guides": "border-rose-400/20 bg-rose-400/6 text-rose-300",
+  "Asset Intelligence": "border-indigo-400/20 bg-indigo-400/6 text-indigo-300",
 };
 
 export default async function BlogPage() {
@@ -43,7 +61,7 @@ export default async function BlogPage() {
   const [featured, ...rest] = sorted;
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#040816] font-sans text-white selection:bg-amber-300/30">
+    <div className="flex min-h-screen flex-col bg-[#040816] font-sans text-white selection:bg-amber-300/30" suppressHydrationWarning>
       <Navbar />
 
       <main className="flex-1">
@@ -68,6 +86,83 @@ export default async function BlogPage() {
           </div>
         </section>
 
+        {/* Section Cards - Unified Grid */}
+        <section className="px-4 pb-8 sm:px-6">
+          <div className="container mx-auto max-w-7xl px-0">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.36em] text-amber-400/70">
+                  Browse by Topic
+                </p>
+                <h2 className="mt-2 text-xl font-light tracking-tight text-white">
+                  Explore Our Content Sections
+                </h2>
+              </div>
+              <span className="hidden font-mono text-[10px] text-white/30 sm:block">
+                {BLOG_SECTIONS.length} sections · {BLOG_SECTIONS.reduce((acc, s) => acc + s.postCount, 0)} articles
+              </span>
+            </div>
+            
+            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {BLOG_SECTIONS.map((section, index) => {
+                const Icon = iconMap[section.icon];
+                const colors = SECTION_COLORS[section.color];
+                const isFeatured = section.featured;
+                
+                return (
+                  <Link
+                    key={section.id}
+                    href={`/blog/section/${section.slug}`}
+                    className={`group relative overflow-hidden rounded-xl border bg-[#0B1221]/80 p-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-white/20 ${colors.border} ${isFeatured ? 'lg:row-span-1' : ''}`}
+                    style={{
+                      transitionDelay: `${index * 25}ms`,
+                    }}
+                  >
+                    {/* Subtle gradient overlay on hover */}
+                    <div className={`pointer-events-none absolute inset-0 bg-linear-to-br ${colors.bg} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
+                    
+                    {/* Glow effect on hover */}
+                    <div className={`pointer-events-none absolute -inset-px rounded-xl opacity-0 blur-sm transition-opacity duration-500 group-hover:opacity-40 bg-linear-to-r ${colors.text.replace('text-', 'from-')}/20 ${colors.text.replace('text-', 'to-')}/10`} />
+                    
+                    <div className="relative flex items-start gap-3">
+                      {/* Icon container with glow */}
+                      <div className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border bg-[#040816]/60 ${colors.border}`}>
+                        <Icon className={`h-5 w-5 ${colors.text} transition-transform duration-300 group-hover:scale-110`} />
+                        {/* Icon glow */}
+                        <div className={`absolute inset-0 rounded-lg opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-50 ${colors.bg}`} />
+                      </div>
+                      
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <h3 className={`truncate font-medium text-sm ${colors.text}`}>
+                            {section.name}
+                          </h3>
+                          {isFeatured && (
+                            <span className="shrink-0 rounded-full bg-amber-400/15 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-amber-400">
+                              Top
+                            </span>
+                          )}
+                        </div>
+                        <p className="mt-1 line-clamp-2 text-xs leading-5 text-white/45">
+                          {section.description}
+                        </p>
+                        
+                        <div className="mt-3 flex items-center justify-between">
+                          <span className="font-mono text-[9px] text-white/35">
+                            {section.postCount} articles
+                          </span>
+                          <ArrowRight className={`h-3.5 w-3.5 ${colors.text} opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0.5`} />
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Blog Posts */}
         <section className="px-4 pb-24 sm:px-6">
           <div className="container mx-auto max-w-7xl px-0">
 
@@ -146,9 +241,9 @@ export default async function BlogPage() {
             )}
 
             {/* Category links */}
-            <div className="mt-16 border-t border-white/8 pt-12">
+            <div className="mt-12 border-t border-white/8 pt-10">
               <p className="font-mono text-[10px] font-bold uppercase tracking-[0.36em] text-white/30">
-                Categories
+                All Categories
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 {allCategories.map((cat) => (

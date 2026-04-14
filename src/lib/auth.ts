@@ -5,11 +5,16 @@ import { createLogger } from "@/lib/logger";
 
 const logger = createLogger({ service: "auth" });
 
-function getAdminEmailAllowlist() {
-  return (process.env.ADMIN_EMAIL_ALLOWLIST ?? "")
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
+// Memoized admin allowlist — parsed once per serverless instance, not per request
+let _adminEmailCache: string[] | null = null;
+function getAdminEmailAllowlist(): string[] {
+  if (!_adminEmailCache) {
+    _adminEmailCache = (process.env.ADMIN_EMAIL_ALLOWLIST ?? "")
+      .split(",")
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean);
+  }
+  return _adminEmailCache;
 }
 
 export function isPrivilegedEmail(email: string | null | undefined) {

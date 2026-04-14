@@ -4,6 +4,8 @@
 
 **LyraAlpha AI** is building the structured financial intelligence layer that retail investors in India and the US have never had — not more data, not another chatbot, but a system that turns fragmented market signals into consistent, institutional-quality reasoning at consumer scale.
 
+- **Version:** 2.3 · April 2026
+- **Latest (24h):** Beta branding deployed, new static pages (pricing, methodology, about, careers, legal), crypto-focused blog content, trimmed landing copy
 - **Category:** Financial intelligence / AI-native investing software
 - **Markets:** US + India — crypto assets
 - **Model:** Freemium SaaS with credit-governed usage, premium workflow upsell, and Enterprise packaging
@@ -152,7 +154,7 @@ All plans use `single` mode — one direct streaming call to the appropriate mod
 
 This architecture keeps inference costs structurally disciplined: lightweight queries never pay full-model prices, premium synthesis on COMPLEX uses lyra-full only when the analytical task genuinely requires it.
 
-### AI Runtime Hardening (Shipped March 2026)
+### AI Runtime Hardening (Shipped March–April 2026)
 
 Before Q1 2026 feature work, the AI runtime was hardened with production-safety additions that strengthen the product moat:
 

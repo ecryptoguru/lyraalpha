@@ -5,9 +5,11 @@
  */
 import { clerkClient } from "@clerk/nextjs/server";
 import { Prisma } from "@/generated/prisma/client";
+import { CreditTransactionType } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { createLogger } from "@/lib/logger";
 import { isAuthBypassEnabled } from "@/lib/runtime-env";
+import { grantCreditsInTransaction } from "@/lib/services/credit.service";
 
 const logger = createLogger({ service: "ensure-user" });
 
@@ -53,16 +55,53 @@ export async function ensureUserExists(userId: string): Promise<void> {
     return;
   }
 
+  const SIGNUP_BONUS_CREDITS = 300;
+  const SIGNUP_BONUS_REF = `signup-bonus:${userId}`;
+
   try {
-    await prisma.user.upsert({
-      where: { id: userId },
-      create: { id: userId, email, credits: 300, plan: createPlanTier, updatedAt: new Date() },
-      update: {
-        // Only update email if it's still a placeholder
-        ...(email !== `${userId}@pending.com`
-          ? { email, updatedAt: new Date() }
-          : {}),
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.user.upsert({
+        where: { id: userId },
+        create: {
+          id: userId,
+          email,
+          plan: createPlanTier,
+          credits: 0,
+          monthlyCreditsBalance: 0,
+          bonusCreditsBalance: 0,
+          purchasedCreditsBalance: 0,
+          totalCreditsEarned: 0,
+          totalCreditsSpent: 0,
+          updatedAt: new Date(),
+        },
+        update: {
+          // Only update email if it's still a placeholder
+          ...(email !== `${userId}@pending.com`
+            ? { email, updatedAt: new Date() }
+            : {}),
+        },
+      });
+
+      // Grant signup bonus if not yet received — same logic as Clerk webhook.
+      // This handles the SSR path where the user hits the dashboard before
+      // the Clerk webhook processes. The Clerk webhook will also try, but
+      // totalCreditsEarned === 0 check prevents double-grant.
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { totalCreditsEarned: true },
+      });
+      if (user && user.totalCreditsEarned === 0) {
+        await grantCreditsInTransaction(
+          tx,
+          userId,
+          SIGNUP_BONUS_CREDITS,
+          CreditTransactionType.BONUS,
+          "Beta sign-up bonus — welcome to LyraAlpha!",
+          SIGNUP_BONUS_REF,
+          { countTowardEarned: true },
+        );
+        logger.info({ userId, credits: SIGNUP_BONUS_CREDITS }, "Sign-up bonus granted via ensureUserExists");
+      }
     });
   } catch (err) {
     // P2002 = unique constraint violation — the Clerk webhook already created this

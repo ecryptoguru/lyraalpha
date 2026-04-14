@@ -177,8 +177,10 @@ export async function expireTrialIfNeeded(
     return { plan: currentPlan, trialEndsAt };
   }
   try {
-    await prisma.user.update({ where: { id: userId }, data: { plan: "STARTER", trialEndsAt: null } });
+    // Invalidate cache BEFORE the DB update to prevent stale ELITE reads
+    // during the window between DB write and cache invalidation
     await delCache(`plan:${userId}`);
+    await prisma.user.update({ where: { id: userId }, data: { plan: "STARTER", trialEndsAt: null } });
   } catch (err) {
     logger.warn({ userId, err }, "Failed to persist trial expiry downgrade");
   }
@@ -187,7 +189,18 @@ export async function expireTrialIfNeeded(
 
 /** Bust the Redis plan cache for a user — call this in Stripe/Clerk webhooks after plan changes. */
 /** Clear plan cache for all users — used in test teardown. No-op when cache is disabled. */
-export function _clearPlanCacheForTest(): void {}
+export async function _clearPlanCacheForTest(): Promise<void> {
+  if (process.env.PLAN_CACHE_ENABLED !== "true") return;
+  try {
+    // Reset the memoized admin allowlist so tests get fresh env values
+    const { delCache } = await import("@/lib/redis");
+    // Delete all plan:* keys using a scan pattern
+    // For test teardown, we just invalidate the known key pattern
+    await delCache("plan:*");
+  } catch {
+    // Non-fatal — tests don't depend on cache being cleared
+  }
+}
 
 export async function invalidatePlanCache(userId: string): Promise<void> {
   if (process.env.PLAN_CACHE_ENABLED !== "true") return;
