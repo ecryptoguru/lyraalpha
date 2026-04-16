@@ -78,7 +78,10 @@ function getCorsHeaders(origin: string | null) {
   return headers;
 }
 
-export default clerkMiddleware(async (auth, req: NextRequest) => {
+// Next.js 16 renamed `middleware.ts` → `proxy.ts` and recommends the
+// exported function be named `proxy`, even when using a default export.
+// See: https://nextjs.org/docs/app/guides/upgrading/version-16#middleware-to-proxy
+export const proxy = clerkMiddleware(async (auth, req: NextRequest) => {
   const normalizedLocalDevUrl = getNormalizedLocalDevUrl(req);
   if (normalizedLocalDevUrl) {
     return NextResponse.redirect(normalizedLocalDevUrl);
@@ -155,6 +158,8 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
 
   return NextResponse.next();
 });
+
+export default proxy;
 
 export const config = {
   matcher: [
