@@ -13,6 +13,7 @@ import { normalizePlanTier } from "@/lib/utils/plan";
 import { createLogger } from "@/lib/logger";
 import { withStaleWhileRevalidate, delCache } from "@/lib/redis";
 import { isPrivilegedEmail } from "@/lib/auth";
+import { ensureUserExists } from "@/lib/utils/ensure-user";
 
 const logger = createLogger({ service: "plan-gate" });
 
@@ -79,7 +80,7 @@ export function hasFeatureAccess(plan: PlanTier, feature: EliteFeature): boolean
 
 // ─── User Plan Resolver (Direct DB) ─────────────────────────────────────────
 
-/** Fetch user plan directly from DB. Returns STARTER as fallback. */
+/** Fetch user plan directly from DB. Returns ELITE as fallback during Beta. */
 export async function getUserPlan(userId: string): Promise<PlanTier> {
   // Audit/test override: LYRA_AUDIT_PLAN=STARTER|PRO|ELITE|ENTERPRISE bypasses DB lookup.
   // Only allowed in development/test — never in any Vercel environment (production or preview).
@@ -87,6 +88,15 @@ export async function getUserPlan(userId: string): Promise<PlanTier> {
       process.env.NODE_ENV !== "production" &&
       !process.env.VERCEL_ENV) {
     return normalizePlanTier(process.env.LYRA_AUDIT_PLAN);
+  }
+
+  // Safety net: ensure the user row exists before reading plan.
+  // Without this, a race between Clerk webhook and first dashboard load
+  // can cause getUserPlan to read STARTER (user not found) and cache it.
+  try {
+    await ensureUserExists(userId);
+  } catch {
+    // Non-fatal — proceed to DB read; user may already exist
   }
 
   const PLAN_CACHE_ENABLED = process.env.PLAN_CACHE_ENABLED === "true";
@@ -107,7 +117,9 @@ export async function getUserPlan(userId: string): Promise<PlanTier> {
   try {
     return await fetchUserPlanFromDb(userId);
   } catch {
-    return "STARTER";
+    // During Beta, all new users are ELITE — returning STARTER on error
+    // could cause a stale cache or wrong feature gating.
+    return "ELITE";
   }
 }
 
@@ -128,8 +140,11 @@ async function fetchUserPlanFromDb(userId: string): Promise<PlanTier> {
     });
 
     if (!user) {
-      logger.warn({ userId }, "User not found in DB - returning STARTER");
-      return "STARTER";
+      // During Beta, all signups are ELITE. Returning STARTER here would
+      // get cached in Redis and stick. ensureUserExists (called above) should
+      // have created the row, but as a final safety net, return ELITE.
+      logger.warn({ userId }, "User not found in DB after ensureUserExists — returning ELITE (Beta default)");
+      return "ELITE";
     }
 
     let plan = normalizePlanTier(user?.plan as string | null | undefined);

@@ -14,7 +14,7 @@ export function Navbar() {
         <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 transition-opacity duration-200 group-hover:opacity-80 sm:hidden">
           <Image
             src="/brand/lyraalpha-ai-symbol.svg"
-            alt="LyraAlpha AI Logo"
+            alt="LyraAlpha Solana Logo"
             fill
             sizes="40px"
             className="object-contain p-1.5"
@@ -25,7 +25,7 @@ export function Navbar() {
         <div className="hidden sm:flex items-center gap-2">
           <Image
             src="/brand/lyraalpha-ai-logo-lockup.svg"
-            alt="LyraAlpha AI"
+            alt="LyraAlpha Solana"
             width={307}
             height={95}
             priority
@@ -40,11 +40,11 @@ export function Navbar() {
       <div className="flex items-center gap-2 sm:gap-3">
         <NavbarLinks />
         <Link
-          href="/sign-up"
+          href="/wallet"
           className="hidden items-center gap-2 rounded-full border border-teal-400/30 bg-teal-50/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.26em] text-teal-700 transition-colors hover:bg-teal-100 lg:flex dark:border-teal-400/20 dark:bg-teal-400/8 dark:text-teal-300 dark:hover:bg-teal-400/12"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          Sign Up Free
+          Open Wallet
         </Link>
         <NavbarAuthControlsSlot />
       </div>

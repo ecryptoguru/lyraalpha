@@ -396,7 +396,7 @@ model TrendingQuestion {
 model User {
   id                   String                @id
   email                String                @unique
-  plan                 PlanTier              @default(STARTER)
+  plan                 PlanTier              @default(ELITE)
   trialEndsAt          DateTime?
   stripeCustomerId     String?               @unique
   credits              Int                   @default(0) // Current credit balance

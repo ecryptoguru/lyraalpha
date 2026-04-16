@@ -27,11 +27,8 @@ export async function GET(request: Request) {
 
   if (!OPENAI_API_KEY) return apiError("OpenAI key not configured", 500);
 
-  // Auth checks first — fast-fail before any DB work
+  // MYRA voice is available to all authenticated users — no plan gate
   const userPlan = await getUserPlan(userId);
-  if (userPlan !== "PRO" && userPlan !== "ELITE" && userPlan !== "ENTERPRISE") {
-    return apiError("Voice requires a PRO or higher plan", 403);
-  }
 
   const rateLimitResult = await rateLimitChat(userId, userPlan);
   if (rateLimitResult.response) return rateLimitResult.response;

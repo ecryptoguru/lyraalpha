@@ -27,8 +27,6 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { getFriendlySymbol } from "@/lib/format-utils";
-import { usePlan } from "@/hooks/use-plan";
-import { EliteGate } from "@/components/dashboard/elite-gate";
 import { AssetSearchInput } from "@/components/dashboard/asset-search-input";
 import { useRegion } from "@/lib/context/RegionContext";
 import dynamic from "next/dynamic";
@@ -49,7 +47,7 @@ const SCENARIO_COLORS = [
   "#22d3ee", "#f59e0b", "#f43f5e", "#a3e635", "#818cf8", "#fb923c", "#34d399", "#e879f9",
 ];
 const MAX_STRESS_TEST_ASSETS = 3;
-const MAX_STRESS_TEST_ASSETS_MESSAGE = "Shock Simulator supports up to 3 assets. Remove one to continue.";
+const MAX_STRESS_TEST_ASSETS_MESSAGE = "Scenario Lab supports up to 3 assets. Remove one to continue.";
 
 const SCENARIO_UI_CHROME: Record<StressScenarioId, { color: string; icon: React.ReactNode }> = {
   "gfc-2008": {
@@ -344,12 +342,12 @@ async function getStressTestErrorMessage(res: Response) {
   }
 
   if (res.status === 402) {
-    return payload?.message ?? "You do not have enough credits to run this stress test.";
+    return payload?.message ?? "Scenario analysis is temporarily unavailable. Please try again.";
   }
 
   if (res.status === 403) {
     return payload?.error === "Elite plan required"
-      ? "Stress Test is available on Elite and Enterprise plans."
+      ? "Scenario analysis is temporarily unavailable for this session."
       : payload?.message ?? payload?.error ?? fallback;
   }
 
@@ -409,9 +407,6 @@ function FactorDrivers({ factors }: { factors: NonNullable<StressResult["factors
 }
 
 export default function StressTestPage() {
-  const { plan } = usePlan();
-  const isElite = plan === "ELITE" || plan === "ENTERPRISE";
-
   const { region: activeRegion } = useRegion();
   const searchParams = useSearchParams();
   const [symbols, setSymbols] = useState<string[]>([]);
@@ -587,7 +582,7 @@ export default function StressTestPage() {
       .map((r) => `${r.symbol}: ${fmt(r.maxDrawdown)} max drawdown, ${fmt(r.periodReturn)} period return`)
       .join("; ");
 
-    const query = `Stress test during ${scenarioDef?.name} (${activeRegion} market, ${scenarioInfo?.period}): ${resultSummary}. What are the best hedging strategies for this portfolio? Which assets provided the best protection? What should I add or remove to improve resilience? Format your response using well-structured markdown (headers, bullet points, bold text) exactly like you do in the Lyra Intel Chat.`;
+    const query = `Scenario Lab during ${scenarioDef?.name} (${scenarioInfo?.period}) for Solana assets: ${resultSummary}. What are the best hedging or rotation strategies for this wallet? Which assets provided the best protection? What should I add, trim, or avoid to improve resilience? Format your response using well-structured markdown with headers and bullet points.`;
 
     try {
       const response = await fetch("/api/chat", {
@@ -595,7 +590,7 @@ export default function StressTestPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [{ role: "user", content: query }],
-          contextData: { symbol: "GLOBAL", assetType: "GLOBAL", assetName: "Shock Simulator", scores: {}, chatMode: "stress-test" },
+          contextData: { symbol: "GLOBAL", assetType: "GLOBAL", assetName: "Scenario Lab", scores: {}, chatMode: "stress-test" },
           symbol: "GLOBAL",
         }),
       });
@@ -718,8 +713,8 @@ export default function StressTestPage() {
     <div className="relative pb-6 p-3 sm:p-4 md:p-6 space-y-6 w-full min-w-0 overflow-x-hidden">
       <PageHeader
         icon={<Shield className="h-5 w-5" />}
-        title="Shock Simulator"
-        eyebrow="Downside rehearsal"
+        title="Scenario Lab"
+        eyebrow="Solana downside rehearsal"
         chips={
           <>
             {scenarioDef ? (
@@ -735,16 +730,7 @@ export default function StressTestPage() {
         actions={shockShare ? <ShareInsightButton share={shockShare} label="Share" /> : undefined}
       />
 
-      {!isElite ? (
-        <EliteGate
-          feature="discovery_feed"
-          plan={plan}
-          teaser="Run Shock Simulator across historical crash scenarios with up to 3 assets, see projected drawdowns and use credit pricing of 5 for the first asset plus 3 for each additional asset."
-        >
-          <div />
-        </EliteGate>
-      ) : (
-        <>
+      <>
 
           {/* Scenario Selection */}
           <div className="bg-card/60 backdrop-blur-2xl border border-white/10 shadow-xl rounded-3xl p-5 space-y-4">
@@ -758,7 +744,7 @@ export default function StressTestPage() {
                     type="button"
                     onClick={() => setSelectedScenario(s.id)}
                     aria-pressed={selectedScenario === s.id}
-                    aria-label={`${s.name} scenario for ${activeRegion === "IN" ? "India" : "US"} market`}
+                    aria-label={`${s.name} scenario for Solana markets`}
                     className={cn(
                       "text-left p-4 rounded-3xl border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                       selectedScenario === s.id
@@ -791,7 +777,7 @@ export default function StressTestPage() {
           {/* Symbol Input */}
           <div className="bg-card/60 backdrop-blur-2xl border border-white/10 shadow-xl rounded-3xl p-5 space-y-3">
             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">
-              Add assets to test (up to 3) · 5 credits for the first asset + 3 credits per additional asset
+              Add up to 3 Solana assets to model drawdowns, proxy paths, and hedge ideas
             </p>
             <div className="flex flex-wrap gap-2">
               {symbols.map((sym) => (
@@ -810,7 +796,7 @@ export default function StressTestPage() {
                   onSelect={addSymbol}
                   region={activeRegion}
                   global={true}
-                  placeholder={activeRegion === "IN" ? "Search BTC, Bitcoin, ETH" : "Search BTC, Bitcoin, ETH"}
+                  placeholder="Search SOL, JUP, BONK, PYTH"
                   className="w-[312px] max-w-full"
                 />
               )}
@@ -821,7 +807,7 @@ export default function StressTestPage() {
               className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary text-black text-xs font-black uppercase tracking-wider hover:bg-primary/90 transition-colors disabled:opacity-40"
             >
               {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Shield className="h-3.5 w-3.5" />}
-              {loading ? "Running..." : "Run Stress Test"}
+              {loading ? "Running..." : "Run Scenario"}
             </button>
             {errorMessage && (
               <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 px-3 py-2 text-xs font-semibold text-rose-400">
@@ -836,7 +822,7 @@ export default function StressTestPage() {
               {shockShare ? (
                 <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-primary/15 bg-primary/5 p-4">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">Share the stress result</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">Share the scenario result</p>
                     <p className="text-sm font-semibold text-foreground">Package the scenario outcome, replay context and share card into a polished post.</p>
                   </div>
                   <ShareInsightButton share={shockShare} label="Share result" />
@@ -850,7 +836,7 @@ export default function StressTestPage() {
                 </div>
                 {proxyCount > 0 && (
                   <span className="text-[9px] text-amber-400/80 font-bold">
-                    Proxy replay uses {activeRegion === "IN" ? "BTC-USD / ETH-USD / XRP-USD" : "BTC-USD / ETH-USD / SOL-USD"} historical paths scaled by asset beta
+                    Proxy replay uses BTC, ETH, and SOL drawdown paths scaled by token beta and liquidity conditions
                   </span>
                 )}
               </div>
@@ -1081,12 +1067,11 @@ export default function StressTestPage() {
               <Shield className="h-12 w-12 opacity-20" />
               <p className="text-sm font-bold">Add assets and select a scenario to begin</p>
               <p className="text-xs opacity-50 text-center max-w-xs">
-                Each scenario uses historically accurate {activeRegion === "IN" ? "BTC-USD / ETH-USD" : "BTC-USD / ETH-USD"} drawdown paths replayed through your asset&apos;s beta
+                Each scenario replays historically accurate crypto drawdown paths through your asset&apos;s beta and proxy profile
               </p>
             </div>
           )}
-        </>
-      )}
+      </>
     </div>
   );
 }

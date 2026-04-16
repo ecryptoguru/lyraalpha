@@ -742,18 +742,18 @@ export default function PortfolioPage() {
       <DemoPortfolioOverlay open={showDemo} onClose={() => setShowDemo(false)} region={region} />
       <PageHeader
         icon={<BriefcaseBusiness className="h-5 w-5" />}
-        title={activeTab === "shock-test" ? "Shock Simulator" : "Portfolio Intelligence"}
-        eyebrow={activeTab === "shock-test" ? "Downside rehearsal" : "Risk, health, and decision support"}
+        title={activeTab === "shock-test" ? "Scenario Lab" : "Wallet Intelligence"}
+        eyebrow={activeTab === "shock-test" ? "Solana downside rehearsal" : "Wallet health, fragility, and decision support"}
         chips={
           activeTab === "portfolio" ? (
             <>
               {summaryCards?.slice(0, 2).map((c) => (
                 <StatChip key={c.label} value={c.value} label={c.label} variant="amber" />
               ))}
-              <StatChip value={region} label="Market" variant="muted" />
+              <StatChip value="Solana" label="Chain" variant="muted" />
             </>
           ) : (
-            <StatChip value={region} label="Market" variant="muted" />
+            <StatChip value="Solana" label="Chain" variant="muted" />
           )
         }
         actions={
@@ -784,7 +784,7 @@ export default function PortfolioPage() {
           <PortfolioIntelligenceHero
             intelligence={portfolioIntelligence}
             supportNote={portfolioAlert?.missingInsight ?? portfolioAlert?.stressHeadline ?? null}
-            marketLabel={`${region} market · ${regionConfig.currencySymbol} ${regionConfig.currency}`}
+            marketLabel={`Solana wallet intelligence · ${regionConfig.currencySymbol} ${regionConfig.currency}`}
           />
         ) : null}
         <div className="flex flex-wrap items-center gap-2">
@@ -824,13 +824,13 @@ export default function PortfolioPage() {
               )}
               <Button asChild size="sm" className="gap-2">
                 <Link href="/dashboard/stress-test">
-                  {portfolioAlert?.stressHeadline ?? "Open shock simulator"}
+                  Open scenario lab
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>
               <Button asChild variant="outline" size="sm" className="gap-2">
-                <Link href="/dashboard#market-intelligence">
-                  Read market narratives
+                <Link href="/dashboard/lyra">
+                  Ask Lyra for a wallet memo
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
               </Button>
@@ -878,7 +878,7 @@ export default function PortfolioPage() {
               </div>
               <div>
                 <p className="text-base font-bold text-foreground">No holdings yet</p>
-                <p className="text-sm text-muted-foreground mt-1.5 max-w-sm leading-relaxed">Add an asset to get a portfolio score, health diagnostics, and AI insights.</p>
+                <p className="text-sm text-muted-foreground mt-1.5 max-w-sm leading-relaxed">Add a Solana position to generate wallet health, fragility diagnostics, and decision-ready intelligence.</p>
               </div>
               <div className="flex flex-wrap justify-center items-center gap-2">
                 <Button size="sm" onClick={() => setShowAddHolding(true)} className="gap-1.5 h-9">
@@ -898,7 +898,7 @@ export default function PortfolioPage() {
                   Connect Broker
                 </Button>
               </div>
-              <p className="text-[10px] text-muted-foreground/50">CSV: symbol, quantity, avgPrice · PDF: Zerodha / Groww / US brokerage statements</p>
+              <p className="text-[10px] text-muted-foreground/50">CSV: token, quantity, costBasis · PDF: wallet exports and exchange statements</p>
             </motion.div>
           )}
 
@@ -992,7 +992,7 @@ export default function PortfolioPage() {
           {/* Footer */}
           <div className="flex items-center justify-between pt-3 border-t border-white/5">
             <p className="text-[10px] text-muted-foreground/50">
-              {portfolio?.name} · {holdings.length} position{holdings.length !== 1 ? "s" : ""} · {region}
+              {portfolio?.name} · {holdings.length} position{holdings.length !== 1 ? "s" : ""} · Solana
             </p>
           </div>
         </div>

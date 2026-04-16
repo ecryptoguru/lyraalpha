@@ -23,6 +23,10 @@ vi.mock("@/lib/auth", () => ({
   isPrivilegedEmail: vi.fn().mockReturnValue(false),
 }));
 
+vi.mock("@/lib/utils/ensure-user", () => ({
+  ensureUserExists: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { prisma } from "@/lib/prisma";
 import { delCache } from "@/lib/redis";
 import {
@@ -74,18 +78,18 @@ describe("plan-gate", () => {
       expect(prisma.user.findUnique).toHaveBeenCalledTimes(2);
     });
 
-    it("returns STARTER as fallback when user not found", async () => {
+    it("returns ELITE as fallback when user not found (Beta default)", async () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
       const plan = await getUserPlan("nonexistent");
-      expect(plan).toBe("STARTER");
+      expect(plan).toBe("ELITE");
     });
 
-    it("returns STARTER on DB error", async () => {
+    it("returns ELITE on DB error (Beta default)", async () => {
       vi.mocked(prisma.user.findUnique).mockRejectedValue(new Error("DB down"));
 
       const plan = await getUserPlan("error_user");
-      expect(plan).toBe("STARTER");
+      expect(plan).toBe("ELITE");
     });
 
     it("different users get independent cache entries", async () => {

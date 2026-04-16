@@ -84,7 +84,17 @@ Agent activated → Check frontmatter "skills:" → Read SKILL.md (INDEX) → Re
 
 When user's prompt is NOT in English: translate internally, respond in user's language, keep code/comments in English.
 
-### 🧹 Clean Code (Global Mandatory)
+### � Caveman Mode (Default Active)
+
+**Caveman mode is ON by default every session.** See `@[agents/caveman]` + `@[skills/caveman]`.
+
+- **Default intensity:** `full` (drop articles, fragments OK, short synonyms)
+- **Switch:** `/caveman lite|full|ultra|wenyan-lite|wenyan|wenyan-ultra`
+- **Off:** "stop caveman" or "normal mode"
+- **Auto-clarity:** Drop caveman for security warnings, irreversible actions, clarification requests. Resume after.
+- **Sub-skills:** `caveman-commit` (terse commits), `caveman-review` (one-line PR comments), `caveman-compress` (compress .md files), `caveman-help` (reference card)
+
+### �🧹 Clean Code (Global Mandatory)
 
 **ALL code MUST follow `@[skills/clean-code]` rules.**
 
@@ -128,6 +138,7 @@ Before modifying ANY file: Check `CODEBASE.md` → identify dependent files → 
 | **DB PERFORMANCE** (slow queries, N+1, indexes) | `database-optimizer`  | database-design                           |
 | **LLM COST** (routing, shadow test, cost)       | `autonomous-optimization-architect` | llm-patterns              |
 | **COMPLIANCE** (SOC 2, GDPR, ISO 27001)         | `compliance-auditor`  | vulnerability-scanner                     |
+| **TOKEN EFFICIENCY** (caveman, terse, compress)  | `caveman`             | caveman, caveman-commit, caveman-review, caveman-compress, compress |
 
 > 🔴 **Mobile + frontend-specialist = WRONG.** Mobile = `mobile-developer` ONLY.
 
@@ -208,8 +219,8 @@ Agents contain: Purple Ban, Template Ban, Anti-cliché rules, Deep Design Thinki
 
 ### Agents & Skills
 
-- **Masters**: `orchestrator`, `project-planner`, `security-auditor`, `backend-specialist`, `frontend-specialist`, `mobile-developer`, `debugger`, `ai-engineer`, `data-engineer`, `marketing-strategist`, `sre-engineer`, `database-optimizer`, `autonomous-optimization-architect`, `compliance-auditor`
-- **Key Skills**: `clean-code`, `brainstorming`, `app-builder`, `frontend-design`, `mobile-design`, `plan-writing`, `behavioral-modes`, `llm-patterns`, `data-pipeline-patterns`, `growth-marketing`, `social-media-patterns`
+- **Masters**: `orchestrator`, `project-planner`, `security-auditor`, `backend-specialist`, `frontend-specialist`, `mobile-developer`, `debugger`, `ai-engineer`, `data-engineer`, `marketing-strategist`, `sre-engineer`, `database-optimizer`, `autonomous-optimization-architect`, `compliance-auditor`, `caveman`
+- **Key Skills**: `clean-code`, `brainstorming`, `app-builder`, `frontend-design`, `mobile-design`, `plan-writing`, `behavioral-modes`, `llm-patterns`, `data-pipeline-patterns`, `growth-marketing`, `social-media-patterns`, `caveman`, `caveman-commit`, `caveman-review`, `caveman-compress`, `compress`
 
 ### Key Scripts
 

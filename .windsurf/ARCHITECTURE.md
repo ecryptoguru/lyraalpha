@@ -8,8 +8,8 @@
 
 Antigravity Kit is a modular system consisting of:
 
-- **26 Specialist Agents** - Role-based AI personas
-- **42 Skills** - Domain-specific knowledge modules
+- **27 Specialist Agents** - Role-based AI personas
+- **48 Skills** - Domain-specific knowledge modules
 - **14 Workflows** - Slash command procedures
 
 ---
@@ -60,6 +60,7 @@ Specialist AI personas for different domains.
 | `database-optimizer`     | Query perf, N+1, indexing  | database-design, data-pipeline-patterns                  |
 | `autonomous-optimization-architect` | LLM cost routing | llm-patterns, typescript-expert, python-patterns    |
 | `compliance-auditor`     | SOC 2, GDPR, ISO 27001     | vulnerability-scanner, documentation-templates           |
+| `caveman`                | Token efficiency, terse comms | caveman, caveman-help, caveman-commit, caveman-review, caveman-compress, compress |
 
 ---
 
@@ -154,6 +155,17 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 | -------------------- | ------------------------- |
 | `bash-linux`         | Linux commands, scripting |
 | `powershell-windows` | Windows PowerShell        |
+
+### Caveman & Token Efficiency
+
+| Skill               | Description                                              |
+| ------------------- | -------------------------------------------------------- |
+| `caveman`           | Ultra-compressed communication mode (default active)     |
+| `caveman-help`      | Quick-reference card for all caveman modes and commands  |
+| `caveman-commit`    | Terse commit messages, Conventional Commits, ≤50 chars   |
+| `caveman-review`    | One-line PR comments: location, problem, fix             |
+| `caveman-compress`  | Compress .md memory files to caveman prose, ~46% savings |
+| `compress`          | Alias for caveman-compress                               |
 
 ### Other
 
@@ -272,8 +284,8 @@ For details, see [scripts/README.md](scripts/README.md)
 
 | Metric              | Value                         |
 | ------------------- | ----------------------------- |
-| **Total Agents**    | 25                            |
-| **Total Skills**    | 44                            |
+| **Total Agents**    | 27                            |
+| **Total Skills**    | 50                            |
 | **Total Workflows** | 15                            |
 | **Total Scripts**   | 2 (master) + 18 (skill-level) |
 | **Coverage**        | ~90% web/mobile development   |
@@ -299,3 +311,4 @@ For details, see [scripts/README.md](scripts/README.md)
 | DB Performance | `database-optimizer` | database-design                    |
 | LLM Cost | `autonomous-optimization-architect` | llm-patterns, python-patterns |
 | Compliance | `compliance-auditor` | vulnerability-scanner               |
+| Token Efficiency | `caveman` | caveman, caveman-commit, caveman-review, caveman-compress |

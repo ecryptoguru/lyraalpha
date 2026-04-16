@@ -25,8 +25,10 @@ export const getDashboardViewer = cache(async (): Promise<DashboardViewer> => {
   }
 
   try {
-    const [, plan, preferences] = await Promise.all([
-      ensureUserExists(userId),
+    // ensureUserExists MUST complete before getUserPlan — otherwise getUserPlan
+    // reads STARTER (user row doesn't exist yet) and caches that in Redis.
+    await ensureUserExists(userId);
+    const [plan, preferences] = await Promise.all([
       getUserPlan(userId),
       prisma.userPreference.findUnique({
         where: { userId },

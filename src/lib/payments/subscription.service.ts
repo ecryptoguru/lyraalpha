@@ -36,9 +36,9 @@ export function resolvePlan(provider: PaymentProvider, priceOrPlanId: string): P
   const map = getPlanMap(provider);
   const resolved = map[priceOrPlanId];
   if (!resolved) {
-    logger.warn({ provider, priceOrPlanId }, "Unknown price/plan ID — defaulting to STARTER");
+    logger.warn({ provider, priceOrPlanId }, "Unknown price/plan ID — defaulting to ELITE (Beta)");
   }
-  return resolved ?? "STARTER";
+  return resolved ?? "ELITE";
 }
 
 // ─── Audit Logging ────────────────────────────────────────────────────────────
@@ -100,13 +100,16 @@ export async function activateSubscription(params: {
   // Run user upsert + subscription upsert in a transaction for atomicity.
   // User upsert uses a placeholder email so the webhook never fails P2025
   // when the Clerk user hasn't visited the dashboard yet.
+  // During Beta, all new users start as ELITE — the subscription plan is stored
+  // on the Subscription row, but the User plan should be at least ELITE.
+  const effectivePlan = plan === "ENTERPRISE" ? "ENTERPRISE" : "ELITE";
   await prisma.$transaction([
     prisma.user.upsert({
       where: { id: userId },
       create: {
         id: userId,
         email: `${userId}@stripe-webhook.pending`,
-        plan,
+        plan: effectivePlan,
         credits: 0,
         monthlyCreditsBalance: 0,
         bonusCreditsBalance: 0,
@@ -115,7 +118,11 @@ export async function activateSubscription(params: {
         totalCreditsSpent: 0,
         updatedAt: new Date(),
       },
-      update: { plan, updatedAt: new Date() },
+      update: {
+        // Never downgrade from ELITE/ENTERPRISE — only upgrade
+        ...(plan === "ENTERPRISE" ? { plan: "ENTERPRISE" as const } : {}),
+        updatedAt: new Date(),
+      },
     }),
     prisma.subscription.upsert({
       where: { providerSubId },
