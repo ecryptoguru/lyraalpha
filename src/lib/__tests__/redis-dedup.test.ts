@@ -42,7 +42,7 @@ const _inFlight = new Map<string, Promise<unknown>>();
 async function withCacheMem<T>(
   key: string,
   fetcher: () => Promise<T | null>,
-  _ttl = 300, // eslint-disable-line @typescript-eslint/no-unused-vars
+  _ttl = 300,
 ): Promise<T | null> {
   const cached = memGet<T>(key);
   if (cached !== null) return cached;

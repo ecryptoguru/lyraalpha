@@ -23,7 +23,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
-  createLegacyShareObject,
+  createTextShareObject,
   type IntelligenceShareObject,
 } from "@/lib/intelligence-share";
 import { trackShareEvent } from "@/lib/ux/share-events";
@@ -351,7 +351,7 @@ export function ShareInsightButton({
   const [inviteEnabled, setInviteEnabled] = useState(false);
 
   const shareObject = useMemo(
-    () => share ?? createLegacyShareObject({
+    () => share ?? createTextShareObject({
       title,
       text: text ?? title ?? "LyraAlpha update",
       url,

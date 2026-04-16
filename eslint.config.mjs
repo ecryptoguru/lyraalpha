@@ -17,7 +17,27 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "test-results/**",
     "coverage/**",
+    // Generated code — not hand-authored.
+    "src/generated/**",
   ]),
+  // Let the `_` prefix opt out of unused-var warnings (args, caught errors, destructures).
+  // Removes the need for scattered `eslint-disable-next-line @typescript-eslint/no-unused-vars` pragmas.
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          args: "after-used",
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrors: "all",
+          caughtErrorsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
+    },
+  },
 ]);
 
 export default eslintConfig;

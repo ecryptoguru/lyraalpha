@@ -82,9 +82,6 @@ export const REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE = 600;
 export const REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE_CONTINUOUS = 600;
 export const REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE_CONTINUOUS = 1_200;
 
-// Legacy alias kept for backward compat with admin dashboard import.
-export const REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION = REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE;
-
 // Measured prompt size for the optimised Myra voice prompt.
 // Static prefix (870) + typical 3-doc KB block (~50) + user ctx (~17) = ~937.
 // Used as the default for cost estimates; pass the actual token count when

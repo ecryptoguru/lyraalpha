@@ -311,7 +311,6 @@ export class SubgraphConnector implements BrokerConnector {
   private async fetchBalances(
     auth: BrokerAuthHandle,
     warnings: string[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _sourcePayloads: Record<string, unknown>[],
   ) {
     try {

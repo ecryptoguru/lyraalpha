@@ -1720,9 +1720,8 @@ export function formatDate(dateStr: string): string {
   });
 }
 
-// Legacy sync exports — used by components that haven't been converted yet.
-// These only return static posts and are kept for backward compatibility.
-export const blogPosts: BlogPost[] = _staticBlogPosts;
+// Static sync accessors — return the bundled static post set.
+// For async/DB-backed reads, use the `*Async` variants above.
 
 export function getPostBySlug(slug: string): BlogPost | undefined {
   return _staticBlogPosts.find((p) => p.slug === slug);
@@ -1734,4 +1733,13 @@ export function getFeaturedPosts(): BlogPostSummary[] {
 
 export function getRecentPosts(count = 3): BlogPostSummary[] {
   return _staticBlogSummaries.slice(0, count);
+}
+
+/**
+ * Returns the full bundled static post set.
+ * Intended for seed scripts and tooling; app code should use the `*Async`
+ * variants that read from the database.
+ */
+export function getAllStaticPosts(): BlogPost[] {
+  return _staticBlogPosts;
 }

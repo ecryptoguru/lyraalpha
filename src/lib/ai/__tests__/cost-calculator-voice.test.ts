@@ -13,7 +13,6 @@ import {
   summariseVoiceSessionCost,
   calculateLLMCost,
   REALTIME_VOICE_PRICING,
-  REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION,
   REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE,
   REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE,
   REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE_CONTINUOUS,
@@ -56,9 +55,6 @@ describe("REALTIME_VOICE_PRICING constants", () => {
   });
   it("continuous audio output rate is 1,200 tokens/min (1 token per 50ms per OpenAI docs)", () => {
     expect(REALTIME_VOICE_AUDIO_OUTPUT_TOKENS_PER_MINUTE_CONTINUOUS).toBe(1_200);
-  });
-  it("legacy alias matches session input rate for backward compat", () => {
-    expect(REALTIME_VOICE_AUDIO_TOKENS_PER_MINUTE_PER_DIRECTION).toBe(300);
   });
   it("default text input tokens reflects measured prompt size (937)", () => {
     expect(REALTIME_VOICE_DEFAULT_TEXT_INPUT_TOKENS).toBe(937);

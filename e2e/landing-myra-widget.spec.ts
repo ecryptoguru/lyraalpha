@@ -120,10 +120,7 @@ test.describe("Landing Page MYRA Widget", () => {
     const launcher = page.getByRole("button", { name: /chat with myra/i });
     await launcher.click();
 
-    // Check for amber/amber color scheme (brand colors)
-    const panel = page.locator("[class*='rounded-4xl']").filter({ has: page.getByText("Myra") }).first();
-    
-    // Verify key UI elements exist with correct structure
+    // Verify key UI elements exist with correct structure (amber brand scheme)
     await expect(page.locator("[class*='bg-amber-50']").first()).toBeVisible();
     await expect(page.locator("[class*='border-amber-300']").first()).toBeVisible();
     

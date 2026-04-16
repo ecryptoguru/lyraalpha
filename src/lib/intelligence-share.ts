@@ -333,7 +333,11 @@ export function createShareObject(input: {
   };
 }
 
-export function createLegacyShareObject(input: {
+/**
+ * Simple wrapper for callers that only have a free-text snippet and
+ * want a ready-to-share object with sensible defaults.
+ */
+export function createTextShareObject(input: {
   title?: string;
   text: string;
   url?: string;

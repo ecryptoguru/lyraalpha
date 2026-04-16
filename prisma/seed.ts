@@ -1,6 +1,8 @@
 import { AssetType } from "../src/generated/prisma/client";
 import { directPrisma as prisma } from "../src/lib/prisma";
-import { blogPosts as staticBlogPosts } from "../src/lib/blog/posts";
+import { getAllStaticPosts } from "../src/lib/blog/posts";
+
+const staticBlogPosts = getAllStaticPosts();
 
 // Crypto Sectors & Themes (Aligned with CoinGecko Categories)
 const SECTORS = [
