@@ -159,18 +159,3 @@ export async function withCronAuthAndLogging(
   }
 }
 
-// Legacy sync wrapper — kept for any direct callers; delegates to async validateCronAuth.
-// Prefer withCronAuthAndLogging for all new usage.
-export async function withCronAuth(
-  request: RequestWithHeaders,
-  handler: () => Promise<NextResponse>,
-): Promise<NextResponse> {
-  const authResult = await validateCronAuth(request);
-  if (!authResult.authorized) {
-    return NextResponse.json(
-      { error: authResult.error!.message },
-      { status: authResult.error!.status },
-    );
-  }
-  return handler();
-}

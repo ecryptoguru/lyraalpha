@@ -18,6 +18,21 @@ import {
 
 const logger = createLogger({ service: "multi-horizon-regime" });
 
+// ─── Prisma JSON boundary helpers ─────────────────────────────────────────────
+// Prisma's `Json` column type is `JsonValue` (recursive primitive structure).
+// Our domain types (MarketContextSnapshot, string[]) are structurally compatible
+// but TypeScript cannot prove that without help. These helpers centralise the
+// cast so call sites stay readable and the unsafe area is auditable in one place.
+// If we ever add runtime schemas (Zod), swap the body of `fromJson` for `.parse()`.
+
+function toJson<T>(value: T): Prisma.InputJsonValue {
+  return value as unknown as Prisma.InputJsonValue;
+}
+
+function fromJson<T>(value: Prisma.JsonValue | null | undefined): T | null {
+  return value == null ? null : (value as unknown as T);
+}
+
 export interface MultiHorizonRegimeData {
   current: MarketContextSnapshot;
   shortTerm: MarketContextSnapshot; // 5-day average
@@ -279,26 +294,24 @@ export async function storeMultiHorizonRegime(region: string = "US"): Promise<vo
         }
     },
     update: {
-      current: data.current as unknown as Prisma.InputJsonValue,
-      shortTerm: data.shortTerm as unknown as Prisma.InputJsonValue,
-      mediumTerm: data.mediumTerm as unknown as Prisma.InputJsonValue,
-      longTerm: data.longTerm as unknown as Prisma.InputJsonValue,
+      current: toJson(data.current),
+      shortTerm: toJson(data.shortTerm),
+      mediumTerm: toJson(data.mediumTerm),
+      longTerm: toJson(data.longTerm),
       transitionProbability: data.transitionProbability,
       transitionDirection: data.transitionDirection,
-      leadingIndicators:
-        data.leadingIndicators as unknown as Prisma.InputJsonValue,
+      leadingIndicators: toJson(data.leadingIndicators),
     },
     create: {
       date: today,
       region,
-      current: data.current as unknown as Prisma.InputJsonValue,
-      shortTerm: data.shortTerm as unknown as Prisma.InputJsonValue,
-      mediumTerm: data.mediumTerm as unknown as Prisma.InputJsonValue,
-      longTerm: data.longTerm as unknown as Prisma.InputJsonValue,
+      current: toJson(data.current),
+      shortTerm: toJson(data.shortTerm),
+      mediumTerm: toJson(data.mediumTerm),
+      longTerm: toJson(data.longTerm),
       transitionProbability: data.transitionProbability,
       transitionDirection: data.transitionDirection,
-      leadingIndicators:
-        data.leadingIndicators as unknown as Prisma.InputJsonValue,
+      leadingIndicators: toJson(data.leadingIndicators),
     },
   });
 }
@@ -314,18 +327,26 @@ export async function getLatestMultiHorizonRegime(region: string = "US"): Promis
 
   if (!latest) return null;
 
-  // Prisma automatically handles Json type conversion
+  // Prisma's `Json` columns are decoded to JsonValue; funnel them through
+  // a single typed boundary helper.
+  const current = fromJson<MarketContextSnapshot>(latest.current);
+  const shortTerm = fromJson<MarketContextSnapshot>(latest.shortTerm);
+  const mediumTerm = fromJson<MarketContextSnapshot>(latest.mediumTerm);
+  const longTerm = fromJson<MarketContextSnapshot>(latest.longTerm);
+
+  if (!current || !shortTerm || !mediumTerm || !longTerm) return null;
+
   return {
-    current: latest.current as unknown as MarketContextSnapshot,
-    shortTerm: latest.shortTerm as unknown as MarketContextSnapshot,
-    mediumTerm: latest.mediumTerm as unknown as MarketContextSnapshot,
-    longTerm: latest.longTerm as unknown as MarketContextSnapshot,
+    current,
+    shortTerm,
+    mediumTerm,
+    longTerm,
     transitionProbability: latest.transitionProbability,
     transitionDirection: latest.transitionDirection as
       | "RISK_ON"
       | "RISK_OFF"
       | "STABLE",
-    leadingIndicators: (latest.leadingIndicators as unknown as string[]) || [],
+    leadingIndicators: fromJson<string[]>(latest.leadingIndicators) ?? [],
   };
 }
 

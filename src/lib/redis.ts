@@ -5,7 +5,11 @@ import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "redis" });
 
-type RedisLike = Pick<Redis, "get" | "set" | "setex" | "del" | "scan" | "pipeline" | "hget" | "hgetall" | "hset" | "hdel" | "hincrby" | "expire" | "evalsha" | "incr">;
+type RedisLike =
+  & Pick<Redis, "get" | "set" | "setex" | "del" | "scan" | "pipeline" | "hget" | "hgetall" | "hset" | "hdel" | "hincrby" | "expire" | "evalsha" | "incr">
+  // `info` is exposed by the ioredis-compatible adapter but not typed on the Upstash REST client.
+  // Declared optional so callers must null-check before invoking.
+  & { info?: () => Promise<string> };
 
 const globalForRedis = global as unknown as { redis: RedisLike | undefined };
 
@@ -224,10 +228,10 @@ export async function redisSetNX(key: string, ttlSeconds: number): Promise<boole
  */
 export async function redisInfo(): Promise<Record<string, string> | null> {
   try {
-    if (typeof (redis as unknown as { info?: () => Promise<string> }).info !== "function") {
+    if (typeof redis.info !== "function") {
       return null;
     }
-    const info = await (redis as unknown as { info: () => Promise<string> }).info();
+    const info = await redis.info();
     const lines = info.split("\r\n");
     const infoMap: Record<string, string> = {};
     for (const line of lines) {
