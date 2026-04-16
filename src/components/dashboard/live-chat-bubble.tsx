@@ -3,6 +3,11 @@
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import { MessageCircle } from "lucide-react";
+import { useUser } from "@/lib/clerk-shim";
+
+import { usePlan } from "@/hooks/use-plan";
+import { LiveChatStarterNudge } from "./live-chat-starter-nudge";
+
 const LiveChatWidget = dynamic(
   () => import("./live-chat-widget").then((mod) => mod.LiveChatWidget),
   {
@@ -15,9 +20,42 @@ const LiveChatWidget = dynamic(
   },
 );
 
+function isLocalDevHost() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  const hostname = window.location.hostname;
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname.endsWith(".localhost");
+}
+
 export function LiveChatBubble() {
+  const { plan, isLoading } = usePlan();
+  const { user, isLoaded: userLoaded } = useUser();
   const [isOpen, setIsOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="fixed bottom-6 right-4 z-50 sm:right-6">
+        <button
+          aria-label="Loading support chat"
+          disabled
+          className="group relative flex h-16 w-16 items-center justify-center rounded-full border border-amber-300/30 bg-white text-amber-400 opacity-80 shadow-[0_16px_48px_rgba(245,158,11,0.12)] transition-all dark:border-amber-300/22 dark:bg-[#0b1322] dark:text-amber-200 dark:shadow-[0_16px_48px_rgba(0,0,0,0.42)]"
+        >
+          <MessageCircle className="h-7 w-7 animate-pulse" />
+        </button>
+      </div>
+    );
+  }
+
+  if (!isLocalDevHost() && (!userLoaded || !user)) return null;
+
+  const isPaidUser = plan === "PRO" || plan === "ELITE" || plan === "ENTERPRISE";
+
+  if (!isPaidUser) {
+    return <LiveChatStarterNudge />;
+  }
 
   if (isOpen) {
     return (
