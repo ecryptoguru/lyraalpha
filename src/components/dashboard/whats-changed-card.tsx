@@ -64,7 +64,10 @@ export function WhatsChangedCard() {
           setSummary(data.summary);
         }
       })
-      .catch((e) => console.warn("Failed to fetch what's changed:", e))
+      .catch(() => {
+        // Silent failure — the card simply stays in its empty / loading state.
+        // This is a secondary surface on the dashboard; a toast would be overkill.
+      })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [fetchParams?.fetch, fetchParams?.since]);

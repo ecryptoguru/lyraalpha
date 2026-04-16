@@ -66,9 +66,6 @@ interface AssetCompareResult {
   } | null;
   performance?: Record<string, number | null>;
   valuation?: {
-    peRatio: number | null;
-    priceToBook: number | null;
-    roe: number | null;
     marketCap: number | null;
   };
   sector?: string | null;
@@ -272,7 +269,7 @@ export default function ComparePage() {
       
       if (assets.length >= 2 && smartAutorun) {
         const symbolList = assets.map((r: AssetCompareResult) => r.symbol).join(", ");
-        const autoQuery = `Compare ${symbolList}: Which offers the best risk-adjusted returns and regime alignment? Provide an executive brief.`;
+        const autoQuery = `Compare ${symbolList}: Which crypto offers the best risk-adjusted returns and regime alignment? Provide an executive brief.`;
         setTimeout(() => {
           void streamLyra(autoQuery, assets);
         }, 300);
@@ -352,7 +349,7 @@ export default function ComparePage() {
       <PageHeader
         icon={<GitCompare className="h-5 w-5" />}
         title="Compare"
-        eyebrow="Compare up to 3 assets"
+        eyebrow="Compare up to 3 crypto assets"
         chips={
           <>
             {inputSymbols.length > 0
@@ -376,7 +373,7 @@ export default function ComparePage() {
         <EliteGate
           feature="discovery_feed"
           plan={plan}
-          teaser="Compare up to 3 assets side-by-side with full score breakdowns, factor alignment and credit pricing of 5 for the first asset plus 3 for each additional asset."
+          teaser="Compare up to 3 crypto assets side-by-side with full score breakdowns, factor alignment and credit pricing of 5 for the first asset plus 3 for each additional asset."
         >
           <div />
         </EliteGate>
@@ -385,7 +382,7 @@ export default function ComparePage() {
           {/* Symbol Input */}
           <div className="rounded-4xl border border-white/10 bg-card/70 p-5 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl space-y-3">
             <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
-              Add up to 3 assets to compare · 5 credits for the first asset + 3 credits per additional asset
+              Add up to 3 crypto assets to compare · 5 credits for the first asset + 3 credits per additional asset
             </p>
             <div className="flex flex-wrap gap-2">
               {inputSymbols.map((sym, i) => (
@@ -407,7 +404,7 @@ export default function ComparePage() {
                   onSelect={addSymbol}
                   region={region}
                   global={true}
-                  placeholder={region === "IN" ? "Search BTC, Bitcoin, ETH" : "Search BTC, Bitcoin, ETH"}
+                  placeholder="Search BTC, ETH, SOL, BNB"
                   className="w-72 max-w-full"
                 />
               )}
@@ -752,7 +749,7 @@ export default function ComparePage() {
             <div className="flex flex-col items-center justify-center py-20 gap-4 text-muted-foreground">
               <GitCompare className="h-12 w-12 opacity-20" />
               <p className="text-sm font-bold">Add at least 2 symbols to compare</p>
-              <p className="text-xs opacity-60">Try BTC-USD, ETH-USD, SOL-USD or BNB-USD, XRP-USD</p>
+              <p className="text-xs opacity-60">Try BTC, ETH, SOL or BNB, XRP, ADA</p>
             </div>
           )}
         </>

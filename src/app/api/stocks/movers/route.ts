@@ -51,18 +51,22 @@ export async function GET(req: NextRequest) {
       return response;
     }
 
+    // Crypto assets are global (region: null) — include them alongside the requested region.
+    const regionFilter = { OR: [{ region }, { region: null }] };
+    const moverSelect = { symbol: true, name: true, price: true, changePercent: true, type: true } as const;
+
     const [gainers, losers] = await Promise.all([
       prisma.asset.findMany({
-        where: { region, changePercent: { gt: 0 }, price: { gt: 0 } },
+        where: { ...regionFilter, changePercent: { gt: 0 }, price: { gt: 0 } },
         take: 5,
         orderBy: { changePercent: "desc" },
-        select: { symbol: true, name: true, price: true, changePercent: true, type: true },
+        select: moverSelect,
       }),
       prisma.asset.findMany({
-        where: { region, changePercent: { lt: 0 }, price: { gt: 0 } },
+        where: { ...regionFilter, changePercent: { lt: 0 }, price: { gt: 0 } },
         take: 5,
         orderBy: { changePercent: "asc" },
-        select: { symbol: true, name: true, price: true, changePercent: true, type: true },
+        select: moverSelect,
       }),
     ]);
 
@@ -78,6 +82,6 @@ export async function GET(req: NextRequest) {
     return response;
   } catch (error) {
     logger.error({ err: sanitizeError(error) }, "Movers API failed");
-    return NextResponse.json({ topGainers: [], topLosers: [] });
+    return apiError("Failed to fetch movers", 500);
   }
 }

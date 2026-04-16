@@ -39,9 +39,9 @@ export async function GET(req: NextRequest) {
       return apiError(`Compare supports a maximum of ${MAX_COMPARE_ASSETS} assets.`, 400);
     }
 
-    const assets = await Promise.all(
-      symbols.map((sym) => AssetService.getAssetBySymbol(sym))
-    );
+    // Single DB round-trip for all symbols instead of N sequential cache/DB hits.
+    const assetMap = await AssetService.getAssetsBySymbols(symbols);
+    const assets = symbols.map((sym) => assetMap.get(sym) ?? null);
 
     const accessibleAssets = assets.filter(
       (asset): asset is NonNullable<typeof asset> => Boolean(asset)
@@ -108,10 +108,7 @@ export async function GET(req: NextRequest) {
           "1Y": perf["1Y"] ?? null,
         },
         valuation: {
-          peRatio: meta.trailingPE as number | null ?? null,
-          priceToBook: meta.priceToBook as number | null ?? null,
-          roe: meta.returnOnEquity as number | null ?? null,
-          marketCap: meta.marketCap as number | null ?? null,
+          marketCap: asset.marketCap ?? (meta.marketCap as number | null) ?? null,
         },
         sector: asset.sector,
         industry: asset.industry,

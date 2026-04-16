@@ -60,23 +60,11 @@ export interface AssetAnalyticsResponse {
   }[];
   technicalMetrics: {
     marketCap: number | null;
-    peRatio: number | null;
     volume?: number | null;
     avgVolume?: number | null;
-    dividendYield: number | null;
-    industryPe: number | null;
     oneYearChange?: number | null;
-    eps: number | null;
-    roe: number | null;
-    roce: number | null;
     fiftyTwoWeekHigh: number | null;
     fiftyTwoWeekLow: number | null;
-    pegRatio: number | null;
-    priceToBook: number | null;
-    shortRatio: number | null;
-    nav: number | null;
-    yield: number | null;
-    morningstarRating: string | null;
     category: string | null;
     openInterest: number | null;
     distanceFrom52WHigh: number | null;

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { getFriendlyAssetName } from "@/lib/format-utils";
 import useSWR from "swr";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 interface RegimeAlert {
   id: string;
@@ -49,7 +49,10 @@ export function RegimeAlertBell() {
         : prev,
       false,
     );
-    fetch("/api/user/notifications", { method: "PATCH" }).catch((e) => console.warn("Failed to mark notification read:", e));
+    // Fire-and-forget: UI already marked notifications as read optimistically.
+    // If the server call fails, the next refresh will reconcile state naturally
+    // — no need to surface an error toast for a low-stakes background sync.
+    fetch("/api/user/notifications", { method: "PATCH" }).catch(() => {});
   };
 
   const getIcon = (type: RegimeAlert["type"]) => {

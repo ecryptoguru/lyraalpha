@@ -6,7 +6,7 @@ import { GitBranch, ShieldAlert, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRegion } from "@/lib/context/RegionContext";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 type CorrelationPayload = {
   region: "US" | "IN";
@@ -83,7 +83,7 @@ export function CorrelationStressCard({ className }: { className?: string }) {
     return (
       <div
         className={cn(
-          "rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl backdrop-blur-2xl p-4 md:p-5",
+          "rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl p-4 md:p-5",
           className,
         )}
       >
@@ -114,7 +114,7 @@ export function CorrelationStressCard({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl backdrop-blur-2xl p-4 md:p-5",
+        "rounded-2xl border border-white/5 bg-card/60 shadow-xl backdrop-blur-2xl p-4 md:p-5",
         className,
       )}
     >

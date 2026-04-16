@@ -7,11 +7,17 @@ const globalForPrisma = global as unknown as {
   directPrisma: PrismaClient;
 };
 
-// Supabase/Supavisor recommendation for serverless: PRISMA_POOL_MAX=2 per function instance.
-// Each Vercel serverless invocation is isolated — at 50 concurrent requests that's 100 connections
-// total, well within Supabase's limits. Higher values risk exhausting the connection pool.
+// Supabase/Supavisor recommendation for serverless: a small pool per function instance.
+// Each Vercel serverless invocation is isolated — at 50 concurrent requests × pool_max
+// connections you should stay well within Supabase's pooler ceiling.
+//
+// Default of 3 (up from 2) matches the fan-out pattern of our hottest route — the asset
+// analytics endpoint now issues 4 parallel Prisma calls per request, and a 2-connection
+// pool bottlenecks it to serial Redis-style queueing. Increase only after confirming
+// the new value against the Supabase dashboard (Usage → Pooler connections).
+//
 // Direct connection (DIRECT_URL, port 5432) is for migrations/scripts only — keep low.
-const POOL_MAX = Number(process.env.PRISMA_POOL_MAX) || 2;
+const POOL_MAX = Number(process.env.PRISMA_POOL_MAX) || 3;
 const DIRECT_POOL_MAX = Number(process.env.PRISMA_DIRECT_POOL_MAX) || 3;
 
 // Supabase uses a self-signed TLS cert on its connection pooler (port 6543) and direct

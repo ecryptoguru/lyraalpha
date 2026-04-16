@@ -791,7 +791,7 @@ export default function StressTestPage() {
           {/* Symbol Input */}
           <div className="bg-card/60 backdrop-blur-2xl border border-white/10 shadow-xl rounded-3xl p-5 space-y-3">
             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">
-              Add assets to test (up to 3) · 5 credits for the first asset + 3 credits per additional asset
+              Add crypto assets to test (up to 3) · 5 credits for the first asset + 3 credits per additional asset
             </p>
             <div className="flex flex-wrap gap-2">
               {symbols.map((sym) => (
@@ -810,7 +810,7 @@ export default function StressTestPage() {
                   onSelect={addSymbol}
                   region={activeRegion}
                   global={true}
-                  placeholder={activeRegion === "IN" ? "Search BTC, Bitcoin, ETH" : "Search BTC, Bitcoin, ETH"}
+                  placeholder="Search BTC, ETH, SOL, BNB"
                   className="w-[312px] max-w-full"
                 />
               )}
@@ -850,7 +850,7 @@ export default function StressTestPage() {
                 </div>
                 {proxyCount > 0 && (
                   <span className="text-[9px] text-amber-400/80 font-bold">
-                    Proxy replay uses {activeRegion === "IN" ? "BTC-USD / ETH-USD / XRP-USD" : "BTC-USD / ETH-USD / SOL-USD"} historical paths scaled by asset beta
+                    Proxy replay uses BTC / ETH / SOL historical drawdown paths scaled by asset beta
                   </span>
                 )}
               </div>
@@ -1081,7 +1081,7 @@ export default function StressTestPage() {
               <Shield className="h-12 w-12 opacity-20" />
               <p className="text-sm font-bold">Add assets and select a scenario to begin</p>
               <p className="text-xs opacity-50 text-center max-w-xs">
-                Each scenario uses historically accurate {activeRegion === "IN" ? "BTC-USD / ETH-USD" : "BTC-USD / ETH-USD"} drawdown paths replayed through your asset&apos;s beta
+                Each scenario uses historically accurate BTC / ETH drawdown paths replayed through your asset&apos;s beta
               </p>
             </div>
           )}

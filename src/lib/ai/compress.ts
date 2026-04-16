@@ -4,7 +4,30 @@ import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { getCache, setCache } from "@/lib/redis";
 import { logFireAndForgetError } from "@/lib/fire-and-forget";
+import { INJECTION_PATTERNS } from "./guardrails";
 import { createHash } from "crypto";
+
+/**
+ * Drop any compressed-output line that matches a prompt-injection pattern.
+ * Defence-in-depth: compression inputs are already scanned upstream, but nano
+ * could hallucinate a jailbreak-shaped line that then propagates into the main
+ * LLM call. Scanning here ensures the cached compressed blob is safe to replay.
+ */
+function filterInjectionLines(text: string): { filtered: string; droppedLines: number } {
+  if (!text) return { filtered: text, droppedLines: 0 };
+  let dropped = 0;
+  const kept = text.split("\n").filter((line) => {
+    const normalized = line.normalize("NFKC");
+    for (const p of INJECTION_PATTERNS) {
+      if (p.test(normalized)) {
+        dropped += 1;
+        return false;
+      }
+    }
+    return true;
+  });
+  return { filtered: kept.join("\n"), droppedLines: dropped };
+}
 
 const logger = createLogger({ service: "context-compress" });
 
@@ -52,7 +75,14 @@ export async function compressKnowledgeContext(rawContext: string, maxTokens: nu
     for await (const chunk of stream.textStream) {
       chunks.push(chunk);
     }
-    const compressed = chunks.join("");
+    const rawCompressed = chunks.join("");
+    // AUDIT-6: Scan the nano output against INJECTION_PATTERNS before caching or returning.
+    // Inputs are already sanitized upstream, but nano could hallucinate a jailbreak-shaped
+    // line that would otherwise flow into the main LLM call and persist in the Redis cache.
+    const { filtered: compressed, droppedLines } = filterInjectionLines(rawCompressed);
+    if (droppedLines > 0) {
+      logger.warn({ droppedLines, originalLen: rawContext.length }, "Compression output had injection-pattern lines dropped");
+    }
     if (compressed && compressed.length < rawContext.length) {
       // Calculate token savings using consistent char-to-token ratio (0.72 words/token, ~4 chars/word)
       const rawTokens = Math.ceil(rawContext.length / 4);

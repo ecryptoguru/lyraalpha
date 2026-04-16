@@ -5,7 +5,7 @@ import type { PlanTier } from "@/lib/ai/config";
 import { usePlanContext } from "@/lib/context/plan-context";
 import { normalizePlanTier } from "@/lib/utils/plan";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 interface UsePlanReturn {
   plan: PlanTier;

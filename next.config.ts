@@ -150,7 +150,12 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
+    // ORDER MATTERS: Next.js applies every matching rule in array order and the
+    // LAST rule to set a given header key wins. General rules must come FIRST
+    // so that specific rules (e.g. cacheable share-card / market endpoints) can
+    // override the default `no-store` later in the list.
     return [
+      // 1. Site-wide security headers + safe CDN default.
       {
         source: "/(.*)",
         headers: [
@@ -158,15 +163,8 @@ const nextConfig: NextConfig = {
           { key: "CDN-Cache-Control", value: "no-store" },
         ],
       },
-      {
-        source: "/api/share/card",
-        headers: [
-          ...securityHeaders,
-          { key: "Content-Type", value: "image/png" },
-          { key: "Cache-Control", value: "public, max-age=3600, stale-while-revalidate=86400" },
-          { key: "CDN-Cache-Control", value: "public, max-age=3600, stale-while-revalidate=86400" },
-        ],
-      },
+      // 2. Default for every `/api/*` handler: never cache user-scoped data.
+      //    Specific `/api/...` rules below override this for cacheable endpoints.
       {
         source: "/api/(.*)",
         headers: [
@@ -175,21 +173,43 @@ const nextConfig: NextConfig = {
           { key: "CDN-Cache-Control", value: "no-store" },
         ],
       },
-      {
-        source: "/api/market/(breadth|correlation-stress|volatility-structure|regime-multi-horizon|factor-rotation)",
-        headers: [
-          ...securityHeaders,
-          { key: "Cache-Control", value: "public, s-maxage=3600, stale-while-revalidate=3600" },
-          { key: "CDN-Cache-Control", value: "public, s-maxage=3600, stale-while-revalidate=3600" },
-        ],
-      },
+      // 3. Dashboard SSR pages — force no-store (user-scoped HTML).
       {
         source: "/dashboard(.*)",
         headers: [
+          ...securityHeaders,
           { key: "Cache-Control", value: "no-store, no-cache, must-revalidate" },
           { key: "CDN-Cache-Control", value: "no-store" },
         ],
       },
+      // 4. Cacheable API endpoints — MUST appear after the `/api/(.*)` default.
+      {
+        source: "/api/share/card",
+        headers: [
+          { key: "Content-Type", value: "image/png" },
+          { key: "Cache-Control", value: "public, max-age=3600, stale-while-revalidate=86400" },
+          { key: "CDN-Cache-Control", value: "public, max-age=3600, stale-while-revalidate=86400" },
+        ],
+      },
+      {
+        source: "/api/market/:metric(breadth|correlation-stress|volatility-structure|regime-multi-horizon|factor-rotation)",
+        headers: [
+          { key: "Cache-Control", value: "public, s-maxage=3600, stale-while-revalidate=3600" },
+          { key: "CDN-Cache-Control", value: "public, s-maxage=3600, stale-while-revalidate=3600" },
+        ],
+      },
+      // Discovery search — query-string-cached 5 min. Safe to share across users because
+      // the response only depends on `q`, `region`, `global` query params.
+      {
+        source: "/api/discovery/search",
+        headers: [
+          { key: "Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=60" },
+          { key: "CDN-Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=60" },
+        ],
+      },
+      // NOTE: `/api/stocks/*` routes set their own `Cache-Control` per-response
+      //       (e.g. `history` returns `private, no-store` on cached Redis hits).
+      //       Not adding a blanket rule here so those route-level intents survive.
     ];
   },
   poweredByHeader: false,

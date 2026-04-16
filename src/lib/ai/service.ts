@@ -4,7 +4,7 @@ import { AI_CONFIG, getSharedAISdkClient, getTierConfig, HISTORY_CAPS, getGpt54D
 import { resolveGptDeployment } from "./orchestration";
 import { getUserPlan, normalizePlanTier } from "@/lib/middleware/plan-gate";
 import { BUILD_LYRA_REFERENCE_EXAMPLE, BUILD_LYRA_STATIC_PROMPT, PROMPT_VERSION } from "./prompts/system";
-import { validateInput } from "./guardrails";
+import { validateInput, SafetyViolationError, UsageLimitError } from "./guardrails";
 import { scrubPII } from "./pii-scrub";
 import { LyraContext } from "@/lib/engines/types";
 // currentUser removed — user creation now handled by Clerk webhook (src/app/api/webhooks/clerk/route.ts)
@@ -373,7 +373,7 @@ export async function generateLyraStream(
     const { isValid, reason } = validateInput(msgContent);
     if (!isValid) {
       logger.warn({ reason, role: msg.role }, "Guardrail violation in conversation history");
-      throw new Error(reason || "Safety Violation");
+      throw new SafetyViolationError(reason || "Safety Violation");
     }
   }
 
@@ -582,7 +582,17 @@ export async function generateLyraStream(
       const used = await getDailyTokensUsed(userId, userPlan);
       if (used >= cap) {
         logger.warn({ userId, userPlan, used, cap }, "Daily token cap exceeded");
-        throw new Error(`Daily usage limit reached for your plan. Your quota resets at midnight UTC. Upgrade to increase your limit.`);
+        // Midnight-UTC reset timestamp so the route layer can render a friendly
+        // "resets in Xh Ym" countdown + `Retry-After` header instead of a generic 500.
+        const now = new Date();
+        const resetAt = new Date(Date.UTC(
+          now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0,
+        )).toISOString();
+        throw new UsageLimitError(
+          "Daily usage limit reached for your plan. Your quota resets at midnight UTC. Upgrade to increase your limit.",
+          "daily_tokens",
+          resetAt,
+        );
       }
     }
   }
@@ -596,7 +606,10 @@ export async function generateLyraStream(
     const { success, remaining } = await consumeCredits(userId, creditCost, costDescriptor);
     if (!success) {
       logger.warn({ userId, creditCost, remaining }, "Insufficient credits");
-      throw new Error(`Insufficient credits. You have ${remaining} credits. Upgrade or purchase more credits to continue.`);
+      throw new UsageLimitError(
+        `Insufficient credits. You have ${remaining} credits. Upgrade or purchase more credits to continue.`,
+        "credits",
+      );
     }
     remainingCredits = remaining;
     logger.debug({ creditCost, remaining }, "Credits consumed");
@@ -1494,7 +1507,7 @@ logRetrievalMetric({
         });
 
         // OBS-1: Record non-fallback completion and check daily cost ceiling alert
-        recordFallbackResult(false).catch((e) => logFireAndForgetError(e, "fallback-result"));
+        recordFallbackResult(false, effectiveDeployment).catch((e) => logFireAndForgetError(e, "fallback-result"));
         alertIfDailyCostExceeded(costBreakdown.totalCost).catch((e) => logFireAndForgetError(e, "daily-cost-alert"));
 
         storeConversationLog(
@@ -1551,81 +1564,154 @@ logRetrievalMetric({
 
     logger.error(
       { err: sanitizeError(primaryError), userId, tier, primaryDeployment: effectiveDeployment },
-      "Primary model generation failed — attempting nano fallback",
+      "Primary model generation failed — attempting graceful fallback",
     );
 
-    // COST-1: Degrade to nano rather than returning a 500 to the user.
-    // Only skip fallback when nano WAS the primary model (avoids recursive retry).
+    // COST-1 + QUALITY: Graceful degradation ladder.
+    //
+    //   lyra-full  → lyra-mini → lyra-nano
+    //   lyra-mini  → lyra-nano
+    //   lyra-nano  → re-throw (no recursive retry)
+    //
+    // The middle-tier step (full → mini) protects paid tiers from a jarring quality
+    // cliff when only the `full` deployment is degraded. Each step uses a tighter
+    // latency budget than the previous since later attempts compound wall-clock time.
     const nanoDeployment = resolveGptDeployment("lyra-nano");
+    const miniDeployment = resolveGptDeployment("lyra-mini");
     if (effectiveDeployment === nanoDeployment) {
       throw primaryError; // nano already failed — nothing left to try
     }
 
-    // B1-FIX: Separate abort controller for fallback — shorter timeout since nano is faster
-    const fallbackAbortController = new AbortController();
-    const fallbackAbortTimer = setTimeout(() => {
-      logger.warn({ tier }, "Nano fallback latency exceeded — aborting");
-      fallbackAbortController.abort();
-    }, 15_000); // 15s — nano should be much faster than primary
-
-    try {
-      const fallbackModel = getSharedAISdkClient().responses(nanoDeployment);
-      const fallbackResult = streamText({
-        model: fallbackModel,
-        messages: finalMessages,
-        system: staticPrompt,
-        maxOutputTokens: 1200,
-        abortSignal: fallbackAbortController.signal,
-        providerOptions: {
-          openai: {
-            textVerbosity: "high" as const,
-            promptCacheKey: "lyra-static-v1",
-          },
-        },
-        onFinish: async ({ text, usage }) => {
-          // B1-FIX: Clear fallback abort timer once stream finishes naturally
-          clearTimeout(fallbackAbortTimer);
-          const durationMs = timer.end();
-          logModelRouting({
-            model: nanoDeployment,
-            tier,
-            tokens: usage.totalTokens ?? ((usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)),
-            wasFallback: true,
-            duration: timer.endFormatted(),
-            durationMs,
-          });
-          recordFallbackResult(true).catch((e) => logFireAndForgetError(e, "fallback-result"));
-
-          // Track latency budget violations for fallback as well
-          const latencyBudgetMs = tierConfig.latencyBudgetMs;
-          const exceededBudget = durationMs > latencyBudgetMs;
-          recordLatencyViolation(exceededBudget, durationMs, tier).catch((e) => logFireAndForgetError(e, "latency-violation"));
-
-          incrementDailyTokens(userId, usage.totalTokens ?? 0).catch((e) => logFireAndForgetError(e, "daily-tokens"));
-          if (text) {
-            storeConversationLog(userId, query, text, nanoDeployment,
-              { tokensUsed: usage.totalTokens ?? 0 }, tier, messages.length, true,
-            ).catch((e: unknown) => logger.error({ err: sanitizeError(e) }, "Fallback log failed"));
-
-            // R5-FIX: Validate fallback output — previously skipped, creating a blind spot
-            // in the validation failure rate alert. Fallback responses are lower quality
-            // and more likely to fail section checks, so monitoring them is critical.
-            const fallbackValidation = validateOutput(
-              text, tier, userPlan,
-              tier === "SIMPLE" && isEduCacheable,
-              responseMode,
-              resolvedAssetType,
-            );
-            logValidationResult(fallbackValidation);
-          }
-        },
+    // Build the fallback chain for this request. Skip `mini` if primary already was `mini`
+    // (avoids hitting the same failing deployment twice), and always end at `nano`.
+    type FallbackStep = {
+      role: Gpt54Role;
+      deployment: string;
+      timeoutMs: number;
+      maxOutputTokens: number;
+    };
+    const fallbackChain: FallbackStep[] = [];
+    const isFromFull = effectiveDeployment !== miniDeployment && effectiveDeployment !== nanoDeployment;
+    if (isFromFull) {
+      // Middle step: mini. Keep a generous output budget since paid-tier users expect
+      // institutional-grade responses even on the degraded path.
+      fallbackChain.push({
+        role: "lyra-mini",
+        deployment: miniDeployment,
+        timeoutMs: 20_000,
+        maxOutputTokens: Math.min(getTargetOutputTokens(tierConfig, tier as QueryComplexity), 1800),
       });
-      logger.warn({ userId, tier, fallbackDeployment: nanoDeployment }, "Nano fallback stream initiated");
-      return { result: fallbackResult, sources: finalSources, remainingCredits, contextTruncated: true };
-    } catch (fallbackError: unknown) {
-      logger.error({ err: sanitizeError(fallbackError), userId }, "Nano fallback also failed");
-      throw primaryError; // surface the original error
     }
+    // Final step: nano. Short timeout, conservative token budget.
+    fallbackChain.push({
+      role: "lyra-nano",
+      deployment: nanoDeployment,
+      timeoutMs: 15_000,
+      maxOutputTokens: 1200,
+    });
+
+    let lastError: unknown = primaryError;
+    for (let i = 0; i < fallbackChain.length; i++) {
+      const step = fallbackChain[i];
+      const isLastStep = i === fallbackChain.length - 1;
+      // B1-FIX: Separate abort controller per fallback step
+      const fallbackAbortController = new AbortController();
+      const fallbackAbortTimer = setTimeout(() => {
+        logger.warn({ tier, fallbackDeployment: step.deployment }, "Fallback step latency exceeded — aborting");
+        fallbackAbortController.abort();
+      }, step.timeoutMs);
+
+      try {
+        const fallbackModel = getSharedAISdkClient().responses(step.deployment);
+        const fallbackResult = streamText({
+          model: fallbackModel,
+          messages: finalMessages,
+          system: staticPrompt,
+          maxOutputTokens: step.maxOutputTokens,
+          abortSignal: fallbackAbortController.signal,
+          providerOptions: {
+            openai: {
+              textVerbosity: "high" as const,
+              promptCacheKey: "lyra-static-v1",
+            },
+          },
+          onFinish: async ({ text, usage }) => {
+            // B1-FIX: Clear fallback abort timer once stream finishes naturally
+            clearTimeout(fallbackAbortTimer);
+            const durationMs = timer.end();
+            logModelRouting({
+              model: step.deployment,
+              tier,
+              tokens: usage.totalTokens ?? ((usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)),
+              wasFallback: true,
+              duration: timer.endFormatted(),
+              durationMs,
+            });
+            recordFallbackResult(true, step.deployment).catch((e) => logFireAndForgetError(e, "fallback-result"));
+
+            // Track latency budget violations for fallback as well
+            const latencyBudgetMs = tierConfig.latencyBudgetMs;
+            const exceededBudget = durationMs > latencyBudgetMs;
+            recordLatencyViolation(exceededBudget, durationMs, tier).catch((e) => logFireAndForgetError(e, "latency-violation"));
+
+            incrementDailyTokens(userId, usage.totalTokens ?? 0).catch((e) => logFireAndForgetError(e, "daily-tokens"));
+
+            // AUDIT-4: Fold fallback-path USD spend into the daily cost alert. Previously
+            // only the primary path reported to alertIfDailyCostExceeded, so a degraded
+            // primary that pushed majority traffic onto the fallback ladder was invisible
+            // to the cost alert even as spend accumulated.
+            try {
+              const fbInput = Number.isFinite(usage.inputTokens) ? usage.inputTokens ?? 0 : 0;
+              const fbOutput = Number.isFinite(usage.outputTokens) ? usage.outputTokens ?? 0 : 0;
+              const fbCachedInput = Number.isFinite((usage as Record<string, unknown>).cachedInputTokens)
+                ? ((usage as Record<string, unknown>).cachedInputTokens as number)
+                : 0;
+              const fbCost = calculateLLMCost({
+                model: step.deployment,
+                inputTokens: fbInput,
+                outputTokens: fbOutput,
+                cachedInputTokens: fbCachedInput,
+              });
+              alertIfDailyCostExceeded(fbCost.totalCost).catch((e) => logFireAndForgetError(e, "fallback-cost-alert"));
+            } catch (e) {
+              logFireAndForgetError(e, "fallback-cost-calc");
+            }
+
+            if (text) {
+              storeConversationLog(userId, query, text, step.deployment,
+                { tokensUsed: usage.totalTokens ?? 0 }, tier, messages.length, true,
+              ).catch((e: unknown) => logger.error({ err: sanitizeError(e) }, "Fallback log failed"));
+
+              // R5-FIX: Validate fallback output — previously skipped, creating a blind spot
+              // in the validation failure rate alert. Fallback responses are lower quality
+              // and more likely to fail section checks, so monitoring them is critical.
+              const fallbackValidation = validateOutput(
+                text, tier, userPlan,
+                tier === "SIMPLE" && isEduCacheable,
+                responseMode,
+                resolvedAssetType,
+              );
+              logValidationResult(fallbackValidation);
+            }
+          },
+        });
+        logger.warn({ userId, tier, fallbackDeployment: step.deployment, stepIndex: i }, "Fallback stream initiated");
+        return { result: fallbackResult, sources: finalSources, remainingCredits, contextTruncated: true };
+      } catch (fallbackError: unknown) {
+        clearTimeout(fallbackAbortTimer);
+        lastError = fallbackError;
+        logger.error(
+          { err: sanitizeError(fallbackError), userId, fallbackDeployment: step.deployment, stepIndex: i },
+          isLastStep ? "Final fallback step failed" : "Fallback step failed — trying next",
+        );
+        // Continue to the next step unless this was the last one.
+        if (isLastStep) {
+          throw primaryError; // surface the original error
+        }
+      }
+    }
+    // Should be unreachable — the loop either returns or throws — but satisfy control flow.
+    throw lastError;
   }
 
   } catch (outerError: unknown) {

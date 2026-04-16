@@ -7,8 +7,8 @@ const plans = [
   {
     name: "Starter",
     price: "Free",
-    description: "For individuals exploring AI-powered market intelligence.",
-    features: ["5 Lyra queries/day", "Basic asset analytics", "Market regime signals", "1 watchlist"],
+    description: "For individuals exploring AI-powered crypto intelligence.",
+    features: ["5 Lyra queries/day", "Basic crypto analytics", "Market regime signals", "1 watchlist"],
     cta: "Get Started Free",
     href: "/sign-up",
     highlight: false,
@@ -17,8 +17,8 @@ const plans = [
     name: "Pro",
     price: "$29",
     period: "/month",
-    description: "For serious investors who want deeper signals and more queries.",
-    features: ["100 Lyra queries/day", "Full asset analytics", "Portfolio Intel", "Sector Pulse", "5 watchlists", "Priority support"],
+    description: "For serious crypto investors who want deeper signals and more queries.",
+    features: ["100 Lyra queries/day", "Full crypto analytics", "Portfolio Intel", "Sector Pulse", "5 watchlists", "Priority support"],
     cta: "Start Pro Trial",
     href: "/sign-up",
     highlight: true,
@@ -27,7 +27,7 @@ const plans = [
     name: "Elite",
     price: "$79",
     period: "/month",
-    description: "For professional investors who need the full analytical stack.",
+    description: "For professional crypto investors who need the full analytical stack.",
     features: ["Unlimited Lyra queries", "All Pro features", "Multibagger Radar", "Elite commands", "Compare Assets", "API access (coming soon)", "Dedicated support"],
     cta: "Go Elite",
     href: "/sign-up",
@@ -48,7 +48,7 @@ export default function PricingPage() {
               <span className="text-amber-400">Pay less than one bad trade.</span>
             </h1>
             <p className="mt-5 text-base text-white/55 max-w-2xl mx-auto">
-              Every plan includes AI-powered market intelligence, deterministic engine signals, and no hallucinated metrics.
+              Every plan includes AI-powered crypto intelligence, deterministic engine signals, and no hallucinated metrics.
             </p>
           </div>
 

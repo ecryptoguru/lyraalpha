@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import type { AnalogSearchResult, HistoricalAnalogResult } from "@/lib/engines/historical-analog";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 const REGIME_COLOR: Record<string, string> = {
   RISK_ON: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
@@ -209,7 +209,7 @@ export function HistoricalAnalogCard({ region = "US" }: { region?: string }) {
 
   return (
     <TooltipProvider>
-      <div className="rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl backdrop-blur-2xl p-5 space-y-4">
+      <div className="rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl p-5 space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-0.5">

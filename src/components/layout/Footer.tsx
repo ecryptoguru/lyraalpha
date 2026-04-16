@@ -43,10 +43,10 @@ export function Footer() {
                 LyraAlpha AI
               </p>
               <h3 className="mt-3 text-xl font-bold tracking-[-0.05em] text-white sm:text-2xl">
-                Built for disciplined investors.
+                Built for disciplined crypto investors.
               </h3>
               <p className="mt-3 text-sm leading-7 text-white/54">
-                Market intelligence for investors who want clearer reasoning, cleaner tools and more signal per decision.
+                Crypto intelligence for investors who want clearer reasoning, cleaner tools and more signal per decision.
               </p>
               <div className="mt-5 flex flex-wrap gap-2.5">
                 {[Twitter, Linkedin, Github].map((Icon, index) => (
@@ -104,10 +104,10 @@ export function Footer() {
             {/* Newsletter */}
             <div className="rounded-3xl border border-amber-300/16 bg-amber-300/6 p-5">
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-100/70">
-                Market intelligence list
+                Crypto intelligence list
               </p>
               <p className="mt-3 text-sm leading-6 text-white/58">
-                Get launch updates, product notes and occasional market insight.
+                Get launch updates, product notes and occasional crypto market insight.
               </p>
               <FooterNewsletterForm />
             </div>

@@ -85,7 +85,8 @@ describe("getAllPosts", () => {
     const dbRow = makeDbRow({
       slug: "db-post-2026",
       title: "DB Post",
-      publishedAt: new Date("2026-03-25T00:00:00Z"),
+      // Must be newer than every static post for the newest-first assertion to hold
+      publishedAt: new Date("2027-01-15T00:00:00Z"),
     });
     (prisma.blogPost.findMany as ReturnType<typeof vi.fn>).mockResolvedValueOnce([dbRow]);
 
@@ -94,7 +95,7 @@ describe("getAllPosts", () => {
     // DB post should sort newest-first
     expect(posts[0].slug).toBe("db-post-2026");
     // date is formatted as ISO date string
-    expect(posts[0].date).toBe("2026-03-25");
+    expect(posts[0].date).toBe("2027-01-15");
   });
 
   it("falls back to static posts when DB throws", async () => {

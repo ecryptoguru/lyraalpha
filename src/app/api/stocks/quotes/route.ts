@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getQuotes } from "@/lib/market-data";
+import { prisma } from "@/lib/prisma";
 import { rateLimitMarketData } from "@/lib/rate-limit";
 import { auth } from "@/lib/auth";
 import { getClientIp } from "@/lib/rate-limit/utils";
@@ -7,9 +7,9 @@ import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { StocksQuotesSchema, parseSearchParams } from "@/lib/schemas";
 
-const logger = createLogger({ service: "stocks-api" });
+const logger = createLogger({ service: "stocks-quotes" });
 
-export const dynamic = "force-dynamic"; // Ensure not cached statically
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
@@ -21,34 +21,30 @@ export async function GET(req: NextRequest) {
         { status: 400 },
       );
     }
-    const { symbols } = parsed.data;
+    // Schema already validated and transformed to string[] of safe symbols
+    const symbolList = parsed.data.symbols.map((s) => s.toUpperCase());
 
-    // Rate limiting
     const { userId } = await auth();
-
     const identifier = userId || getClientIp(req);
-    const rateLimitError = await rateLimitMarketData(
-      identifier,
-      userId || undefined,
-    );
-    if (rateLimitError) {
-      return rateLimitError;
+    const rateLimitError = await rateLimitMarketData(identifier, userId || undefined);
+    if (rateLimitError) return rateLimitError;
+
+    const assets = await prisma.asset.findMany({
+      where: { symbol: { in: symbolList } },
+      select: { symbol: true, price: true, changePercent: true, name: true, type: true },
+    });
+
+    const data: Record<string, { symbol: string; price: number | null; changePercent: number | null; name: string | null; type: string }> = {};
+    for (const a of assets) {
+      data[a.symbol] = a;
     }
 
-    const data = await getQuotes(symbols);
-
     const response = NextResponse.json(data);
-    // Cache for 1 minute with 30s stale-while-revalidate
-    response.headers.set(
-      "Cache-Control",
-      "private, no-store",
-    );
+    // Quotes freshness is critical — no store; Redis owns any caching above this.
+    response.headers.set("Cache-Control", "private, no-store");
     return response;
   } catch (error) {
     logger.error({ err: sanitizeError(error) }, "Quotes API failed");
-    return NextResponse.json(
-      { error: "Failed to fetch quotes" },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Failed to fetch quotes" }, { status: 500 });
   }
 }

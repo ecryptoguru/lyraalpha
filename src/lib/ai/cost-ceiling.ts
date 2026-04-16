@@ -15,6 +15,7 @@
 
 import { createLogger } from "@/lib/logger";
 import { truncateAtSentence } from "./context-builder";
+import { alertIfCostEstimationDrift } from "./alerting";
 
 const logger = createLogger({ service: "cost-ceiling" });
 
@@ -95,12 +96,13 @@ export async function recordEstimationAccuracy(
 
     if (total >= 50) { // Only log after sufficient samples
       const avgErrorPct = errorSum / total;
-      if (avgErrorPct > 20) { // Alert if average error exceeds 20%
-        logger.warn(
-          { event: "cost_estimation_accuracy", avgErrorPct: avgErrorPct.toFixed(1), total, tier },
-          "Cost ceiling estimation accuracy degraded",
-        );
-      }
+      // Previously log-only — now also delivers a webhook alert via the shared alerting
+      // layer so this signal is visible in the same channel as RAG / fallback / latency
+      // alerts. `alertIfCostEstimationDrift` handles its own threshold + cooldown, so
+      // calling on every sample is safe and intentional.
+      alertIfCostEstimationDrift(avgErrorPct, total, tier).catch(() => {
+        // Fire-and-forget — alerting must never block the main request path.
+      });
     }
   } catch {
     // Redis failure — never block

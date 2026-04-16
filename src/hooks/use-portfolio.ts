@@ -2,10 +2,13 @@
 
 import useSWR, { useSWRConfig } from "swr";
 import { useCallback } from "react";
+import { toast } from "sonner";
 import type { Region } from "@/lib/context/RegionContext";
 import type { BrokerNormalizationResult } from "@/lib/types/broker";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
+
+type PortfolioDetailResponse = { success: boolean; data: { portfolio: PortfolioDetail } };
 
 export interface PortfolioSummary {
   id: string;
@@ -95,61 +98,169 @@ export function usePortfolio(portfolioId: string | null) {
   };
 }
 
+/**
+ * Build an optimistic PortfolioHolding row with server-unknown fields set to null.
+ * The UI renders these as placeholders (e.g. "—" for price) until the server
+ * response arrives and revalidation replaces this row with the authoritative one.
+ */
+function buildOptimisticHolding(
+  portfolioId: string,
+  body: { symbol: string; quantity: number; avgPrice: number },
+  currency: string,
+): PortfolioHolding {
+  return {
+    id: `pending-${Date.now()}-${body.symbol}`,
+    portfolioId,
+    assetId: "",
+    symbol: body.symbol,
+    quantity: body.quantity,
+    avgPrice: body.avgPrice,
+    currency,
+    addedAt: new Date().toISOString(),
+    asset: {
+      symbol: body.symbol,
+      name: body.symbol,
+      type: "CRYPTO",
+      price: null,
+      changePercent: null,
+      currency,
+      region: null,
+      sector: null,
+      avgTrendScore: null,
+      avgMomentumScore: null,
+      avgVolatilityScore: null,
+      avgLiquidityScore: null,
+      avgTrustScore: null,
+      avgSentimentScore: null,
+      compatibilityScore: null,
+      compatibilityLabel: null,
+    },
+  };
+}
+
 export function usePortfolioMutations() {
   const { mutate } = useSWRConfig();
 
   const createPortfolio = useCallback(
     async (body: { name: string; description?: string; currency: string; region: string }) => {
-      const res = await fetch("/api/portfolio", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { error?: string }).error ?? "Failed to create portfolio");
-      await mutate((key: string) => typeof key === "string" && key.startsWith("/api/portfolio"));
-      return data;
+      try {
+        const res = await fetch("/api/portfolio", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error((data as { error?: string }).error ?? "Failed to create portfolio");
+        await mutate((key: unknown) => typeof key === "string" && key.startsWith("/api/portfolio"));
+        return data;
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to create portfolio");
+        throw err;
+      }
     },
     [mutate],
   );
 
   const deletePortfolio = useCallback(
     async (portfolioId: string) => {
-      const res = await fetch(`/api/portfolio/${portfolioId}`, { method: "DELETE" });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Failed to delete portfolio");
+      try {
+        const res = await fetch(`/api/portfolio/${portfolioId}`, { method: "DELETE" });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error ?? "Failed to delete portfolio");
+        }
+        await mutate((key: unknown) => typeof key === "string" && key.startsWith("/api/portfolio"));
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to delete portfolio");
+        throw err;
       }
-      await mutate((key: string) => typeof key === "string" && key.startsWith("/api/portfolio"));
     },
     [mutate],
   );
 
   const addHolding = useCallback(
     async (portfolioId: string, body: { symbol: string; quantity: number; avgPrice: number }) => {
-      const res = await fetch(`/api/portfolio/${portfolioId}/holdings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { error?: string }).error ?? "Failed to add holding");
-      await mutate(`/api/portfolio/${portfolioId}`);
-      return data;
+      const key = `/api/portfolio/${portfolioId}`;
+      // Optimistic insert — user sees the row instantly. Server response replaces
+      // the pending row with the authoritative one (including asset snapshot +
+      // updated health scores) via the final revalidation.
+      try {
+        const result = await mutate<PortfolioDetailResponse>(
+          key,
+          async (current) => {
+            const res = await fetch(`${key}/holdings`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error((data as { error?: string }).error ?? "Failed to add holding");
+            return current; // placeholder; we revalidate below to pull the real detail
+          },
+          {
+            optimisticData: (current) => {
+              if (!current?.data?.portfolio) return current as PortfolioDetailResponse;
+              const optimistic = buildOptimisticHolding(portfolioId, body, current.data.portfolio.currency);
+              return {
+                ...current,
+                data: {
+                  portfolio: {
+                    ...current.data.portfolio,
+                    holdings: [...current.data.portfolio.holdings, optimistic],
+                  },
+                },
+              };
+            },
+            rollbackOnError: true,
+            revalidate: true,
+            populateCache: false,
+          },
+        );
+        return result;
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to add holding");
+        throw err;
+      }
     },
     [mutate],
   );
 
   const removeHolding = useCallback(
     async (portfolioId: string, holdingId: string) => {
-      const res = await fetch(`/api/portfolio/${portfolioId}/holdings/${holdingId}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error ?? "Failed to remove holding");
+      const key = `/api/portfolio/${portfolioId}`;
+      try {
+        await mutate<PortfolioDetailResponse>(
+          key,
+          async (current) => {
+            const res = await fetch(`${key}/holdings/${holdingId}`, { method: "DELETE" });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              throw new Error(err.error ?? "Failed to remove holding");
+            }
+            return current;
+          },
+          {
+            optimisticData: (current) => {
+              if (!current?.data?.portfolio) return current as PortfolioDetailResponse;
+              return {
+                ...current,
+                data: {
+                  portfolio: {
+                    ...current.data.portfolio,
+                    holdings: current.data.portfolio.holdings.filter((h) => h.id !== holdingId),
+                  },
+                },
+              };
+            },
+            rollbackOnError: true,
+            revalidate: true,
+            populateCache: false,
+          },
+        );
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to remove holding");
+        throw err;
       }
-      await mutate(`/api/portfolio/${portfolioId}`);
     },
     [mutate],
   );
@@ -160,15 +271,51 @@ export function usePortfolioMutations() {
       holdingId: string,
       body: { quantity?: number; avgPrice?: number },
     ) => {
-      const res = await fetch(`/api/portfolio/${portfolioId}/holdings/${holdingId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { error?: string }).error ?? "Failed to update holding");
-      await mutate(`/api/portfolio/${portfolioId}`);
-      return data;
+      const key = `/api/portfolio/${portfolioId}`;
+      try {
+        const result = await mutate<PortfolioDetailResponse>(
+          key,
+          async (current) => {
+            const res = await fetch(`${key}/holdings/${holdingId}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error((data as { error?: string }).error ?? "Failed to update holding");
+            return current;
+          },
+          {
+            optimisticData: (current) => {
+              if (!current?.data?.portfolio) return current as PortfolioDetailResponse;
+              return {
+                ...current,
+                data: {
+                  portfolio: {
+                    ...current.data.portfolio,
+                    holdings: current.data.portfolio.holdings.map((h) =>
+                      h.id === holdingId
+                        ? {
+                            ...h,
+                            quantity: body.quantity ?? h.quantity,
+                            avgPrice: body.avgPrice ?? h.avgPrice,
+                          }
+                        : h,
+                    ),
+                  },
+                },
+              };
+            },
+            rollbackOnError: true,
+            revalidate: true,
+            populateCache: false,
+          },
+        );
+        return result;
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to update holding");
+        throw err;
+      }
     },
     [mutate],
   );
@@ -179,18 +326,27 @@ export function usePortfolioMutations() {
       snapshot: BrokerNormalizationResult,
       replaceExisting = false,
     ) => {
-      const res = await fetch(`/api/portfolio/${portfolioId}/broker/import`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ snapshot, replaceExisting }),
-      });
+      try {
+        const res = await fetch(`/api/portfolio/${portfolioId}/broker/import`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ snapshot, replaceExisting }),
+        });
 
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error((data as { error?: string }).error ?? "Failed to import broker snapshot");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error((data as { error?: string }).error ?? "Failed to import broker snapshot");
 
-      await mutate(`/api/portfolio/${portfolioId}`);
-      await mutate(`/api/portfolio/${portfolioId}/health`);
-      return data;
+        // Broker import triggers server-side recomputation of health + holdings —
+        // revalidate both in parallel so the UI refreshes in a single render pass.
+        await Promise.all([
+          mutate(`/api/portfolio/${portfolioId}`),
+          mutate(`/api/portfolio/${portfolioId}/health`),
+        ]);
+        return data;
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Failed to import broker snapshot");
+        throw err;
+      }
     },
     [mutate],
   );

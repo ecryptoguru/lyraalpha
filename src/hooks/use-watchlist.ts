@@ -1,5 +1,7 @@
 import useSWR from "swr";
 import { useCallback, useMemo } from "react";
+import { toast } from "sonner";
+import { fetcher } from "@/lib/swr-fetcher";
 
 interface WatchlistAsset {
   symbol: string;
@@ -26,15 +28,6 @@ export interface WatchlistItem {
   asset: WatchlistAsset;
 }
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.error || "Failed to load watchlist");
-  }
-  return data;
-};
-
 export function useWatchlist(region?: string) {
   const url = region ? `/api/user/watchlist?region=${region}` : "/api/user/watchlist";
 
@@ -54,38 +47,91 @@ export function useWatchlist(region?: string) {
 
   const addToWatchlist = useCallback(
     async (symbol: string, assetRegion?: string) => {
+      // Optimistic update — flip the star instantly, rollback on failure.
+      // SWR mutate with { revalidate: false } suppresses the background refetch while
+      // the request is in flight; we revalidate at the end to pick up server-computed
+      // fields (e.g. asset snapshot).
+      const optimisticItem: WatchlistItem = {
+        id: `pending-${symbol}`,
+        userId: "",
+        assetId: "",
+        symbol,
+        region: assetRegion ?? "US",
+        note: null,
+        createdAt: new Date().toISOString(),
+        asset: {
+          symbol,
+          name: symbol,
+          type: "CRYPTO",
+          price: null,
+          changePercent: null,
+          currency: null,
+          region: assetRegion ?? null,
+          marketCap: null,
+          sector: null,
+          scoreDynamics: null,
+          compatibilityScore: null,
+        },
+      };
+      const rollbackSnapshot = data;
+      void mutate(
+        (current) =>
+          current
+            ? { items: [...current.items, optimisticItem] }
+            : { items: [optimisticItem] },
+        { revalidate: false },
+      );
       try {
         const res = await fetch("/api/user/watchlist", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ symbol, region: assetRegion }),
         });
-        if (!res.ok) throw new Error("Failed to add");
-        await mutate();
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.error || "Failed to add to watchlist");
+        }
+        await mutate(); // pull the real row (with server-assigned id + asset snapshot)
         return true;
-      } catch {
+      } catch (err) {
+        // Rollback on failure so the UI stays consistent with the server state.
+        void mutate(rollbackSnapshot, { revalidate: true });
+        toast.error(err instanceof Error ? err.message : "Failed to add to watchlist");
         return false;
       }
     },
-    [mutate],
+    [mutate, data],
   );
 
   const removeFromWatchlist = useCallback(
     async (symbol: string) => {
+      const rollbackSnapshot = data;
+      void mutate(
+        (current) =>
+          current
+            ? { items: current.items.filter((i) => i.symbol !== symbol) }
+            : { items: [] },
+        { revalidate: false },
+      );
       try {
         const res = await fetch("/api/user/watchlist", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ symbol }),
         });
-        if (!res.ok) throw new Error("Failed to remove");
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.error || "Failed to remove from watchlist");
+        }
         await mutate();
         return true;
-      } catch {
+      } catch (err) {
+        void mutate(rollbackSnapshot, { revalidate: true });
+        toast.error(err instanceof Error ? err.message : "Failed to remove from watchlist");
         return false;
       }
     },
-    [mutate],
+    [mutate, data],
   );
 
   const toggleWatchlist = useCallback(

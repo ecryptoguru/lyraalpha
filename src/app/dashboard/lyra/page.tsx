@@ -108,7 +108,7 @@ const LYRA_FALLBACK_PROMPTS: LyraPromptQuestion[] = [
   },
 ];
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 function BriefingStalenessBadge({ region }: { region: string }) {
   const { data } = useSWR<{ briefing?: { generatedAt?: string } }>(
@@ -339,7 +339,14 @@ function LyraPageInner() {
   const { plan } = usePlan();
   const isElite = plan === "ELITE" || plan === "ENTERPRISE";
 
-  const { data: regimeData } = useSWR(`/api/market/regime-multi-horizon?region=${region}`, fetcher, {
+  const { data: regimeData } = useSWR<{
+    current?: {
+      regime?: { label?: string };
+      risk?: { label?: string };
+      volatility?: { label?: string };
+      breadth?: { label?: string };
+    };
+  }>(`/api/market/regime-multi-horizon?region=${region}`, fetcher, {
     refreshInterval: hasMessages ? 0 : 300000,
     revalidateOnFocus: false,
     dedupingInterval: 120000,

@@ -75,22 +75,39 @@ export class ErrorBoundary extends Component<
         return this.props.fallback;
       }
 
-      // Default fallback - will be replaced by ErrorFallback component
+      // Default fallback — production hides the raw error message because it can
+      // leak internal endpoint names, SQL fragments, or stack context that the
+      // user shouldn't see. Development keeps the message + stack behind an
+      // expandable <details> for fast triage.
+      const isDev = process.env.NODE_ENV !== "production";
       return (
         <div className="flex items-center justify-center min-h-[400px] p-8">
-          <div className="text-center">
+          <div className="max-w-md w-full text-center">
             <h2 className="text-2xl font-bold text-red-600 mb-4">
               Something went wrong
             </h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {this.state.error.message || "An unexpected error occurred"}
+              We couldn&apos;t render this part of the page. Try again, or reload if
+              the issue persists.
             </p>
             <button
+              type="button"
               onClick={this.resetError}
               className="px-4 py-2 bg-amber-600 text-white rounded hover:bg-amber-700"
             >
               Try Again
             </button>
+            {isDev && (
+              <details className="mt-6 text-left text-xs text-gray-500 dark:text-gray-400">
+                <summary className="cursor-pointer select-none font-semibold">
+                  Developer details
+                </summary>
+                <pre className="mt-2 overflow-auto rounded bg-gray-100 p-3 text-gray-700 dark:bg-gray-900 dark:text-gray-300">
+                  {this.state.error.message}
+                  {this.state.error.stack ? `\n\n${this.state.error.stack}` : ""}
+                </pre>
+              </details>
+            )}
           </div>
         </div>
       );

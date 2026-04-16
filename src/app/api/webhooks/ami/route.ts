@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { verifyAmiSignature } from "@/lib/blog/webhook-verify";
+import { sanitizeBlogContent, sanitizeBlogInlineText } from "@/lib/blog/content-sanitize";
 import { sendBrevoEmail } from "@/lib/email/brevo";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
@@ -120,16 +121,34 @@ async function handlePublished(payload: BlogPostPayload) {
 
   const finalSlug = await resolveSlug(data.slug, data.contentId);
 
+  // Defence-in-depth sanitization (HMAC already authenticates the source). Strips
+  // raw <script>/<iframe>/on* handlers + javascript: URLs and drops lines that
+  // match known prompt-injection patterns — the blog content is later surfaced
+  // to the LLM (RAG) so a published post can otherwise become an attack vector.
+  const sanitized = sanitizeBlogContent(data.content);
+  if (sanitized.strippedTagCount > 0 || sanitized.injectionLinesDropped > 0) {
+    logger.warn(
+      {
+        slug: finalSlug,
+        contentId: data.contentId,
+        sourceAgent: data.sourceAgent,
+        strippedTags: sanitized.strippedTagCount,
+        injectionLinesDropped: sanitized.injectionLinesDropped,
+      },
+      "AMI webhook content sanitized on ingest",
+    );
+  }
+
   const blogFields = {
     slug: finalSlug,
-    title: data.title,
-    description: data.description,
-    content: data.content,
-    author: data.author,
+    title: sanitizeBlogInlineText(data.title),
+    description: sanitizeBlogInlineText(data.description),
+    content: sanitized.content,
+    author: sanitizeBlogInlineText(data.author),
     category: data.category,
     tags: data.tags,
     keywords: data.keywords,
-    metaDescription: data.metaDescription,
+    metaDescription: data.metaDescription ? sanitizeBlogInlineText(data.metaDescription) : data.metaDescription,
     heroImageUrl: data.heroImageUrl,
     featured: data.featured,
     status: "PUBLISHED" as const,

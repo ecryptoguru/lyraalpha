@@ -16,7 +16,7 @@ import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { getFriendlySymbol } from "@/lib/format-utils";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 interface SearchAsset {
   symbol: string;

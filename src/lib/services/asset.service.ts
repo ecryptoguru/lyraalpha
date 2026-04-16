@@ -120,6 +120,23 @@ export class AssetService {
     );
   }
 
+  /**
+   * Batch variant of getAssetBySymbol. One DB round-trip for N symbols.
+   * Returns a map keyed by uppercase symbol; missing symbols are absent from the map.
+   * Prefer this over Promise.all(symbols.map(getAssetBySymbol)) for N>1.
+   */
+  static async getAssetsBySymbols(symbols: string[]): Promise<Map<string, AnalyticsAsset>> {
+    const upperSymbols = Array.from(new Set(symbols.map((s) => s.toUpperCase())));
+    if (upperSymbols.length === 0) return new Map();
+    const rows = await prisma.asset.findMany({
+      where: { symbol: { in: upperSymbols } },
+      select: analyticsAssetSelect,
+    });
+    const map = new Map<string, AnalyticsAsset>();
+    for (const row of rows) map.set(row.symbol, row);
+    return map;
+  }
+
   static getAnalyticsCacheKey(symbol: string): string {
     return `asset:analytics:${symbol.toUpperCase()}`;
   }

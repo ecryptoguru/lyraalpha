@@ -789,9 +789,6 @@ export class MarketSyncService {
 
         // Factors & Correlations
         const factorProfile = calculateFactorProfile(symbol, history, {
-          peRatio: (assetMeta.forwardPe as number) ?? null,
-          industryPe: (assetMeta.industryPe as number) ?? null,
-          roe: (assetMeta.roe as number) ?? null,
           oneYearChange: asset.oneYearChange,
         });
         const correlations = calculateCorrelations(history, benchmarkHistoriesForCorrelation);

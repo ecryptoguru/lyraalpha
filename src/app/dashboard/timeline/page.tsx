@@ -23,16 +23,7 @@ import { useRegion } from "@/lib/context/RegionContext";
 import { SectionErrorBoundary } from "@/components/error-boundary";
 import { PageHeader, StatChip } from "@/components/dashboard/page-header";
 import { getFriendlySymbol } from "@/lib/format-utils";
-
-const fetcher = async (url: string) => {
-  const response = await fetch(url);
-  if (!response.ok) {
-    const payload = await response.json().catch(() => null);
-    const message = payload?.error || `Request failed with status ${response.status}`;
-    throw new Error(message);
-  }
-  return response.json();
-};
+import { fetcher } from "@/lib/swr-fetcher";
 
 interface IntelligenceEvent {
   id: string;

@@ -5,7 +5,7 @@ import { rateLimitChat } from "@/lib/rate-limit";
 import { getGlobalNotes } from "@/lib/ai/memory";
 import { buildMyraVoiceInstructions } from "@/lib/support/voice-prompt";
 import { bm25SearchKnowledge } from "@/lib/support/ai-responder";
-import { checkPromptInjection } from "@/lib/ai/guardrails";
+import { checkPromptInjection, INJECTION_PATTERNS } from "@/lib/ai/guardrails";
 import { apiError } from "@/lib/api-response";
 import { createLogger } from "@/lib/logger";
 
@@ -143,12 +143,29 @@ export async function GET(request: Request) {
       }
     }
 
+    // AUDIT-5: Re-scan stored globalNotes at READ time against current INJECTION_PATTERNS.
+    // Notes are already filtered on write in `distillSessionNotes`, but a new pattern added
+    // to the guardrail set after storage would not retroactively filter older rows. Drop
+    // any line that matches before embedding into the voice system prompt.
+    let safeGlobalNotes: string | undefined;
+    if (globalNotes) {
+      const lines = globalNotes.split("\n").filter((line) => {
+        const normalized = line.normalize("NFKC");
+        return !INJECTION_PATTERNS.some((p) => p.test(normalized));
+      });
+      const dropped = globalNotes.split("\n").length - lines.length;
+      if (dropped > 0) {
+        logger.warn({ userId, dropped }, "Voice session: filtered injection-matching memory lines at render");
+      }
+      safeGlobalNotes = lines.join("\n") || undefined;
+    }
+
     const instructions = buildMyraVoiceInstructions(
       {
         plan: userPlan,
         credits: userRecord?.credits ?? undefined,
         currentPage: safePageParam,
-        globalNotes: globalNotes || undefined,
+        globalNotes: safeGlobalNotes,
       },
       kbDocs,
     );

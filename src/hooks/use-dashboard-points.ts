@@ -1,13 +1,9 @@
 import useSWR from "swr";
 import { useMounted } from "@/hooks/use-mounted";
+import { fetcher as sharedFetcher } from "@/lib/swr-fetcher";
 
-const fetcher = async (url: string) => {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error("Failed to fetch dashboard points");
-  }
-  return response.json() as Promise<DashboardPointsResponse>;
-};
+const fetcher = (url: string): Promise<DashboardPointsResponse> =>
+  sharedFetcher<DashboardPointsResponse>(url);
 
 export interface DashboardPointsRedemption {
   type: string;

@@ -41,22 +41,22 @@ const formatUppercase = (segment: string) => decodeURIComponent(segment).toUpper
 
 export const DASHBOARD_ROUTES: DashboardRouteMeta[] = [
   // ── Main nav (flat, ordered by usage frequency) ──────────────────────────
-  { key: "dashboard",  title: "Wallet",            url: "/dashboard",             section: "Main" },
-  { key: "portfolio",  title: "Wallet Intel",      url: "/dashboard/portfolio",   section: "Main",     navOnly: true },
+  { key: "dashboard",  title: "Dashboard",        url: "/dashboard",             section: "Main" },
   { key: "lyra",       title: "Ask Lyra",          url: "/dashboard/lyra",        section: "Main",     navOnly: true },
-  { key: "compare",    title: "Compare",           url: "/dashboard/compare",     section: "Main",     navOnly: true },
-  { key: "stress-test", title: "Scenario Lab",     url: "/dashboard/stress-test", section: "Main",     navOnly: true },
+  { key: "macro",      title: "Research",          url: "/dashboard/macro",       section: "Main",     navOnly: true },
+  { key: "assets",     title: "Asset Intel",      url: "/dashboard/assets",      section: "Main",     navOnly: true, detailSegmentFormatter: formatUppercase },
+  { key: "portfolio",  title: "Portfolio Intel",   url: "/dashboard/portfolio",   section: "Main",     navOnly: true },
+  { key: "discovery",  title: "Multibagger Radar", url: "/dashboard/discovery",   section: "Main",     navOnly: true, detailSegmentFormatter: formatTitleWords },
+  { key: "sector-pulse", title: "Sector Pulse",     url: "/dashboard/sector-pulse", section: "Main",   navOnly: true },
+  { key: "compare",    title: "Compare Assets",    url: "/dashboard/compare",     section: "Main",     navOnly: true, eliteOnly: true },
+  { key: "timeline",   title: "Market Events",     url: "/dashboard/timeline",    section: "Main",     navOnly: true },
+  { key: "watchlist",  title: "Watchlist",         url: "/dashboard/watchlist",   section: "Main",     navOnly: true },
   // ── Settings (divider in sidebar) ────────────────────────────────────────
   { key: "settings",   title: "Settings",          url: "/dashboard/settings",    section: "Settings", navOnly: true },
+  { key: "learning",   title: "Learning Hub",      url: "/dashboard/learning",    section: "Settings", navOnly: true, detailSegmentFormatter: formatTitleWords },
 
   // ── Not in main nav (breadcrumb/redirect pages only) ─────────────────────
-  { key: "macro",            title: "Research",     url: "/dashboard/macro",            section: "Main" },
-  { key: "assets",           title: "Asset Intel",  url: "/dashboard/assets",           section: "Main", detailSegmentFormatter: formatUppercase },
-  { key: "discovery",        title: "Discovery",    url: "/dashboard/discovery",        section: "Main", detailSegmentFormatter: formatTitleWords },
-  { key: "sector-pulse",     title: "Sector Pulse", url: "/dashboard/sector-pulse",     section: "Main" },
-  { key: "timeline",         title: "Market Events", url: "/dashboard/timeline",        section: "Main" },
-  { key: "watchlist",        title: "Watchlist",    url: "/dashboard/watchlist",        section: "Main" },
-  { key: "learning",         title: "Learning Hub", url: "/dashboard/learning",         section: "Settings", detailSegmentFormatter: formatTitleWords },
+  { key: "stress-test",      title: "Shock Test",   url: "/dashboard/stress-test",      section: "Main",     eliteOnly: true },
   { key: "rewards",          title: "Credits & XP", url: "/dashboard/rewards",          section: "Settings" },
   { key: "admin",            title: "Admin",        url: "/admin",                      section: "Settings", adminOnly: true },
 ];

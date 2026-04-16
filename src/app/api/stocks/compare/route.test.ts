@@ -19,6 +19,7 @@ vi.mock("@/lib/middleware/plan-gate", () => ({
 vi.mock("@/lib/services/asset.service", () => ({
   AssetService: {
     getAssetBySymbol: vi.fn(),
+    getAssetsBySymbols: vi.fn(),
   },
 }));
 
@@ -36,6 +37,16 @@ import { consumeCredits } from "@/lib/services/credit.service";
 
 function makeRequest(symbols: string) {
   return new NextRequest(`http://localhost/api/stocks/compare?symbols=${symbols}`);
+}
+
+// Helper: mock AssetService.getAssetsBySymbols to return a Map built from ordered args.
+// `null` entries are skipped (route treats missing symbols as "Not found").
+function mockAssets(...assets: Array<{ symbol: string; [k: string]: unknown } | null>) {
+  const map = new Map<string, unknown>();
+  for (const asset of assets) {
+    if (asset) map.set(asset.symbol.toUpperCase(), asset);
+  }
+  vi.mocked(AssetService.getAssetsBySymbols).mockResolvedValueOnce(map as any);
 }
 
 function makeAsset(overrides: Record<string, unknown> = {}) {
@@ -58,7 +69,7 @@ function makeAsset(overrides: Record<string, unknown> = {}) {
     signalStrength: { score: 74, label: "STRONG", confidence: "HIGH" },
     factorAlignment: { score: 68, regimeFit: "GOOD", dominantFactor: "MOMENTUM" },
     performanceData: { returns: { "1D": 1.2, "1W": 3.4, "1M": -2.1, "3M": 8.7, "1Y": 22.3 } },
-    metadata: { trailingPE: 28.5, priceToBook: 45.2, returnOnEquity: 1.47, marketCap: "2.9T" },
+    metadata: { marketCap: "2.9T" },
     ...overrides,
   };
 }
@@ -100,9 +111,7 @@ describe("GET /api/stocks/compare", () => {
 
   it("allows ENTERPRISE plan", async () => {
     vi.mocked(getUserPlan).mockResolvedValue("ENTERPRISE" as any);
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD" }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD" }) as any);
+    mockAssets(makeAsset({ symbol: "BTC-USD" }), makeAsset({ symbol: "ETH-USD" }));
     const res = await GET(makeRequest("BTC-USD,ETH-USD"));
     expect(res.status).toBe(200);
   });
@@ -128,35 +137,30 @@ describe("GET /api/stocks/compare", () => {
     expect(res.status).toBe(400);
     const json = await res.json();
     expect(json.error).toBe("Compare supports a maximum of 3 assets.");
-    expect(AssetService.getAssetBySymbol).not.toHaveBeenCalled();
+    expect(AssetService.getAssetsBySymbols).not.toHaveBeenCalled();
   });
 
   it("normalises symbols to uppercase", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD" }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD" }) as any);
+    mockAssets(makeAsset({ symbol: "BTC-USD" }), makeAsset({ symbol: "ETH-USD" }));
     const res = await GET(makeRequest("btc-usd,eth-usd"));
     expect(res.status).toBe(200);
-    expect(AssetService.getAssetBySymbol).toHaveBeenCalledWith("BTC-USD");
-    expect(AssetService.getAssetBySymbol).toHaveBeenCalledWith("ETH-USD");
+    expect(AssetService.getAssetsBySymbols).toHaveBeenCalledWith(["BTC-USD", "ETH-USD"]);
   });
 
   it("trims whitespace from symbols", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD" }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD" }) as any);
+    mockAssets(makeAsset({ symbol: "BTC-USD" }), makeAsset({ symbol: "ETH-USD" }));
     const res = await GET(makeRequest(" BTC-USD , ETH-USD "));
     expect(res.status).toBe(200);
-    expect(AssetService.getAssetBySymbol).toHaveBeenCalledWith("BTC-USD");
-    expect(AssetService.getAssetBySymbol).toHaveBeenCalledWith("ETH-USD");
+    expect(AssetService.getAssetsBySymbols).toHaveBeenCalledWith(["BTC-USD", "ETH-USD"]);
   });
 
   // ── Response Shape ────────────────────────────────────────────────────────
 
   it("returns correct response shape for two valid assets", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD" }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD", avgTrendScore: 82, avgMomentumScore: 71 }) as any);
+    mockAssets(
+      makeAsset({ symbol: "BTC-USD" }),
+      makeAsset({ symbol: "ETH-USD", avgTrendScore: 82, avgMomentumScore: 71 }),
+    );
 
     const res = await GET(makeRequest("BTC-USD,ETH-USD"));
     expect(res.status).toBe(200);
@@ -180,13 +184,11 @@ describe("GET /api/stocks/compare", () => {
     expect(asset.signalStrength).toMatchObject({ score: 74, label: "STRONG", confidence: "HIGH" });
     expect(asset.factorAlignment).toMatchObject({ score: 68, regimeFit: "GOOD", dominantFactor: "MOMENTUM" });
     expect(asset.performance).toMatchObject({ "1D": 1.2, "1W": 3.4, "1M": -2.1, "3M": 8.7, "1Y": 22.3 });
-    expect(asset.valuation).toMatchObject({ peRatio: 28.5, priceToBook: 45.2, roe: 1.47, marketCap: "2.9T" });
+    expect(asset.valuation).toMatchObject({ marketCap: expect.anything() });
   });
 
   it("returns error entry for unknown symbol without crashing", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD" }) as any)
-      .mockResolvedValueOnce(null as any);
+    mockAssets(makeAsset({ symbol: "BTC-USD" }), null);
 
     const res = await GET(makeRequest("BTC-USD,FAKEXYZ"));
     expect(res.status).toBe(200);
@@ -197,9 +199,7 @@ describe("GET /api/stocks/compare", () => {
   });
 
   it("returns 402 with remaining credits when balance is insufficient", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD" }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD" }) as any);
+    mockAssets(makeAsset({ symbol: "BTC-USD" }), makeAsset({ symbol: "ETH-USD" }));
     vi.mocked(consumeCredits).mockResolvedValueOnce({ success: false, remaining: 1 } as any);
 
     const res = await GET(makeRequest("BTC-USD,ETH-USD"));
@@ -214,9 +214,7 @@ describe("GET /api/stocks/compare", () => {
   // ── Null / Missing Fields ─────────────────────────────────────────────────
 
   it("handles null signalStrength gracefully", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD", signalStrength: null }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD" }) as any);
+    mockAssets(makeAsset({ symbol: "BTC-USD", signalStrength: null }), makeAsset({ symbol: "ETH-USD" }));
 
     const res = await GET(makeRequest("BTC-USD,ETH-USD"));
     const json = await res.json();
@@ -225,9 +223,7 @@ describe("GET /api/stocks/compare", () => {
   });
 
   it("handles null factorAlignment gracefully", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD", factorAlignment: null }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD" }) as any);
+    mockAssets(makeAsset({ symbol: "BTC-USD", factorAlignment: null }), makeAsset({ symbol: "ETH-USD" }));
 
     const res = await GET(makeRequest("BTC-USD,ETH-USD"));
     const json = await res.json();
@@ -236,9 +232,7 @@ describe("GET /api/stocks/compare", () => {
   });
 
   it("handles null performanceData gracefully — all perf fields null", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD", performanceData: null }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD" }) as any);
+    mockAssets(makeAsset({ symbol: "BTC-USD", performanceData: null }), makeAsset({ symbol: "ETH-USD" }));
 
     const res = await GET(makeRequest("BTC-USD,ETH-USD"));
     const json = await res.json();
@@ -247,14 +241,12 @@ describe("GET /api/stocks/compare", () => {
   });
 
   it("handles null metadata gracefully — all valuation fields null", async () => {
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(makeAsset({ symbol: "BTC-USD", metadata: null }) as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD" }) as any);
+    mockAssets(makeAsset({ symbol: "BTC-USD", metadata: null }), makeAsset({ symbol: "ETH-USD" }));
 
     const res = await GET(makeRequest("BTC-USD,ETH-USD"));
     const json = await res.json();
     const asset = json.assets.find((a: any) => a.symbol === "BTC-USD");
-    expect(asset.valuation).toEqual({ peRatio: null, priceToBook: null, roe: null, marketCap: null });
+    expect(asset.valuation).toEqual({ marketCap: null });
   });
 
   // ── Score Accuracy ────────────────────────────────────────────────────────
@@ -270,9 +262,7 @@ describe("GET /api/stocks/compare", () => {
       avgTrustScore: 88,
       compatibilityScore: 62,
     });
-    vi.mocked(AssetService.getAssetBySymbol)
-      .mockResolvedValueOnce(mockAsset as any)
-      .mockResolvedValueOnce(makeAsset({ symbol: "ETH-USD" }) as any);
+    mockAssets(mockAsset, makeAsset({ symbol: "ETH-USD" }));
 
     const res = await GET(makeRequest("BTC-USD,ETH-USD"));
     const json = await res.json();
@@ -289,7 +279,7 @@ describe("GET /api/stocks/compare", () => {
   // ── Error Handling ────────────────────────────────────────────────────────
 
   it("returns 500 when AssetService throws", async () => {
-    vi.mocked(AssetService.getAssetBySymbol).mockRejectedValue(new Error("DB error"));
+    vi.mocked(AssetService.getAssetsBySymbols).mockRejectedValue(new Error("DB error"));
     const res = await GET(makeRequest("BTC-USD,ETH-USD"));
     expect(res.status).toBe(500);
     const json = await res.json();

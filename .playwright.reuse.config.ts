@@ -43,7 +43,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `sh -c 'SKIP_AUTH=true SKIP_RATE_LIMIT=true E2E_BYPASS=true npm run build && SKIP_AUTH=true SKIP_RATE_LIMIT=true E2E_BYPASS=true npm run start -- -p ${E2E_PORT}'`,
+    command: `sh -c 'SKIP_AUTH=true SKIP_RATE_LIMIT=true E2E_BYPASS=true LYRA_E2E_USER_PLAN=ELITE npm run build && SKIP_AUTH=true SKIP_RATE_LIMIT=true E2E_BYPASS=true LYRA_E2E_USER_PLAN=ELITE npm run start -- -p ${E2E_PORT}'`,
     url: E2E_BASE_URL,
     reuseExistingServer: true,
     timeout: 120 * 1000,
@@ -51,6 +51,7 @@ export default defineConfig({
       SKIP_AUTH: "true",
       SKIP_RATE_LIMIT: "true",
       E2E_BYPASS: "true",
+      LYRA_E2E_USER_PLAN: "ELITE",
     },
   },
 });

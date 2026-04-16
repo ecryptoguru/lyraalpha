@@ -11,6 +11,10 @@ import { DiscoveryFeedCard, type DiscoveryFeedItem } from "./discovery-feed-card
 import { formatRelativeTime } from "@/lib/format-relative-time";
 import { useRegion } from "@/lib/context/RegionContext";
 import type { DiscoveryFeedResponse } from "@/lib/services/discovery-feed.service";
+import { fetcher as sharedFetcher } from "@/lib/swr-fetcher";
+
+const fetcher = (url: string): Promise<DiscoveryFeedResponse> =>
+  sharedFetcher<DiscoveryFeedResponse>(url);
 
 const TYPE_LABEL: Record<string, string> = {
   CRYPTO: "Crypto",
@@ -42,13 +46,6 @@ function SignalClusterBanner({ items }: { items: DiscoveryFeedItem[] }) {
     </div>
   );
 }
-
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Discovery feed error: ${res.status}`);
-  return res.json() as Promise<DiscoveryFeedResponse>;
-};
-
 
 export function DiscoveryFeed({
   initialData,

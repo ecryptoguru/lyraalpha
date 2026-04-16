@@ -10,7 +10,7 @@ import { getClientIp } from "@/lib/rate-limit/utils";
 import { getUserPlan, canAccessRegion } from "@/lib/middleware/plan-gate";
 import { isRateLimitBypassEnabled } from "@/lib/runtime-env";
 
-const logger = createLogger({ service: "stocks-api" });
+const logger = createLogger({ service: "stocks-coverage" });
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +37,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const cacheKey = `coverage:v3:${regionParam}:${typeParam || "ALL"}:${query || ""}:${page}:${limit}:${plan}`;
+    // Cache key is plan-agnostic — gating happens at the route boundary above, payload is identical.
+    const cacheKey = `coverage:v4:${regionParam}:${typeParam || "ALL"}:${query || ""}:${page}:${limit}`;
 
     if (!fresh) {
       const cached = await getCache(cacheKey);
@@ -65,29 +66,30 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 1. Get the latest Market Regime
-    // 2. Fetch assets with Server-Side Filtering
-    // GOLD-MCX and SILVER-MCX are proper IN region assets (region="IN", currency="INR")
-    // US commodities remain region="US" — fully separate.
-    // Crypto assets are global (region: null) and should appear in all region views.
-    const whereInput: Prisma.AssetWhereInput = {
-      lastPriceUpdate: { not: null },
-      OR: [
-        { region: regionParam },
-        { region: null },
-      ],
+    // Fetch assets with server-side filtering.
+    // Crypto assets are global (region: null) and should appear in every region view.
+    // We use AND arrays so region and search filters compose without one overwriting the other.
+    const regionFilter: Prisma.AssetWhereInput = {
+      OR: [{ region: regionParam }, { region: null }],
     };
 
-    if (typeParam && typeParam !== "ALL") {
-      whereInput.type = typeParam as Prisma.EnumAssetTypeFilter;
+    const andClauses: Prisma.AssetWhereInput[] = [regionFilter];
+    if (query) {
+      andClauses.push({
+        OR: [
+          { symbol: { contains: query, mode: "insensitive" } },
+          { name: { contains: query, mode: "insensitive" } },
+        ],
+      });
     }
 
-    if (query) {
-      whereInput.OR = [
-        { symbol: { contains: query, mode: "insensitive" } },
-        { name: { contains: query, mode: "insensitive" } },
-      ];
-    }
+    const whereInput: Prisma.AssetWhereInput = {
+      lastPriceUpdate: { not: null },
+      AND: andClauses,
+      ...(typeParam && typeParam !== "ALL"
+        ? { type: typeParam as Prisma.EnumAssetTypeFilter }
+        : {}),
+    };
 
     // Columns shared across all asset types
     const baseSelect = {
@@ -117,31 +119,8 @@ export async function GET(req: NextRequest) {
       avgTrustScore: true,
     } as const;
 
-    // Equity-specific columns (always null for CRYPTO)
-    const equitySelect = {
-      peRatio: true,
-      avgVolume: true,
-      dividendYield: true,
-      industryPe: true,
-      roe: true,
-      roce: true,
-      eps: true,
-      pegRatio: true,
-      priceToBook: true,
-      shortRatio: true,
-      expenseRatio: true,
-      nav: true,
-      yield: true,
-      morningstarRating: true,
-      openInterest: true,
-      fundHouse: true,
-      schemeType: true,
-    } as const;
-
-    const isCryptoOnly = typeParam?.toUpperCase() === "CRYPTO";
-    const assetSelect = isCryptoOnly
-      ? baseSelect
-      : { ...baseSelect, ...equitySelect };
+    // Platform is crypto-only — no equity column branching needed
+    const assetSelect = baseSelect;
 
     const [latestRegimeForRegion, latestRegimeUS, dbAssets, totalCount] = await Promise.all([
       prisma.marketRegime.findFirst({
@@ -184,7 +163,7 @@ export async function GET(req: NextRequest) {
         logger.warn({ regimeId: latestRegime.state }, "Failed to parse regime context as JSON, falling back to defaults");
       }
     } else {
-      logger.info({ region: regionParam }, "No market regime found — returning default context");
+      logger.debug({ region: regionParam }, "No market regime found — returning default context");
     }
 
     const marketContext = {
@@ -197,24 +176,24 @@ export async function GET(req: NextRequest) {
     };
 
     // 4. Transform to expected UI format
-    const assets = dbAssets.map(asset => ({
+    const assets = dbAssets.map((asset) => ({
       ...asset,
       lastUpdated: asset.lastPriceUpdate,
       signals: {
-        trend: Math.round((asset.avgTrendScore as number) || 0),
-        momentum: Math.round((asset.avgMomentumScore as number) || 0),
-        volatility: Math.round((asset.avgVolatilityScore as number) || 0),
-        liquidity: Math.round((asset.avgLiquidityScore as number) || 0),
-        sentiment: Math.round((asset.avgSentimentScore as number) || 0),
-        trust: Math.round((asset.avgTrustScore as number) || 0)
+        trend: Math.round(asset.avgTrendScore ?? 0),
+        momentum: Math.round(asset.avgMomentumScore ?? 0),
+        volatility: Math.round(asset.avgVolatilityScore ?? 0),
+        liquidity: Math.round(asset.avgLiquidityScore ?? 0),
+        sentiment: Math.round(asset.avgSentimentScore ?? 0),
+        trust: Math.round(asset.avgTrustScore ?? 0),
       },
       compatibility: {
-        score: Math.round((asset.compatibilityScore as number) || 0),
-        label: (asset.compatibilityLabel || "Mixed Fit") as string
+        score: Math.round(asset.compatibilityScore ?? 0),
+        label: asset.compatibilityLabel ?? "Mixed Fit",
       },
       grouping: {
-        group: (asset.assetGroup || "Neutral / Defensive") as string
-      }
+        group: asset.assetGroup ?? "Neutral / Defensive",
+      },
     }));
 
     const hasMore = skip + limit < totalCount;

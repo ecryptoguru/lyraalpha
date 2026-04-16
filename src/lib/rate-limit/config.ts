@@ -47,6 +47,16 @@ const RATE_LIMIT_CONFIG = {
     ELITE:      { requests: 10,   window: "1h" as Duration },
     ENTERPRISE: { requests: 10,   window: "1h" as Duration },
   },
+  // Public Myra burst guard — layered on top of chatDailyBurst + chatMonthlyCap
+  // for unauthenticated `/api/support/public-chat` callers. Protects against
+  // IP-rotation-limited scrapers who stay under the daily cap but fire many
+  // messages per minute from the same IP.
+  publicChatBurst: {
+    STARTER:    { requests: 8,    window: "60s" as Duration },
+    PRO:        { requests: 8,    window: "60s" as Duration },
+    ELITE:      { requests: 8,    window: "60s" as Duration },
+    ENTERPRISE: { requests: 8,    window: "60s" as Duration },
+  },
 } as const satisfies Record<string, TierLimits>;
 
 export { RATE_LIMIT_CONFIG };
@@ -63,7 +73,7 @@ const RATE_LIMIT_ANALYTICS_ENABLED: Partial<Record<keyof typeof RATE_LIMIT_CONFI
   general: false,
 };
 
-const SLIDING_WINDOW_ENDPOINTS = new Set<keyof typeof RATE_LIMIT_CONFIG>(["chatDailyBurst", "chatMonthlyCap"]);
+const SLIDING_WINDOW_ENDPOINTS = new Set<keyof typeof RATE_LIMIT_CONFIG>(["chatDailyBurst", "chatMonthlyCap", "publicChatBurst"]);
 
 function buildLimiters(endpoint: keyof typeof RATE_LIMIT_CONFIG): TierRateLimiters {
   const tiers: PlanTier[] = ["STARTER", "PRO", "ELITE", "ENTERPRISE"];
@@ -93,3 +103,4 @@ export const discoveryRateLimiter = buildLimiters("discovery");
 export const marketDataRateLimiter = buildLimiters("marketdata");
 export const generalRateLimiter = buildLimiters("general");
 export const authBypassRateLimiter = buildLimiters("authBypass");
+export const publicChatBurstRateLimiter = buildLimiters("publicChatBurst");

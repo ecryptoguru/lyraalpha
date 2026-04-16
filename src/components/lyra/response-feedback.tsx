@@ -103,7 +103,11 @@ export function ResponseFeedback({
           setChangeCount(1); // already voted once — one change left
         }
       })
-      .catch((e) => console.warn("Failed to fetch existing vote:", e));
+      .catch(() => {
+        // Fire-and-forget: if the prior-vote fetch fails we treat the user as
+        // unvoted (default state), which is correct and safe. Surfacing a toast
+        // here would annoy users on every transient network hiccup.
+      });
   }, [answerId]);
 
   const canVote = changeCount < 2;

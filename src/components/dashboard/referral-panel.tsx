@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import useSWR from "swr";
+import { toast } from "sonner";
 import { Copy, Check, Users, Gift, Trophy } from "lucide-react";
 import { ShareInsightButton } from "@/components/dashboard/share-insight-button";
 import { buildReferralShareObject } from "@/lib/intelligence-share";
+import { fetcher } from "@/lib/swr-fetcher";
 
 interface ReferralData {
   referralCode: string;
@@ -17,25 +20,34 @@ interface ReferralData {
 }
 
 export function ReferralPanel() {
-  const [data, setData] = useState<ReferralData | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Previously this used a raw `useEffect + fetch` that swallowed errors into
+  // `console.warn` — silent failures + no dedup across dashboard mounts. SWR gives
+  // request dedup, focus-throttled revalidation, and a real error channel we can
+  // surface through the shared `toast` UI.
+  const { data, error, isLoading: loading } = useSWR<ReferralData>(
+    "/api/referral",
+    fetcher,
+    { revalidateOnFocus: false, dedupingInterval: 60_000 },
+  );
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    fetch("/api/referral")
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.error) setData(data);
-      })
-      .catch((e) => console.warn("Failed to fetch referral data:", e))
-      .finally(() => setLoading(false));
-  }, []);
+    if (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Couldn't load referral data",
+      );
+    }
+  }, [error]);
 
   const copyLink = async () => {
     if (!data?.referralLink) return;
-    await navigator.clipboard.writeText(data.referralLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(data.referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("Couldn't copy link — please copy manually");
+    }
   };
 
   const tierColors: Record<string, string> = {

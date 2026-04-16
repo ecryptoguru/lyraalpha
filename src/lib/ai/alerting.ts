@@ -22,6 +22,11 @@ const THRESHOLDS = {
   fallbackRateMitigationPct: Number(process.env.AI_ALERT_FALLBACK_RATE_MITIGATION_PCT ?? 15),
   // Latency budget violation: alert when % of requests exceeding latency budget exceeds threshold (15-min window)
   latencyViolationRatePct: Number(process.env.AI_ALERT_LATENCY_VIOLATION_PCT ?? 15),
+  // Cost-ceiling token estimator drift: avg |est-actual|/est as a percentage, measured
+  // over a 1h window. A sustained drift above this threshold means the char→token ratio
+  // is out of sync with the real tokenizer (e.g. after an Azure model upgrade) and the
+  // cost-ceiling guard is sizing contexts incorrectly. Fires webhook; not just log.
+  costEstimationDriftPct: Number(process.env.AI_ALERT_COST_ESTIMATION_DRIFT_PCT ?? 20),
 };
 
 // ─── Redis keys ───────────────────────────────────────────────────────────────
@@ -205,9 +210,26 @@ export async function recordValidationResult(passed: boolean): Promise<void> {
  *  Uses a 15-min sliding window. Call from service.ts whenever wasFallback=true.
  *  When fallback rate exceeds mitigation threshold, sets a Redis flag to trigger
  *  automatic model switching in the service layer. */
-export async function recordFallbackResult(wasFallback: boolean): Promise<void> {
+export async function recordFallbackResult(wasFallback: boolean, deployment?: string): Promise<void> {
   const windowKey = `ai:fallback:window:${Math.floor(Date.now() / (15 * 60 * 1000))}`;
   const mitigationFlagKey = "ai:fallback:mitigation_active";
+
+  // AUDIT-7: Per-deployment breakdown. Aggregate rate triggers alerts/mitigation,
+  // but this side counter lets operators see which Azure deployment is degrading.
+  // Fire-and-forget — any failure here is irrelevant to the main counter.
+  if (deployment) {
+    try {
+      const perDeploymentKey = `ai:fallback:deployment:${Math.floor(Date.now() / (15 * 60 * 1000))}`;
+      const pipeline = redis.pipeline();
+      pipeline.hincrby(perDeploymentKey, `${deployment}:total`, 1);
+      if (wasFallback) pipeline.hincrby(perDeploymentKey, `${deployment}:fallback`, 1);
+      pipeline.expire(perDeploymentKey, 20 * 60);
+      await pipeline.exec();
+    } catch {
+      // Non-critical — never block
+    }
+  }
+
   try {
     const pipeline = redis.pipeline();
     pipeline.hincrby(windowKey, "total", 1);
@@ -304,6 +326,33 @@ export async function recordLatencyViolation(exceededBudget: boolean, latencyMs:
   } catch {
     // Redis failure — never block
   }
+}
+
+/** OBS-1g: Cost-ceiling token-estimator drift alert.
+ *  Call from cost-ceiling.ts after each per-request accuracy sample. Fires when the
+ *  15-min-windowed average error exceeds the configured drift threshold. Unlike the
+ *  previous log-only behaviour, this now delivers to the webhook so SRE sees the drift
+ *  in near-real-time — critical because a silent tokenizer update would otherwise
+ *  under-size context budgets for hours before anyone notices.
+ */
+export async function alertIfCostEstimationDrift(
+  avgErrorPct: number,
+  sampleCount: number,
+  tier: string,
+): Promise<void> {
+  if (sampleCount < 50) return;
+  if (avgErrorPct < THRESHOLDS.costEstimationDriftPct) return;
+  logger.warn(
+    { event: "ai_alert_cost_estimation_drift", avgErrorPct, sampleCount, tier, threshold: THRESHOLDS.costEstimationDriftPct },
+    "AI cost estimation drift exceeded threshold",
+  );
+  await sendWebhookAlert({
+    alert: "cost_estimation_drift",
+    severity: "warn",
+    value: Number(avgErrorPct.toFixed(1)),
+    threshold: THRESHOLDS.costEstimationDriftPct,
+    detail: `Token-estimator average error is ${avgErrorPct.toFixed(1)}% over ${sampleCount} samples (tier: ${tier}). The char→token ratio is likely out of sync with the tokenizer — cost ceilings may be mis-sizing contexts.`,
+  });
 }
 
 export { THRESHOLDS };

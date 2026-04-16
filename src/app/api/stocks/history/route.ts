@@ -4,7 +4,7 @@ import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { getCache, setCache } from "@/lib/redis";
 
-const logger = createLogger({ service: "stocks-api" });
+const logger = createLogger({ service: "stocks-history" });
 
 import { StockHistorySchema } from "@/lib/schemas";
 import { apiError } from "@/lib/api-response";

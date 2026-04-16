@@ -1,3 +1,43 @@
+/**
+ * Thrown when user input fails a guardrail check (injection pattern, banned
+ * phrase, intent-aware predictive language). Carries a user-safe `reason`
+ * string so API routes can surface a 400 with the exact violation reason
+ * without leaking internal state.
+ */
+export class SafetyViolationError extends Error {
+  readonly reason: string;
+  constructor(reason: string) {
+    super(reason);
+    this.name = "SafetyViolationError";
+    this.reason = reason;
+  }
+}
+
+/**
+ * Thrown when a user has exhausted a usage quota (daily token cap, credit balance,
+ * per-request cost ceiling). Maps to HTTP 429 at the route boundary so the UI can
+ * render an upgrade CTA instead of a generic "something went wrong" 500.
+ *
+ * `resetAt` is an optional ISO timestamp the caller can surface via a `Retry-After`
+ * header or in-UI countdown.
+ */
+export class UsageLimitError extends Error {
+  readonly reason: string;
+  readonly resetAt?: string;
+  readonly kind: "daily_tokens" | "credits" | "cost_ceiling";
+  constructor(
+    reason: string,
+    kind: UsageLimitError["kind"] = "daily_tokens",
+    resetAt?: string,
+  ) {
+    super(reason);
+    this.name = "UsageLimitError";
+    this.reason = reason;
+    this.kind = kind;
+    this.resetAt = resetAt;
+  }
+}
+
 // Prompt injection patterns — catch role-hijacking and instruction-override attempts.
 // Precompiled at module load for zero per-call cost.
 // Exported for post-retrieval scanning in rag.ts (SEC-1).

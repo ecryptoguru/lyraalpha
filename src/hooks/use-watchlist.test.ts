@@ -98,6 +98,14 @@ describe("useWatchlist", () => {
       "/api/user/watchlist",
       expect.objectContaining({ method: "DELETE" }),
     );
-    expect(mutate).toHaveBeenCalledOnce();
+    // Optimistic update path: mutate is called twice per successful remove —
+    // once to apply the optimistic snapshot (no revalidate) and once after the
+    // server confirms success (revalidates to pick up authoritative state).
+    expect(mutate).toHaveBeenCalledTimes(2);
+    expect(mutate).toHaveBeenNthCalledWith(
+      1,
+      expect.any(Function),
+      { revalidate: false },
+    );
   });
 });

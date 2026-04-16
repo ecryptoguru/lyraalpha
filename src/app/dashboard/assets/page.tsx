@@ -37,12 +37,21 @@ import { MarketContextPanel } from "@/components/dashboard/market/MarketContextP
 import { cn } from "@/lib/utils";
 import { AssetSignals, CompatibilityResult } from "@/lib/engines/compatibility";
 import { GroupingResult, AssetGroup } from "@/lib/engines/grouping";
+import type { MarketContextSnapshot } from "@/lib/engines/market-regime";
 import {
   ErrorBoundary,
   SectionErrorFallback,
 } from "@/components/error-boundary";
 import { TopMoversSection, TopMoverItem } from "@/components/dashboard/market/TopMoversSection";
 import { PageHeader, StatChip } from "@/components/dashboard/page-header";
+
+interface CoveragePage {
+  assets: AssetState[];
+  marketContext: MarketContextSnapshot | null;
+  pagination: { hasMore: boolean; page: number; limit: number; total: number };
+  error?: string;
+  details?: string;
+}
 
 interface AssetState {
   symbol: string;
@@ -51,7 +60,6 @@ interface AssetState {
   price: number;
   changePercent: number;
   marketCap: number | null;
-  peRatio: number | null;
   oneYearChange: number | null;
   signals: AssetSignals;
   compatibility: CompatibilityResult;
@@ -60,11 +68,8 @@ interface AssetState {
   currency: string;
   metadata?: Record<string, unknown> | null;
   sector?: string | null;
-  dividendYield?: number | null;
   fiftyTwoWeekHigh?: number | null;
   fiftyTwoWeekLow?: number | null;
-  fundHouse?: string | null;
-  schemeType?: string | null;
 }
 
 const GROUP_MESSAGES: Record<AssetGroup, string[]> = {
@@ -112,7 +117,7 @@ const GROUP_ORDER: AssetGroup[] = [
   "Fragile / High Risk",
 ];
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 const PAGE_SIZE = 30;
 const SUCCESS_ACTIONS_KEY = "ux:successful-actions:v1";
@@ -163,7 +168,7 @@ export default function AssetsPage() {
     return baseUrl;
   };
 
-  const { data, setSize, isValidating, isLoading } = useSWRInfinite(
+  const { data, setSize, isValidating, isLoading } = useSWRInfinite<CoveragePage>(
     getKey,
     fetcher,
     {

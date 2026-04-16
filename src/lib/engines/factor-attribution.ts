@@ -10,29 +10,17 @@ export interface FactorProfile {
 }
 
 export function calculateFactorProfile(
-  symbol: string,
+  _symbol: string,
   history: OHLCV[],
   financials: {
-    peRatio?: number | null;
-    industryPe?: number | null;
-    roe?: number | null;
     oneYearChange?: number | null;
   },
 ): FactorProfile {
-  const isCrypto = /^[A-Z]+-USD[T]?$/.test(symbol);
   const cleanData = cleanHistory(history);
-  
-  // 1. Value Factor (Lower PE relative to industry, Higher ROE)
-  // For crypto: Use price vs 52-week range as "value" proxy
+
+  // 1. Value Factor — crypto: distance from 52-week high as value proxy
   let valueScore = 50;
-  if (!isCrypto && financials.peRatio && financials.industryPe) {
-    const peRel = financials.industryPe / financials.peRatio;
-    valueScore = Math.min(100, Math.max(0, peRel * 50));
-    if (financials.roe) {
-      valueScore = (valueScore + Math.min(100, financials.roe * 2)) / 2;
-    }
-  } else if (cleanData.length >= 20) {
-    // Crypto value: how far from 52-week high (higher = more value)
+  if (cleanData.length >= 20) {
     const last = cleanData[cleanData.length - 1].close;
     const prices = cleanData.slice(-252).map(h => h.close);
     const high52w = Math.max(...prices);

@@ -111,11 +111,20 @@ export function PublicMyraPanel({
   const errorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Synchronous guard against double-send (same pattern as dashboard's sendingRef)
   const sendingRef = useRef(false);
+  // Mirror the input state in a ref so `sendMessage` can read the latest value
+  // without declaring `input` as a dependency — otherwise the callback is rebuilt
+  // on every keystroke, invalidating memoized children that consume it.
+  const inputValueRef = useRef("");
 
   // Persist messages on change
   useEffect(() => {
     persistMessages(messages);
   }, [messages]);
+
+  // Keep the ref in sync with the controlled `input` state.
+  useEffect(() => {
+    inputValueRef.current = input;
+  }, [input]);
 
   // Auto-focus input on mount (not on every render)
   useEffect(() => {
@@ -220,7 +229,7 @@ export function PublicMyraPanel({
   const renderedStreaming = useMemo(() => renderContent(streamingText), [streamingText]);
 
   const sendMessage = useCallback(async (text?: string) => {
-    const content = (text ?? input).trim();
+    const content = (text ?? inputValueRef.current).trim();
     if (!content || sendingRef.current) return;
     sendingRef.current = true;
     setSending(true);
@@ -299,7 +308,7 @@ export function PublicMyraPanel({
       setSending(false);
       inputRef.current?.focus();
     }
-  }, [input]);
+  }, []);
 
   const handleRetry = useCallback(() => {
     if (lastFailedInput) {

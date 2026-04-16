@@ -43,26 +43,9 @@ export async function GET(
 
     const { userId } = await auth();
 
-    if (!fresh) {
-      try {
-        const cached = await getCache<Record<string, unknown>>(AssetService.getAnalyticsCacheKey(upperSymbol));
-        const cachedPayload = cached as ({ type?: string } & Record<string, unknown>) | null;
-        if (cachedPayload) {
-          const response = NextResponse.json(cached);
-          response.headers.set("Cache-Control", "private, no-store");
-          return response;
-        }
-      } catch (cacheError) {
-        logger.warn(
-          { symbol: upperSymbol, err: sanitizeError(cacheError) },
-          "Analytics cache read failed, proceeding without cache",
-        );
-      }
-    }
-
-    logger.info({ symbol: upperSymbol }, "Processing analytics request");
-
-    // 0. Rate Limiting
+    // 0. Rate Limiting — checked BEFORE the cache read so that abuse traffic against
+    // hot symbols (warm Redis cache) still counts against the limiter. Otherwise a
+    // cached symbol becomes an uncapped endpoint.
     const identifier = userId || getClientIp(req);
     const isTest = isRateLimitBypassEnabled();
 
@@ -76,11 +59,62 @@ export async function GET(
       }
     }
 
-    // 1. Fetch asset first (single query) - get region + full data in one call
-    const assetWithRegion = await prisma.asset.findUnique({
-      where: { symbol: upperSymbol },
-      select: analyticsAssetSelect
-    });
+    if (!fresh) {
+      try {
+        const cached = await getCache<Record<string, unknown>>(AssetService.getAnalyticsCacheKey(upperSymbol));
+        const cachedPayload = cached as ({ type?: string } & Record<string, unknown>) | null;
+        if (cachedPayload) {
+          const response = NextResponse.json(cached);
+          // `private, no-store` targets the browser/CDN — the server-side Redis cache is
+          // the authoritative fast path; we don't want intermediaries to cache per-user data.
+          response.headers.set("Cache-Control", "private, no-store");
+          return response;
+        }
+      } catch (cacheError) {
+        logger.warn(
+          { symbol: upperSymbol, err: sanitizeError(cacheError) },
+          "Analytics cache read failed, proceeding without cache",
+        );
+      }
+    }
+
+    logger.info({ symbol: upperSymbol }, "Processing analytics request");
+
+    // 1. Fully-parallel fetch: asset row + latest regime for BOTH regions + events
+    //    + primary sector mapping.
+    //    All five queries filter on `symbol` (directly or via relation), so none
+    //    depend on the asset row being resolved first. Pre-fetching both region
+    //    regimes + the sector mapping in the same Promise.all eliminates the
+    //    last two sequential Prisma round-trips from the critical path — the
+    //    dynamics-cache-miss branch no longer needs any DB hops beyond this block.
+    const [assetWithRegion, latestRegimeUS, latestRegimeIN, events, sectorMapping] = await Promise.all([
+      prisma.asset.findUnique({
+        where: { symbol: upperSymbol },
+        select: analyticsAssetSelect,
+      }),
+      prisma.marketRegime.findFirst({
+        where: { region: "US" },
+        orderBy: { date: "desc" },
+        select: { context: true, date: true },
+      }),
+      prisma.marketRegime.findFirst({
+        where: { region: "IN" },
+        orderBy: { date: "desc" },
+        select: { context: true, date: true },
+      }),
+      prisma.institutionalEvent.findMany({
+        where: {
+          asset: { symbol: upperSymbol },
+          date: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+        },
+        orderBy: { date: "desc" },
+        select: { id: true, type: true, title: true, description: true, severity: true, date: true, metadata: true },
+      }),
+      prisma.assetSector.findFirst({
+        where: { asset: { symbol: upperSymbol }, isActive: true },
+        select: { sectorId: true },
+      }),
+    ]);
 
     if (!assetWithRegion) {
       logger.warn({ symbol: upperSymbol }, "Asset not found in database");
@@ -89,24 +123,8 @@ export async function GET(
 
     const assetRegion = assetWithRegion.region || "US";
     const currentAsset = assetWithRegion as AnalyticsAsset;
+    const latestRegime = assetRegion === "IN" ? latestRegimeIN : latestRegimeUS;
 
-    // 2. Parallel Fetch: Market context + Events (asset already fetched above)
-    const [latestRegime, events] = await Promise.all([
-      prisma.marketRegime.findFirst({ 
-        where: { region: assetRegion },
-        orderBy: { date: "desc" },
-        select: { context: true, date: true }
-      }),
-      prisma.institutionalEvent.findMany({
-        where: { 
-          asset: { symbol: upperSymbol },
-          date: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } 
-        },
-        orderBy: { date: "desc" },
-        select: { id: true, type: true, title: true, description: true, severity: true, date: true, metadata: true }
-      }),
-    ]);
-    
     if (!latestRegime || !latestRegime.context) {
       return apiError("Market context not initialized.", 404);
     }
@@ -222,10 +240,8 @@ export async function GET(
         scoreDynamics = cachedDynamics;
       } else {
         const scoreTypes: ScoreType[] = ["TREND", "MOMENTUM", "VOLATILITY", "SENTIMENT", "LIQUIDITY", "TRUST"];
-        const sectorMapping = await prisma.stockSector.findFirst({
-          where: { assetId: currentAsset.id, isActive: true },
-          select: { sectorId: true },
-        });
+        // `sectorMapping` was pre-fetched in the top-level Promise.all above — no
+        // extra round-trip on this code path now.
         const dynamicsResults = await Promise.all(scoreTypes.map(async (scoreType) => {
           const d = await calculateScoreDynamics(currentAsset.id, scoreType, sectorMapping?.sectorId);
           return d ? { type: scoreType.toLowerCase(), dynamics: d } : null;
@@ -262,24 +278,9 @@ export async function GET(
 
     if (!precomputedSignal || !precomputedSignal.score) {
       const meta = (currentAsset.metadata || {}) as Record<string, unknown>;
+      void meta;
       const fundamentals: FundamentalData = {
-        peRatio: (meta.peRatio as number) ?? null,
-        industryPe: (meta.industryPe as number) ?? null,
-        pegRatio: (meta.pegRatio as number) ?? null,
-        priceToBook: (meta.priceToBook as number) ?? null,
-        roe: (meta.roe as number) ?? null,
-        roce: (meta.roce as number) ?? null,
-        profitMargins: (meta.profitMargins as number) ?? null,
-        operatingMargins: (meta.operatingMargins as number) ?? null,
-        revenueGrowth: (meta.revenueGrowth as number) ?? null,
-        dividendYield: (meta.dividendYield as number) ?? null,
-        shortRatio: (meta.shortRatio as number) ?? null,
-        heldPercentInstitutions: (meta.heldPercentInstitutions as number) ?? null,
-        targetMeanPrice: (meta.targetMeanPrice as number) ?? null,
-        currentPrice: currentAsset.price,
         distanceFrom52WHigh: performance.range52W.distanceFromHigh,
-        beta: (meta.beta as number) ?? null,
-        debtToEquity: (meta.debtToEquity as number) ?? null,
       };
 
       signalStrength = calculateSignalStrength({

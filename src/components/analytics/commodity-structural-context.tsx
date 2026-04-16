@@ -43,7 +43,7 @@ export function CommodityStructuralContext({ context, className }: CommodityStru
   const ClusterIcon = CLUSTER_ICONS[context.cluster] || Info;
 
   return (
-    <div className={cn("rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl backdrop-blur-xl p-4 space-y-3", className)}>
+    <div className={cn("rounded-2xl border border-white/5 bg-card/60 shadow-xl backdrop-blur-xl p-4 space-y-3", className)}>
       {/* Header */}
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 rounded-xl bg-foreground/5 flex items-center justify-center">

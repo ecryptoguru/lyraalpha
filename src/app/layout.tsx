@@ -30,8 +30,8 @@ export const viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
-  title: "LyraAlpha Solana | Wallet Intelligence and Scenario Analytics",
-  description: "Solana wallet intelligence with deterministic health, fragility, protocol exposure, scenario analytics, and Lyra-led interpretation.",
+  title: "LyraAlpha AI | Institutional-Grade Crypto Intelligence",
+  description: "Decode crypto market signals with AI that understands context. Real-time analysis for Bitcoin, Ethereum, and altcoins with institutional-grade retail clarity.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -44,13 +44,13 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "LyraAlpha Solana",
+    title: "LyraAlpha AI",
   },
   openGraph: {
-    title: "LyraAlpha Solana | Wallet Intelligence and Scenario Analytics",
-    description: "Deterministic Solana wallet analytics with scenario testing and AI interpretation.",
+    title: "LyraAlpha AI | Institutional-Grade Crypto Intelligence",
+    description: "Institutional-grade crypto intelligence for every investor.",
     url: process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz",
-    siteName: "LyraAlpha Solana",
+    siteName: "LyraAlpha AI",
     images: [
       {
         url: "/og-image.png",
@@ -63,9 +63,16 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "LyraAlpha Solana | Wallet Intelligence and Scenario Analytics",
-    description: "Solana wallet analytics with deterministic scoring, scenario intelligence, and Lyra-led interpretation.",
+    title: "LyraAlpha AI | Institutional-Grade Crypto Intelligence",
+    description: "Institutional-grade crypto intelligence for every investor.",
     images: ["/og-image.png"],
+  },
+  alternates: {
+    types: {
+      "application/rss+xml": [
+        { url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/blog/feed.xml`, title: "LyraAlpha AI Blog" },
+      ],
+    },
   },
 };
 

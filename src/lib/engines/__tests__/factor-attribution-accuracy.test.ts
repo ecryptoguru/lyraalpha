@@ -35,35 +35,6 @@ function flatPrices(n: number, price: number): number[] {
 // ─── Value Factor ─────────────────────────────────────────────────────────────
 
 describe("Factor Attribution — value factor", () => {
-  it("PE below industry PE → high value score", () => {
-    // peRel = industryPe / peRatio = 30/10 = 3 → valueScore = min(100, 3*50) = 100
-    const history = makeHistory(flatPrices(30, 100));
-    const result = calculateFactorProfile("AAPL", history, { peRatio: 10, industryPe: 30 });
-    expect(result.value).toBeGreaterThan(70);
-  });
-
-  it("PE above industry PE → low value score", () => {
-    // peRel = 10/50 = 0.2 → valueScore = min(100, 0.2*50) = 10
-    const history = makeHistory(flatPrices(30, 100));
-    const result = calculateFactorProfile("AAPL", history, { peRatio: 50, industryPe: 10 });
-    expect(result.value).toBeLessThan(30);
-  });
-
-  it("PE = industry PE → valueScore = 50", () => {
-    const history = makeHistory(flatPrices(30, 100));
-    const result = calculateFactorProfile("AAPL", history, { peRatio: 20, industryPe: 20 });
-    // peRel = 1 → 50, no ROE → valueScore = 50
-    expect(result.value).toBe(50);
-  });
-
-  it("high ROE boosts value score", () => {
-    const history = makeHistory(flatPrices(30, 100));
-    const withROE = calculateFactorProfile("AAPL", history, { peRatio: 20, industryPe: 20, roe: 40 });
-    const noROE = calculateFactorProfile("AAPL", history, { peRatio: 20, industryPe: 20 });
-    // With ROE=40: valueScore = (50 + min(100, 40*2)) / 2 = (50 + 80) / 2 = 65
-    expect(withROE.value).toBeGreaterThan(noROE.value);
-  });
-
   it("crypto value: price near 52W low → high value score", () => {
     // Build 252 bars: prices from 200 down to 100 (near low)
     const prices = linearPrices(252, 200, -0.4);
@@ -190,8 +161,8 @@ describe("Factor Attribution — output clamping [10, 95]", () => {
   it("all scores are in [10, 95]", () => {
     const datasets = [
       { prices: flatPrices(30, 100), fin: {} },
-      { prices: linearPrices(30, 100, 5), fin: { peRatio: 5, industryPe: 100, roe: 50 } },
-      { prices: linearPrices(30, 200, -5), fin: { peRatio: 100, industryPe: 5 } },
+      { prices: linearPrices(30, 100, 5), fin: { oneYearChange: 150 } },
+      { prices: linearPrices(30, 200, -5), fin: { oneYearChange: -50 } },
     ];
     for (const { prices, fin } of datasets) {
       const result = calculateFactorProfile("BTC-USD", makeHistory(prices), fin);

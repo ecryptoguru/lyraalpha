@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 /**
  * Returns the count of watchlist assets whose regime compatibility

@@ -45,7 +45,11 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `sh -c 'SKIP_AUTH=true SKIP_RATE_LIMIT=true E2E_BYPASS=true npm run build && SKIP_AUTH=true SKIP_RATE_LIMIT=true E2E_BYPASS=true npm run start -- -p ${E2E_PORT}'`,
+    // LYRA_E2E_USER_PLAN=ELITE tells `src/lib/auth.ts` to seed the bypass userId with
+    // a real ELITE user from the DB so plan-gated surfaces (compare, stress-test,
+    // elite-gating) continue to work in E2E. Without this env, bypass falls back to
+    // the `test-user-id` sentinel — safe default for non-Vercel deploys.
+    command: `sh -c 'SKIP_AUTH=true SKIP_RATE_LIMIT=true E2E_BYPASS=true LYRA_E2E_USER_PLAN=ELITE npm run build && SKIP_AUTH=true SKIP_RATE_LIMIT=true E2E_BYPASS=true LYRA_E2E_USER_PLAN=ELITE npm run start -- -p ${E2E_PORT}'`,
     url: E2E_BASE_URL,
     reuseExistingServer: !isCI,
     timeout: 120 * 1000,
@@ -53,6 +57,7 @@ export default defineConfig({
       SKIP_AUTH: "true",
       SKIP_RATE_LIMIT: "true",
       E2E_BYPASS: "true",
+      LYRA_E2E_USER_PLAN: "ELITE",
     },
   },
 });

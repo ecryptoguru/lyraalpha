@@ -19,6 +19,11 @@ vi.mock("@/lib/prisma", () => ({
     institutionalEvent: {
       findMany: vi.fn().mockResolvedValue([]),
     },
+    // Now called in the top-level Promise.all to eliminate a serial round-trip
+    // on the dynamics-cache-miss path — see analytics route Phase 1 comment.
+    assetSector: {
+      findFirst: vi.fn().mockResolvedValue(null),
+    },
   },
 }));
 
@@ -35,7 +40,7 @@ vi.mock("@/lib/rate-limit/utils", () => ({
 }));
 
 vi.mock("@/lib/logger", () => ({
-  createLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
+  createLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), trace: vi.fn() }),
 }));
 
 vi.mock("@/lib/logger/utils", () => ({
@@ -155,7 +160,7 @@ function makeCryptoAsset(overrides: Record<string, unknown> = {}) {
     signalStrength: { score: 74, label: "STRONG", confidence: "HIGH" },
     factorAlignment: { score: 68, regimeFit: "GOOD", dominantFactor: "MOMENTUM" },
     performanceData: { returns: { "1D": 1.2, "1W": 3.4, "1M": -2.1, "3M": 8.7, "1Y": 22.3 } },
-    metadata: { trailingPE: 28.5, priceToBook: 45.2, returnOnEquity: 1.47, marketCap: "2.9T" },
+    metadata: { marketCap: "2.9T" },
     ...overrides,
   };
 }

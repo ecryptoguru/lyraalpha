@@ -52,6 +52,40 @@ const PII_PATTERNS: PIIPattern[] = [
     replacement: "[user-id]",
     label: "clerk-user-id",
   },
+  // BIP-39 mnemonic phrases (12 / 15 / 18 / 21 / 24 words) — catastrophic if pasted.
+  // We do NOT verify against the BIP-39 wordlist here (too large for a regex pass);
+  // instead we flag any sequence of 12-24 ALL-LOWERCASE words separated by single
+  // spaces that is flanked by start-of-string, newline, or an obvious context word.
+  // This catches the common paste-by-accident case without matching normal prose.
+  // False-positive rate is further reduced by requiring each word to be 3-8 chars
+  // (BIP-39 dictionary range).
+  {
+    pattern: /(?:^|\n|seed(?:\s+phrase)?:?\s*|mnemonic:?\s*|recovery(?:\s+phrase)?:?\s*)((?:[a-z]{3,8}\s+){11,23}[a-z]{3,8})\b/gi,
+    replacement: "[redacted-seed-phrase]",
+    label: "bip39-mnemonic",
+  },
+  // Hex private keys — 64 hex chars. REQUIRES a context word (private key / privkey /
+  // secret key) to avoid false positives on transaction hashes and SHA-256 digests
+  // which share the same shape and are legitimately discussed in crypto analysis.
+  {
+    pattern: /((?:private[\s_-]?key|priv[\s_-]?key|secret[\s_-]?key|wallet[\s_-]?key)(?:\s*[:=]\s*|\s+(?:is|=)\s+))(0x)?[0-9a-fA-F]{64}\b/gi,
+    replacement: (_match, prefix: string) => `${prefix}[redacted-private-key]`,
+    label: "hex-private-key",
+  },
+  // Generic API keys / bearer tokens. Targets well-known provider prefixes rather
+  // than guessing — avoids false positives on random 32+ char base64-ish content
+  // that shows up in financial data blobs.
+  //   - OpenAI:      sk-..., sk-proj-...
+  //   - Anthropic:   sk-ant-...
+  //   - Azure/AWS:   AKIA..., AWS-style
+  //   - Clerk:       sk_live_... / sk_test_...
+  //   - Supabase/JWT eyJ... (only when ≥ 100 chars — real JWTs are long)
+  //   - Stripe:      sk_live_... / pk_live_...
+  {
+    pattern: /\b(?:sk-(?:ant-|proj-)?[A-Za-z0-9_-]{20,}|sk_(?:live|test)_[A-Za-z0-9]{16,}|pk_(?:live|test)_[A-Za-z0-9]{16,}|AKIA[0-9A-Z]{16}|eyJ[A-Za-z0-9_-]{100,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+)\b/g,
+    replacement: "[redacted-api-key]",
+    label: "api-key",
+  },
 ];
 
 export interface ScrubResult {

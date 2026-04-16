@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { getFriendlySymbol } from "@/lib/format-utils";
 import useSWR from "swr";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 interface BriefingAsset {
   symbol: string;

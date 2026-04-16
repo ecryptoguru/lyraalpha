@@ -18,7 +18,7 @@ vi.mock("@/lib/redis", () => ({
 }));
 
 vi.mock("@/lib/logger", () => ({
-  createLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn() }),
+  createLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn(), trace: vi.fn() }),
 }));
 
 vi.mock("@/lib/logger/utils", () => ({

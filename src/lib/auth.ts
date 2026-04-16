@@ -29,32 +29,53 @@ export async function auth() {
   );
 
   if (isAuthBypassEnabled() || skipAuthViaHeader) {
-    // For auth bypass, try to use a real ELITE user from database for testing
-    // This ensures plan-gating works correctly during development
-    try {
-      const prismaModule = await import("@/lib/prisma");
-      const eliteUser = await prismaModule.directPrisma.user.findFirst({
-        where: { plan: "ELITE" },
-        select: { id: true },
-      });
-      const userId = eliteUser?.id || "test-user-id";
+    // Auth bypass resolves a userId in this priority order:
+    //   1. LYRA_E2E_USER_ID env — explicit, deterministic, safe to deploy.
+    //   2. LYRA_E2E_USER_PLAN env + DB lookup — opt-in plan-based seeding for local dev
+    //      (e.g. LYRA_E2E_USER_PLAN=ELITE). NEVER used unless the env var is set,
+    //      so a leaked bypass flag cannot silently grant access to a real ELITE user.
+    //   3. "test-user-id" sentinel — last resort.
+    const explicitUserId = process.env.LYRA_E2E_USER_ID?.trim();
+    if (explicitUserId) {
       return {
-        userId,
-        sessionId: "test-session-id",
-        getToken: async () => "test-token",
-        debug: () => {},
-        redirectToSignIn: () => {},
-      };
-    } catch (e) {
-      logger.warn({ err: e }, "Auth bypass: failed to find ELITE user, using fallback test-user-id");
-      return {
-        userId: "test-user-id",
+        userId: explicitUserId,
         sessionId: "test-session-id",
         getToken: async () => "test-token",
         debug: () => {},
         redirectToSignIn: () => {},
       };
     }
+
+    const seedPlan = process.env.LYRA_E2E_USER_PLAN?.trim().toUpperCase();
+    if (seedPlan) {
+      try {
+        const prismaModule = await import("@/lib/prisma");
+        const seeded = await prismaModule.directPrisma.user.findFirst({
+          where: { plan: seedPlan as never },
+          select: { id: true },
+        });
+        if (seeded?.id) {
+          return {
+            userId: seeded.id,
+            sessionId: "test-session-id",
+            getToken: async () => "test-token",
+            debug: () => {},
+            redirectToSignIn: () => {},
+          };
+        }
+        logger.warn({ seedPlan }, "Auth bypass: no user matched LYRA_E2E_USER_PLAN — falling back to test-user-id");
+      } catch (e) {
+        logger.warn({ err: e }, "Auth bypass: plan-seeded lookup failed — falling back to test-user-id");
+      }
+    }
+
+    return {
+      userId: "test-user-id",
+      sessionId: "test-session-id",
+      getToken: async () => "test-token",
+      debug: () => {},
+      redirectToSignIn: () => {},
+    };
   }
   return clerkAuth();
 }

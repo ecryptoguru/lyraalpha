@@ -8,7 +8,9 @@ import { createLogger } from "@/lib/logger";
 import { createTimer, sanitizeError } from "@/lib/logger/utils";
 import { LyraMessage } from "@/types/ai";
 import { LyraContext } from "@/lib/engines/types";
+import { NextResponse } from "next/server";
 import { apiError } from "@/lib/api-response";
+import { SafetyViolationError, UsageLimitError } from "@/lib/ai/guardrails";
 
 const logger = createLogger({ service: "chat-api" });
 
@@ -176,6 +178,26 @@ export async function POST(req: NextRequest) {
     return response;
 
   } catch (error: unknown) {
+    // Guardrail violations are user-facing input errors, not server failures.
+    // Surface them as 400 with the sanitized reason so the UI can show actionable copy
+    // (e.g. "Your query appears to request a price prediction…") instead of a generic 500.
+    if (error instanceof SafetyViolationError) {
+      logger.warn({ reason: error.reason }, "Chat request rejected by guardrail");
+      return apiError(error.reason, 400);
+    }
+    // Quota exhaustion (daily tokens, credits, per-request cost ceiling) is a normal
+    // 429 condition — include `Retry-After` when a reset time is known so the UI can
+    // render a live countdown rather than a generic error.
+    if (error instanceof UsageLimitError) {
+      logger.warn({ kind: error.kind, reason: error.reason }, "Chat request rejected — usage limit");
+      const body = { error: error.reason, kind: error.kind, resetAt: error.resetAt ?? null };
+      const headers: Record<string, string> = {};
+      if (error.resetAt) {
+        const retrySec = Math.max(1, Math.ceil((new Date(error.resetAt).getTime() - Date.now()) / 1000));
+        headers["Retry-After"] = String(retrySec);
+      }
+      return NextResponse.json(body, { status: 429, headers });
+    }
     logger.error({ err: sanitizeError(error) }, "Chat request failed");
     return apiError("Failed to process chat request", 500);
   } finally {

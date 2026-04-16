@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ShareInsightButton } from "@/components/dashboard/share-insight-button";
 import { buildPortfolioShareObject } from "@/lib/intelligence-share";
+import { fetcher as sharedFetcher } from "@/lib/swr-fetcher";
 
 interface DecisionMemoResponse {
   headline: string;
@@ -16,11 +17,9 @@ interface DecisionMemoResponse {
   bullets: string[];
 }
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Portfolio memo error: ${res.status}`);
-  return res.json() as Promise<{ success: boolean; memo: DecisionMemoResponse | null }>;
-};
+type MemoEnvelope = { success: boolean; memo: DecisionMemoResponse | null };
+
+const fetcher = (url: string): Promise<MemoEnvelope> => sharedFetcher<MemoEnvelope>(url);
 
 export function PortfolioDecisionMemoCard({
   portfolioId,

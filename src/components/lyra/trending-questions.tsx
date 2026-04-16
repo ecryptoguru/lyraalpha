@@ -171,7 +171,11 @@ export function TrendingQuestions({ onQuestionClick }: TrendingQuestionsProps) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ questionId: question.id }),
-    }).catch((e) => console.warn("Failed to track trending question click:", e));
+    }).catch(() => {
+      // Fire-and-forget analytics tracking — intentional silent failure.
+      // User's click is always honored (onQuestionClick fires below); we just
+      // drop the tracking event if the endpoint is unreachable.
+    });
     onQuestionClick(question.question, question.id);
   };
 

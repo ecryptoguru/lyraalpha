@@ -30,6 +30,14 @@ export async function POST(request: Request) {
   );
 }
 
-export async function GET(request: Request) {
-  return POST(request);
+/**
+ * GET is intentionally not a sync trigger. QStash uses POST, and exposing the heavy
+ * 300s sync on GET makes it a target for accidental link prefetchers, browser history,
+ * and casual curl-ing. GET now returns a lightweight status payload only.
+ */
+export async function GET() {
+  return NextResponse.json(
+    { job: "crypto-sync", trigger: "POST", status: "idle" },
+    { status: 200 },
+  );
 }

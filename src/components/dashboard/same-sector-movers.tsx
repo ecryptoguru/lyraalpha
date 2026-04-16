@@ -23,7 +23,7 @@ interface SectorMoversResponse {
   label: string;
 }
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 export function SameSectorMovers({ symbol }: { symbol: string }) {
   const { data, isLoading } = useSWR<SectorMoversResponse>(

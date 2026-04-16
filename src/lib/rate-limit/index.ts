@@ -5,6 +5,7 @@ import {
   marketDataRateLimiter,
   generalRateLimiter,
   authBypassRateLimiter,
+  publicChatBurstRateLimiter,
 } from "./config";
 import { createRateLimitErrorResponse } from "./errors";
 import { headers } from "next/headers";
@@ -276,6 +277,39 @@ export async function rateLimitGeneral(
     return null;
   } catch (error) {
     return handleFailOpen(error, "general", identifier);
+  }
+}
+
+/**
+ * Short-burst rate limit for the public Myra chat endpoint (`/api/support/public-chat`).
+ * Layered on top of `rateLimitChat` to stop rapid-fire abuse from a single IP that
+ * stays under the daily cap. Uses a sliding window so legitimate users who space
+ * messages out are never penalized.
+ *
+ * Returns a `NextResponse` when the limit is exceeded, `null` otherwise.
+ */
+export async function rateLimitPublicChatBurst(
+  identifier: string,
+): Promise<NextResponse | null> {
+  try {
+    if (await shouldBypassRateLimit()) return null;
+    const limiter = publicChatBurstRateLimiter["STARTER"];
+    if (!limiter) return null;
+
+    const { success, limit, remaining, reset } = await timed(
+      "publicChatBurst.limit",
+      () => withTimeout(limiter.limit(identifier), TIMEOUTS_MS.chat),
+      { tier: "STARTER", timeoutMs: TIMEOUTS_MS.chat },
+    );
+
+    if (!success) {
+      return createRateLimitErrorResponse(limit, remaining, reset);
+    }
+    return null;
+  } catch (error) {
+    // Fail open — the per-day limiter is already enforced upstream, so a Redis
+    // blip on the burst check should not block legitimate FAQ traffic.
+    return handleFailOpen(error, "public-chat-burst", identifier);
   }
 }
 

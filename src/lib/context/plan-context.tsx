@@ -5,7 +5,7 @@ import useSWR from "swr";
 import type { PlanTier } from "@/lib/ai/config";
 import { normalizePlanTier } from "@/lib/utils/plan";
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
+import { fetcher } from "@/lib/swr-fetcher";
 
 const noop = () => {};
 const subscribe = () => noop;

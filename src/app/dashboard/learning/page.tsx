@@ -34,17 +34,7 @@ import { motion } from "framer-motion";
 import { usePlan } from "@/hooks/use-plan";
 import { EliteTrigger } from "@/components/dashboard/elite-trigger";
 import { PageHeader, StatChip } from "@/components/dashboard/page-header";
-
-const fetcher = async (url: string) => {
-  const response = await fetch(url);
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data?.error ?? "Failed to load learning data");
-  }
-
-  return data;
-};
+import { fetcher } from "@/lib/swr-fetcher";
 
 // ─── Types ───
 
@@ -153,9 +143,9 @@ export default function LearningPage() {
 function LearningHubContent() {
   const { plan } = usePlan();
   const isEliteEquivalent = plan === "ELITE" || plan === "ENTERPRISE";
-  const { data: progressRes, isLoading: progressLoading } = useSWR("/api/learning/progress", fetcher, { dedupingInterval: 30000, revalidateOnFocus: false });
-  const { data: badgesRes, isLoading: badgesLoading } = useSWR("/api/learning/badges", fetcher, { dedupingInterval: 30000, revalidateOnFocus: false });
-  const { data: modulesRes, isLoading: modulesLoading } = useSWR("/api/learning/modules", fetcher, { dedupingInterval: 30000, revalidateOnFocus: false });
+  const { data: progressRes, isLoading: progressLoading } = useSWR<{ progress?: ProgressData }>("/api/learning/progress", fetcher, { dedupingInterval: 30000, revalidateOnFocus: false });
+  const { data: badgesRes, isLoading: badgesLoading } = useSWR<{ earned?: BadgeData[]; available?: BadgeData[] }>("/api/learning/badges", fetcher, { dedupingInterval: 30000, revalidateOnFocus: false });
+  const { data: modulesRes, isLoading: modulesLoading } = useSWR<ModulesResponse>("/api/learning/modules", fetcher, { dedupingInterval: 30000, revalidateOnFocus: false });
 
   const progress: ProgressData = progressRes?.progress ?? {
     totalXp: 0, level: 1, streak: 0, tierName: "Beginner",

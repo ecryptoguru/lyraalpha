@@ -7,7 +7,7 @@ import {
   setMyraResponseCache,
 } from "@/lib/support/ai-responder";
 import { checkPromptInjection } from "@/lib/ai/guardrails";
-import { rateLimitChat } from "@/lib/rate-limit";
+import { rateLimitChat, rateLimitPublicChatBurst } from "@/lib/rate-limit";
 import { logFireAndForgetError } from "@/lib/fire-and-forget";
 import { getClientIp } from "@/lib/rate-limit/utils";
 import { getGpt54Model } from "@/lib/ai/service";
@@ -23,6 +23,16 @@ export const preferredRegion = "bom1";
 export async function POST(req: NextRequest) {
   try {
     const identifier = getClientIp(req);
+    // Two-tier rate limiting:
+    //   1. publicChatBurst — short-window sliding limiter (8 req / 60s) to block
+    //      rapid-fire abuse even when the daily cap is nowhere near exhausted.
+    //   2. rateLimitChat   — the standard daily + monthly caps applied at STARTER tier.
+    // Burst is checked first because it's cheaper (one Redis round-trip vs two) and
+    // short-circuits the common bot-spam pattern before we touch the heavier limiter.
+    const burstLimited = await rateLimitPublicChatBurst(identifier);
+    if (burstLimited) {
+      return burstLimited;
+    }
     const rateLimitResult = await rateLimitChat(identifier, { type: "plan", value: "STARTER" });
     if (rateLimitResult.response) {
       return rateLimitResult.response;

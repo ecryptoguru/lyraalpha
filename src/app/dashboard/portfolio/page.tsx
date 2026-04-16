@@ -784,7 +784,7 @@ export default function PortfolioPage() {
           <PortfolioIntelligenceHero
             intelligence={portfolioIntelligence}
             supportNote={portfolioAlert?.missingInsight ?? portfolioAlert?.stressHeadline ?? null}
-            marketLabel={`${region} market · ${regionConfig.currencySymbol} ${regionConfig.currency}`}
+            marketLabel={`Crypto market · ${regionConfig.currencySymbol} ${regionConfig.currency}`}
           />
         ) : null}
         <div className="flex flex-wrap items-center gap-2">
@@ -878,7 +878,7 @@ export default function PortfolioPage() {
               </div>
               <div>
                 <p className="text-base font-bold text-foreground">No holdings yet</p>
-                <p className="text-sm text-muted-foreground mt-1.5 max-w-sm leading-relaxed">Add an asset to get a portfolio score, health diagnostics, and AI insights.</p>
+                <p className="text-sm text-muted-foreground mt-1.5 max-w-sm leading-relaxed">Add a crypto asset to get a portfolio score, health diagnostics, and AI insights.</p>
               </div>
               <div className="flex flex-wrap justify-center items-center gap-2">
                 <Button size="sm" onClick={() => setShowAddHolding(true)} className="gap-1.5 h-9">
@@ -898,7 +898,7 @@ export default function PortfolioPage() {
                   Connect Broker
                 </Button>
               </div>
-              <p className="text-[10px] text-muted-foreground/50">CSV: symbol, quantity, avgPrice · PDF: Zerodha / Groww / US brokerage statements</p>
+              <p className="text-[10px] text-muted-foreground/50">CSV: symbol, quantity, avgPrice · PDF: exchange statements and wallet exports</p>
             </motion.div>
           )}
 

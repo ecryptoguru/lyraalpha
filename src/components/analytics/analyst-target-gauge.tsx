@@ -27,7 +27,7 @@ export function AnalystTargetGauge({
   // If no analyst data, show placeholder message
   if (!targetMeanPrice && !targetHighPrice && !targetLowPrice) {
     return (
-      <div className={cn("rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl backdrop-blur-xl p-4", className)}>
+      <div className={cn("rounded-2xl border border-white/5 bg-card/60 shadow-xl backdrop-blur-xl p-4", className)}>
         <div className="flex items-center gap-2 mb-3">
           <Target className="w-4 h-4 text-amber-500" />
           <h3 className="text-sm font-semibold text-foreground">Analyst Targets</h3>
@@ -55,7 +55,7 @@ export function AnalystTargetGauge({
   };
 
   return (
-    <div className={cn("rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl backdrop-blur-xl", className)}>
+    <div className={cn("rounded-2xl border border-white/5 bg-card/60 shadow-xl backdrop-blur-xl", className)}>
       <div className="px-4 py-3 border-b border-white/5">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">

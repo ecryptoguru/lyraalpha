@@ -282,6 +282,17 @@ export async function POST(
     const warnings: string[] = [];
     const importResults: Array<{ symbol: string; status: "imported" | "skipped" | "unknown"; message?: string }> = [];
 
+    // ── Phase 1: validate + bucket holdings into "importable" vs "skip" ──
+    // Doing this pre-pass means the transaction below only touches rows that
+    // actually need writing, and the client receives authoritative skip reasons
+    // even when the transaction later fails.
+    const importable: Array<{
+      symbol: string;
+      assetId: string;
+      quantity: number;
+      avgPrice: number;
+      currency: string;
+    }> = [];
     for (const parsed of parsedHoldings) {
       const asset = assetBySymbol.get(parsed.symbol);
       if (!asset) {
@@ -296,24 +307,50 @@ export async function POST(
         importResults.push({ symbol: parsed.symbol, status: "skipped", message: `Region mismatch (${asset.region})` });
         continue;
       }
-
-      await prisma.portfolioHolding.upsert({
-        where: { portfolioId_assetId: { portfolioId: portfolio.id, assetId: asset.id } },
-        create: {
-          portfolioId: portfolio.id,
-          assetId: asset.id,
-          symbol: parsed.symbol,
-          quantity: parsed.quantity,
-          avgPrice: parsed.avgPrice,
-          currency: asset.currency ?? portfolio.currency,
-        },
-        update: replaceExisting
-          ? { quantity: parsed.quantity, avgPrice: parsed.avgPrice }
-          : {},
+      importable.push({
+        symbol: parsed.symbol,
+        assetId: asset.id,
+        quantity: parsed.quantity,
+        avgPrice: parsed.avgPrice,
+        currency: asset.currency ?? portfolio.currency,
       });
+    }
 
-      importedCount++;
-      importResults.push({ symbol: parsed.symbol, status: "imported" });
+    // ── Phase 2: atomic parallel upsert inside a single transaction ──
+    // Previously this was a sequential `for…await` which hit one pooled DB
+    // round-trip per holding (10–30+ for a typical broker statement). The
+    // transaction now fans out all upserts concurrently under a single BEGIN/COMMIT
+    // so the DB handles them in parallel and any partial-failure rolls back cleanly.
+    // `timeout` is raised from the 5s Prisma default since PDFs with 50+ holdings
+    // can realistically take longer under pool pressure.
+    if (importable.length > 0) {
+      await prisma.$transaction(
+        async (tx) => {
+          await Promise.all(
+            importable.map((h) =>
+              tx.portfolioHolding.upsert({
+                where: { portfolioId_assetId: { portfolioId: portfolio.id, assetId: h.assetId } },
+                create: {
+                  portfolioId: portfolio.id,
+                  assetId: h.assetId,
+                  symbol: h.symbol,
+                  quantity: h.quantity,
+                  avgPrice: h.avgPrice,
+                  currency: h.currency,
+                },
+                update: replaceExisting
+                  ? { quantity: h.quantity, avgPrice: h.avgPrice }
+                  : {},
+              }),
+            ),
+          );
+        },
+        { timeout: 30_000, maxWait: 5_000 },
+      );
+      importedCount = importable.length;
+      for (const h of importable) {
+        importResults.push({ symbol: h.symbol, status: "imported" });
+      }
     }
 
     await computeAndStorePortfolioHealth(portfolio.id).catch((err) => {

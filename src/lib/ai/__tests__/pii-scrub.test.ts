@@ -115,6 +115,68 @@ describe("scrubPII", () => {
     expect(result.scrubbed).toContain("[phone]");
     expect(result.redactionTypes).toContain("phone");
   });
+
+  // ─── Crypto-domain high-risk PII (AI audit finding) ─────────────────────────
+
+  it("redacts BIP-39 mnemonic after explicit context word", () => {
+    const seed = "abandon ability able about above absent absorb abstract absurd abuse access accident";
+    const result = scrubPII(`Seed phrase: ${seed} please don't save this`);
+    expect(result.scrubbed).toContain("[redacted-seed-phrase]");
+    expect(result.scrubbed).not.toContain("abandon ability");
+    expect(result.redactionTypes).toContain("bip39-mnemonic");
+  });
+
+  it("redacts 24-word mnemonic with 'mnemonic:' prefix", () => {
+    const words = Array(24).fill("abandon").join(" ");
+    const result = scrubPII(`mnemonic: ${words}`);
+    expect(result.scrubbed).toContain("[redacted-seed-phrase]");
+  });
+
+  it("does not redact normal sentences as mnemonic", () => {
+    const result = scrubPII("the asset has strong fundamentals and clean tokenomics with solid");
+    // 10 short words — below the 12-word floor and no trigger word
+    expect(result.scrubbed).not.toContain("[redacted-seed-phrase]");
+  });
+
+  it("redacts hex private key when labelled", () => {
+    const key = "0x" + "a".repeat(64);
+    const result = scrubPII(`private key: ${key}`);
+    expect(result.scrubbed).toContain("[redacted-private-key]");
+    expect(result.redactionTypes).toContain("hex-private-key");
+  });
+
+  it("does NOT redact bare transaction hashes (no private-key context)", () => {
+    const hash = "0x" + "f".repeat(64);
+    const result = scrubPII(`The tx hash is ${hash}`);
+    expect(result.scrubbed).toBe(`The tx hash is ${hash}`);
+  });
+
+  it("redacts OpenAI API keys", () => {
+    const result = scrubPII("My key is sk-proj-abcdef0123456789abcdef0123456789abcd");
+    expect(result.scrubbed).toContain("[redacted-api-key]");
+    expect(result.redactionTypes).toContain("api-key");
+  });
+
+  it("redacts Stripe live secret keys", () => {
+    // Split literal to avoid tripping GitHub push protection secret scanners.
+    const fakeStripeKey = "sk_" + "live_" + "abcdef0123456789abcdef01";
+    const result = scrubPII(`Webhook secret ${fakeStripeKey}`);
+    expect(result.scrubbed).toContain("[redacted-api-key]");
+  });
+
+  it("redacts long JWT-shaped tokens", () => {
+    // Realistic 3-part JWT: header.payload.signature. Header segment must be ≥ 100 chars.
+    const header = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" + "A".repeat(80); // >100 after eyJ prefix
+    const longJwt = `${header}.payloadSegment.signatureSegment`;
+    const result = scrubPII(`Bearer ${longJwt} please`);
+    expect(result.scrubbed).toContain("[redacted-api-key]");
+  });
+
+  it("does NOT redact short base64 strings that look like keys", () => {
+    // Short base64-ish blob that shouldn't match the api-key regex
+    const result = scrubPII("Cache key: abc123def456");
+    expect(result.scrubbed).toBe("Cache key: abc123def456");
+  });
 });
 
 describe("scrubPIIString", () => {
