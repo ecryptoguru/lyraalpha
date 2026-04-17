@@ -3,6 +3,110 @@
 import { applyOptimisticCreditDelta, revalidateCreditViews, setAuthoritativeCreditBalance } from "@/lib/credits/client";
 import { parseLyraMessage, type Source } from "@/lib/lyra-utils";
 
+// ─── Error surface ───────────────────────────────────────────────────────────
+// The previous `catch {}` silently replaced every failure with a generic
+// "An error occurred" string, hiding rate limits, credit exhaustion, guardrail
+// rejections, auth failures, and network issues behind the same message. We now
+// parse the server response body (when structured) and categorise errors so the
+// UI can render a meaningful reason and, where relevant, a recovery CTA.
+
+export type ChatErrorKind =
+  | "auth"
+  | "rate_limit"
+  | "credits"
+  | "guardrail"
+  | "server"
+  | "network"
+  | "unknown";
+
+class ChatApiError extends Error {
+  readonly kind: ChatErrorKind;
+  readonly status: number;
+  readonly retryAfterSec?: number;
+
+  constructor(
+    message: string,
+    kind: ChatErrorKind,
+    status: number,
+    retryAfterSec?: number,
+  ) {
+    super(message);
+    this.name = "ChatApiError";
+    this.kind = kind;
+    this.status = status;
+    this.retryAfterSec = retryAfterSec;
+  }
+}
+
+interface ApiErrorBody {
+  error?: string;
+  reason?: string;
+  kind?: string;
+  resetAt?: string | null;
+}
+
+async function parseApiError(response: Response): Promise<ChatApiError> {
+  // Best-effort body parse — some error paths (e.g. network proxies) return no JSON.
+  let body: ApiErrorBody | null = null;
+  try {
+    const text = await response.text();
+    body = text ? (JSON.parse(text) as ApiErrorBody) : null;
+  } catch {
+    body = null;
+  }
+
+  const retryHeader = response.headers.get("Retry-After");
+  const retryFromHeader = retryHeader ? Number(retryHeader) : NaN;
+  const retryFromBody = body?.resetAt
+    ? Math.max(1, Math.ceil((new Date(body.resetAt).getTime() - Date.now()) / 1000))
+    : NaN;
+  const retryAfterSec = Number.isFinite(retryFromHeader)
+    ? retryFromHeader
+    : Number.isFinite(retryFromBody)
+    ? retryFromBody
+    : undefined;
+
+  const serverMessage = body?.reason || body?.error;
+
+  if (response.status === 401) {
+    return new ChatApiError(
+      "You need to sign in to chat with Lyra. Please refresh and sign in again.",
+      "auth",
+      401,
+    );
+  }
+  if (response.status === 429) {
+    // Server distinguishes rate-limit (no body.kind) vs credit/token exhaustion (kind set).
+    const kind: ChatErrorKind = body?.kind === "credits" || body?.kind === "daily-tokens"
+      ? "credits"
+      : "rate_limit";
+    const defaultMsg = kind === "credits"
+      ? "You're out of credits for this period. Top up or upgrade to keep chatting."
+      : "You're sending messages faster than Lyra can answer. Give it a moment.";
+    return new ChatApiError(serverMessage || defaultMsg, kind, 429, retryAfterSec);
+  }
+  if (response.status === 400) {
+    return new ChatApiError(
+      serverMessage || "Lyra couldn't handle that request. Try rephrasing.",
+      "guardrail",
+      400,
+    );
+  }
+  return new ChatApiError(
+    serverMessage || "Lyra ran into a problem answering that. Please try again.",
+    "server",
+    response.status,
+    retryAfterSec,
+  );
+}
+
+function formatRetry(sec?: number): string {
+  if (!sec || sec <= 0) return "";
+  if (sec < 60) return ` Try again in ${sec}s.`;
+  const mins = Math.ceil(sec / 60);
+  return ` Try again in ~${mins} min.`;
+}
+
 function uid(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -258,7 +362,7 @@ class LyraChatSessionController {
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+        throw await parseApiError(response);
       }
 
       const remaining = response.headers.get("X-RateLimit-Remaining");
@@ -357,13 +461,40 @@ class LyraChatSessionController {
             : message,
         ),
       };
-    } catch {
-      // Refund the optimistic deduction since the request failed
+    } catch (error) {
+      // Refund the optimistic deduction since the request failed.
+      // NOTE: for `credits` errors the server rejected before deducting, so
+      // the refund is correct. For server errors after partial processing the
+      // authoritative X-Credits-Remaining header would have corrected anyway.
       void applyOptimisticCreditDelta(1);
       void revalidateCreditViews();
+
+      // Classify and surface the actual failure reason instead of a generic string.
+      let message: string;
+      if (error instanceof ChatApiError) {
+        message = error.message + formatRetry(error.retryAfterSec);
+      } else if (
+        error instanceof TypeError
+        && /fetch|network|load failed/i.test(error.message)
+      ) {
+        message = "Can't reach Lyra — check your connection and try again.";
+      } else {
+        message = "Lyra ran into a problem answering that. Please try again.";
+      }
+
+      // Log the underlying error so it shows up in the browser console for
+      // debugging. The user sees the human-readable message above.
+      console.error("[Lyra] chat request failed", error);
+
+      // Drop the empty assistant placeholder if one was added before the failure.
+      const cleanedMessages = this.snapshot.messages.filter(
+        (m) => !(m.role === "assistant" && m.content === ""),
+      );
+
       this.snapshot = {
         ...this.snapshot,
-        error: "An error occurred. Please try again.",
+        messages: cleanedMessages,
+        error: message,
       };
     } finally {
       this.snapshot = {

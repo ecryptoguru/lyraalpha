@@ -1,4 +1,8 @@
 import type { BlogPost } from "./posts";
+import { week1Posts } from "./blogs-week1";
+import { week2Posts } from "./blogs-week2";
+import { week3Posts } from "./blogs-week3";
+import { week4Posts } from "./blogs-week4";
 
 // Static blog-post content set. Split out from posts.ts to keep the
 // runtime API surface small (~300 LOC) and make the content data easy to diff.
@@ -1435,4 +1439,16 @@ The investors who master on-chain analysis gain insight into market dynamics tha
 *Disclaimer: On-chain metrics provide historical and current data, not predictions. Past patterns don't guarantee future results. Always use risk management appropriate for your situation.*
     `.trim(),
   },
+
+  // ─── Week 1 Blog Posts ───────────────────────────────────────────────────────
+  ...week1Posts,
+
+  // ─── Week 2 Blog Posts ───────────────────────────────────────────────────────
+  ...week2Posts,
+
+  // ─── Week 3 Blog Posts ───────────────────────────────────────────────────────
+  ...week3Posts,
+
+  // ─── Week 4 Blog Posts ───────────────────────────────────────────────────────
+  ...week4Posts,
 ];
