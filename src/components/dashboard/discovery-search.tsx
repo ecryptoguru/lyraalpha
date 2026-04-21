@@ -53,7 +53,7 @@ export function DiscoverySearch() {
   return (
     <div ref={containerRef} className="relative w-full max-w-2xl mx-auto z-50">
       <div className="relative group">
-        <div className="absolute -inset-1 bg-linear-to-r from-primary/10 to-secondary/10 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-700" />
+        <div className="absolute -inset-1 rounded-2xl bg-primary/20 opacity-0 group-focus-within:opacity-100 transition duration-500 blur-md" />
         <div className="relative flex items-center group-focus-within:border-primary/20 transition-all shadow-xl">
           <Search className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground opacity-40 shrink-0 z-10" />
           <Input
@@ -116,8 +116,8 @@ export function DiscoverySearch() {
                         className="flex items-center justify-between p-4 rounded-2xl hover:bg-muted/20 transition-colors group/item min-h-[56px] cursor-pointer"
                       >
                         <div className="flex items-center gap-4">
-                          <div className="p-2.5 rounded-2xl bg-primary/10 border border-primary/20 shrink-0">
-                            <Globe className="h-4 w-4 text-primary" />
+                          <div className="p-2.5 rounded-2xl bg-accent/10 border border-accent/20 shrink-0">
+                            <Globe className="h-4 w-4 text-accent" />
                           </div>
                           <span className="font-bold text-foreground/90 font-data tracking-tight">
                             {s.name}
@@ -142,8 +142,8 @@ export function DiscoverySearch() {
                           className="flex items-center justify-between p-4 rounded-2xl hover:bg-muted/20 transition-colors group/item min-h-[56px] cursor-pointer"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="p-2.5 rounded-2xl bg-warning/10 border border-warning/20 shrink-0">
-                              <Zap className="h-4 w-4 text-warning" />
+                            <div className="p-2.5 rounded-2xl bg-primary/10 border border-primary/20 shrink-0">
+                              <Zap className="h-4 w-4 text-primary" />
                             </div>
                             <div className="font-data">
                               <p className="font-bold text-foreground/90 tracking-tight">

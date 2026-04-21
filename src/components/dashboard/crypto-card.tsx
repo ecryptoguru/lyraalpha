@@ -103,7 +103,7 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
 
   const getScoreColor = (score: number) => {
     if (score >= 70) return "text-success";
-    if (score >= 40) return "text-cyan-400";
+    if (score >= 40) return "text-warning";
     return "text-danger";
   };
 
@@ -437,7 +437,7 @@ function SignalItem({
 }) {
   const getProgressBarColor = (colorClass: string) => {
     if (colorClass.includes("success")) return "bg-success";
-    if (colorClass.includes("warning") || colorClass.includes("accent-cta")) return "bg-warning";
+    if (colorClass.includes("warning")) return "bg-warning";
     if (colorClass.includes("danger")) return "bg-danger";
     return "bg-muted-foreground";
   };

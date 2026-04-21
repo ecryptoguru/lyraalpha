@@ -49,7 +49,7 @@ interface MetricCell {
 
 function getScoreColor(score: number) {
   if (score >= 70) return "text-success";
-  if (score >= 40) return "text-cyan-400";
+  if (score >= 40) return "text-warning";
   return "text-danger";
 };
 
@@ -313,9 +313,9 @@ function SignalItem({
   color: string;
 }) {
   const getProgressBarColor = (colorClass: string) => {
-    if (colorClass.includes("emerald")) return "bg-success";
-    if (colorClass.includes("gold")) return "bg-[#FFD700]";
-    if (colorClass.includes("rose")) return "bg-danger";
+    if (colorClass.includes("success")) return "bg-success";
+    if (colorClass.includes("warning")) return "bg-warning";
+    if (colorClass.includes("danger")) return "bg-danger";
     return "bg-muted";
   };
 

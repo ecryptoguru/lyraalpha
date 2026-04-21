@@ -132,7 +132,7 @@ export function AssetSearchInput({
   return (
     <div className={cn("relative z-50", className)}>
       <div className="relative group" ref={refs.setReference}>
-        <div className="absolute -inset-1 bg-linear-to-r from-primary/20 to-secondary/20 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition duration-700" />
+        <div className="absolute -inset-1 rounded-2xl bg-primary/20 opacity-0 group-focus-within:opacity-100 transition duration-500 blur-md" />
         <div className="relative flex items-center group-focus-within:border-primary/40 transition-all shadow-xl group-focus-within:shadow-primary/15 rounded-2xl">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground opacity-60 group-focus-within:text-primary group-focus-within:opacity-100 transition-colors shrink-0 z-10" />
           <input
@@ -199,8 +199,8 @@ export function AssetSearchInput({
                       className="w-full flex items-center justify-between px-4 md:px-3 py-3 md:py-2.5 rounded-2xl md:rounded-xl hover:bg-muted/20 md:hover:bg-white/5 transition-colors text-left group min-h-[56px] md:min-h-[48px]"
                     >
                       <div className="flex items-center gap-4 md:gap-3 flex-1 min-w-0">
-                        <div className="p-2.5 md:p-1.5 rounded-2xl md:rounded-lg bg-warning/10 border border-warning/20 shrink-0">
-                          <Zap className="h-4 w-4 md:h-3 md:w-3 text-warning" />
+                        <div className="p-2.5 md:p-1.5 rounded-2xl md:rounded-lg bg-primary/10 border border-primary/20 shrink-0">
+                          <Zap className="h-4 w-4 md:h-3 md:w-3 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0 font-data md:font-sans">
                           <p className="font-bold text-sm md:text-xs text-foreground/90 truncate group-hover:text-primary transition-colors tracking-tight">
