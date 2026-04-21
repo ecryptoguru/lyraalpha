@@ -270,7 +270,7 @@ export async function GET(
 
     const grouping: GroupingResult = currentAsset.assetGroup 
       ? { group: currentAsset.assetGroup as AssetGroup, explanation: "Institutional classification persisted from latest sync cycle.", intent: "Strategy Alignment" }
-      : classifyAsset(signals, compatibility, currentAsset.type.toLowerCase());
+      : classifyAsset(signals, compatibility, currentAsset.type.toLowerCase(), currentAsset.sector ?? currentAsset.category);
 
     // 5. Signal Strength: use pre-computed from DB, fall back to live computation
     const precomputedSignal = readJson<Record<string, unknown> | null>(currentAsset.signalStrength, null);
@@ -338,6 +338,7 @@ export async function GET(
       description: currentAsset.description || null,
       industry: currentAsset.industry || null,
       sector: currentAsset.sector || null,
+      cryptoIntelligence: currentAsset.cryptoIntelligence as Record<string, unknown> || null,
     };
 
     if (!fresh) {

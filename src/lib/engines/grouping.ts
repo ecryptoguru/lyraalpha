@@ -6,7 +6,10 @@ export type AssetGroup =
   | "Regime-Sensitive"
   | "Momentum Decay"
   | "Neutral / Defensive"
-  | "Fragile / High Risk";
+  | "Fragile / High Risk"
+  | "Memecoin / Speculative"
+  | "AI / Compute Token"
+  | "RWA / Real-World Asset";
 
 export interface GroupingResult {
   group: AssetGroup;
@@ -18,13 +21,56 @@ export interface GroupingResult {
  * Institutional Asset Grouping Rules (AGR)
  * Logic derived from AGR.md
  */
+const MEMECOIN_SECTORS = new Set([
+  "Meme", "Dog-Themed", "Animal Meme Coins", "Memecoin",
+  "Pepe", "Shiba Inu", "Doge", "Frog-Themed",
+]);
+
+const AI_SECTORS = new Set([
+  "AI", "Artificial Intelligence", "AI & Big Data", "Compute",
+  "Machine Learning", "DeAI", "AI Agents",
+]);
+
+const RWA_SECTORS = new Set([
+  "RWA", "Real World Assets", "Tokenized Real Estate",
+  "Asset-Backed", "Treasury Tokens", "Yield-Bearing RWA",
+]);
+
 export function classifyAsset(
   signals: AssetSignals,
   compatibility: CompatibilityResult,
   assetType: string = "CRYPTO",
+  sector?: string | null,
 ): GroupingResult {
   const arcs = compatibility.score;
   const { trend, momentum, volatility, liquidity } = signals;
+
+  // Crypto-native sector classification (takes priority over signal-based)
+  const sectorKey = sector ?? "";
+  if (MEMECOIN_SECTORS.has(sectorKey)) {
+    return {
+      group: "Memecoin / Speculative",
+      intent: "Assets driven by social momentum with minimal fundamental backing.",
+      explanation:
+        "High volatility, low trust, and narrative-dependent price action. Structural fundamentals are typically absent.",
+    };
+  }
+  if (AI_SECTORS.has(sectorKey)) {
+    return {
+      group: "AI / Compute Token",
+      intent: "Tokens tied to AI infrastructure, compute marketplaces, or agent economies.",
+      explanation:
+        "Sector-specific risk/reward tied to AI adoption cycles. Revenue may be compute-based rather than financial.",
+    };
+  }
+  if (RWA_SECTORS.has(sectorKey)) {
+    return {
+      group: "RWA / Real-World Asset",
+      intent: "Tokens backed by off-chain real-world assets or cash flows.",
+      explanation:
+        "Value tied to legal structure and custodial trust. Regulatory and redemption risk are key differentiators.",
+    };
+  }
 
   // 1. Fragile / High Risk (Top Priority)
   if (arcs < 40 || (liquidity < 40 && volatility > 65)) {
@@ -62,7 +108,7 @@ export function classifyAsset(
   if (
     arcs >= 45 &&
     arcs <= 59 &&
-    (volatility >= 65 || assetType === "crypto")
+    (volatility >= 65 || assetType.toLowerCase() === "crypto")
   ) {
     return {
       group: "Regime-Sensitive",

@@ -51,6 +51,7 @@ export async function GET(
             },
           },
           orderBy: { addedAt: "desc" },
+          take: 100,
         },
         healthSnapshots: {
           orderBy: { date: "desc" },

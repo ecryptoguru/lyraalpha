@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Circle, Send, CheckCircle, MessageCircle, Sparkles } from "lucide-react";
 import { supabaseRealtime } from "@/lib/supabase-realtime";
+import { createClientLogger } from "@/lib/logger/client";
 
 interface Message {
   id: string;
@@ -136,7 +137,7 @@ export default function AdminSupportPage() {
         setNextCursor(data.nextCursor ?? null);
       }
     } catch (err) {
-      console.error("Failed to fetch conversations:", err);
+      createClientLogger("admin-support").error("Failed to fetch conversations", { err: String(err) });
     } finally {
       if (cursor) {
         setLoadingMore(false);
@@ -166,7 +167,7 @@ export default function AdminSupportPage() {
         fetchConversations();
       }
     } catch (err) {
-      console.error("Failed to send reply:", err);
+      createClientLogger("admin-support").error("Failed to send reply", { err: String(err) });
     } finally {
       setSending(false);
     }
@@ -182,7 +183,7 @@ export default function AdminSupportPage() {
         fetchConversations();
       }
     } catch (err) {
-      console.error("Failed to resolve conversation:", err);
+      createClientLogger("admin-support").error("Failed to resolve conversation", { err: String(err) });
     }
   };
 

@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { getAzureEmbeddingDeployment, getEmbeddingClient } from "@/lib/ai/config";
 import { getCache, setCache } from "@/lib/redis";
@@ -67,7 +68,7 @@ function fingerprintToText(fp: MarketFingerprint): string {
 }
 
 async function getEmbedding(text: string): Promise<number[]> {
-  const cacheKey = `analog:emb:${Buffer.from(text).toString("base64").slice(0, 32)}`;
+  const cacheKey = `analog:emb:${createHash("sha256").update(text).digest("hex").slice(0, 32)}`;
   const cached = await getCache<number[]>(cacheKey);
   if (cached) return cached;
 

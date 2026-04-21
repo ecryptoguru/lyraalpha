@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { createClientLogger } from "@/lib/logger/client";
 import {
   AlertTriangle,
   TrendingDown,
@@ -100,12 +101,12 @@ const SCENARIOS = STRESS_SCENARIO_IDS.flatMap((id) => {
     us = getScenario(id, "US");
     inRegion = getScenario(id, "IN");
   } catch (err) {
-    if (typeof window !== "undefined") console.error(`Failed to load scenario metadata for ${id}:`, err);
+    if (typeof window !== "undefined") createClientLogger("stress-test").error("Failed to load scenario metadata", { id, err: String(err) });
     return [];
   }
 
   if (!us || !inRegion) {
-    if (typeof window !== "undefined") console.error(`Missing scenario metadata for ${id}`);
+    if (typeof window !== "undefined") createClientLogger("stress-test").error("Missing scenario metadata", { id });
     return [];
   }
 
@@ -628,7 +629,7 @@ export default function StressTestPage() {
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
-      console.error("[askLyraForHedges]", err);
+      createClientLogger("stress-test").error("askLyraForHedges failed", { err: String(err) });
       setLyraAnalysis("Lyra is unavailable. Please try again.");
     } finally {
       if (lyraAbortRef.current === controller) {

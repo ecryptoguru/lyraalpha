@@ -13,13 +13,20 @@ interface LogPayload {
   timestamp: string;
 }
 
+const MAX_QUEUE_SIZE = 100;
+
 class ClientLogger {
   private service: string;
   private queue: LogPayload[] = [];
   private flushTimeout: ReturnType<typeof setTimeout> | null = null;
+  private boundFlush: () => void;
 
   constructor(service: string) {
     this.service = service;
+    this.boundFlush = () => this.flushSync();
+    if (typeof window !== "undefined") {
+      window.addEventListener("beforeunload", this.boundFlush);
+    }
   }
 
   private enqueue(level: LogPayload["level"], message: string, details?: Record<string, unknown>) {
@@ -38,6 +45,9 @@ class ClientLogger {
     }
 
     // In production, batch and send to server
+    if (this.queue.length >= MAX_QUEUE_SIZE) {
+      this.queue.splice(0, this.queue.length - MAX_QUEUE_SIZE + 1);
+    }
     this.queue.push(entry);
     this.scheduleFlush();
   }
@@ -81,6 +91,30 @@ class ClientLogger {
     } catch {
       // Silent fail - don't break user experience for logging
     }
+  }
+
+  /** Synchronous flush used by beforeunload — fires fetch with keepalive. */
+  private flushSync() {
+    if (this.queue.length === 0) return;
+    const batch = this.queue.splice(0, 10);
+    this.flushTimeout = null;
+    try {
+      fetch(LOG_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logs: batch }),
+        keepalive: true,
+      });
+    } catch {
+      // Silent fail
+    }
+  }
+
+  destroy() {
+    if (typeof window !== "undefined") {
+      window.removeEventListener("beforeunload", this.boundFlush);
+    }
+    this.flushSync();
   }
 
   info(message: string, details?: Record<string, unknown>) {

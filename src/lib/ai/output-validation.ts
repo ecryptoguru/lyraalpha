@@ -72,6 +72,20 @@ const ELITE_ASSET_COMPLEX_SECTIONS = [
 // Global/macro queries use a different structure
 const GLOBAL_SECTIONS = ["## Market Pulse", "## Crypto Sector View", "## Key Risks", "## What to Watch"];
 
+// Crypto-specific banned hype phrases
+const CRYPTO_BANNED_PHRASES = [
+  "diamond hands",
+  "wagmi",
+  "we're all gonna make it",
+  "ser",
+  "100x gem",
+  "hidden gem",
+  "moonshot",
+  "to the moon",
+  "lambo",
+  "when lambo",
+];
+
 // Follow-up rules: format instructions require exactly 3
 const EXPECTED_FOLLOW_UP_COUNT = 3;
 const FOLLOW_UP_HEADER = "## Follow-up Questions";
@@ -140,11 +154,34 @@ export function validateOutput(
         : [...ASSET_SIMPLE_SECTIONS];
   }
 
+  // PROMPT-1-FIX: Crypto prompts emit "## Protocol & Growth" instead of "## Business & Growth"
+  if (assetType === "CRYPTO") {
+    fullExpected = fullExpected.map((s) =>
+      s === "## Business & Growth" ? "## Protocol & Growth" : s,
+    );
+  }
+
   // Check section presence (case-insensitive substring match for robustness)
   const textLower = text.toLowerCase();
   const missingSections = fullExpected.filter(
     (section) => !textLower.includes(section.toLowerCase()),
   );
+
+  // Check for crypto-specific banned hype phrases
+  const bannedCryptoPhrases = CRYPTO_BANNED_PHRASES.filter((phrase) =>
+    textLower.includes(phrase.toLowerCase()),
+  );
+  if (bannedCryptoPhrases.length > 0 && assetType === "CRYPTO") {
+    logger.warn(
+      {
+        event: "output_validation_crypto_banned_phrase",
+        phrases: bannedCryptoPhrases,
+        tier,
+        plan,
+      },
+      `LLM output contains ${bannedCryptoPhrases.length} crypto banned phrase(s)`,
+    );
+  }
 
   // Count follow-up questions (all tiers require exactly 3)
   let followUpCount = 0;

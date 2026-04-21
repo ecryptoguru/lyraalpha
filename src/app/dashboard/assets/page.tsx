@@ -97,6 +97,18 @@ const GROUP_MESSAGES: Record<AssetGroup, string[]> = {
     "Assets misaligned with the environment and structurally exposed.",
     "Significant exposure to volatility or liquidity gaps.",
   ],
+  "Memecoin / Speculative": [
+    "Driven by social momentum with minimal fundamental backing — high narrative risk.",
+    "Extreme volatility and low trust typical of hype-driven tokens.",
+  ],
+  "AI / Compute Token": [
+    "Tied to AI infrastructure or compute marketplaces — sector-specific adoption cycles.",
+    "Revenue model may be compute-based rather than traditional financial.",
+  ],
+  "RWA / Real-World Asset": [
+    "Backed by off-chain real-world assets or cash flows — legal structure matters.",
+    "Regulatory and custodial trust are key value differentiators.",
+  ],
 };
 
 const GROUP_PLAIN_ENGLISH: Record<AssetGroup, string> = {
@@ -106,6 +118,9 @@ const GROUP_PLAIN_ENGLISH: Record<AssetGroup, string> = {
   "Momentum Decay": "Price move is slowing down — watch closely",
   "Neutral / Defensive": "Stable, low-drama assets — good for cautious investors",
   "Fragile / High Risk": "Out of step with the market — higher risk right now",
+  "Memecoin / Speculative": "Hype-driven token — very high risk, low fundamentals",
+  "AI / Compute Token": "AI-sector token — tied to adoption of compute or agent economies",
+  "RWA / Real-World Asset": "Real-world backed token — value depends on legal and custodial trust",
 };
 
 const GROUP_ORDER: AssetGroup[] = [
@@ -115,6 +130,9 @@ const GROUP_ORDER: AssetGroup[] = [
   "Momentum Decay",
   "Neutral / Defensive",
   "Fragile / High Risk",
+  "Memecoin / Speculative",
+  "AI / Compute Token",
+  "RWA / Real-World Asset",
 ];
 
 import { fetcher } from "@/lib/swr-fetcher";
@@ -227,6 +245,9 @@ export default function AssetsPage() {
       "Momentum Decay": [],
       "Neutral / Defensive": [],
       "Fragile / High Risk": [],
+      "Memecoin / Speculative": [],
+      "AI / Compute Token": [],
+      "RWA / Real-World Asset": [],
     };
 
     const seenByGroup: Record<AssetGroup, Set<string>> = {
@@ -236,6 +257,9 @@ export default function AssetsPage() {
       "Momentum Decay": new Set(),
       "Neutral / Defensive": new Set(),
       "Fragile / High Risk": new Set(),
+      "Memecoin / Speculative": new Set(),
+      "AI / Compute Token": new Set(),
+      "RWA / Real-World Asset": new Set(),
     };
 
     // Distribute Server-Filtered assets into groups

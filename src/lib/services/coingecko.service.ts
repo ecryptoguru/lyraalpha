@@ -31,24 +31,44 @@ const CACHE_TTL = {
   TOP_COINS: 86400,   // 24 hours — top 50 list
 } as const;
 
+// ─── Token-bucket rate limiter (replaces serial promise queue) ────────────
+// Demo tier: ~30 requests/minute.  We allow a small burst (3) and then
+// enforce a 2100ms minimum gap between request *starts* to stay well under
+// the limit even during traffic spikes.  This prevents the old serial-queue
+// bottleneck where request N had to wait for request N-1 to finish entirely.
+const MAX_CONCURRENCY = 3;
 let lastRequestTime = 0;
-let requestQueue: Promise<void> = Promise.resolve();
+let inFlight = 0;
+const waiting: Array<(release: () => void) => void> = [];
+
+function processWaiting() {
+  while (inFlight < MAX_CONCURRENCY && waiting.length > 0) {
+    const now = Date.now();
+    const elapsed = now - lastRequestTime;
+    if (elapsed < RATE_LIMIT_DELAY_MS) {
+      setTimeout(processWaiting, RATE_LIMIT_DELAY_MS - elapsed);
+      return;
+    }
+    lastRequestTime = now;
+    inFlight++;
+    const resolve = waiting.shift()!;
+    resolve(() => {
+      inFlight--;
+      processWaiting();
+    });
+  }
+}
+
+async function acquireSlot(): Promise<() => void> {
+  return new Promise((resolve) => {
+    waiting.push(resolve);
+    processWaiting();
+  });
+}
 
 async function rateLimitedFetch(url: string, retries = 0): Promise<Response> {
-  // Serialize all requests through a queue to prevent concurrent rate-limit bypass
-  const ticket = requestQueue;
-  let resolve: () => void;
-  requestQueue = new Promise<void>((r) => { resolve = r; });
-
-  await ticket; // wait for previous request to finish its delay
-
-  const now = Date.now();
-  const elapsed = now - lastRequestTime;
-  if (elapsed < RATE_LIMIT_DELAY_MS) {
-    await new Promise((r) => setTimeout(r, RATE_LIMIT_DELAY_MS - elapsed));
-  }
-  lastRequestTime = Date.now();
-  resolve!(); // release next request in queue
+  const release = await acquireSlot();
+  try {
 
   const headers: Record<string, string> = {
     "Accept": "application/json",
@@ -57,21 +77,24 @@ async function rateLimitedFetch(url: string, retries = 0): Promise<Response> {
     headers["x-cg-demo-api-key"] = API_KEY;
   }
 
-  const res = await fetch(url, { headers, next: { revalidate: 0 } });
+    const res = await fetch(url, { headers, next: { revalidate: 0 } });
 
-  if (res.status === 429 && retries < MAX_RETRIES) {
-    const backoff = Math.pow(2, retries + 1) * 1000;
-    logger.warn({ url, retries, backoff }, "CoinGecko rate limited, backing off");
-    await new Promise((r) => setTimeout(r, backoff));
-    return rateLimitedFetch(url, retries + 1);
+    if (res.status === 429 && retries < MAX_RETRIES) {
+      const backoff = Math.pow(2, retries + 1) * 1000;
+      logger.warn({ url, retries, backoff }, "CoinGecko rate limited, backing off");
+      await new Promise((r) => setTimeout(r, backoff));
+      return rateLimitedFetch(url, retries + 1);
+    }
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`CoinGecko API ${res.status}: ${body.slice(0, 200)}`);
+    }
+
+    return res;
+  } finally {
+    release();
   }
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`CoinGecko API ${res.status}: ${body.slice(0, 200)}`);
-  }
-
-  return res;
 }
 
 export class CoinGeckoService {

@@ -99,6 +99,7 @@ export async function calculateScoreDynamics(
         },
         select: { value: true },
         distinct: ["assetId"],
+        orderBy: [{ assetId: "asc" }, { date: "desc" }],
       });
       const cacheKeys = Object.keys(GLOBAL_SCORE_CACHE);
       if (cacheKeys.length >= SCORE_CACHE_MAX_KEYS) {
@@ -132,6 +133,7 @@ export async function calculateScoreDynamics(
         },
         select: { value: true, assetId: true },
         distinct: ["assetId"],
+        orderBy: [{ assetId: "asc" }, { date: "desc" }],
       });
     }
 
@@ -181,6 +183,7 @@ export async function buildBulkDynamicsContext(
       where: { type: { in: scoreTypes }, date: { gte: sevenDaysAgo } },
       select: { value: true, type: true },
       distinct: ["assetId", "type"],
+      orderBy: [{ assetId: "asc" }, { type: "asc" }, { date: "desc" }],
     }),
     prisma.assetSector.findMany({
       where: { assetId: { in: assetIds }, isActive: true },
@@ -218,6 +221,7 @@ export async function buildBulkDynamicsContext(
       where: { assetId: { in: peerIds }, type: { in: scoreTypes }, date: { gte: sevenDaysAgo } },
       select: { value: true, assetId: true, type: true },
       distinct: ["assetId", "type"],
+      orderBy: [{ assetId: "asc" }, { type: "asc" }, { date: "desc" }],
     });
 
     // Group peer scores by sectorId → type
@@ -263,7 +267,7 @@ export async function calculateAllScoreDynamicsBulk(
     }),
     prisma.assetScore.findMany({
       where: { assetId, type: { in: scoreTypes } },
-      orderBy: { date: "desc" },
+      orderBy: [{ type: "asc" }, { date: "desc" }],
       distinct: ["type"],
       select: { id: true, value: true, type: true },
     }),

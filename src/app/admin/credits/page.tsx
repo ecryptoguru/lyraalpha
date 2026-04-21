@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createClientLogger } from "@/lib/logger/client";
 import { useAdminCredits } from "@/hooks/use-admin";
 import {
   Loader2,
@@ -73,7 +74,7 @@ function BulkCreditAward({ onAwarded }: { onAwarded: () => Promise<unknown> | un
       const payload = await response.json();
       setUsers(Array.isArray(payload.users) ? payload.users : []);
     } catch (err) {
-      console.error("Failed to load users:", err);
+      createClientLogger("admin-credits").error("Failed to load users", { err: String(err) });
     }
   };
 

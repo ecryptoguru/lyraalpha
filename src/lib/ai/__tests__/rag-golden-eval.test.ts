@@ -113,40 +113,44 @@ describe("RAG golden-set eval (CI-safe)", () => {
 
 const LIVE = process.env.RAG_EVAL_LIVE === "true";
 
-describe.skipIf(!LIVE)("RAG golden-set eval (live retrieval)", () => {
-  it("lazy-imports retrieval layer only when live mode is on", async () => {
-    // Dynamic import so the CI-safe run never pays the cost of loading prisma / OpenAI.
-    const { retrieveInstitutionalKnowledge } = await import("../rag");
-    expect(typeof retrieveInstitutionalKnowledge).toBe("function");
-  });
-
-  for (const gc of RAG_GOLDEN_SET) {
-    if (!gc.expectedChunkKeywords || gc.expectedChunkKeywords.length === 0) continue;
-    if (!gc.mustPassGuardrails) continue; // never run retrieval on adversarial queries
-
-    it(`[${gc.id}] retrieval surfaces expected keywords`, async () => {
+// Only register live retrieval tests when explicitly opted-in.
+// This avoids 8 permanently-skipped tests cluttering CI output.
+if (LIVE) {
+  describe("RAG golden-set eval (live retrieval)", () => {
+    it("lazy-imports retrieval layer only when live mode is on", async () => {
+      // Dynamic import so the CI-safe run never pays the cost of loading prisma / OpenAI.
       const { retrieveInstitutionalKnowledge } = await import("../rag");
-      const tier = gc.expectedTier === "moderateOrComplex" ? "MODERATE" : gc.expectedTier;
-      // Signature: retrieveInstitutionalKnowledge(query, topK, assetType, useFastPath, tier)
-      const result = await retrieveInstitutionalKnowledge(gc.query, 5, undefined, false, tier);
-      const haystack = (result.content ?? "").toLowerCase();
+      expect(typeof retrieveInstitutionalKnowledge).toBe("function");
+    });
 
-      for (const kw of gc.expectedChunkKeywords!) {
-        expect(
-          haystack.includes(kw.toLowerCase()),
-          `[${gc.id}] expected chunk keyword "${kw}" not found in retrieved content (first 200 chars: "${haystack.slice(0, 200)}")`,
-        ).toBe(true);
-      }
+    for (const gc of RAG_GOLDEN_SET) {
+      if (!gc.expectedChunkKeywords || gc.expectedChunkKeywords.length === 0) continue;
+      if (!gc.mustPassGuardrails) continue; // never run retrieval on adversarial queries
 
-      if (typeof gc.minAvgSimilarity === "number") {
-        const avg = result.sources?.length
-          ? result.sources.reduce((a, s) => a + ((s as { similarity?: number }).similarity ?? 0), 0) / result.sources.length
-          : 0;
-        expect(
-          avg,
-          `[${gc.id}] avg similarity ${avg.toFixed(3)} below floor ${gc.minAvgSimilarity}`,
-        ).toBeGreaterThanOrEqual(gc.minAvgSimilarity);
-      }
-    }, 30_000);
-  }
-});
+      it(`[${gc.id}] retrieval surfaces expected keywords`, async () => {
+        const { retrieveInstitutionalKnowledge } = await import("../rag");
+        const tier = gc.expectedTier === "moderateOrComplex" ? "MODERATE" : gc.expectedTier;
+        // Signature: retrieveInstitutionalKnowledge(query, topK, assetType, useFastPath, tier)
+        const result = await retrieveInstitutionalKnowledge(gc.query, 5, undefined, false, tier);
+        const haystack = (result.content ?? "").toLowerCase();
+
+        for (const kw of gc.expectedChunkKeywords!) {
+          expect(
+            haystack.includes(kw.toLowerCase()),
+            `[${gc.id}] expected chunk keyword "${kw}" not found in retrieved content (first 200 chars: "${haystack.slice(0, 200)}")`,
+          ).toBe(true);
+        }
+
+        if (typeof gc.minAvgSimilarity === "number") {
+          const avg = result.sources?.length
+            ? result.sources.reduce((a, s) => a + ((s as { similarity?: number }).similarity ?? 0), 0) / result.sources.length
+            : 0;
+          expect(
+            avg,
+            `[${gc.id}] avg similarity ${avg.toFixed(3)} below floor ${gc.minAvgSimilarity}`,
+          ).toBeGreaterThanOrEqual(gc.minAvgSimilarity);
+        }
+      }, 30_000);
+    }
+  });
+}

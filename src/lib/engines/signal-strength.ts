@@ -1,6 +1,8 @@
+import { clamp } from "./portfolio-utils";
 import { AssetSignals, CompatibilityResult } from "./compatibility";
 import { MarketContextSnapshot } from "./market-regime";
 import { ScoreDynamics, EventImpact } from "@/types/analytics";
+import type { CryptoIntelligenceResult } from "./crypto-intelligence";
 
 // ─── Signal Strength Types ───────────────────────────────────────────────────
 
@@ -13,7 +15,7 @@ export type SignalLabel =
 
 export type SignalConfidence = "low" | "medium" | "high";
 
-export type AssetCategory = "CRYPTO";
+export type AssetCategory = string;
 
 export interface SignalStrengthResult {
   score: number;                    // 0-100 composite
@@ -57,6 +59,7 @@ export interface SignalStrengthInput {
   factorAlignment?: { score: number; regimeFit: string; dominantFactor?: string } | null;
   fundamentals?: FundamentalData | null;
   groupClassification?: string | null;
+  cryptoIntelligence?: CryptoIntelligenceResult | null;
 }
 
 // ─── Asset-Type-Aware Weights ────────────────────────────────────────────────
@@ -69,7 +72,9 @@ interface LayerWeights {
 }
 
 const TYPE_WEIGHTS: Record<string, LayerWeights> = {
-  CRYPTO:      { dse: 0.55, regime: 0.25, fundamental: 0.00, dynamics: 0.20 },
+  // Phase-1 fix: crypto assets need fundamental anchoring, not pure momentum.
+  // DSE reduced 0.55→0.40, fundamental increased 0.00→0.15 (total still 1.0).
+  CRYPTO:      { dse: 0.40, regime: 0.25, fundamental: 0.15, dynamics: 0.20 },
 };
 
 const DSE_WEIGHTS: Record<string, Record<string, number>> = {
@@ -95,7 +100,7 @@ export function calculateSignalStrength(input: SignalStrengthInput): SignalStren
   );
 
   // Layer 3: Fundamental Quality
-  const fundamentalScore = calculateFundamentalQuality(input.fundamentals ?? null, assetType);
+  const fundamentalScore = calculateFundamentalQuality(input.fundamentals ?? null, assetType, input.cryptoIntelligence);
 
   // Layer 4: Score Dynamics
   const dynamicsScore = calculateDynamicsScore(input.scoreDynamics);
@@ -241,9 +246,48 @@ function calculateRegimeMomentumBonus(regime: string, signals: AssetSignals): nu
 
 // ─── Layer 3: Fundamental Quality ────────────────────────────────────────────
 
-function calculateFundamentalQuality(_fundamentals: FundamentalData | null, _assetType: string): number {
-  // Crypto-only platform — fundamental quality scoring is not applicable
-  return 50;
+function calculateFundamentalQuality(
+  _fundamentals: FundamentalData | null,
+  _assetType: string,
+  cryptoIntelligence?: CryptoIntelligenceResult | null,
+): number {
+  // Crypto-only platform — compute a composite fundamental score from
+  // on-chain structural quality dimensions rather than a single proxy.
+  if (!cryptoIntelligence) return 50;
+
+  const ci = cryptoIntelligence;
+  const scores: number[] = [];
+  const weights: number[] = [];
+
+  if (ci.enhancedTrust?.score != null) {
+    scores.push(ci.enhancedTrust.score);
+    weights.push(0.30);
+  }
+  if (ci.networkActivity?.score != null) {
+    scores.push(ci.networkActivity.score);
+    weights.push(0.25);
+  }
+  if (ci.holderStability?.score != null) {
+    scores.push(ci.holderStability.score);
+    weights.push(0.20);
+  }
+  if (ci.liquidityRisk?.score != null) {
+    scores.push(ci.liquidityRisk.score);
+    weights.push(0.15);
+  }
+  // Invert structural risk: lower structural risk = higher fundamental quality
+  if (ci.structuralRisk?.overallLevel) {
+    const levelMap: Record<string, number> = { low: 85, moderate: 65, high: 25, critical: 10 };
+    const structuralScore = levelMap[ci.structuralRisk.overallLevel] ?? 50;
+    scores.push(structuralScore);
+    weights.push(0.10);
+  }
+
+  if (scores.length === 0) return 50;
+
+  const totalWeight = weights.reduce((a, b) => a + b, 0);
+  const weightedSum = scores.reduce((sum, s, i) => sum + s * weights[i], 0);
+  return clamp(weightedSum / totalWeight, 0, 100);
 }
 
 // ─── Layer 4: Score Dynamics ─────────────────────────────────────────────────
@@ -375,8 +419,11 @@ function calculateEngineAgreement(signals: AssetSignals): { agreement: number; d
   directions.forEach(d => counts[d as keyof typeof counts]++);
 
   const maxCount = Math.max(counts.BULLISH, counts.BEARISH, counts.NEUTRAL);
-  const dominantDirection = (Object.keys(counts) as Array<keyof typeof counts>)
-    .find(k => counts[k] === maxCount) ?? "NEUTRAL";
+  // Deterministic tie-break: explicit priority order rather than Object.keys insertion order
+  const tieBreakPriority = ["BULLISH", "BEARISH", "NEUTRAL"] as const;
+  const dominantDirection = tieBreakPriority.find(
+    (d) => counts[d] === maxCount,
+  ) ?? "NEUTRAL";
 
   return { agreement: maxCount / directions.length, dominantDirection };
 }
@@ -421,6 +468,17 @@ function extractKeyDrivers(
   }
   if (input.compatibility.label === "Strong Fit" || input.compatibility.label === "Good Fit") {
     drivers.push({ text: `${input.compatibility.label} with market regime (ARCS: ${input.compatibility.score})`, weight: input.compatibility.score });
+  }
+
+  // Crypto-native drivers
+  if (input.cryptoIntelligence) {
+    const ci = input.cryptoIntelligence;
+    if (ci.enhancedTrust?.score >= 70) {
+      drivers.push({ text: `High on-chain trust score (${ci.enhancedTrust.score}) — strong structural fundamentals`, weight: ci.enhancedTrust.score });
+    }
+    if (ci.networkActivity?.score >= 70) {
+      drivers.push({ text: `Robust network activity (${ci.networkActivity.score}) — healthy on-chain engagement and developer momentum`, weight: ci.networkActivity.score });
+    }
   }
 
   // Dynamics drivers
@@ -483,6 +541,23 @@ function extractRiskFactors(
     risks.push({ text: `Thin liquidity conditions (score: ${Math.round(s.liquidity)}) — potential for slippage and wide spreads`, weight: 100 - s.liquidity });
   }
 
+  // Crypto-native structural risks
+  if (input.cryptoIntelligence?.structuralRisk) {
+    const sr = input.cryptoIntelligence.structuralRisk;
+    if (sr.unlockPressure?.score >= 70) {
+      risks.push({ text: `Severe token unlock overhang (${sr.unlockPressure.score}) — dilution risk may override technical signals`, weight: sr.unlockPressure.score });
+    }
+    if (sr.mevExposure?.score >= 60) {
+      risks.push({ text: `High MEV exposure (${sr.mevExposure.score}) — sandwich attacks and frontrunning can erode position value`, weight: sr.mevExposure.score });
+    }
+    if (sr.bridgeDependency?.score >= 70) {
+      risks.push({ text: `Critical bridge dependency (${sr.bridgeDependency.score}) — wrapped/cross-chain asset vulnerable to bridge exploits`, weight: sr.bridgeDependency.score });
+    }
+  }
+  if (input.cryptoIntelligence?.networkActivity && input.cryptoIntelligence.networkActivity.score < 40) {
+    risks.push({ text: `Weak on-chain activity (${input.cryptoIntelligence.networkActivity.score}) — declining network usage undermines fundamental thesis`, weight: 100 - input.cryptoIntelligence.networkActivity.score });
+  }
+
   // Sort by weight descending
   risks.sort((a, b) => b.weight - a.weight);
   return risks.map(r => r.text);
@@ -515,12 +590,9 @@ function normalizeAssetType(type: string): string {
   const upper = type.toUpperCase().replace(/[\s-]/g, "_");
   if (upper === "CRYPTOCURRENCY" || upper === "CRYPTO") return "CRYPTO";
   if (TYPE_WEIGHTS[upper]) return upper;
-  return "CRYPTO"; // Default fallback
+  return "CRYPTO"; // Default fallback — only CRYPTO is currently supported
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
 
 /** Single source of truth for volatility inversion: low raw vol = high effective score = bullish */
 function effectiveVolatility(rawVolatility: number): number {

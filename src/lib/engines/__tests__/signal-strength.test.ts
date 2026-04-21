@@ -154,10 +154,10 @@ describe("calculateSignalStrength", () => {
   });
 
   describe("Asset-Type-Aware Weighting", () => {
-    it("CRYPTO uses 55% DSE weight and 0% fundamental", () => {
+    it("CRYPTO uses 40% DSE weight and 15% fundamental", () => {
       const result = calculateSignalStrength(buildInput({ assetType: "CRYPTO" }));
-      expect(result.weights.dse).toBe(0.55);
-      expect(result.weights.fundamental).toBe(0.00);
+      expect(result.weights.dse).toBe(0.40);
+      expect(result.weights.fundamental).toBe(0.15);
     });
 
     it("CRYPTO uses DSE weight", () => {
@@ -168,7 +168,7 @@ describe("calculateSignalStrength", () => {
     it("normalizes asset type variants (cryptocurrency → CRYPTO)", () => {
       const result = calculateSignalStrength(buildInput({ assetType: "cryptocurrency" }));
       expect(result.metadata.assetType).toBe("CRYPTO");
-      expect(result.weights.dse).toBe(0.55);
+      expect(result.weights.dse).toBe(0.40);
     });
 
     it("normalizes asset type variants (stock → CRYPTO)", () => {
@@ -190,14 +190,14 @@ describe("calculateSignalStrength", () => {
   });
 
   describe("Fundamental Layer", () => {
-    it("fundamentals do NOT boost CRYPTO signal (0% weight)", () => {
+    it("stock-style fundamentals (distanceFrom52WHigh) are ignored for CRYPTO asset type", () => {
       const withFundamentals = calculateSignalStrength(buildInput({
         fundamentals: {
           distanceFrom52WHigh: -15,
         },
       }));
       const withoutFundamentals = calculateSignalStrength(buildInput());
-      // CRYPTO has fundamental weight = 0, so fundamentals cannot affect the composite
+      // CRYPTO fundamental score is driven by cryptoIntelligence, not stock-style distanceFrom52WHigh
       expect(withFundamentals.breakdown.fundamental).toBe(withoutFundamentals.breakdown.fundamental);
     });
 
@@ -254,6 +254,17 @@ describe("calculateSignalStrength", () => {
         marketContext: { ...riskOnContext, regime: { ...riskOnContext.regime, confidence: "low" } },
       }));
       expect(result.confidence).toBe("low");
+    });
+
+    it("engine agreement tie-breaking is deterministic across invocations", () => {
+      // Mixed signals that could produce ties — run twice and ensure identical output
+      const mixedInput = buildInput({
+        signals: { trend: 50, momentum: 50, volatility: 50, sentiment: 50, liquidity: 50, trust: 50 },
+      });
+      const a = calculateSignalStrength(mixedInput);
+      const b = calculateSignalStrength(mixedInput);
+      expect(a.confidence).toBe(b.confidence);
+      expect(a.score).toBe(b.score);
     });
   });
 
@@ -368,6 +379,65 @@ describe("calculateSignalStrength", () => {
     it("includes asset type", () => {
       const result = calculateSignalStrength(buildInput({ assetType: "CRYPTO" }));
       expect(result.metadata.assetType).toBe("CRYPTO");
+    });
+  });
+
+  // ─── Phase 6: Crypto-Specific Regression Tests ────────────────────────────
+
+  describe("Phase 6 — crypto fundamental quality", () => {
+    it("TC-6a: CRYPTO fundamental weight is positive when cryptoIntelligence is present", () => {
+      const result = calculateSignalStrength(buildInput({
+        assetType: "CRYPTO",
+        cryptoIntelligence: {
+          enhancedTrust: { score: 75 },
+          networkActivity: { score: 70 },
+          holderStability: { score: 65 },
+          liquidityRisk: { score: 60 },
+          structuralRisk: { overallLevel: "low" },
+        } as unknown as import("../crypto-intelligence").CryptoIntelligenceResult,
+      }));
+      expect(result.weights.fundamental).toBeGreaterThan(0);
+      expect(result.weights.fundamental).toBe(0.15);
+      expect(result.breakdown.fundamental).toBeGreaterThan(50);
+    });
+
+    it("TC-6b: revenue-generating DeFi protocol scores higher than memecoin with identical price action", () => {
+      const identicalBase = {
+        signals: bullishSignals,
+        compatibility: strongFitCompatibility,
+        marketContext: riskOnContext,
+        assetType: "CRYPTO",
+        scoreDynamics: null,
+        eventAdjustedScores: null,
+        factorAlignment: null,
+        fundamentals: null,
+        groupClassification: null,
+      };
+
+      const deFiResult = calculateSignalStrength({
+        ...identicalBase,
+        cryptoIntelligence: {
+          enhancedTrust: { score: 82 },
+          networkActivity: { score: 78 },
+          holderStability: { score: 72 },
+          liquidityRisk: { score: 68 },
+          structuralRisk: { overallLevel: "low" },
+        } as unknown as import("../crypto-intelligence").CryptoIntelligenceResult,
+      });
+
+      const memeResult = calculateSignalStrength({
+        ...identicalBase,
+        cryptoIntelligence: {
+          enhancedTrust: { score: 25 },
+          networkActivity: { score: 30 },
+          holderStability: { score: 20 },
+          liquidityRisk: { score: 15 },
+          structuralRisk: { overallLevel: "high" },
+        } as unknown as import("../crypto-intelligence").CryptoIntelligenceResult,
+      });
+
+      expect(deFiResult.score).toBeGreaterThan(memeResult.score);
+      expect(deFiResult.breakdown.fundamental).toBeGreaterThan(memeResult.breakdown.fundamental);
     });
   });
 });

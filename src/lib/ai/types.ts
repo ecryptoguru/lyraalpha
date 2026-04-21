@@ -65,4 +65,16 @@ export interface AssetEnrichment {
   currency?: string | null;
   coingeckoId?: string | null;
   region?: string | null;
+
+  // Phase 3: On-chain concentration & leverage data (CI-6, CB-3)
+  holderGini?: number | null;
+  top10HolderPercent?: number | null;
+  fundingRate?: number | null;
+  openInterest?: number | null;
+
+  // Phase 3: Exchange flows, staking, emissions, governance (CB-4, CB-5, CB-6)
+  exchangeFlows?: Record<string, unknown> | null;
+  stakingYield?: Record<string, unknown> | null;
+  emissionSchedule?: Record<string, unknown> | null;
+  governanceData?: Record<string, unknown> | null;
 }

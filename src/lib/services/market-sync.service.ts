@@ -803,7 +803,73 @@ export class MarketSyncService {
           trust: signals.trust.score,
         };
         const compatibility = calculateCompatibility(flatSignals, context);
-        const grouping = classifyAsset(flatSignals, compatibility, asset.type.toLowerCase());
+        const grouping = classifyAsset(flatSignals, compatibility, asset.type.toLowerCase(), asset.sector ?? asset.category);
+
+        // Crypto Intelligence: compute BEFORE signal strength so it feeds into fundamental layer
+        let cryptoIntelData: Prisma.InputJsonValue | null = null;
+        let cryptoReliability: Record<string, SourcedField<number>> | null = null;
+        let cryptoIntelligenceResult: import("../engines/crypto-intelligence").CryptoIntelligenceResult | null = null;
+        if (asset.type === "CRYPTO" && asset.coingeckoId) {
+          try {
+            const result = await CryptoIntelligenceEngine.compute(prisma, asset.id, symbol, asset.coingeckoId, {
+              metadata: asset.metadata as Record<string, unknown> | null,
+              marketCap: asset.marketCap,
+              volume: asset.volume,
+              avgTrustScore: asset.avgTrustScore,
+              price: asset.price,
+              changePercent: asset.changePercent,
+            });
+            if (result) {
+              cryptoIntelligenceResult = result;
+              cryptoIntelData = asPrismaJsonValue(result) as Prisma.InputJsonValue | null;
+
+              const cgMeta = (assetMeta.coingecko as Record<string, unknown>) || {};
+              const quoteFreshnessHours = hoursSince((cgMeta.lastMarketSync as string | undefined) || asset.lastPriceUpdate);
+              const computedFreshnessHours = hoursSince(result.computedAt);
+              const poolSummary = result.liquidityRisk?.poolSummary;
+
+              cryptoReliability = {
+                quotePrice: resolveSingleSourceField<number>({
+                  expectedSource: "coingecko",
+                  source: "coingecko",
+                  value: asNumber(asset.price),
+                  freshnessHours: quoteFreshnessHours,
+                  slaHours: CRYPTO_QUOTES_SLA_HOURS,
+                }),
+                marketCap: resolveSingleSourceField<number>({
+                  expectedSource: "coingecko",
+                  source: "coingecko",
+                  value: asNumber(asset.marketCap),
+                  freshnessHours: quoteFreshnessHours,
+                  slaHours: CRYPTO_QUOTES_SLA_HOURS,
+                }),
+                cexVolume: resolveSingleSourceField<number>({
+                  expectedSource: "coingecko",
+                  source: "coingecko",
+                  value: asNumber(asset.volume),
+                  freshnessHours: quoteFreshnessHours,
+                  slaHours: LIQUIDITY_SLA_HOURS,
+                }),
+                dexLiquidity: resolveSingleSourceField<number>({
+                  expectedSource: "geckoterminal",
+                  source: "geckoterminal",
+                  value: asNumber(poolSummary?.totalReserveUsd),
+                  freshnessHours: computedFreshnessHours,
+                  slaHours: CRYPTO_DEX_SLA_HOURS,
+                }),
+                tvl: resolveSingleSourceField<number>({
+                  expectedSource: "defillama",
+                  source: "defillama",
+                  value: asNumber(result.tvlData?.tvl),
+                  freshnessHours: computedFreshnessHours,
+                  slaHours: LIQUIDITY_SLA_HOURS,
+                }),
+              };
+            }
+          } catch (err) {
+            logger.warn({ symbol, err: String(err) }, "Crypto intelligence computation failed");
+          }
+        }
 
         // Pre-compute Performance from price history
         const performance = calculatePerformance(history);
@@ -868,6 +934,7 @@ export class MarketSyncService {
           factorAlignment: factorAlignment as { score: number; regimeFit: string; dominantFactor?: string } | null,
           fundamentals,
           groupClassification: grouping.group,
+          cryptoIntelligence: cryptoIntelligenceResult,
         });
 
         // Pre-compute Scenario Analysis (Wave 2 - Phase 3)
@@ -958,86 +1025,8 @@ export class MarketSyncService {
           createScore(ScoreType.TRUST, signals.trust),
         );
 
-        // Crypto Intelligence: network activity, holder stability, liquidity risk, structural risk, enhanced trust
-        let cryptoIntelData: Prisma.InputJsonValue | null = null;
-        let cryptoReliability: Record<string, SourcedField<number>> | null = null;
-        if (asset.type === "CRYPTO" && asset.coingeckoId) {
-          try {
-            const result = await CryptoIntelligenceEngine.compute(prisma, asset.id, symbol, asset.coingeckoId, {
-              metadata: asset.metadata as Record<string, unknown> | null,
-              marketCap: asset.marketCap,
-              volume: asset.volume,
-              avgTrustScore: asset.avgTrustScore,
-              price: asset.price,
-              changePercent: asset.changePercent,
-            });
-            if (result) {
-              cryptoIntelData = asPrismaJsonValue(result) as Prisma.InputJsonValue | null;
-
-              const cgMeta = (assetMeta.coingecko as Record<string, unknown>) || {};
-              const quoteFreshnessHours = hoursSince((cgMeta.lastMarketSync as string | undefined) || asset.lastPriceUpdate);
-              const computedFreshnessHours = hoursSince(result.computedAt);
-              const poolSummary = result.liquidityRisk?.poolSummary;
-
-              cryptoReliability = {
-                quotePrice: resolveSingleSourceField<number>({
-                  expectedSource: "coingecko",
-                  source: "coingecko",
-                  value: asNumber(asset.price),
-                  freshnessHours: quoteFreshnessHours,
-                  slaHours: CRYPTO_QUOTES_SLA_HOURS,
-                }),
-                marketCap: resolveSingleSourceField<number>({
-                  expectedSource: "coingecko",
-                  source: "coingecko",
-                  value: asNumber(asset.marketCap),
-                  freshnessHours: quoteFreshnessHours,
-                  slaHours: CRYPTO_QUOTES_SLA_HOURS,
-                }),
-                cexVolume: resolveSingleSourceField<number>({
-                  expectedSource: "coingecko",
-                  source: "coingecko",
-                  value: asNumber(asset.volume),
-                  freshnessHours: quoteFreshnessHours,
-                  slaHours: LIQUIDITY_SLA_HOURS,
-                }),
-                dexLiquidity: resolveSingleSourceField<number>({
-                  expectedSource: "geckoterminal",
-                  source: "geckoterminal",
-                  value: asNumber(poolSummary?.totalReserveUsd),
-                  freshnessHours: computedFreshnessHours,
-                  slaHours: CRYPTO_DEX_SLA_HOURS,
-                }),
-                tvl: resolveSingleSourceField<number>({
-                  expectedSource: "defillama",
-                  source: "defillama",
-                  value: asNumber(result.tvlData?.tvl),
-                  freshnessHours: computedFreshnessHours,
-                  slaHours: LIQUIDITY_SLA_HOURS,
-                }),
-              };
-            }
-          } catch (err) {
-            logger.warn({ symbol, err: String(err) }, "Crypto intelligence computation failed");
-          }
-        }
-
         // CoinGlass derivatives enrichment — DEFERRED until API key is purchased (no free tier)
         // To activate: set COINGLASS_API_KEY in .env and uncomment the block below
-        // let coinglassOi: number | null = null;
-        // if (asset.type === "CRYPTO") {
-        //   try {
-        //     const { CoinGlassService } = await import("./coinglass.service");
-        //     const derivatives = await CoinGlassService.getDerivativesSummary(symbol);
-        //     if (derivatives.openInterest || derivatives.fundingRate || derivatives.liquidation) {
-        //       assetMeta.coinglass = { ... } as Record<string, unknown>;
-        //       coinglassOi = derivatives.openInterest?.openInterest ?? null;
-        //     }
-        //   } catch (err) {
-        //     logger.debug({ symbol, err: String(err) }, "CoinGlass enrichment skipped");
-        //   }
-        // }
-
         // Messari financials enrichment (protocol revenue, P/S, tokenomics)
         let messariFinancials: Record<string, unknown> | null = null;
         if (asset.type === "CRYPTO" && asset.coingeckoId) {

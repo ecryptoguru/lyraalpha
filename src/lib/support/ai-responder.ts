@@ -366,7 +366,13 @@ export async function buildSupportPrompt(
   // ── Parallel fetch: DB history + RAG (if needed) ────────────────────────
   // Previously sequential (~1.5s embedding then ~0.3s DB). Now concurrent.
   const historyPromise: Promise<InMemoryMessage[]> = (async () => {
-    if (inMemoryHistory) return inMemoryHistory;
+    if (inMemoryHistory) {
+      return inMemoryHistory.map((msg) =>
+        msg.role === "user" && typeof msg.content === "string"
+          ? { ...msg, content: scrubPII(msg.content).scrubbed }
+          : msg,
+      );
+    }
     if (conversationId === "__public__") return [];
     const recentMessages = await prisma.supportMessage.findMany({
       where: { conversationId },

@@ -34,6 +34,7 @@ interface PortfolioWithHoldings {
       avgSentimentScore: number | null;
       compatibilityScore: number | null;
       compatibilityLabel: string | null;
+      cryptoIntelligence: unknown | null;
     };
   }[];
 }
@@ -61,6 +62,7 @@ function buildHoldingInputs(portfolio: PortfolioWithHoldings): {
       avgTrustScore: h.asset.avgTrustScore,
       sector: h.asset.sector,
       type: h.asset.type,
+      cryptoIntelligence: h.asset.cryptoIntelligence as HoldingInput["cryptoIntelligence"],
     };
     healthInputs.push(base);
     fragilityInputs.push({ ...base, compatibilityScore: h.asset.compatibilityScore });
@@ -190,6 +192,7 @@ export async function computeAndStorePortfolioHealth(portfolioId: string): Promi
               avgSentimentScore: true,
               compatibilityScore: true,
               compatibilityLabel: true,
+              cryptoIntelligence: true,
             },
           },
         },

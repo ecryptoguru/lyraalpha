@@ -140,6 +140,27 @@ describe("Query Classifier", () => {
     });
   });
 
+  describe("COMPLEX — crypto-specific deep analytical patterns (QC-1)", () => {
+    const COMPLEX_CRYPTO_QUERIES = [
+      "How does MEV exposure affect my ETH staking rewards?",
+      "Bridge exploit risk analysis for cross-chain wrapped assets",
+      "What is the token unlock schedule for this project and how does it affect price?",
+      "Impermanent loss risk in my liquidity pool position",
+      "Oracle manipulation attack vectors in DeFi lending protocols",
+      "Smart contract audit results and reentrancy vulnerability risk",
+      "Sandwich attack probability and frontrunning protection strategies",
+      "Cross-chain bridge vulnerability assessment for wrapped tokens",
+      "Vesting cliff unlock analysis for early investors",
+      "TWAP oracle manipulation risk in AMM pools",
+    ];
+
+    for (const query of COMPLEX_CRYPTO_QUERIES) {
+      it(`classifies as COMPLEX: "${query}"`, () => {
+        expect(classifyQuery(query)).toBe("COMPLEX");
+      });
+    }
+  });
+
   describe("edge cases", () => {
     it("handles empty string", () => {
       expect(classifyQuery("")).toBe("MODERATE");

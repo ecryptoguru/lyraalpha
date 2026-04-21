@@ -114,4 +114,50 @@ describe("Portfolio Health Engine", () => {
     const r2 = computePortfolioHealth(normalizedWeights);
     expect(r1.healthScore).toBeCloseTo(r2.healthScore, 1);
   });
+
+  // ─── Phase 6: Crypto-Specific Regression Tests ────────────────────────────
+
+  it("TC-1: memecoin-only portfolio has low health due to concentration and low quality", () => {
+    // 100% DOGE — single memecoin holding
+    const dogeOnly = [
+      makeHolding({ symbol: "DOGE", weight: 1, type: "CRYPTO", sector: "Meme", avgTrustScore: 20, avgLiquidityScore: 30 }),
+    ];
+    const result = computePortfolioHealth(dogeOnly);
+    expect(result.healthScore).toBeLessThan(35);
+    expect(result.dimensions.concentrationScore).toBeLessThan(20);
+    expect(result.dimensions.qualityScore).toBeLessThan(40);
+    expect(result.band).toBe("High Risk");
+
+    // 50% SHIB + 50% PEPE — still meme-sector concentrated
+    const splitMeme = [
+      makeHolding({ symbol: "SHIB", weight: 0.5, type: "CRYPTO", sector: "Meme", avgTrustScore: 25, avgLiquidityScore: 35 }),
+      makeHolding({ symbol: "PEPE", weight: 0.5, type: "CRYPTO", sector: "Meme", avgTrustScore: 25, avgLiquidityScore: 35 }),
+    ];
+    const splitResult = computePortfolioHealth(splitMeme);
+    expect(splitResult.dimensions.diversificationScore).toBeLessThan(20);
+    expect(splitResult.healthScore).toBeLessThan(40);
+  });
+
+  it("TC-2: stablecoin-only portfolio has low health due to concentration / de-peg risk", () => {
+    const stableOnly = [
+      makeHolding({ symbol: "USDC", weight: 1, type: "CRYPTO", sector: "stablecoin", avgTrustScore: 85, avgLiquidityScore: 90, avgVolatilityScore: 5 }),
+    ];
+    const result = computePortfolioHealth(stableOnly);
+    // Single-asset concentration dominates: diversification = 0, concentration heavily penalized
+    expect(result.dimensions.diversificationScore).toBeLessThan(15);
+    expect(result.dimensions.concentrationScore).toBeLessThan(20);
+    expect(result.healthScore).toBeLessThan(50);
+  });
+
+  it("TC-3: cross-chain ETH portfolio has low diversification (same bucket)", () => {
+    const crossChainEth = [
+      makeHolding({ symbol: "ETH", weight: 0.4, type: "CRYPTO", sector: "Layer 1" }),
+      makeHolding({ symbol: "WETH-ARBITRUM", weight: 0.3, type: "CRYPTO", sector: "Layer 1" }),
+      makeHolding({ symbol: "WETH-OPTIMISM", weight: 0.3, type: "CRYPTO", sector: "Layer 1" }),
+    ];
+    const result = computePortfolioHealth(crossChainEth);
+    // All three map to "l1" bucket → bucketHHI = 1.0 → near-zero bucket diversity
+    expect(result.dimensions.diversificationScore).toBeLessThan(40);
+    expect(result.dimensions.correlationScore).toBeLessThan(50);
+  });
 });

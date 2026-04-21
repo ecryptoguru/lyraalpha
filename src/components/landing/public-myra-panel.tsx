@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Minus, Sparkles, MessageCircle, RotateCcw } from "lucide-react";
 import { renderContent } from "@/components/shared/chat-markdown-renderer";
+import { createClientLogger } from "@/lib/logger/client";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -298,7 +299,7 @@ export function PublicMyraPanel({
       }
     } catch (err) {
       if ((err as Error).name === "AbortError") return;
-      console.error("Myra panel stream failed:", err);
+      createClientLogger("public-myra").error("Myra panel stream failed", { err: String(err) });
       setSendError("Message failed to send — please try again.");
       setLastFailedInput(content);
       setStreamingText("");

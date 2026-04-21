@@ -2,7 +2,7 @@ import { directPrisma } from "../src/lib/prisma";
 
 async function main() {
   // Find blog posts missing hero images
-  const postsWithoutImages = await (directPrisma as any).blogPost.findMany({
+  const postsWithoutImages = await directPrisma.blogPost.findMany({
     where: { 
       status: "PUBLISHED",
       OR: [
@@ -19,7 +19,7 @@ async function main() {
   }
   
   // Also check all posts
-  const allPosts = await (directPrisma as any).blogPost.findMany({
+  const allPosts = await directPrisma.blogPost.findMany({
     where: { status: "PUBLISHED" },
     select: { slug: true, title: true, heroImageUrl: true },
   });

@@ -3,7 +3,7 @@ import { generateBlogHeroImage } from "../src/lib/blog/image-generator";
 
 async function main() {
   // Find all posts without hero images
-  const postsWithoutImages = await (directPrisma as any).blogPost.findMany({
+  const postsWithoutImages = await directPrisma.blogPost.findMany({
     where: { 
       status: "PUBLISHED",
       OR: [
@@ -34,7 +34,7 @@ async function main() {
       });
       
       // Update the post with the new image URL
-      await (directPrisma as any).blogPost.update({
+      await directPrisma.blogPost.update({
         where: { id: post.id },
         data: { heroImageUrl: result.heroImageUrl },
       });

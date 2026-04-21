@@ -10,6 +10,7 @@ const mockFindUnique = vi.fn();
 const mockGetGlobalNotes = vi.fn();
 const mockBuildMyraVoiceInstructions = vi.fn();
 const mockBm25SearchKnowledge = vi.fn();
+const mockRedisDel = vi.fn().mockResolvedValue(1);
 const mockApiError = vi.fn((message: string, status: number) =>
   new Response(JSON.stringify({ error: message }), {
     status,
@@ -38,6 +39,12 @@ vi.mock("@/lib/support/voice-prompt", () => ({
 vi.mock("@/lib/support/ai-responder", () => ({ bm25SearchKnowledge: mockBm25SearchKnowledge }));
 vi.mock("@/lib/api-response", () => ({ apiError: mockApiError }));
 vi.mock("@/lib/logger", () => ({ createLogger: mockCreateLogger }));
+vi.mock("@/lib/redis", () => ({
+  redis: { del: mockRedisDel },
+  redisSetNXStrict: vi.fn().mockResolvedValue(true),
+  getCache: vi.fn(),
+  setCache: vi.fn(),
+}));
 
 const fetchMock = vi.fn();
 
@@ -55,6 +62,12 @@ async function loadRoute() {
   vi.mock("@/lib/support/ai-responder", () => ({ bm25SearchKnowledge: mockBm25SearchKnowledge }));
   vi.mock("@/lib/api-response", () => ({ apiError: mockApiError }));
   vi.mock("@/lib/logger", () => ({ createLogger: mockCreateLogger }));
+  vi.mock("@/lib/redis", () => ({
+    redis: { del: mockRedisDel },
+    redisSetNXStrict: vi.fn().mockResolvedValue(true),
+    getCache: vi.fn(),
+    setCache: vi.fn(),
+  }));
   return import("./route");
 }
 
@@ -271,7 +284,7 @@ describe("GET /api/support/voice-session", () => {
     const { GET } = await loadRoute();
     const res = await GET(mockRequest());
     expect(res.status).toBe(502);
-    expect(await res.json()).toEqual({ error: "Voice session token generation failed" });
+    expect(await res.json()).toEqual({ error: "We couldn't start your voice session. This is usually a temporary issue — please try again in a few seconds." });
   });
 
   it("502 when OpenAI returns a non-OK status (502)", async () => {
@@ -356,5 +369,64 @@ describe("GET /api/support/voice-session", () => {
       expect.objectContaining({ currentPage: undefined }),
       expect.any(Array),
     );
+  });
+
+  // ─── Lock release ───────────────────────────────────────────────────────────
+
+  it("releases the concurrency lock immediately on success", async () => {
+    const { GET } = await loadRoute();
+    const res = await GET(mockRequest());
+    expect(res.status).toBe(200);
+    expect(mockRedisDel).toHaveBeenCalledWith("voice:session:user_123");
+  });
+
+  it("releases the concurrency lock on OpenAI error", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response("Unauthorized", { status: 401 }),
+    );
+    const { GET } = await loadRoute();
+    const res = await GET(mockRequest());
+    expect(res.status).toBe(502);
+    expect(mockRedisDel).toHaveBeenCalledWith("voice:session:user_123");
+  });
+
+  // ─── DELETE endpoint ────────────────────────────────────────────────────────
+
+  it("DELETE releases the concurrency lock and returns released:true", async () => {
+    mockRedisDel.mockResolvedValueOnce(1);
+    const { DELETE } = await loadRoute();
+    const res = await DELETE(mockRequest());
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.released).toBe(true);
+    expect(mockRedisDel).toHaveBeenCalledWith("voice:session:user_123");
+  });
+
+  it("DELETE returns released:false when redis.del fails", async () => {
+    mockRedisDel.mockRejectedValueOnce(new Error("Redis down"));
+    const { DELETE } = await loadRoute();
+    const res = await DELETE(mockRequest());
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.released).toBe(false);
+  });
+
+  it("DELETE returns 401 when unauthenticated", async () => {
+    mockAuth.mockResolvedValueOnce({ userId: null });
+    const { DELETE } = await loadRoute();
+    const res = await DELETE(mockRequest());
+    expect(res.status).toBe(401);
+  });
+
+  // ─── Actionable error messages ──────────────────────────────────────────────
+
+  it("returns actionable error message on OpenAI non-OK", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response("Bad Gateway", { status: 502 }),
+    );
+    const { GET } = await loadRoute();
+    const res = await GET(mockRequest());
+    const body = await res.json();
+    expect(body.error).toContain("try again");
   });
 });

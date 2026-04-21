@@ -102,6 +102,18 @@ model Asset {
   signalStrength          Json?
   cryptoIntelligence      Json?
   scenarioData            Json?
+
+  // Phase 3: On-chain concentration & leverage data (CI-6, CB-3)
+  holderGini              Float?
+  top10HolderPercent      Float?
+  fundingRate             Float?
+
+  // Phase 3: Exchange flows, staking, emissions, governance (CB-4, CB-5, CB-6)
+  exchangeFlows           Json?
+  stakingYield            Json?
+  emissionSchedule        Json?
+  governanceData          Json?
+
   industry                String?
   scores                  AssetScore[]         @relation("AssetScores")
   evidence                Evidence[]           @relation("AssetEvidence")
@@ -113,6 +125,7 @@ model Asset {
   watchlistItems          WatchlistItem[]
   portfolioHoldings       PortfolioHolding[]
   lyraAnalyses            LyraAnalysis[]
+  tokenUnlockEvents       TokenUnlockEvent[]
 
   @@index([assetGroup, compatibilityScore(sort: Desc)])
   @@index([lastPriceUpdate])
@@ -148,10 +161,32 @@ model AssetMetrics {
   cryptoIntelligence Json?
   scenarioData       Json?
 
+  // Phase 3: Exchange flows, staking, emissions, governance (CB-4, CB-5, CB-6)
+  exchangeFlows      Json?
+  stakingYield       Json?
+  emissionSchedule   Json?
+  governanceData     Json?
+
   updatedAt          DateTime @updatedAt
 
   @@index([assetId])
   @@index([updatedAt])
+}
+
+// Phase 3: Token unlock calendar events (CI-4)
+model TokenUnlockEvent {
+  id                String   @id @default(cuid())
+  assetId           String
+  asset             Asset    @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  unlockDate        DateTime
+  amount            Float?
+  percentOfSupply   Float?
+  category          String?  // team / seed / public / investor
+  description       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([assetId, unlockDate])
 }
 
 model AssetScore {

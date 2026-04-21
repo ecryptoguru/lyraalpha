@@ -8,6 +8,7 @@ import {
 } from "@/lib/support/ai-responder";
 import { validateInput } from "@/lib/ai/guardrails";
 import { scrubPII } from "@/lib/ai/pii-scrub";
+import { validateMyraOutput, logMyraValidationResult } from "@/lib/ai/output-validation";
 import { rateLimitChat, rateLimitPublicChatBurst } from "@/lib/rate-limit";
 import { logFireAndForgetError } from "@/lib/fire-and-forget";
 import { getClientIp } from "@/lib/rate-limit/utils";
@@ -132,8 +133,11 @@ export async function POST(req: NextRequest) {
           logger.error({ err: sanitizeError(e) }, "Public chat stream error");
         } finally {
           controller.close();
-          if (fullText.trim()) {
-            void setMyraResponseCache(trimmedMessage, "STARTER", true, fullText.trim()).catch((e) => logFireAndForgetError(e, "myra-public-cache"));
+          const trimmedText = fullText.trim();
+          if (trimmedText) {
+            const validation = validateMyraOutput(trimmedText);
+            logMyraValidationResult(validation);
+            void setMyraResponseCache(trimmedMessage, "STARTER", true, trimmedText).catch((e) => logFireAndForgetError(e, "myra-public-cache"));
           }
         }
       },

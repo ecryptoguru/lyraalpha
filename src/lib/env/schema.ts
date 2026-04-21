@@ -39,6 +39,22 @@ const aiSchema = z.object({
 });
 
 /**
+ * Azure OpenAI configuration
+ */
+const azureSchema = z.object({
+  AZURE_OPENAI_API_KEY: z.string().min(1, "AZURE_OPENAI_API_KEY is required"),
+  AZURE_OPENAI_ENDPOINT: z.string().url("AZURE_OPENAI_ENDPOINT must be a valid URL"),
+  AZURE_OPENAI_CHAT_DEPLOYMENT: z.string().min(1, "AZURE_OPENAI_CHAT_DEPLOYMENT is required"),
+  AZURE_OPENAI_EMBEDDING_DEPLOYMENT: z.string().min(1, "AZURE_OPENAI_EMBEDDING_DEPLOYMENT is required"),
+  AZURE_OPENAI_DEPLOYMENT_LYRA_FULL: z.string().optional(),
+  AZURE_OPENAI_DEPLOYMENT_LYRA_MINI: z.string().optional(),
+  AZURE_OPENAI_DEPLOYMENT_LYRA_NANO: z.string().optional(),
+  AZURE_OPENAI_DEPLOYMENT_MYRA: z.string().optional(),
+  AZURE_RESPONSES_API_ENABLED: z.enum(["true", "false"]).optional().default("false"),
+  AZURE_NATIVE_WEB_SEARCH_ENABLED: z.enum(["true", "false"]).optional().default("false"),
+});
+
+/**
  * Redis configuration
  */
 const redisSchema = z.object({
@@ -137,6 +153,7 @@ const cacheSchema = z.object({
 const envSchema = databaseSchema
   .merge(authSchema)
   .merge(aiSchema)
+  .merge(azureSchema)
   .merge(redisSchema)
   .merge(stripeSchema)
   .merge(emailSchema)
@@ -218,6 +235,21 @@ export const env = {
       openrouterApiKey: getEnv().OPENROUTER_API_KEY,
       tavilyApiKey: getEnv().TAVILY_API_KEY,
       anthropicApiKey: getEnv().ANTHROPIC_API_KEY,
+    };
+  },
+
+  get azure() {
+    return {
+      openaiApiKey: getEnv().AZURE_OPENAI_API_KEY,
+      openaiEndpoint: getEnv().AZURE_OPENAI_ENDPOINT,
+      chatDeployment: getEnv().AZURE_OPENAI_CHAT_DEPLOYMENT,
+      embeddingDeployment: getEnv().AZURE_OPENAI_EMBEDDING_DEPLOYMENT,
+      lyraFullDeployment: getEnv().AZURE_OPENAI_DEPLOYMENT_LYRA_FULL,
+      lyraMiniDeployment: getEnv().AZURE_OPENAI_DEPLOYMENT_LYRA_MINI,
+      lyraNanoDeployment: getEnv().AZURE_OPENAI_DEPLOYMENT_LYRA_NANO,
+      myraDeployment: getEnv().AZURE_OPENAI_DEPLOYMENT_MYRA,
+      responsesApiEnabled: getEnv().AZURE_RESPONSES_API_ENABLED === "true",
+      nativeWebSearchEnabled: getEnv().AZURE_NATIVE_WEB_SEARCH_ENABLED === "true",
     };
   },
 

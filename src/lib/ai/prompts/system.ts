@@ -117,7 +117,7 @@ function starterFormatFull(wordBudget: number, queryTier: "SIMPLE" | "MODERATE" 
     ? `Target about ${wordBudget} words total. Stay within roughly 20% of that target. If the question is straightforward, stay concise instead of padding with extra detail.`
     : "Keep the answer concise and fully useful.";
   const moderateExtra = isModerate
-    ? "\n## How It's Been Moving\nUse the 1D/1W/1M/3M performance numbers. Explain in plain English what the trend of those returns means. Compare to the 52-week range. Use at least 3 specific % or price figures. Write exactly 1 paragraph."
+    ? "\n## How It's Been Moving\nUse the 1D/1W/1M/3M performance numbers. Explain in plain English what the trend of those returns means. Compare to the ATH distance and recent trading range. Use at least 3 specific % or price figures. Write exactly 1 paragraph."
     : "";
   const extraSection = isComplex
     ? "\n## How the Pieces Fit Together\nConnect Bottom Line, scores, and risks into a single unified story. Write exactly 1 paragraph. Use an analogy to make it concrete."
@@ -164,7 +164,11 @@ function buildMonitoringChecklistSection(): string {
   return `## Monitoring Checklist
 ☐ **Supply inflation easing** — CircSupply/MaxSupply above 90% means inflation pressure is mostly behind it.
 ☐ **FDV overhang shrinking** — if FDV/MCap compresses, dilution risk is fading.
-☐ **Liquidity draining** — if Volume/MCap drops below BTC's benchmark, exits get harder fast.`;
+☐ **Liquidity draining** — if Volume/MCap drops below BTC's benchmark, exits get harder fast.
+☐ **Unlock calendar proximity** — cliff unlocks within 30 days can trigger forced selling; watch unlock schedule and category (team/investor/DAO).
+☐ **Staking yield sustainability** — verify APR source (protocol fees vs inflation); if inflation-backed, check emission decay rate.
+☐ **Oracle / MEV surface** — for DeFi/AMM assets: low DEX liquidity + concentrated pools increases oracle manipulation and sandwich attack risk.
+☐ **BTC dominance rotation** — rising BTC dominance above 55% historically drains altcoin momentum; watch for regime shift signals.`;
 }
 
 // ─── Response Format Blocks (PRO — solid depth, leaner than Elite) ───
@@ -194,7 +198,7 @@ function proFormatFull(wordBudget: number, queryTier: "SIMPLE" | "MODERATE" | "C
     ? `
 
 ## Performance Context
-Reference the most important return figures and the ATH/52-week position. For crypto, include multi-timeframe momentum (7D/30D/200D) and ATH distance. Explain what the price structure means in 1 paragraph.`
+Reference the most important return figures, ATH distance, and cycle position. Include multi-timeframe momentum (7D/30D/200D) and compare current price to recent local highs and lows. Explain what the price structure means in 1 paragraph.`
     : "";
 
   const signalBreakdown = isComplex
@@ -824,7 +828,7 @@ Shorthand: T=Trend, M=Momentum, V=Volatility, L=Liquidity, S=Sentiment, Trust=co
 
 ### CONTEXT UTILIZATION (CRITICAL)
 The LIVE MARKET CONTEXT message contains tagged data blocks like [ASSET], [QUESTION_FOCUS], [PRICE], [ENGINE_SCORES], [VALUATION], [FINANCIALS], [PERFORMANCE], [SIGNAL_STRENGTH], [SCORE_DYNAMICS], [ANALYST_CONSENSUS], [INSIDER_SENTIMENT], etc. You MUST:
-1. **Reference every relevant tag** — if [VALUATION] shows P/E:38.5 and [FINANCIALS] shows FCF:$12B, USE both. Don't cherry-pick 2 numbers and ignore the rest.
+1. **Reference every relevant tag** — if [VALUATION] shows FDV/MCap:3.2x and [FINANCIALS] shows TVL:$2.1B, USE both. Don't cherry-pick 2 numbers and ignore the rest.
 2. **Follow [QUESTION_FOCUS] when present** — prioritize the requested analytical lens first, then add only supporting data that sharpens the answer.
 3. **Cross-reference tags** — [ENGINE_SCORES] + [VALUATION] + [PERFORMANCE] together tell a richer story than any one alone. The more connections you draw, the better.
 4. **Never say "data is limited"** when context tags are present — mine them thoroughly. If a tag exists, analyze it.

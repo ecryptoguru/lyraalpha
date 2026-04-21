@@ -153,12 +153,12 @@ describe("Portfolio Fragility Engine — mathematical accuracy", () => {
     expect(result.components.liquidityFragility).toBeCloseTo(100, 0);
   });
 
-  it("volatility fragility applies regime stress multiplier (1 + 0.65*0.5 = 1.325)", () => {
-    // Single holding, vol=40 → 40 * 1.325 = 53
+  it("volatility fragility applies crypto regime stress multiplier (1 + 0.85*0.5 = 1.425)", () => {
+    // Single CRYPTO holding, vol=40 → 40 * 1.425 = 57
     const result = computePortfolioFragility([
       makeHolding({ weight: 1.0, avgVolatilityScore: 40 }),
     ]);
-    expect(result.components.volatilityFragility).toBeCloseTo(40 * 1.325, 0);
+    expect(result.components.volatilityFragility).toBeCloseTo(40 * 1.425, 0);
   });
 
   it("factor rotation fragility for perfect compatibility is near zero", () => {
@@ -183,13 +183,14 @@ describe("Portfolio Fragility Engine — mathematical accuracy", () => {
       makeHolding({ symbol: "B", weight: 0.5, type: "CRYPTO", sector: "Finance" }),
     ];
     const result = computePortfolioFragility(holdings);
-    const { volatilityFragility, correlationFragility, liquidityFragility, factorRotationFragility, concentrationFragility } = result.components;
+    const { volatilityFragility, correlationFragility, liquidityFragility, factorRotationFragility, concentrationFragility, stablecoinDepegFragility } = result.components;
     const expected =
-      volatilityFragility * 0.25 +
-      correlationFragility * 0.20 +
-      liquidityFragility * 0.25 +
-      factorRotationFragility * 0.15 +
-      concentrationFragility * 0.15;
+      volatilityFragility * 0.23 +
+      correlationFragility * 0.18 +
+      liquidityFragility * 0.23 +
+      factorRotationFragility * 0.13 +
+      concentrationFragility * 0.13 +
+      stablecoinDepegFragility * 0.10;
     // fragilityScore is computed from unrounded values; components are rounded to 1dp
     // so allow ±1 tolerance for rounding differences
     expect(Math.abs(result.fragilityScore - expected)).toBeLessThan(1.5);
@@ -254,5 +255,49 @@ describe("Portfolio Fragility Engine — classification", () => {
     ]);
     expect(result.fragilityScore).toBeGreaterThanOrEqual(0);
     expect(result.fragilityScore).toBeLessThanOrEqual(100);
+  });
+});
+
+// ─── Phase 6: Crypto-Specific Regression Tests ───────────────────────────────
+
+describe("Portfolio Fragility Engine — Phase 6 crypto regressions", () => {
+  it("TC-4: unlock-pressure scenario elevates fragility", () => {
+    const baseline = computePortfolioFragility([
+      makeHolding({ symbol: "A", weight: 0.33, type: "CRYPTO", sector: "DeFi", avgLiquidityScore: 60 }),
+      makeHolding({ symbol: "B", weight: 0.33, type: "CRYPTO", sector: "Layer 1", avgLiquidityScore: 60 }),
+      makeHolding({ symbol: "C", weight: 0.34, type: "CRYPTO", sector: "DeFi", avgLiquidityScore: 60 }),
+    ]);
+    const unlockPressure = computePortfolioFragility([
+      makeHolding({
+        symbol: "A", weight: 0.33, type: "CRYPTO", sector: "DeFi", avgLiquidityScore: 60,
+        cryptoIntelligence: { structuralRisk: { unlockPressure: { score: 80, level: "high", description: "" } } } as never,
+      }),
+      makeHolding({
+        symbol: "B", weight: 0.33, type: "CRYPTO", sector: "Layer 1", avgLiquidityScore: 60,
+        cryptoIntelligence: { structuralRisk: { unlockPressure: { score: 80, level: "high", description: "" } } } as never,
+      }),
+      makeHolding({
+        symbol: "C", weight: 0.34, type: "CRYPTO", sector: "DeFi", avgLiquidityScore: 60,
+        cryptoIntelligence: { structuralRisk: { unlockPressure: { score: 80, level: "high", description: "" } } } as never,
+      }),
+    ]);
+    expect(unlockPressure.fragilityScore).toBeGreaterThan(baseline.fragilityScore);
+    expect(unlockPressure.components.liquidityFragility).toBeGreaterThan(baseline.components.liquidityFragility);
+  });
+
+  it("TC-5: high-MEV low-liquidity DEX pair elevates fragility", () => {
+    const mevPortfolio = computePortfolioFragility([
+      makeHolding({
+        symbol: "LOW-LIQ-DEFI",
+        weight: 1,
+        type: "CRYPTO",
+        sector: "DeFi",
+        avgLiquidityScore: 20,
+        dexLiquidityConcentration: 85,
+        cryptoIntelligence: { structuralRisk: { mevExposure: { score: 80, level: "high", description: "" } } } as never,
+      }),
+    ]);
+    expect(mevPortfolio.components.liquidityFragility).toBeGreaterThan(50);
+    expect(mevPortfolio.fragilityScore).toBeGreaterThan(40);
   });
 });

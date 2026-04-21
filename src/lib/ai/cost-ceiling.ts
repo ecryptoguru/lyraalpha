@@ -16,6 +16,7 @@
 import { createLogger } from "@/lib/logger";
 import { truncateAtSentence } from "./context-builder";
 import { alertIfCostEstimationDrift } from "./alerting";
+import { redis } from "@/lib/redis";
 
 const logger = createLogger({ service: "cost-ceiling" });
 
@@ -82,17 +83,20 @@ export async function recordEstimationAccuracy(
   tier: string,
 ): Promise<void> {
   try {
-    const errorPct = Math.abs((actualTokens - estimatedTokens) / estimatedTokens) * 100;
+    // Guard against divide-by-zero when estimatedTokens is 0 (empty prompt edge case)
+    const errorPct = estimatedTokens > 0
+      ? Math.abs((actualTokens - estimatedTokens) / estimatedTokens) * 100
+      : 0;
     const windowKey = `ai:cost_estimation:window:${Math.floor(Date.now() / (60 * 60 * 1000))}`; // 1-hour windows
 
-    const pipeline = (await import("@/lib/redis")).redis.pipeline();
+    const pipeline = redis.pipeline();
     pipeline.hincrby(windowKey, "total", 1);
     pipeline.hincrby(windowKey, "errorSum", Math.round(errorPct));
     pipeline.expire(windowKey, 25 * 60 * 60); // 25 hours TTL
     const results = await pipeline.exec();
 
-    const total = (results?.[0] as number) ?? 0;
-    const errorSum = (results?.[1] as number) ?? 0;
+    const total = Array.isArray(results?.[0]) ? (results[0][1] as number) ?? 0 : (results?.[0] as number) ?? 0;
+    const errorSum = Array.isArray(results?.[1]) ? (results[1][1] as number) ?? 0 : (results?.[1] as number) ?? 0;
 
     if (total >= 50) { // Only log after sufficient samples
       const avgErrorPct = errorSum / total;

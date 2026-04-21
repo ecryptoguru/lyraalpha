@@ -367,7 +367,7 @@ describe("Context Builder — buildCompressedContext", () => {
       expect(result).toContain("Rank:#1");
     });
 
-    it("truncates long descriptions to 80 chars", () => {
+    it("truncates long descriptions to 200 chars", () => {
       const longDesc = "A".repeat(300);
       const result = buildCompressedContext(
         { symbol: "BTC-USD", assetType: "CRYPTO", scores: {} },
@@ -376,7 +376,7 @@ describe("Context Builder — buildCompressedContext", () => {
           assetEnrichment: { type: "CRYPTO", description: longDesc, metadata: { coingecko: {} } },
         },
       );
-      expect(result).toContain("[CRYPTO_ABOUT] " + "A".repeat(80) + "...");
+      expect(result).toContain("[CRYPTO_ABOUT] " + "A".repeat(200) + "...");
     });
 
     it("omits [CRYPTO_ABOUT] when no description", () => {

@@ -83,6 +83,13 @@ const COMPLEX_PATTERNS = [
   /\b(?:l1|l2|defi|nft|gaming|memecoin|layer1|layer2|cefi)\s+sector\s+(?:outlook|analysis|performance|rotation|trend)/i,  // "L1 sector outlook"
   /\b(?:current|now|today|this\s+(?:week|month|quarter)|right\s+now|happening)\b.*\b(?:sector|token|narrative)\s+(?:rotation|analysis|performance|breakdown)\b/i,  // "what's happening with sector/token rotation" — contextual, not definitional
   /\bsector\s+(?:rotation|analysis|performance|breakdown|comparison)\b.*\b(?:now|today|current|this\s+(?:week|month|quarter)|impact|effect|signal)\b/i,  // "sector rotation analysis this week"
+  // Crypto-specific deep analytical risk queries
+  /\b(?:mev|sandwich|frontrunn|flashbot|miner extractable value)\b/i,  // MEV risk analysis
+  /\b(?:bridge hack|bridge exploit|cross.chain risk|bridge vulnerability|wrapped token risk)\b/i,  // Bridge risk
+  /\b(?:token unlock|cliff unlock|vesting schedule|unlock pressure|emission schedule|inflation schedule)\b/i,  // Token unlock analysis
+  /\b(?:impermanent loss|IL risk|lp impermanent|liquidity pool loss)\b/i,  // DeFi / LP risk
+  /\b(?:oracle manipulation|oracle attack|price feed manipulation|twap attack|chainlink risk)\b/i,  // Oracle risk
+  /\b(?:smart contract audit|contract vulnerability|reentrancy|exploit risk|hack risk)\b/i,  // Smart contract risk
 ];
 
 // ─── MODERATE signals: override SIMPLE when query has analytical intent ───
@@ -106,16 +113,17 @@ const MODERATE_SIGNALS = [
 const FINANCE_STOPWORDS = new Set([
   "RATE", "HOLD", "BASE", "BULL", "BEAR", "LONG", "SHORT", "CALL", "PUT", "RISK",
   "FUND", "BOND", "CASH", "GOLD", "COIN", "DROP", "FALL", "RISE", "PUMP", "DUMP", "MINT", "BURN", "ETF", "IPO",
-  "FEES", "LOSS", "GAIN", "MINT", "BURN", "DEFI", "NODE", "HODL", "SWAP", "PEAK", "LOWS",
+  "FEES", "LOSS", "GAIN", "DEFI", "NODE", "HODL", "SWAP", "PEAK", "LOWS",
   "TVL", "DEX", "NFT", "ICO", "CEO", "GDP", "USD", "DSE", "ARCS", "RSI", "MACD", "VIX",
 ]);
 
 function hasLowercaseTicker(text: string): boolean {
-  const words = text.match(/\b[a-zA-Z]{3,8}(?:-[a-zA-Z]{1,4})?\b/g);
+  // MB-4: Align with uppercase ticker pattern: 2-8 chars, optional suffix, case-insensitive match
+  const words = text.match(/\b[a-z]{2,8}(?:[-.][a-z]{1,4})?\b/g);
   if (!words) return false;
   return words.some((w) => {
     const upper = w.toUpperCase();
-    return !COMMON_WORDS.has(upper) && !FINANCE_STOPWORDS.has(upper) && /^[a-z]/.test(w) && /^[a-zA-Z-]+$/.test(w);
+    return !COMMON_WORDS.has(upper) && !FINANCE_STOPWORDS.has(upper) && /^[a-zA-Z-]+$/.test(w);
   });
 }
 
@@ -163,7 +171,7 @@ export function classifyQuery(
   query: string,
   conversationLength: number = 1,
 ): QueryComplexity {
-  const trimmed = query.trim();
+  const trimmed = query.trim().normalize("NFKC");
 
   // ABSOLUTE SIMPLE: platform-specific educational queries and greetings — never escalate
   if (SIMPLE_ABSOLUTE.some((p) => p.test(trimmed))) {

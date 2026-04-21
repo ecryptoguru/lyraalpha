@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { auth as clerkAuth } from "@clerk/nextjs/server";
 import { isAuthBypassEnabled, isAuthBypassHeaderEnabled } from "@/lib/runtime-env";
 import { createLogger } from "@/lib/logger";
+import type { PlanTier } from "@/lib/ai/config";
 
 const logger = createLogger({ service: "auth" });
 
@@ -79,7 +80,8 @@ export async function auth() {
       try {
         const prismaModule = await import("@/lib/prisma");
         const seeded = await prismaModule.directPrisma.user.findFirst({
-          where: { plan: seedPlan as never },
+          where: { plan: seedPlan as PlanTier },
+          orderBy: { createdAt: "asc" },
           select: { id: true },
         });
         if (seeded?.id) {

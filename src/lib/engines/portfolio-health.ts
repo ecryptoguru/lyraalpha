@@ -6,6 +6,7 @@
  */
 
 import { clamp, hhi } from "./portfolio-utils";
+import type { CryptoIntelligenceResult } from "./crypto-intelligence";
 
 export interface HoldingInput {
   symbol: string;
@@ -15,6 +16,7 @@ export interface HoldingInput {
   avgTrustScore: number | null;
   sector: string | null;
   type: string;
+  cryptoIntelligence?: CryptoIntelligenceResult | null;
 }
 
 export interface HealthDimensions {
@@ -49,10 +51,43 @@ function getBand(score: number): PortfolioHealthResult["band"] {
   return "High Risk";
 }
 
+// Crypto-native diversification buckets — maps common sector names to functional categories
+const CRYPTO_BUCKETS: Record<string, string> = {
+  "layer 1": "l1",
+  "smart contract": "l1",
+  "defi": "defi",
+  "dex": "defi",
+  "infrastructure": "infra",
+  "oracle": "infra",
+  "bridge": "infra",
+  "interoperability": "infra",
+  "meme": "meme",
+  "stablecoin": "stable",
+  "store of value": "sov",
+};
+
+function getCryptoBucket(sector: string | null, symbol: string): string {
+  if (!sector) {
+    // Fallback: infer from symbol for known assets
+    const s = symbol.toUpperCase();
+    if (s === "BTC-USD" || s === "BTC") return "sov";
+    if (s === "ETH-USD" || s === "ETH") return "l1";
+    if (s.startsWith("USDT") || s.startsWith("USDC") || s.startsWith("DAI")) return "stable";
+    return "other";
+  }
+  const key = sector.toLowerCase();
+  for (const [prefix, bucket] of Object.entries(CRYPTO_BUCKETS)) {
+    if (key.includes(prefix)) return bucket;
+  }
+  return "other";
+}
+
 function computeDiversificationScore(holdings: HoldingInput[]): number {
   if (holdings.length === 0) return 0;
   // A single holding is maximally undiversified.
   if (holdings.length === 1) return 0;
+
+  const isAllCrypto = holdings.every((h) => h.type === "CRYPTO");
 
   const typeGroups: Record<string, number> = {};
   const sectorGroups: Record<string, number> = {};
@@ -69,8 +104,36 @@ function computeDiversificationScore(holdings: HoldingInput[]): number {
   const typeHHI = hhi(typeWeights);
   const sectorHHI = hhi(sectorWeights);
 
-  const typeScore = clamp((1 - typeHHI) * 100 * 1.25);
-  const sectorScore = clamp((1 - sectorHHI) * 100 * 1.25);
+  let typeScore = clamp((1 - typeHHI) * 100 * 1.25);
+  let sectorScore = clamp((1 - sectorHHI) * 100 * 1.25);
+
+  // For crypto-only portfolios, use crypto-native buckets AND apply BTC-beta penalty
+  if (isAllCrypto) {
+    const bucketGroups: Record<string, number> = {};
+    for (const h of holdings) {
+      const bucket = getCryptoBucket(h.sector, h.symbol);
+      bucketGroups[bucket] = (bucketGroups[bucket] ?? 0) + h.weight;
+    }
+    const bucketWeights = Object.values(bucketGroups);
+    const bucketHHI = hhi(bucketWeights);
+    // Crypto bucket score is tighter: max 90 even for perfect spread (crypto correlations are high)
+    const bucketScore = clamp((1 - bucketHHI) * 100 * 1.15);
+    sectorScore = Math.min(sectorScore, bucketScore);
+
+    // BTC-beta penalty: if >60% weight is in assets historically correlated to BTC,
+    // diversification is illusory. Apply penalty proportional to BTC-correlated weight.
+    const btcCorrelatedWeight = holdings.reduce((sum, h) => {
+      // BTC itself, L1s, and most altcoins are BTC-beta correlated
+      const bucket = getCryptoBucket(h.sector, h.symbol);
+      const isBtcCorrelated = bucket !== "stable" && bucket !== "sov";
+      return sum + (isBtcCorrelated ? h.weight : 0);
+    }, 0);
+    if (btcCorrelatedWeight > 0.6) {
+      const penalty = (btcCorrelatedWeight - 0.6) * 80; // up to 32 points penalty
+      typeScore = clamp(typeScore - penalty);
+      sectorScore = clamp(sectorScore - penalty);
+    }
+  }
 
   return clamp(typeScore * 0.6 + sectorScore * 0.4);
 }
@@ -111,6 +174,8 @@ function computeVolatilityScore(holdings: HoldingInput[], diversificationScore: 
 function computeCorrelationScore(holdings: HoldingInput[]): number {
   if (holdings.length < 2) return 50;
 
+  const isAllCrypto = holdings.every((h) => h.type === "CRYPTO");
+
   // Use weight-based HHI rather than count ratios so that a tiny crypto
   // position among 50 large-cap crypto assets does not inflate type diversity.
   const typeWeights: Record<string, number> = {};
@@ -126,8 +191,31 @@ function computeCorrelationScore(holdings: HoldingInput[]): number {
   const typeHHI = hhi(Object.values(typeWeights));
   const sectorHHI = hhi(Object.values(sectorWeights));
 
-  const typeScore = clamp((1 - typeHHI) * 100 * 1.4);
-  const sectorScore = clamp((1 - sectorHHI) * 100 * 1.25);
+  let typeScore = clamp((1 - typeHHI) * 100 * 1.4);
+  let sectorScore = clamp((1 - sectorHHI) * 100 * 1.25);
+
+  // For crypto-only portfolios, compute correlation from crypto buckets.
+  // Most crypto assets (L1, DeFi, infra, meme) are 0.7-0.95 correlated to BTC.
+  // Only stablecoins and BTC itself provide genuine decorrelation.
+  if (isAllCrypto) {
+    const bucketWeights: Record<string, number> = {};
+    for (const h of holdings) {
+      const bucket = getCryptoBucket(h.sector, h.symbol);
+      bucketWeights[bucket] = (bucketWeights[bucket] ?? 0) + h.weight;
+    }
+    const bucketHHI = hhi(Object.values(bucketWeights));
+    // Cap crypto correlation diversity at 70: even a perfectly spread crypto portfolio
+    // has ~0.85 average pairwise correlation during stress.
+    const bucketScore = clamp((1 - bucketHHI) * 100 * 1.4);
+    sectorScore = Math.min(sectorScore, bucketScore, 70);
+
+    // If portfolio contains no stablecoins and no BTC, correlation is structurally high
+    const hasStable = Object.keys(bucketWeights).includes("stable");
+    const hasSov = Object.keys(bucketWeights).includes("sov");
+    if (!hasStable && !hasSov) {
+      typeScore = clamp(typeScore * 0.75); // penalize further
+    }
+  }
 
   return clamp(typeScore * 0.5 + sectorScore * 0.5);
 }
@@ -143,7 +231,26 @@ function computeQualityScore(holdings: HoldingInput[]): number {
     let penalty = 0;
     if (h.type === "CRYPTO" && trust < 40) penalty = 10;
 
-    return sum + (composite - penalty) * h.weight;
+    // Phase-1: incorporate crypto-intelligence structural risk into quality
+    if (h.type === "CRYPTO" && h.cryptoIntelligence) {
+      const ci = h.cryptoIntelligence;
+      if (ci.structuralRisk) {
+        const unlockLevel = ci.structuralRisk.unlockPressure?.level;
+        if (unlockLevel === "high" || unlockLevel === "critical") penalty += 8;
+        else if (unlockLevel === "moderate") penalty += 4;
+
+        const bridgeLevel = ci.structuralRisk.bridgeDependency?.level;
+        if (bridgeLevel === "high" || bridgeLevel === "critical") penalty += 4;
+        else if (bridgeLevel === "moderate") penalty += 2;
+      }
+      // Holder concentration penalty: supplyConcentration is already inverted
+      // (higher = more distributed). If very low, it implies whale concentration.
+      if (ci.holderStability && ci.holderStability.supplyConcentration < 30) {
+        penalty += 5;
+      }
+    }
+
+    return sum + clamp(composite - penalty, 0, 100) * h.weight;
   }, 0);
 
   return clamp(weightedQuality);

@@ -101,7 +101,8 @@ export async function alertIfDailyCostExceeded(requestCostUsd: number): Promise<
     pipeline.incrbyfloat(todayKey, requestCostUsd);
     pipeline.expire(todayKey, 90_000); // 25h TTL — covers UTC day + buffer
     const results = await pipeline.exec();
-    cumulativeCost = Number((results?.[0] as number) ?? 0);
+    const rawTotal = Array.isArray(results?.[0]) ? (results[0][1] as string | number) ?? 0 : (results?.[0] as string | number) ?? 0;
+    cumulativeCost = Number(rawTotal) || 0;
   } catch {
     // Redis failure — alerting is non-critical, never block
     return;
@@ -149,8 +150,8 @@ export async function recordRagResult(hadResults: boolean): Promise<void> {
     pipeline.expire(windowKey, 20 * 60); // 20 min TTL — 1 window + buffer
     const results = await pipeline.exec();
 
-    const total = (results?.[0] as number) ?? 0;
-    const zero = (results?.[1] as number) ?? 0;
+    const total = Array.isArray(results?.[0]) ? (results[0][1] as number) ?? 0 : (results?.[0] as number) ?? 0;
+    const zero = Array.isArray(results?.[1]) ? (results[1][1] as number) ?? 0 : (results?.[1] as number) ?? 0;
     if (total < 10) return; // need sufficient sample before alerting
 
     const zeroRatePct = (zero / total) * 100;
@@ -183,8 +184,8 @@ export async function recordValidationResult(passed: boolean): Promise<void> {
     pipeline.expire(windowKey, 20 * 60);
     const results = await pipeline.exec();
 
-    const total = (results?.[0] as number) ?? 0;
-    const failed = (results?.[1] as number) ?? 0;
+    const total = Array.isArray(results?.[0]) ? (results[0][1] as number) ?? 0 : (results?.[0] as number) ?? 0;
+    const failed = Array.isArray(results?.[1]) ? (results[1][1] as number) ?? 0 : (results?.[1] as number) ?? 0;
     if (total < 10) return;
 
     const failRatePct = (failed / total) * 100;
@@ -237,8 +238,8 @@ export async function recordFallbackResult(wasFallback: boolean, deployment?: st
     pipeline.expire(windowKey, 20 * 60);
     const results = await pipeline.exec();
 
-    const total = (results?.[0] as number) ?? 0;
-    const fallbacks = (results?.[1] as number) ?? 0;
+    const total = Array.isArray(results?.[0]) ? (results[0][1] as number) ?? 0 : (results?.[0] as number) ?? 0;
+    const fallbacks = Array.isArray(results?.[1]) ? (results[1][1] as number) ?? 0 : (results?.[1] as number) ?? 0;
     if (total < 10) return;
 
     const fallbackRatePct = (fallbacks / total) * 100;
@@ -305,8 +306,8 @@ export async function recordLatencyViolation(exceededBudget: boolean, latencyMs:
     pipeline.expire(windowKey, 20 * 60);
     const results = await pipeline.exec();
 
-    const total = (results?.[0] as number) ?? 0;
-    const violations = (results?.[1] as number) ?? 0;
+    const total = Array.isArray(results?.[0]) ? (results[0][1] as number) ?? 0 : (results?.[0] as number) ?? 0;
+    const violations = Array.isArray(results?.[1]) ? (results[1][1] as number) ?? 0 : (results?.[1] as number) ?? 0;
     if (total < 10) return;
 
     const violationRatePct = (violations / total) * 100;

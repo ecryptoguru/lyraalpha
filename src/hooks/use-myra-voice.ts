@@ -157,6 +157,10 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
     emittedIds.current.clear();
     greetingResponsePendingRef.current = false;
     cleanupMedia();
+    // Fire-and-forget: tell the backend to release the concurrency lock so
+    // the user can immediately start a new session. Safe to call even if
+    // no session was ever started (backend will simply return released:false).
+    fetch("/api/support/voice-session", { method: "DELETE" }).catch(() => { /* ignore */ });
   }, [cleanupMedia, clearSilenceTimer]);
 
   const stopVoice = useCallback(() => {

@@ -7,6 +7,7 @@ import { addCredits } from "@/lib/services/credit.service";
 import { CreditTransactionType } from "@/generated/prisma/enums";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
+import { randomUUID } from "crypto";
 
 const logger = createLogger({ service: "lyra-streaming" });
 
@@ -24,7 +25,7 @@ export function refundOnStreamError(
 ): AsyncGenerator<string> {
   const refundPromise = async () => {
     try {
-      await addCredits(userId, creditCost, CreditTransactionType.ADJUSTMENT, "LLM stream failure refund", `lyra-refund:${Date.now()}-${userId.slice(-6)}`);
+      await addCredits(userId, creditCost, CreditTransactionType.ADJUSTMENT, "LLM stream failure refund", `lyra-refund:${randomUUID().slice(0, 8)}-${userId.slice(-6)}`);
       logger.warn({ userId, creditCost, streamLabel }, "Credits refunded after mid-stream LLM failure");
     } catch (refundError) {
       logger.error({ err: sanitizeError(refundError), userId, creditCost }, "Credit refund failed on mid-stream LLM failure");

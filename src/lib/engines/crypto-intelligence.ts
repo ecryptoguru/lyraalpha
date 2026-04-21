@@ -13,6 +13,7 @@ export interface NetworkActivityScore {
   tvlHealth: number; // 0-100 sub-score
   communityEngagement: number; // 0-100 sub-score
   onChainActivity: number; // 0-100 sub-score (from GeckoTerminal txns)
+  validatorConcentration: number; // 0-100 sub-score (inverted — high = more decentralized)
   drivers: string[];
 }
 
@@ -39,6 +40,12 @@ export interface CryptoStructuralRisk {
   dependencyRisk: { score: number; level: string; description: string };
   governanceRisk: { score: number; level: string; description: string };
   maturityRisk: { score: number; level: string; description: string };
+  unlockPressure: { score: number; level: string; description: string };
+  mevExposure: { score: number; level: string; description: string };
+  bridgeDependency: { score: number; level: string; description: string };
+  yieldSustainability: { score: number; level: string; description: string };
+  oracleRisk: { score: number; level: string; description: string };
+  inflationRisk: { score: number; level: string; description: string };
   overallLevel: "low" | "moderate" | "high" | "critical";
 }
 
@@ -113,6 +120,15 @@ interface AssetData {
   avgTrustScore: number | null;
   price: number | null;
   changePercent: number | null;
+  // Phase 3: On-chain concentration & leverage data
+  holderGini?: number | null;
+  top10HolderPercent?: number | null;
+  fundingRate?: number | null;
+  // Phase 3: Structured crypto data
+  exchangeFlows?: Record<string, unknown> | null;
+  stakingYield?: Record<string, unknown> | null;
+  emissionSchedule?: Record<string, unknown> | null;
+  governanceData?: Record<string, unknown> | null;
 }
 
 export class CryptoIntelligenceEngine {
@@ -138,6 +154,13 @@ export class CryptoIntelligenceEngine {
           avgTrustScore: true,
           price: true,
           changePercent: true,
+          holderGini: true,
+          top10HolderPercent: true,
+          fundingRate: true,
+          exchangeFlows: true,
+          stakingYield: true,
+          emissionSchedule: true,
+          governanceData: true,
         },
       });
 
@@ -149,10 +172,16 @@ export class CryptoIntelligenceEngine {
       // Fetch DefiLlama + GeckoTerminal in parallel (independent APIs)
       const [tvlData, poolSummary] = await Promise.all([
         coingeckoId
-          ? DefiLlamaService.getTVLData(coingeckoId).catch(() => null)
+          ? DefiLlamaService.getTVLData(coingeckoId).catch((e) => {
+              logger.warn({ symbol, err: String(e), source: "defillama" }, "TVL fetch failed");
+              return null;
+            })
           : Promise.resolve(null),
         coingeckoId
-          ? GeckoTerminalService.getPoolSummaryForCoinGeckoId(coingeckoId).catch(() => null)
+          ? GeckoTerminalService.getPoolSummaryForCoinGeckoId(coingeckoId).catch((e) => {
+              logger.warn({ symbol, err: String(e), source: "geckoterminal" }, "Pool summary fetch failed");
+              return null;
+            })
           : Promise.resolve(null),
       ]);
 
@@ -163,13 +192,20 @@ export class CryptoIntelligenceEngine {
       const networkActivity = this.computeNetworkActivity(cg, tvlData, poolSummary);
 
       // 2. Holder Stability Score
-      const holderStability = this.computeHolderStability(cg, poolSummary, marketCap);
+      const holderStability = this.computeHolderStability(
+        cg, poolSummary, marketCap,
+        asset.holderGini, asset.top10HolderPercent,
+      );
 
       // 3. Liquidity Risk Score
       const liquidityRisk = this.computeLiquidityRisk(marketCap, volume, poolSummary);
 
-      // 4. Structural Risk
-      const structuralRisk = this.computeStructuralRisk(cg);
+      // 4. Structural Risk (fetch calendar unlock events from DB)
+      const unlockEvents = await prisma.tokenUnlockEvent.findMany({
+        where: { assetId },
+        select: { unlockDate: true, amount: true, percentOfSupply: true, category: true },
+      });
+      const structuralRisk = this.computeStructuralRisk(cg, marketCap, unlockEvents, poolSummary, asset.stakingYield as Record<string, unknown> | null, asset.emissionSchedule as Record<string, unknown> | null);
 
       // 5. Enhanced Trust
       const enhancedTrust = this.computeEnhancedTrust(cg, structuralRisk, asset.avgTrustScore);
@@ -198,7 +234,9 @@ export class CryptoIntelligenceEngine {
   ): NetworkActivityScore {
     const drivers: string[] = [];
 
-    // Dev Activity (30% weight)
+    // Dev Activity (20% weight) — reduced from 30% because on-chain DAU/MAU is a
+    // stronger price predictor than GitHub activity (CI-1: "zombie" repos with dead chains
+    // can still score high when dev activity dominates).
     let devScore = 30; // default neutral
     if (cg.developer) {
       const commits = cg.developer.commitCount4Weeks ?? 0;
@@ -249,7 +287,7 @@ export class CryptoIntelligenceEngine {
     if (sentiment > 70) drivers.push(`Strong sentiment: ${sentiment.toFixed(0)}% positive`);
     if (watchlist > 100000) drivers.push(`${(watchlist / 1000).toFixed(0)}K watchlist users`);
 
-    // On-Chain Activity (20% weight) — from GeckoTerminal
+    // On-Chain Activity (25% weight) — from GeckoTerminal
     let onChainScore = 30;
     if (poolSummary) {
       const totalTxns = poolSummary.totalBuys24h + poolSummary.totalSells24h;
@@ -259,11 +297,30 @@ export class CryptoIntelligenceEngine {
       if (poolSummary.dexCount > 3) drivers.push(`Active on ${poolSummary.dexCount} DEXs`);
     }
 
+    // Validator Concentration (15% weight) — heuristic from chain type and market position
+    // Small-cap L1s tend to have more centralized validator sets
+    let validatorConcentration = 50;
+    const categories = cg.categories || [];
+    const isL1 = categories.some(c => c?.toLowerCase().includes("layer 1") || c?.toLowerCase().includes("smart contract"));
+    const rank = cg.marketCapRank ?? 999;
+    if (!isL1) {
+      validatorConcentration = 70; // Non-L1 tokens rely on host chain validators = moderate decentralization
+    } else if (rank <= 10) {
+      validatorConcentration = 80; // Top L1s (ETH, SOL) have broad validator sets
+    } else if (rank <= 50) {
+      validatorConcentration = 50; // Mid-cap L1s — moderate concern
+    } else {
+      validatorConcentration = 25; // Small L1s — high validator concentration risk
+    }
+    if (isL1 && rank > 50) drivers.push("Small L1 — validator concentration risk");
+    if (isL1 && rank <= 10) drivers.push("Broad validator distribution expected");
+
     const score = Math.round(
-      devScore * 0.30 +
-      tvlScore * 0.25 +
-      communityScore * 0.25 +
-      onChainScore * 0.20,
+      devScore * 0.20 +
+      tvlScore * 0.20 +
+      communityScore * 0.20 +
+      onChainScore * 0.25 +
+      validatorConcentration * 0.15,
     );
 
     return {
@@ -272,6 +329,7 @@ export class CryptoIntelligenceEngine {
       tvlHealth: clamp(tvlScore),
       communityEngagement: clamp(communityScore),
       onChainActivity: clamp(onChainScore),
+      validatorConcentration: clamp(validatorConcentration),
       drivers,
     };
   }
@@ -282,25 +340,36 @@ export class CryptoIntelligenceEngine {
     cg: CGMeta,
     poolSummary: PoolLiquiditySummary | null,
     marketCap: number,
+    holderGini: number | null = null,
+    top10HolderPercent: number | null = null,
   ): HolderStabilityScore {
     const drivers: string[] = [];
 
     // Supply Concentration (30% weight) — inverted: more distributed = higher score
     let supplyConcentration = 50;
-    const circulating = cg.circulatingSupply ?? 0;
-    const total = cg.totalSupply ?? circulating;
-    const max = cg.maxSupply ?? total;
 
-    if (total > 0 && circulating > 0) {
-      const circulatingRatio = circulating / total;
-      // High circulating ratio = more distributed = higher score
-      supplyConcentration = Math.round(circulatingRatio * 80 + 10);
-      if (circulatingRatio < 0.3) drivers.push(`Only ${(circulatingRatio * 100).toFixed(0)}% circulating — dilution risk`);
-      if (circulatingRatio > 0.8) drivers.push("Well-distributed supply");
-    }
-    if (max && max > 0 && total && total > max * 0.9) {
-      supplyConcentration = Math.min(100, supplyConcentration + 10);
-      drivers.push("Near max supply");
+    // Phase 3 (CI-6): If on-chain Gini / top10 data is available, weight it at 60%
+    // and fall back to circulating/total ratio at 40%.
+    if (top10HolderPercent != null && holderGini != null) {
+      const giniScore = Math.round(Math.max(0, 100 - holderGini * 100));
+      const top10Score = Math.round(Math.max(0, 100 - top10HolderPercent));
+      supplyConcentration = Math.round(giniScore * 0.5 + top10Score * 0.5);
+      if (top10HolderPercent > 50) drivers.push(`Top 10 holders control ${top10HolderPercent.toFixed(1)}% — whale concentration risk`);
+      else if (top10HolderPercent < 20) drivers.push("Well-distributed holder base");
+    } else {
+      const circulating = cg.circulatingSupply ?? 0;
+      const total = cg.totalSupply ?? circulating;
+
+      if (total > 0 && circulating > 0) {
+        const circulatingRatio = circulating / total;
+        // High circulating ratio = more distributed = higher score
+        supplyConcentration = Math.round(circulatingRatio * 100);
+        if (circulatingRatio < 0.3) drivers.push(`Only ${(circulatingRatio * 100).toFixed(0)}% circulating — dilution risk`);
+        if (circulatingRatio > 0.8) drivers.push("Well-distributed supply");
+      }
+      // Removed: +10 floor bias (HB-5). Near-max supply already scores high from
+      // circulating/total ratio; the extra +10 was inflating scores for tokens
+      // with no meaningful holder distribution improvement.
     }
 
     // Buy Pressure (25% weight) — from GeckoTerminal buy/sell ratio
@@ -329,7 +398,7 @@ export class CryptoIntelligenceEngine {
     const change7d = Math.abs(cg.priceChangePercentage7d ?? 0);
     // Blend 30d (70%) and 7d (30%) for more responsive stability signal
     const blendedVolatility = change30d * 0.7 + change7d * 0.3;
-    priceStability = Math.round(Math.max(5, 100 - blendedVolatility * 1.8));
+    priceStability = Math.round(Math.max(0, 100 - blendedVolatility * 1.8));
     if (change7d > 20) drivers.push(`High 7d volatility: ${change7d.toFixed(0)}%`);
     if (change30d < 10 && change7d < 10) drivers.push("Stable price action");
 
@@ -359,14 +428,14 @@ export class CryptoIntelligenceEngine {
   ): LiquidityRiskScore {
     const drivers: string[] = [];
 
-    // Volume/MCap ratio (35% weight)
+    // Volume/MCap ratio (35% weight) — log-scaled for discriminative power
     let volumeToMcap = 30;
     if (marketCap > 0 && volume > 0) {
       const ratio = volume / marketCap;
-      // ratio 0.001→10, 0.01→30, 0.05→60, 0.1→80, 0.2+→100
-      volumeToMcap = Math.round(Math.min(100, ratio * 500));
+      // Log-scaled: 0.1%→15, 1%→40, 5%→65, 10%→80, 20%+→95
+      volumeToMcap = Math.round(Math.min(95, Math.max(5, 25 + Math.log10(Math.max(0.001, ratio)) * 25)));
       if (ratio > 0.1) drivers.push(`High volume/mcap: ${(ratio * 100).toFixed(1)}%`);
-      if (ratio < 0.01) drivers.push("Low trading volume relative to market cap");
+      if (ratio < 0.005) drivers.push("Very low trading volume relative to market cap");
     }
 
     // DEX Liquidity (30% weight) — from GeckoTerminal
@@ -421,13 +490,24 @@ export class CryptoIntelligenceEngine {
 
   static computeStructuralRisk(
     cg: CGMeta,
+    marketCap: number,
+    unlockEvents: Array<{ unlockDate: Date; amount: number | null; percentOfSupply: number | null; category: string | null }> = [],
+    poolSummary: PoolLiquiditySummary | null = null,
+    stakingYield: Record<string, unknown> | null = null,
+    emissionSchedule: Record<string, unknown> | null = null,
   ): CryptoStructuralRisk {
+    const categories = cg.categories || [];
+    // MB-1: Precompute lowercase category set once to avoid repeated O(n×m) scans
+    const categorySet = new Set(categories.map(c => (c || "").toLowerCase()));
+    const hasCategory = (keywords: string[]) => keywords.some(k => categorySet.has(k) || categories.some(c => (c || "").toLowerCase().includes(k)));
+    const isL1 = hasCategory(["layer 1", "smart contract"]) || categories.some(c => c?.toLowerCase().includes("layer 1"));
+    const isMultiChain = hasCategory(["cross-chain", "interoperability"]);
+    const isWrapped = hasCategory(["wrapped"]);
+    const isDeFi = hasCategory(["defi", "dex"]);
+
     // Dependency Risk: single-chain vs multi-chain
     let depScore = 50;
     let depDesc = "Unknown chain dependency";
-    const categories = cg.categories || [];
-    const isL1 = categories.some(c => c?.toLowerCase().includes("layer 1") || c?.toLowerCase().includes("smart contract"));
-    const isMultiChain = categories.some(c => c?.toLowerCase().includes("cross-chain") || c?.toLowerCase().includes("interoperability"));
 
     if (isL1) {
       depScore = 20; // L1s have low dependency risk
@@ -482,7 +562,219 @@ export class CryptoIntelligenceEngine {
       }
     }
 
-    const avgRisk = (depScore + govScore + matScore) / 3;
+    // Unlock Pressure Risk (CI-4): prefer actual calendar data, fallback to MCap/FDV heuristic
+    let unlockScore = 50;
+    let unlockDesc = "Unknown unlock schedule";
+
+    // Phase 3: Use real TokenUnlockEvent data when available
+    const now = Date.now();
+    const next30d = unlockEvents.filter(
+      e => {
+        const t = new Date(e.unlockDate).getTime();
+        return t >= now && t <= now + 30 * 24 * 60 * 60 * 1000;
+      },
+    );
+    const totalSupply = cg.totalSupply ?? cg.circulatingSupply ?? 1;
+    const next30dUnlockPct = totalSupply > 0
+      ? next30d.reduce((sum, e) => sum + (e.percentOfSupply ?? (e.amount ? e.amount / totalSupply : 0)), 0)
+      : 0;
+
+    if (next30d.length > 0 && totalSupply > 0) {
+      unlockScore = Math.min(100, Math.round(next30dUnlockPct * 500)); // 20% unlock in 30d = 100 score
+      if (unlockScore > 80) {
+        unlockDesc = `Severe unlock overhang — ${(next30dUnlockPct * 100).toFixed(1)}% unlocking in 30d (${next30d.length} events)`;
+      } else if (unlockScore > 50) {
+        unlockDesc = `Significant unlock pressure — ${(next30dUnlockPct * 100).toFixed(1)}% unlocking in 30d`;
+      } else if (unlockScore > 25) {
+        unlockDesc = `Moderate unlock schedule — ${(next30dUnlockPct * 100).toFixed(1)}% in 30d`;
+      } else {
+        unlockDesc = `Limited near-term unlocks — ${(next30dUnlockPct * 100).toFixed(1)}% in 30d`;
+      }
+    } else {
+      // Fallback: inferred from supply ratios and FDV gap
+      const circulating = cg.circulatingSupply ?? 0;
+      const total = cg.totalSupply ?? circulating;
+      const max = cg.maxSupply ?? total;
+      const fdv = cg.fullyDilutedValuation ?? 0;
+
+      if (marketCap > 0 && fdv > 0) {
+        const mcapToFdv = marketCap / fdv;
+        if (mcapToFdv < 0.15) {
+          unlockScore = 90;
+          unlockDesc = `Severe unlock overhang — MCap/FDV only ${(mcapToFdv * 100).toFixed(0)}%`;
+        } else if (mcapToFdv < 0.35) {
+          unlockScore = 70;
+          unlockDesc = `Significant future dilution risk — MCap/FDV ${(mcapToFdv * 100).toFixed(0)}%`;
+        } else if (mcapToFdv < 0.6) {
+          unlockScore = 45;
+          unlockDesc = `Moderate dilution ahead — MCap/FDV ${(mcapToFdv * 100).toFixed(0)}%`;
+        } else {
+          unlockScore = 20;
+          unlockDesc = `Limited unlock pressure — MCap/FDV ${(mcapToFdv * 100).toFixed(0)}%`;
+        }
+      } else if (max > 0 && total > 0) {
+        const totalRatio = total / max;
+        if (totalRatio > 0.9) {
+          unlockScore = 20;
+          unlockDesc = "Near-full supply in circulation — low dilution";
+        } else if (totalRatio > 0.6) {
+          unlockScore = 45;
+          unlockDesc = `~${(totalRatio * 100).toFixed(0)}% of max supply issued — moderate remaining`;
+        } else {
+          unlockScore = 70;
+          unlockDesc = `Only ${(totalRatio * 100).toFixed(0)}% of max supply issued — high dilution risk`;
+        }
+      } else if (!max && !total) {
+        unlockScore = 25;
+        unlockDesc = "No max supply cap — inflation risk instead of unlock risk";
+      }
+    }
+
+    // MEV Exposure Risk (CI-3): Calibrate from binary category score to continuous score
+    // using pool liquidity depth and concentration as proxy for slippage / sandwich risk.
+    let mevScore = 50;
+    let mevDesc = "Unknown MEV exposure";
+    if (isDeFi) {
+      mevScore = 70;
+      mevDesc = "DeFi token — high base MEV exposure via DEX trading";
+    } else if (isL1) {
+      mevScore = 40;
+      mevDesc = "L1 asset — moderate MEV from chain-level activity";
+    } else if (categories.some(c => c?.toLowerCase().includes("meme"))) {
+      mevScore = 60;
+      mevDesc = "Meme token — speculative DEX activity creates MEV opportunities";
+    } else {
+      mevScore = 35;
+      mevDesc = "Utility token — limited MEV exposure";
+    }
+
+    // Pool-data calibration: low liquidity + high concentration = higher MEV extraction risk
+    if (poolSummary) {
+      let mevAdjustment = 0;
+      if (poolSummary.totalReserveUsd < 1_000_000) mevAdjustment += 18;
+      else if (poolSummary.totalReserveUsd < 10_000_000) mevAdjustment += 8;
+      if (poolSummary.top3PoolConcentration > 90) mevAdjustment += 14;
+      else if (poolSummary.top3PoolConcentration > 70) mevAdjustment += 6;
+      if (poolSummary.dexCount >= 5) mevAdjustment -= 8; // more competition, harder to extract
+      else if (poolSummary.totalPools <= 2) mevAdjustment += 6; // few pools = easier manipulation
+      mevScore = Math.min(100, Math.max(0, mevScore + mevAdjustment));
+      if (mevAdjustment > 10) {
+        mevDesc += ` — elevated by thin/concentrated liquidity (${poolSummary.top3PoolConcentration.toFixed(0)}% in top 3 pools, $${(poolSummary.totalReserveUsd / 1e6).toFixed(1)}M total reserve)`;
+      } else if (mevAdjustment < -5) {
+        mevDesc += ` — moderated by broad DEX distribution (${poolSummary.dexCount} DEXs, ${poolSummary.totalPools} pools)`;
+      }
+    }
+
+    // Bridge Dependency Risk: wrapped tokens and cross-chain assets
+    let bridgeScore = 50;
+    let bridgeDesc = "Unknown bridge dependency";
+    if (isWrapped) {
+      bridgeScore = 85;
+      bridgeDesc = "Wrapped token — dependent on bridge security and solvency";
+    } else if (isMultiChain) {
+      bridgeScore = 55;
+      bridgeDesc = "Multi-chain asset — bridge risk across multiple chains";
+    } else if (isL1) {
+      bridgeScore = 10;
+      bridgeDesc = "Native L1 asset — no bridge dependency";
+    } else {
+      bridgeScore = 40;
+      bridgeDesc = "Single-chain native token — no bridge risk";
+    }
+
+    // Yield Sustainability Risk (CI-7): assess staking yield source sustainability
+    let yieldScore = 50;
+    let yieldDesc = "No staking yield data";
+    if (stakingYield) {
+      const syRaw = stakingYield as { source?: string; apr?: number; sustainable?: boolean; decayRate?: number } | null;
+      if (!syRaw) {
+        // malformed stakingYield — leave defaults
+      } else {
+        const sy = syRaw;
+        const source = (sy.source || "").toLowerCase();
+      const apr = Number.isFinite(sy.apr) ? sy.apr : null;
+      const decay = Number.isFinite(sy.decayRate) ? sy.decayRate : null;
+      if (source.includes("fee") || source.includes("revenue") || source.includes("protocol")) {
+        yieldScore = 20;
+        yieldDesc = "Yield from protocol fees/revenue — structurally sustainable";
+      } else if (source.includes("ponzi") || source.includes("reflexive") || source.includes("p2p") || (sy.sustainable === false)) {
+        yieldScore = 85;
+        yieldDesc = "Yield from reflexive/ponzi mechanics — high unsustainability risk";
+      } else if (source.includes("emission") || source.includes("inflation") || source.includes("reward")) {
+        const effectiveDecay = decay ?? 0;
+        yieldScore = Math.round(Math.min(100, 40 + (1 - effectiveDecay) * 50));
+        yieldDesc = `Emission-based yield${effectiveDecay > 0 ? ` with ${(effectiveDecay * 100).toFixed(0)}% decay` : ""} — dilution risk`;
+      } else if (apr != null && apr > 50) {
+        yieldScore = 70;
+        yieldDesc = `Extremely high APR (${apr.toFixed(0)}%) — unsustainable without fee/revenue backing`;
+      } else if (apr != null && apr > 20) {
+        yieldScore = 50;
+        yieldDesc = `Elevated APR (${apr.toFixed(0)}%) — verify fee backing vs inflation`;
+      } else if (apr != null) {
+        yieldScore = 30;
+        yieldDesc = `Moderate APR (${apr.toFixed(0)}%) — typically sustainable if protocol-revenue backed`;
+      }
+    }
+  }
+
+    // Oracle Risk (CI-9): DeFi protocols depend on price oracles — assess exposure
+    let oracleScore = 50;
+    let oracleDesc = "Unknown oracle dependency";
+    if (isDeFi || categories.some(c => c?.toLowerCase().includes("amm") || c?.toLowerCase().includes("dex") || c?.toLowerCase().includes("lending"))) {
+      oracleScore = 55;
+      oracleDesc = "DeFi/AMM/DEX/Lending — price oracle dependent; custom TWAP or single-source feeds carry manipulation risk";
+      // Smaller / newer DeFi = higher oracle risk (less battle-tested, fewer audits)
+      if (cg.marketCapRank && cg.marketCapRank > 100) {
+        oracleScore += 15;
+        oracleDesc += " — small-cap protocol, limited oracle resilience";
+      } else if (cg.marketCapRank && cg.marketCapRank <= 20) {
+        oracleScore -= 15;
+        oracleDesc += " — established protocol with likely multi-source oracle";
+      }
+      // Low liquidity amplifies oracle manipulation payoff
+      if (poolSummary && poolSummary.totalReserveUsd < 5_000_000) {
+        oracleScore += 12;
+        oracleDesc += " — low DEX liquidity makes oracle manipulation more profitable";
+      }
+    } else if (isL1) {
+      oracleScore = 10;
+      oracleDesc = "L1 native asset — no direct oracle dependency";
+    } else {
+      oracleScore = 25;
+      oracleDesc = "Limited oracle exposure — utility token with minimal on-chain value derivation";
+    }
+
+    // Inflation Risk (CI-5): score supply inflation / emissions trajectory
+    let inflationScore = 50;
+    let inflationDesc = "No emission schedule data";
+    if (emissionSchedule) {
+      const es = emissionSchedule as { currentIssuance?: number; maxSupply?: number; nextYearInflationPct?: number; halvingNextDate?: string } | null;
+      if (es?.nextYearInflationPct != null) {
+        const pct = es.nextYearInflationPct;
+        if (pct <= 1) {
+          inflationScore = 20; inflationDesc = `Low inflation trajectory (${pct.toFixed(1)}% next year) — limited dilution risk`;
+        } else if (pct <= 5) {
+          inflationScore = 40; inflationDesc = `Moderate inflation (${pct.toFixed(1)}% next year) — manageable dilution`;
+        } else if (pct <= 15) {
+          inflationScore = 65; inflationDesc = `Elevated inflation (${pct.toFixed(1)}% next year) — significant holder dilution risk`;
+        } else {
+          inflationScore = 85; inflationDesc = `High inflation (${pct.toFixed(1)}% next year) — aggressive supply dilution`;
+        }
+      } else if (es?.currentIssuance != null && es?.maxSupply != null && es.maxSupply > 0) {
+        const remaining = 1 - (es.currentIssuance / es.maxSupply);
+        inflationScore = Math.round(Math.max(10, Math.min(90, remaining * 100)));
+        inflationDesc = `${(remaining * 100).toFixed(0)}% of max supply remaining — ${remaining > 0.5 ? "significant" : "limited"} future dilution`;
+      }
+    } else if (cg.maxSupply && cg.totalSupply && cg.maxSupply > 0) {
+      const remaining = 1 - (cg.totalSupply / cg.maxSupply);
+      inflationScore = Math.round(Math.max(10, Math.min(90, remaining * 100)));
+      inflationDesc = `${(remaining * 100).toFixed(0)}% of max supply unissued — future dilution risk from remaining emissions`;
+    }
+
+    // Overall: weighted average across all 9 structural risk dimensions
+    const avgRisk = Math.round(
+      (depScore + govScore + matScore + unlockScore + mevScore + bridgeScore + yieldScore + oracleScore + inflationScore) / 9,
+    );
     const overallLevel: CryptoStructuralRisk["overallLevel"] =
       avgRisk >= 70 ? "critical" :
       avgRisk >= 50 ? "high" :
@@ -492,6 +784,12 @@ export class CryptoIntelligenceEngine {
       dependencyRisk: { score: depScore, level: riskLevel(depScore), description: depDesc },
       governanceRisk: { score: govScore, level: riskLevel(govScore), description: govDesc },
       maturityRisk: { score: matScore, level: riskLevel(matScore), description: matDesc },
+      unlockPressure: { score: unlockScore, level: riskLevel(unlockScore), description: unlockDesc },
+      mevExposure: { score: mevScore, level: riskLevel(mevScore), description: mevDesc },
+      bridgeDependency: { score: bridgeScore, level: riskLevel(bridgeScore), description: bridgeDesc },
+      yieldSustainability: { score: yieldScore, level: riskLevel(yieldScore), description: yieldDesc },
+      oracleRisk: { score: oracleScore, level: riskLevel(oracleScore), description: oracleDesc },
+      inflationRisk: { score: inflationScore, level: riskLevel(inflationScore), description: inflationDesc },
       overallLevel,
     };
   }
@@ -505,7 +803,7 @@ export class CryptoIntelligenceEngine {
   ): EnhancedCryptoTrust {
     // 1. Protocol Age (15%)
     // Many top coins (ETH, BTC) lack genesisDate in CoinGecko — use market cap rank as proxy
-    let ageScore = 40; // neutral default
+    let ageScore = 65; // default: unknown age = elevated risk (MB-5)
     if (cg.genesisDate) {
       const ageYears = (Date.now() - new Date(cg.genesisDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000);
       ageScore = Math.min(100, Math.round(ageYears * 15));

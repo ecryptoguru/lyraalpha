@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { streamText } from "ai";
 import { prisma } from "@/lib/prisma";
 import { AI_CONFIG, getSharedAISdkClient, getTierConfig, HISTORY_CAPS, getGpt54Deployment, getTargetOutputTokens, type Gpt54Role, type QueryComplexity } from "./config";
@@ -22,7 +23,7 @@ import { sanitizeError, createTimer } from "@/lib/logger/utils";
 import { buildCompressedContext, extractMentionedSymbols, truncateAtSentence } from "./context-builder";
 import { analyzeBehavioralPatterns } from "./behavioral-intelligence";
 import { findHistoricalAnalogs, formatAnalogContext } from "@/lib/engines/historical-analog";
-import { calculateRiskRewardAsymmetry, formatRiskRewardContext } from "@/lib/engines/risk-reward";
+import { calculateRiskRewardAsymmetry, formatRiskRewardContext, calculateCryptoRiskReward, formatCryptoRiskRewardContext, type CryptoRiskRewardInput } from "@/lib/engines/risk-reward";
 import { classifyQuery } from "./query-classifier";
 import { AssetEnrichment } from "./types";
 import { calculateLLMCost } from "./cost-calculator";
@@ -85,6 +86,10 @@ const logger = createLogger({ service: "lyra-ai" });
 
 // ─── Precompiled query-classification regexes (hoisted from per-request scope) ──
 // Compiling once at module load saves ~10µs per request vs inline RegExp creation.
+// Hoisted trivial query regex (compiled once, avoids per-request RegExp overhead)
+const TRIVIAL_QUERY_RE =
+  /^(?:hi|hello|hey|thanks|thank you|ok|okay|got it|sure|yes|no|bye|goodbye|good morning|good evening)\s*[.!?]*\s*$/i;
+
 const MACRO_DETECTED_RE =
   /\b(?:macro|regime|inflation|fed|rates|yields|economy|recession|cpi|ppi|gdp|market sentiment|overall market|sector rotation)\b/i;
 const FUNDAMENTAL_EXCLUSION_RE =
@@ -224,7 +229,7 @@ function parseMarketCapValue(marketCap?: number | null): number {
   return marketCap ?? 0;
 }
 
-function inferSearchRegion(symbol: string, contextRegion?: string): "US" | "IN" {
+function inferSearchRegion(_symbol: string, contextRegion?: string): "US" | "IN" {
   if ((contextRegion || "").toUpperCase() === "IN") return "IN";
   return "US";
 }
@@ -475,7 +480,7 @@ export async function generateLyraStream(
   const gptReasoningEffort = responseMode === "default" ? tierConfig.reasoningEffort : "none";
 
   // Hoist trivial detection before any DB work — greetings/acks skip asset resolution entirely.
-  const isTrivial = /^(?:hi|hello|hey|thanks|thank you|ok|okay|got it|sure|yes|no|bye|goodbye|good morning|good evening)\s*[.!?]*\s*$/i.test(query.trim());
+  const isTrivial = TRIVIAL_QUERY_RE.test(query.trim());
 
   // Extract mentioned symbols once from all messages — reuse for symbol resolution, context building, and topic detection.
   const mentionedSymbols = extractMentionedSymbols(safeMessages as Array<{ role: string; content: string | unknown }>);
@@ -748,6 +753,10 @@ export async function generateLyraStream(
             cryptoIntelligence: deepFields,
             category: true, currency: true,
             coingeckoId: true,
+            // Phase 3: On-chain concentration & leverage data (CI-6, CB-3)
+            holderGini: true, top10HolderPercent: true, fundingRate: true, openInterest: true,
+            // Phase 3: Exchange flows, staking, emissions, governance (CB-4, CB-5, CB-6)
+            exchangeFlows: true, stakingYield: true, emissionSchedule: true, governanceData: true,
           };
 
           const asset = await prisma.asset.findUnique({
@@ -774,6 +783,16 @@ export async function generateLyraStream(
               currency: asset.currency,
               coingeckoId: asset.coingeckoId,
               region: asset.region,
+              // Phase 3: On-chain concentration & leverage data (CI-6, CB-3)
+              holderGini: asset.holderGini,
+              top10HolderPercent: asset.top10HolderPercent,
+              fundingRate: asset.fundingRate,
+              openInterest: asset.openInterest,
+              // Phase 3: Exchange flows, staking, emissions, governance (CB-4, CB-5, CB-6)
+              exchangeFlows: asset.exchangeFlows as Record<string, unknown> | null,
+              stakingYield: asset.stakingYield as Record<string, unknown> | null,
+              emissionSchedule: asset.emissionSchedule as Record<string, unknown> | null,
+              governanceData: asset.governanceData as Record<string, unknown> | null,
             };
           }
         } catch (e) {
@@ -850,6 +869,16 @@ export async function generateLyraStream(
               tier !== "SIMPLE" && safeMessages.length >= 2 ? getSessionNotes(userId, "lyra") : Promise.resolve(""),
             ]);
             const ragResult = await Promise.race([ragWork, ragTimeout]);
+            // Instrument late RAG resolution for capacity planning
+            ragWork.then((lateResult) => {
+              if (ragResult === null && lateResult !== null) {
+                const lateKnowledge = lateResult[0] as { chunkCount?: number } | undefined;
+                logger.warn(
+                  { tier, timeoutMs: RAG_TIMEOUT_MS, lateChunkCount: lateKnowledge?.chunkCount ?? 0 },
+                  "RAG resolved after timeout — underlying work completed late",
+                );
+              }
+            }).catch((e) => logFireAndForgetError(e, "rag-late-resolution"));
             const ragRetrievalMs = Date.now() - ragStartTime;
             if (ragResult === null) {
               logger.warn({ tier, timeoutMs: RAG_TIMEOUT_MS }, "RAG retrieval timed out — proceeding without context");
@@ -1055,22 +1084,48 @@ export async function generateLyraStream(
             let riskRewardStr = "";
             if (priceData && assetEnrichment) {
               const currentPrice = priceData.price;
-              const fiftyTwoWeekHigh = priceData.fiftyTwoWeekHigh;
-              const fiftyTwoWeekLow = priceData.fiftyTwoWeekLow;
-              // Attempt to extract analyst target from metadata if available
-              const metadata = assetEnrichment.metadata as Record<string, unknown> | null;
-              const analystTargetMean = metadata?.analystTargetMean as number | undefined;
               const currentRegime = analogResult?.currentFingerprint.regimeState || "NORMAL";
-              
-              const rrScore = calculateRiskRewardAsymmetry(
-                currentPrice,
-                analystTargetMean,
-                fiftyTwoWeekHigh,
-                fiftyTwoWeekLow,
-                currentRegime
-              );
-              if (rrScore) {
-                riskRewardStr = formatRiskRewardContext(rrScore);
+              const isCryptoAsset = (assetEnrichment?.type || "").toUpperCase() === "CRYPTO";
+
+              if (isCryptoAsset) {
+                // Crypto-native risk/reward using ATH/ATL and on-chain metrics
+                const metadata = assetEnrichment.metadata as Record<string, unknown> | null;
+                const cgMeta = (metadata?.coingecko as Record<string, unknown>) || {};
+                const ath = (cgMeta.ath as number | undefined) || priceData.fiftyTwoWeekHigh;
+                const atl = (cgMeta.atl as number | undefined) || priceData.fiftyTwoWeekLow;
+                const fdvToMcap = (cgMeta.fdv_to_market_cap as number | undefined)
+                  || ((metadata?.fdv && metadata?.marketCap)
+                    ? (metadata.fdv as number) / (metadata.marketCap as number)
+                    : undefined);
+                const cycleStage = (metadata?.cycleStage as string | undefined) || "unknown";
+
+                const rrScore = calculateCryptoRiskReward({
+                  currentPrice: currentPrice ?? 0,
+                  ath,
+                  atl,
+                  cycleStage: cycleStage as CryptoRiskRewardInput["cycleStage"],
+                  fdvToMcapRatio: fdvToMcap,
+                  currentRegime,
+                });
+                if (rrScore) {
+                  riskRewardStr = formatCryptoRiskRewardContext(rrScore, cycleStage);
+                }
+              } else {
+                const fiftyTwoWeekHigh = priceData.fiftyTwoWeekHigh;
+                const fiftyTwoWeekLow = priceData.fiftyTwoWeekLow;
+                const metadata = assetEnrichment.metadata as Record<string, unknown> | null;
+                const analystTargetMean = metadata?.analystTargetMean as number | undefined;
+
+                const rrScore = calculateRiskRewardAsymmetry(
+                  currentPrice,
+                  analystTargetMean,
+                  fiftyTwoWeekHigh,
+                  fiftyTwoWeekLow,
+                  currentRegime
+                );
+                if (rrScore) {
+                  riskRewardStr = formatRiskRewardContext(rrScore);
+                }
               }
             }
 
@@ -1178,8 +1233,12 @@ logRetrievalMetric({
     ? analyzeBehavioralPatterns(
         recentUserMessages
           .map((m, idx) => ({
-            assetSymbol: typeof m.content === "string" && m.content ? resolvedSymbol !== "GLOBAL" ? resolvedSymbol : undefined : undefined,
+            // CB-2: Don't backfill every historical message with the current query's symbol.
+            // Behavioral pattern detection relies on per-message asset symbols; falsifying them
+            // breaks concentration, recency, and FOMO detection across the conversation.
+            assetSymbol: undefined,
             assetType: resolvedAssetType !== "GLOBAL" ? resolvedAssetType : undefined,
+            query: typeof m.content === "string" ? m.content : undefined,
             // Stagger timestamps by message index (1s apart, oldest first) so hasDistinctTimestamps=true
             // and recency/FOMO pattern detection works correctly on in-session conversation history.
             timestamp: new Date(Date.now() - (recentUserMessages.length - 1 - idx) * 1000),
@@ -1266,8 +1325,8 @@ logRetrievalMetric({
   // BUILD_LYRA_REFERENCE_EXAMPLE returns "" for MODERATE/COMPLEX so this is a no-op there.
   const messagesWithExample: LyraMessage[] =
     referenceExample
-      ? [{ role: "assistant", content: referenceExample }, ...messages]
-      : [...messages];
+      ? [{ role: "assistant", content: referenceExample }, ...safeMessages]
+      : [...safeMessages];
 
   // 2b. Build Context Message → goes as system message in messages array (NOT cached, always fresh)
   // skipAssetLinks override lives HERE (not in static prompt) to preserve prompt cache across main chat + sidebar
@@ -1669,7 +1728,7 @@ logRetrievalMetric({
     // violations, daily cap exceeded, insufficient credits) set creditsConsumed=false.
     if (creditsConsumed && consumedCreditCost > 0) {
       try {
-        await addCredits(userId, consumedCreditCost, CreditTransactionType.ADJUSTMENT, "LLM failure refund", `lyra-refund:${Date.now()}-${userId.slice(-6)}`);
+        await addCredits(userId, consumedCreditCost, CreditTransactionType.ADJUSTMENT, "LLM failure refund", `lyra-refund:${randomUUID().slice(0, 8)}-${userId.slice(-6)}`);
         logger.warn({ userId, creditCost: consumedCreditCost }, "Credits refunded after LLM failure");
       } catch (refundError) {
         logger.error({ err: sanitizeError(refundError), userId, creditCost: consumedCreditCost }, "Credit refund failed on LLM failure");

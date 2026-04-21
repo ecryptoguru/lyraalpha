@@ -16,6 +16,7 @@ import { AssetAnalyticsResponse, ScoreDynamics, EventImpact } from "@/types/anal
 import { cn, computeRangePositionPercent, formatCompactNumber, formatPrice, getCurrencyConfig, resolveAnalyticsSyncError } from "@/lib/utils";
 import { getFriendlySymbol } from "@/lib/format-utils";
 import { BackButton } from "@/components/ui/back-button";
+import { createClientLogger } from "@/lib/logger/client";
 import {
   Loader2,
   AlertTriangle,
@@ -289,7 +290,7 @@ export default function AssetPage({
         })
         .catch((e) => {
           if (e instanceof DOMException && e.name === "AbortError") return;
-          console.warn("Score history fetch failed:", e);
+          createClientLogger("asset-page").warn("Score history fetch failed", { err: String(e) });
         });
     }, 600);
     return () => { cancelled = true; clearTimeout(timer); controller.abort(); };

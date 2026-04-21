@@ -6,20 +6,34 @@ import { getGlobalNotes } from "@/lib/ai/memory";
 import { buildMyraVoiceInstructions } from "@/lib/support/voice-prompt";
 import { bm25SearchKnowledge } from "@/lib/support/ai-responder";
 import { checkPromptInjection, INJECTION_PATTERNS } from "@/lib/ai/guardrails";
+import { scrubPIIString } from "@/lib/ai/pii-scrub";
 import { apiError } from "@/lib/api-response";
 import { createLogger } from "@/lib/logger";
-import { redisSetNXStrict } from "@/lib/redis";
+import { redis, redisSetNXStrict } from "@/lib/redis";
 
 const logger = createLogger({ service: "voice-session" });
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// ── OpenAI Direct (not Azure) ────────────────────────────────────────────────
+// The Realtime API (gpt-realtime-mini) is currently only available on the
+// OpenAI native platform (api.openai.com), not on Azure OpenAI. All other
+// Lyra/Myra text generation uses Azure OpenAI for data-residency and cost
+// parity. This route issues an ephemeral token that the browser uses to
+// connect directly to wss://api.openai.com/v1/realtime — the backend does
+// NOT proxy the WebSocket. Keep the native key in OPENAI_API_KEY; do NOT
+// reuse AZURE_OPENAI_API_KEY here.
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? "";
 const VOICE_MODEL = "gpt-realtime-mini";
 const VOICE_OUTPUT_VOICE = "marin";
 const VOICE_SESSION_FETCH_TIMEOUT_MS = 8_000;
-const VOICE_SESSION_CONCURRENCY_TTL = 300; // 5 min — max expected session duration
+// 60s TTL matches the ephemeral token lifetime (~60s). The lock only needs
+// to cover the client_secrets fetch window — once the token is issued the
+// browser connects directly to OpenAI. Releasing immediately on success
+// prevents users from being blocked for 5 min after a failed or aborted
+// session start.
+const VOICE_SESSION_CONCURRENCY_TTL = 60;
 
 const OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime";
 
@@ -94,11 +108,13 @@ export async function GET(request: Request) {
           },
         }),
       }),
-      prisma.user.findUnique({ where: { id: userId }, select: { credits: true } }),
+      prisma.user.findUnique({ where: { id: userId }, select: { credits: true } }).catch(() => null),
       bm25SearchKnowledge(
         "platform features credits plans lyra intel dse score portfolio watchlist compare assets shock simulator",
-      ).then((docs) => docs.slice(0, 3).map((d) => d.content)),
-      getGlobalNotes(userId, "myra"),
+      )
+        .then((docs) => docs.slice(0, 3).map((d) => d.content))
+        .catch(() => [] as string[]),
+      getGlobalNotes(userId, "myra").catch(() => ""),
     ]);
 
     if (!ephemeralResult.ok) {
@@ -114,7 +130,11 @@ export async function GET(request: Request) {
         },
         "Voice session: client_secrets returned a non-OK response",
       );
-      return apiError("Voice session token generation failed", 502);
+      redis.del(concurrencyKey).catch(() => { /* TTL will expire naturally */ });
+      return apiError(
+        "We couldn't start your voice session. This is usually a temporary issue — please try again in a few seconds.",
+        502,
+      );
     }
 
     const data = (await ephemeralResult.json()) as {
@@ -136,7 +156,11 @@ export async function GET(request: Request) {
         },
         "Voice session: client_secrets returned no ephemeral token",
       );
-      return apiError("Voice session token generation failed", 502);
+      redis.del(concurrencyKey).catch(() => { /* TTL will expire naturally */ });
+      return apiError(
+        "We couldn't start your voice session. This is usually a temporary issue — please try again in a few seconds.",
+        502,
+      );
     }
 
     // Build instructions after both DB and token are ready — no extra latency
@@ -145,13 +169,15 @@ export async function GET(request: Request) {
 
     // V-INJ: Validate page param against prompt injection before injecting into voice instructions.
     // The page param is user-controlled (query string) and gets embedded in the system prompt.
+    // Also scrub PII — the referrer path may contain query params with emails, tokens, etc.
     let safePageParam: string | undefined;
     if (pageParam) {
-      const injectionCheck = checkPromptInjection(pageParam);
+      const scrubbedPage = scrubPIIString(pageParam);
+      const injectionCheck = checkPromptInjection(scrubbedPage.normalize("NFKC"));
       if (!injectionCheck.isValid) {
-        logger.warn({ userId, pageParam, reason: injectionCheck.reason }, "Voice session: injection pattern in page param — stripping");
+        logger.warn({ userId, pageParam: scrubbedPage, reason: injectionCheck.reason }, "Voice session: injection pattern in page param — stripping");
       } else {
-        safePageParam = pageParam;
+        safePageParam = scrubbedPage;
       }
     }
 
@@ -159,13 +185,16 @@ export async function GET(request: Request) {
     // Notes are already filtered on write in `distillSessionNotes`, but a new pattern added
     // to the guardrail set after storage would not retroactively filter older rows. Drop
     // any line that matches before embedding into the voice system prompt.
+    // Also re-scrub for PII — notes may contain historic user messages that slipped
+    // through prior guardrails.
     let safeGlobalNotes: string | undefined;
     if (globalNotes) {
-      const lines = globalNotes.split("\n").filter((line) => {
+      const scrubbedNotes = scrubPIIString(globalNotes);
+      const lines = scrubbedNotes.split("\n").filter((line) => {
         const normalized = line.normalize("NFKC");
         return !INJECTION_PATTERNS.some((p) => p.test(normalized));
       });
-      const dropped = globalNotes.split("\n").length - lines.length;
+      const dropped = scrubbedNotes.split("\n").length - lines.length;
       if (dropped > 0) {
         logger.warn({ userId, dropped }, "Voice session: filtered injection-matching memory lines at render");
       }
@@ -184,6 +213,14 @@ export async function GET(request: Request) {
 
     logger.info({ userId, plan: userPlan }, "Voice session: ephemeral token issued");
 
+    // Release the concurrency lock immediately — the ephemeral token is now
+    // the user's session credential. The 60s TTL is only a safety net if
+    // redis.del fails. This prevents users from being blocked after a normal
+    // session start when they refresh or reconnect.
+    redis.del(concurrencyKey).catch((delErr) =>
+      logger.warn({ userId, err: delErr }, "Voice session: failed to release concurrency lock (TTL will expire naturally)"),
+    );
+
     return Response.json({
       mode: "ephemeral",
       ephemeralKey: ephemeralToken,
@@ -194,8 +231,32 @@ export async function GET(request: Request) {
     });
   } catch (e) {
     logger.warn({ userId, err: e }, "Voice session: token generation failed");
-    return apiError("Voice session token generation failed", 502);
+    // Release lock on failure so the user can retry immediately
+    redis.del(concurrencyKey).catch(() => { /* TTL will expire naturally */ });
+    return apiError(
+      "We couldn't start your voice session. This is usually a temporary issue — please try again in a few seconds.",
+      502,
+    );
   } finally {
     clearTimeout(timeoutId);
+  }
+}
+
+/** Explicitly release the voice-session concurrency lock so the user can
+ *  start a new session immediately. Called by the frontend when the user
+ *  closes the voice widget or the session ends naturally.
+ */
+export async function DELETE(_request: Request) {
+  const { userId } = await auth();
+  if (!userId) return apiError("Unauthorized", 401);
+
+  const concurrencyKey = `voice:session:${userId}`;
+  try {
+    await redis.del(concurrencyKey);
+    logger.info({ userId }, "Voice session: concurrency lock released on DELETE");
+    return Response.json({ released: true });
+  } catch (e) {
+    logger.warn({ userId, err: e }, "Voice session: failed to release lock on DELETE");
+    return Response.json({ released: false });
   }
 }

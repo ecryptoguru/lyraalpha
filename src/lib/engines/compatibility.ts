@@ -169,7 +169,7 @@ export function calculateEnhancedCompatibility(
 
   // Apply event impact if available
   let finalScore = blendedScore;
-  if (eventImpact && eventImpact.impactMagnitude !== 0) {
+  if (eventImpact && typeof eventImpact.impactMagnitude === "number" && eventImpact.impactMagnitude !== 0) {
     finalScore = finalScore * (1 + eventImpact.impactMagnitude / 100);
     finalScore = Math.min(100, Math.max(0, finalScore));
   }

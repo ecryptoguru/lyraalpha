@@ -7,6 +7,7 @@ import { renderContent } from "@/components/shared/chat-markdown-renderer";
 import { useMyraVoice, type VoiceTranscript } from "@/hooks/use-myra-voice";
 import { MyraVoiceButton } from "@/components/dashboard/myra-voice-button";
 import { supabaseRealtime } from "@/lib/supabase-realtime";
+import { createClientLogger } from "@/lib/logger/client";
 import {
   createSupportConversation,
   fetchSupportConversation,
@@ -167,7 +168,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
         setConversation(data);
       }
     } catch (err) {
-      console.warn("[LiveChat] Failed to fetch conversation:", err);
+      createClientLogger("live-chat").warn("Failed to fetch conversation", { err: String(err) });
     } finally {
       setLoading(false);
     }
@@ -269,7 +270,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
           return;
         }
       } catch (err) {
-        console.warn("[LiveChat] Failed to create conversation:", err);
+        createClientLogger("live-chat").warn("Failed to create conversation", { err: String(err) });
         sendingRef.current = false;
         setSending(false);
         return;
@@ -348,7 +349,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
         isStreamingRef.current = false;
       }
     } catch (err) {
-      console.warn("[LiveChat] Send failed:", err);
+      createClientLogger("live-chat").warn("Send failed", { err: String(err) });
       setIsAiTyping(false);
       setStreamingText("");
       isStreamingRef.current = false;

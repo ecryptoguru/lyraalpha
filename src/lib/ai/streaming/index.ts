@@ -4,4 +4,4 @@
 
 export { refundOnStreamError, singleChunkStream } from "./utils";
 export { executeFallbackChain, buildFallbackChainConfig, type FallbackContext } from "./fallback-chain";
-export { handleLateCacheHit, handleEarlyCacheHit, estimateTokens, type CacheHitContext, type EarlyCacheHitContext } from "./cache-handler";
+export { handleLateCacheHit, type CacheHitContext, type EarlyCacheHitContext } from "./cache-handler";

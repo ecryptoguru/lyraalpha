@@ -1,6 +1,16 @@
 import { AssetEnrichment, COMMON_WORDS } from "./types";
 import { getMentoringMessage, type BehavioralInsight } from "./behavioral-intelligence";
 
+// MB-3: Named type for compressed crypto-intelligence context (all fields optional for safe rendering)
+interface CompressedCryptoIntelligence {
+  networkActivity?: { score?: number; devActivity?: number; tvlHealth?: number; communityEngagement?: number; onChainActivity?: number; drivers?: string[] };
+  holderStability?: { score?: number; supplyConcentration?: number; buyPressure?: number; marketCapToFDV?: number; priceStability?: number; drivers?: string[] };
+  liquidityRisk?: { score?: number; volumeToMcap?: number; dexLiquidity?: number; exchangePresence?: number; poolConcentration?: number; drivers?: string[]; poolSummary?: { totalReserveUsd?: number; totalVolume24h?: number; totalPools?: number; dexCount?: number; buyToSellRatio?: number } };
+  structuralRisk?: { dependencyRisk?: { level?: string; description?: string }; governanceRisk?: { level?: string; description?: string }; maturityRisk?: { level?: string; description?: string }; unlockPressure?: { level?: string; description?: string; score?: number }; mevExposure?: { level?: string; description?: string; score?: number }; bridgeDependency?: { level?: string; description?: string }; yieldSustainability?: { level?: string; description?: string }; oracleRisk?: { level?: string; description?: string }; inflationRisk?: { level?: string; description?: string }; overallLevel?: string };
+  enhancedTrust?: { score?: number; level?: string };
+  tvlData?: { tvl?: number | null; protocolCount?: number | null; category?: string | null; isChain?: boolean };
+}
+
 /**
  * Converts internal regime enum values to human-readable labels.
  * Prevents raw SCREAMING_SNAKE_CASE values from leaking into model context and responses.
@@ -145,7 +155,8 @@ export function buildCompressedContext(
     // so computing it on every SIMPLE request is pure CPU waste.
     if (opts.tier !== "SIMPLE") {
       const dynamics = ((opts.assetEnrichment as Record<string, unknown> | undefined)?.scoreDynamics ?? {}) as Record<string, { trend?: string } | undefined>;
-      const chain = buildAnalyticalChain(scores, dynamics);
+      const cryptoIntelligence = (opts.assetEnrichment as Record<string, unknown> | undefined)?.cryptoIntelligence ?? null;
+      const chain = buildAnalyticalChain(scores, dynamics, cryptoIntelligence as Parameters<typeof buildAnalyticalChain>[2], type);
       if (chain) {
         lines.push(`[ANALYTICAL_CHAIN]\n${chain}`);
       }
@@ -325,9 +336,9 @@ export function buildCompressedContext(
         lines.push(`[CRYPTO_GENESIS] ${cg.genesisDate}`);
       }
 
-      // Description (truncated to 80 chars — captures identity, drops marketing copy)
+      // Description (truncated to 200 chars — captures identity + use case, drops marketing copy)
       if (enrich.description) {
-        lines.push(`[CRYPTO_ABOUT] ${truncateDesc(enrich.description, 80)}`);
+        lines.push(`[CRYPTO_ABOUT] ${truncateDesc(enrich.description, 200)}`);
       }
     }
 
@@ -339,14 +350,7 @@ export function buildCompressedContext(
 
     // P1: Crypto Intelligence (Crypto only — network activity, holder stability, liquidity risk, structural risk, enhanced trust)
     if (assetType === "CRYPTO" && enrich.cryptoIntelligence) {
-      const ci = enrich.cryptoIntelligence as {
-        networkActivity?: { score?: number; devActivity?: number; tvlHealth?: number; communityEngagement?: number; onChainActivity?: number; drivers?: string[] };
-        holderStability?: { score?: number; supplyConcentration?: number; buyPressure?: number; marketCapToFDV?: number; priceStability?: number; drivers?: string[] };
-        liquidityRisk?: { score?: number; volumeToMcap?: number; dexLiquidity?: number; exchangePresence?: number; poolConcentration?: number; drivers?: string[]; poolSummary?: { totalReserveUsd?: number; totalVolume24h?: number; totalPools?: number; dexCount?: number; buyToSellRatio?: number } };
-        structuralRisk?: { dependencyRisk?: { level?: string; description?: string }; governanceRisk?: { level?: string; description?: string }; maturityRisk?: { level?: string; description?: string }; overallLevel?: string };
-        enhancedTrust?: { score?: number; level?: string };
-        tvlData?: { tvl?: number | null; protocolCount?: number | null; category?: string | null; isChain?: boolean };
-      };
+      const ci = enrich.cryptoIntelligence as CompressedCryptoIntelligence;
 
       // Network Activity
       if (ci.networkActivity?.score != null) {
@@ -392,6 +396,12 @@ export function buildCompressedContext(
         if (sr.dependencyRisk?.level) srParts.push(`Dependency:${sr.dependencyRisk.level}`);
         if (sr.governanceRisk?.level) srParts.push(`Governance:${sr.governanceRisk.level}`);
         if (sr.maturityRisk?.level) srParts.push(`Maturity:${sr.maturityRisk.level}`);
+        if (sr.unlockPressure?.level) srParts.push(`Unlock:${sr.unlockPressure.level}`);
+        if (sr.mevExposure?.level) srParts.push(`MEV:${sr.mevExposure.level}`);
+        if (sr.bridgeDependency?.level) srParts.push(`Bridge:${sr.bridgeDependency.level}`);
+        if (sr.yieldSustainability?.level) srParts.push(`Yield:${sr.yieldSustainability.level}`);
+        if (sr.oracleRisk?.level) srParts.push(`Oracle:${sr.oracleRisk.level}`);
+        if (sr.inflationRisk?.level) srParts.push(`Inflation:${sr.inflationRisk.level}`);
         lines.push(`[CRYPTO_STRUCTURAL_RISK] ${srParts.join(" | ")}`);
       }
 
@@ -409,6 +419,67 @@ export function buildCompressedContext(
         if (tvl.protocolCount) tvlParts.push(`Protocols:${tvl.protocolCount}`);
         tvlParts.push(tvl.isChain ? "Type:Chain" : "Type:Protocol");
         lines.push(`[CRYPTO_TVL] ${tvlParts.join(" | ")}`);
+      }
+
+      // CB-3: Funding Rate
+      const fr = enrich.fundingRate;
+      if (fr != null) {
+        lines.push(`[FUNDING_RATES] Funding:${(fr * 100).toFixed(3)}%`);
+      }
+
+      // Open Interest
+      const oi = enrich.openInterest ?? (context.openInterest as number | null) ?? null;
+      if (oi != null) {
+        lines.push(`[OPEN_INTEREST] OI:$${(oi / 1e6).toFixed(1)}M`);
+      }
+
+      // CB-4: Exchange Flows (from enrich if available)
+      if (enrich.exchangeFlows) {
+        const ef = enrich.exchangeFlows as { netInflow7d?: number; inflow?: number; outflow?: number; exchange?: string } | null;
+        if (ef?.netInflow7d != null || ef?.inflow != null || ef?.outflow != null) {
+          const parts: string[] = [];
+          if (ef.netInflow7d != null) {
+            const sign = ef.netInflow7d >= 0 ? "+" : "";
+            parts.push(`Net7d:${sign}${(ef.netInflow7d / 1e6).toFixed(1)}M`);
+          }
+          if (ef.inflow != null) parts.push(`In:${(ef.inflow / 1e6).toFixed(1)}M`);
+          if (ef.outflow != null) parts.push(`Out:${(ef.outflow / 1e6).toFixed(1)}M`);
+          if (ef.exchange) parts.push(`Ex:${ef.exchange}`);
+          lines.push(`[EXCHANGE_FLOWS] ${parts.join(" | ")}`);
+        }
+      }
+
+      // CB-5: Staking Yield & Emission Schedule
+      if (enrich.stakingYield) {
+        const sy = enrich.stakingYield as { apr?: number; source?: string; sustainable?: boolean } | null;
+        if (sy?.apr != null) {
+          const yieldParts = [`APR:${sy.apr.toFixed(1)}%`];
+          if (sy.source) yieldParts.push(`Source:${sy.source}`);
+          if (sy.sustainable != null) yieldParts.push(sy.sustainable ? "Sustainable:yes" : "Sustainable:no");
+          lines.push(`[STAKING_YIELD] ${yieldParts.join(" | ")}`);
+        }
+      }
+      if (enrich.emissionSchedule) {
+        const es = enrich.emissionSchedule as { nextEmissionDate?: string; emissionAmount?: number; decayRate?: number } | null;
+        if (es?.nextEmissionDate || es?.emissionAmount != null) {
+          const emitParts: string[] = [];
+          if (es.nextEmissionDate) emitParts.push(`Next:${es.nextEmissionDate}`);
+          if (es.emissionAmount != null) emitParts.push(`Amt:${es.emissionAmount.toLocaleString()}`);
+          if (es.decayRate != null) emitParts.push(`Decay:${(es.decayRate * 100).toFixed(1)}%`);
+          lines.push(`[EMISSION_SCHEDULE] ${emitParts.join(" | ")}`);
+        }
+      }
+
+      // CB-6: Governance Data
+      if (enrich.governanceData) {
+        const gd = enrich.governanceData as { activeProposals?: number; quorum?: number; nextVoteEnd?: string; impact?: string } | null;
+        if (gd?.activeProposals != null && gd.activeProposals > 0) {
+          const govParts = [`Proposals:${gd.activeProposals}`];
+          if (gd.quorum != null) govParts.push(`Quorum:${(gd.quorum * 100).toFixed(0)}%`);
+          if (gd.nextVoteEnd) govParts.push(`VoteEnd:${gd.nextVoteEnd}`);
+          if (gd.impact) govParts.push(`Impact:${gd.impact}`);
+          lines.push(`[GOVERNANCE] ${govParts.join(" | ")}`);
+        }
       }
     }
 
@@ -537,8 +608,13 @@ export function buildCompressedContext(
 
   // --- Behavioral Intelligence (MODERATE/COMPLEX only — coaching context for the model) ---
   // Surfaced as a soft advisory block so Lyra can weave risk mentoring naturally into responses.
+  // MB-7: Include up to 2 insights (highest severity first) instead of a single mentoring message.
   if (opts.behavioralInsights && opts.behavioralInsights.length > 0 && opts.tier !== "SIMPLE") {
-    const mentoringMsg = getMentoringMessage(opts.behavioralInsights);
+    const sorted = [...opts.behavioralInsights].sort(
+      (a, b) => ({ high: 3, moderate: 2, low: 1 }[a.severity] - { high: 3, moderate: 2, low: 1 }[b.severity]),
+    );
+    const top = sorted.slice(0, 2);
+    const mentoringMsg = getMentoringMessage(top);
     if (mentoringMsg) {
       lines.push("");
       lines.push(`[BEHAVIORAL_CONTEXT] ${mentoringMsg}`);
@@ -705,6 +781,8 @@ function fmtLarge(v: number): string {
 function buildAnalyticalChain(
   scores: Record<string, number | undefined>,
   dynamics: Record<string, { trend?: string } | undefined> = {},
+  cryptoIntelligence: CompressedCryptoIntelligence | null = null,
+  assetType: string | null = null,
 ): string | null {
   const T = scores.trend;
   const M = scores.momentum;
@@ -815,6 +893,35 @@ function buildAnalyticalChain(
       steps.push(`Step 6: Trust:${Trust} = low composite trust — signal reliability is reduced; do not act on individual high scores without cross-confirming with price action`);
     } else if (Trust > 75 && T !== undefined && T > 70 && M !== undefined && M > 65) {
       steps.push(`Step 6: Trust:${Trust} + T:${T} + M:${M} = high-trust full confirmation — all signal layers aligned, highest-conviction setup`);
+    }
+  }
+
+  // Step 7: BTC-beta decoupling (crypto-only)
+  if ((assetType ?? "").toUpperCase() === "CRYPTO" && T !== undefined && M !== undefined) {
+    const naScore = cryptoIntelligence?.networkActivity?.score;
+    if (naScore !== undefined && naScore < 50 && T > 60) {
+      steps.push(`Step 7: NetworkActivity:${naScore} + T:${T} = potential BTC-beta decoupling — on-chain activity lagging price trend; trend may be driven by BTC correlation rather than independent fundamentals`);
+    } else if (naScore !== undefined && naScore > 65 && T < 50) {
+      steps.push(`Step 7: NetworkActivity:${naScore} + T:${T} = fundamental strength not reflected in price — strong on-chain metrics with weak trend suggests oversold or BTC-beta drag`);
+    }
+  }
+
+  // Step 8: Tokenomics / unlock pressure check (crypto-only)
+  if ((assetType ?? "").toUpperCase() === "CRYPTO" && cryptoIntelligence?.structuralRisk?.unlockPressure) {
+    const up = cryptoIntelligence.structuralRisk.unlockPressure;
+    const mcapToFdv = cryptoIntelligence?.holderStability?.marketCapToFDV;
+    if (up.score !== undefined && up.score > 70) {
+      steps.push(`Step 8: UnlockPressure:${up.score} = severe token unlock overhang — ${up.description ?? "significant dilution risk ahead"}. Even if trend/momentum look healthy, supply pressure can override technical signals`);
+    } else if (up.score !== undefined && up.score > 45 && mcapToFdv !== undefined && mcapToFdv < 35) {
+      steps.push(`Step 8: UnlockPressure:${up.score} + MCap/FDV:${mcapToFdv}% = moderate dilution risk — monitor vesting schedules; FDV gap means sustained selling pressure possible`);
+    }
+  }
+
+  // Step 9: MEV / structural risk exposure (crypto-only)
+  if ((assetType ?? "").toUpperCase() === "CRYPTO" && cryptoIntelligence?.structuralRisk?.mevExposure) {
+    const mev = cryptoIntelligence.structuralRisk.mevExposure;
+    if (mev.score !== undefined && mev.score > 60) {
+      steps.push(`Step 9: MEV_Exposure:${mev.score} = high MEV vulnerability — ${mev.description ?? "sandwich attacks and frontrunning can erode position value on entry/exit"}. Consider timing and execution venue`);
     }
   }
 

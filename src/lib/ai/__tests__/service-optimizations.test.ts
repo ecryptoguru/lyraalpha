@@ -629,6 +629,8 @@ describe("Service Optimizations", () => {
           cryptoIntelligence: true,
           category: true, currency: true,
           coingeckoId: true,
+          holderGini: true, top10HolderPercent: true, fundingRate: true, openInterest: true,
+          exchangeFlows: true, stakingYield: true, emissionSchedule: true, governanceData: true,
         },
       });
     });
