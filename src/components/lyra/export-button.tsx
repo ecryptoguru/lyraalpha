@@ -102,7 +102,7 @@ export function ExportButton({ messages, symbol, assetName, className }: ExportB
       className={cn(
         "flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl border transition-all text-[9px] font-bold uppercase tracking-wider",
         copied
-          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+          ? "border-success/40 bg-success/10 text-success"
           : "border-white/5 bg-card/60 text-muted-foreground hover:border-primary/30 hover:text-primary hover:bg-primary/5",
         className,
       )}

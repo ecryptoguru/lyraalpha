@@ -1,4 +1,5 @@
-import { generateText } from "ai";
+import { generateObject } from "ai";
+import { z } from "zod";
 import { createHash } from "crypto";
 import { getGpt54Model } from "@/lib/ai/service";
 import { buildHumanizerGuidance } from "@/lib/ai/prompts/humanizer";
@@ -7,7 +8,9 @@ import type { PersonalBriefingResponse } from "@/lib/services/personal-briefing.
 import { getCache, setCache } from "@/lib/redis";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
-import { safeJsonParse } from "@/lib/utils/json";
+import { recordCronLlmCall } from "@/lib/ai/alerting";
+import { calculateLLMCost } from "@/lib/ai/cost-calculator";
+import { resolveGptDeployment } from "@/lib/ai/orchestration";
 
 const logger = createLogger({ service: "personal-briefing-ai" });
 
@@ -134,26 +137,41 @@ JSON SHAPE:
   "bullets": ["bullet 1", "bullet 2", "bullet 3"]
 }`;
 
-  const result = await generateText({
-    model: getGpt54Model("lyra-nano"),
-    prompt,
-    maxOutputTokens: 260,
+  const memoSchema = z.object({
+    headline: z.string(),
+    summary: z.string(),
+    focus: z.string(),
+    nextAction: z.string(),
+    bullets: z.array(z.string()).max(3),
   });
 
-  const cleaned = result.text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  const parsed = safeJsonParse<Partial<PersonalBriefingAIMemo>>(cleaned);
-
-  if (!parsed || !parsed.headline || !parsed.summary || !parsed.focus || !parsed.nextAction) {
-    throw new Error("Invalid personal briefing AI memo format");
+  const llmStart = Date.now();
+  let object: z.infer<typeof memoSchema>;
+  try {
+    ({ object } = await generateObject({
+      model: getGpt54Model("lyra-nano"),
+      schema: memoSchema,
+      prompt,
+    }));
+  } catch (llmError) {
+    const latencyMs = Date.now() - llmStart;
+    recordCronLlmCall({ job: "personal-briefing", costUsd: 0, latencyMs, success: false }).catch(() => {});
+    throw llmError;
   }
+
+  // P1: Wire cron LLM call into alerting
+  const latencyMs = Date.now() - llmStart;
+  const deployment = resolveGptDeployment("lyra-nano");
+  const costBreakdown = calculateLLMCost({ model: deployment, inputTokens: Math.round(prompt.length / 4), outputTokens: Math.round(JSON.stringify(object).length / 4) });
+  recordCronLlmCall({ job: "personal-briefing", costUsd: costBreakdown.totalCost, latencyMs, success: true }).catch(() => {});
 
   return {
     generatedAt: new Date().toISOString(),
-    headline: parsed.headline,
-    summary: parsed.summary,
-    focus: parsed.focus,
-    nextAction: parsed.nextAction,
-    bullets: Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 3).filter((item): item is string => typeof item === "string") : [],
+    headline: object.headline,
+    summary: object.summary,
+    focus: object.focus,
+    nextAction: object.nextAction,
+    bullets: object.bullets,
   };
 }
 

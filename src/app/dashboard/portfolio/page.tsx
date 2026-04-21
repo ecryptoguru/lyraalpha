@@ -105,15 +105,15 @@ function DeletePortfolioDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start gap-3">
-          <div className="h-9 w-9 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
-            <AlertTriangle className="h-4 w-4 text-red-400" />
+          <div className="h-9 w-9 rounded-2xl bg-danger/10 border border-danger/20 flex items-center justify-center shrink-0">
+            <AlertTriangle className="h-4 w-4 text-danger" />
           </div>
           <div>
             <h2 className="text-sm font-bold text-foreground">Delete portfolio?</h2>
             <p className="text-xs text-muted-foreground mt-1">
               <span className="font-bold text-foreground">&ldquo;{portfolioName}&rdquo;</span> and all{" "}
               {holdingCount > 0 ? (
-                <span className="font-bold text-red-400">{holdingCount} holding{holdingCount !== 1 ? "s" : ""}</span>
+                <span className="font-bold text-danger">{holdingCount} holding{holdingCount !== 1 ? "s" : ""}</span>
               ) : (
                 "its holdings"
               )}{" "}
@@ -128,7 +128,7 @@ function DeletePortfolioDialog({
           <Button
             onClick={onConfirm}
             disabled={isDeleting}
-            className="flex-1 text-sm h-9 bg-red-500 hover:bg-red-600 text-white border-0"
+            className="flex-1 text-sm h-9 bg-danger hover:bg-danger text-danger-foreground border-0"
           >
             {isDeleting ? (
               <><Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />Deleting…</>
@@ -195,7 +195,7 @@ function PortfolioSelector({
             onClick={(e) => { e.stopPropagation(); onDelete(p); }}
             className={cn(
               "h-4 w-4 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity",
-              selectedId === p.id ? "text-primary/60 hover:text-red-400" : "text-muted-foreground/60 hover:text-red-400",
+              selectedId === p.id ? "text-primary/60 hover:text-danger" : "text-muted-foreground/60 hover:text-danger",
             )}
             title={`Delete ${p.name}`}
           >
@@ -360,8 +360,8 @@ function AIInsightsContainer({
   if (insights.length === 0) return null;
 
   const insightIcon = (type: string) => {
-    if (type === 'positive') return <TrendingUp className="h-3.5 w-3.5 text-emerald-400 shrink-0" />;
-    if (type === 'warning') return <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />;
+    if (type === 'positive') return <TrendingUp className="h-3.5 w-3.5 text-success shrink-0" />;
+    if (type === 'warning') return <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />;
     return <Sparkles className="h-3.5 w-3.5 text-muted-foreground shrink-0" />;
   };
 
@@ -370,8 +370,8 @@ function AIInsightsContainer({
   return (
     <div className="flex h-full flex-col rounded-3xl border border-white/8 bg-card/50 p-5 shadow-[0_8px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl hover:border-primary/20 transition-all duration-500">
       <div className="flex items-center gap-2 mb-4">
-        <div className="h-7 w-7 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
-          <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+        <div className="h-7 w-7 rounded-xl bg-accent-cta/10 border border-accent-cta/20 flex items-center justify-center">
+          <Sparkles className="h-3.5 w-3.5 text-accent-cta" />
         </div>
         <h3 className="text-sm font-bold text-foreground">Quick Insights</h3>
       </div>
@@ -385,10 +385,10 @@ function AIInsightsContainer({
             className={cn(
               "px-3.5 py-3 border rounded-2xl flex items-start gap-2.5",
               insight.type === 'positive'
-                ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-100"
+                ? "border-success/20 bg-success/5 text-success"
                 : insight.type === 'warning'
-                ? "border-amber-500/20 bg-amber-500/5 text-amber-100"
-                : "border-white/8 bg-card/40 text-muted-foreground"
+                ? "border-warning/20 bg-warning/5 text-warning"
+                : "border-border/8 bg-card/40 text-muted-foreground"
             )}
           >
             {insightIcon(insight.type)}
@@ -423,7 +423,7 @@ function AllocationDonut({
   }, [holdings]);
 
   const HEX_COLORS = ["#fbbf24", "#38bdf8", "#34d399", "#fb923c", "#f87171", "#facc15"];
-  const TW_BG_COLORS = ["bg-amber-400", "bg-sky-400", "bg-emerald-400", "bg-orange-400", "bg-rose-400", "bg-yellow-400"];
+  const TW_BG_COLORS = ["bg-accent-cta", "bg-info", "bg-success", "bg-warning", "bg-danger", "bg-warning"];
 
   if (allocation.length === 0) return null;
 
@@ -748,7 +748,7 @@ export default function PortfolioPage() {
           activeTab === "portfolio" ? (
             <>
               {summaryCards?.slice(0, 2).map((c) => (
-                <StatChip key={c.label} value={c.value} label={c.label} variant="amber" />
+                <StatChip key={c.label} value={c.value} label={c.label} variant="gold" />
               ))}
               <StatChip value={region} label="Market" variant="muted" />
             </>
@@ -1007,6 +1007,14 @@ export default function PortfolioPage() {
             const result = await createPortfolio(body);
             const newId = result?.data?.portfolio?.id ?? result?.portfolio?.id;
             if (newId) {
+              // Seed the auto-refresh timestamp so the useEffect doesn't
+              // immediately fire handleRefreshPortfolio() (which would show
+              // a misleading "Portfolio refreshed" toast for a brand-new portfolio).
+              try {
+                window.localStorage.setItem(`portfolio:auto-refresh:${newId}`, String(Date.now()));
+              } catch {
+                // Ignore storage failures in privacy-restricted environments.
+              }
               setSelectedPortfolioId(newId);
             }
           }}

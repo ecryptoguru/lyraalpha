@@ -30,10 +30,10 @@ export function getHealthBand(score: number): HealthBand {
 
 export function getHealthBandColor(band: HealthBand): string {
   switch (band) {
-    case "Strong":    return "text-emerald-400";
-    case "Balanced":  return "text-amber-400";
-    case "Fragile":   return "text-amber-400";
-    case "High Risk": return "text-red-400";
+    case "Strong":    return "text-success";
+    case "Balanced":  return "text-warning";
+    case "Fragile":   return "text-warning";
+    case "High Risk": return "text-danger";
   }
 }
 

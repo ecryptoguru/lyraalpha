@@ -1,9 +1,7 @@
-import type { BlogPost } from "./posts";
-
 const _week3Posts = [
   {
     slug: "what-watchlist-drift-means-and-why-it-matters",
-    title: "What Watchlist Drift Means and Why It Matters for Crypto Investors",
+    title: "What Watchlist Drift Means for Crypto Investors",
     description:
       "A crypto watchlist that never changes is a liability, not a tool. Watchlist drift — the slow divergence between the assets you track and the assets that actually matter — silently erodes your market awareness.",
     date: "2026-04-17",
@@ -21,7 +19,15 @@ const _week3Posts = [
       "crypto discovery",
       "market awareness",
     ],
-    heroImageUrl: "/blog/watchlist-drift-hero.jpg",
+    internalLinks: [
+      { text: "watchlist tools", url: "/lyra" },
+      { text: "portfolio monitoring", url: "/lyra" },
+      { text: "crypto discovery", url: "/lyra" },
+      { text: "smart watchlist building", url: "/blog/the-best-way-to-build-a-smarter-crypto-watchlist-in-2026" },
+      { text: "crypto discovery methods", url: "/blog/how-lyraalpha-daily-briefing-helps-you-see-the-crypto-market-faster" },
+      { text: "market signals framework", url: "/blog/how-to-turn-market-signals-into-better-investment-decisions" },
+    ],
+    heroImageUrl: "/blog/what-watchlist-drift-means-and-why-it-matters-hero.webp",
     content: `
 # What Watchlist Drift Means and Why It Matters for Crypto Investors
 
@@ -127,7 +133,7 @@ Yes, indirectly. A drifted watchlist means you are making allocation decisions �
   },
   {
     slug: "how-to-use-regime-alignment-to-make-better-portfolio-decisions",
-    title: "How to Use Regime Alignment to Make Better Portfolio Decisions",
+    title: "How to Use Regime Alignment in Portfolio Decisions",
     description:
       "Portfolio regime alignment is the discipline of matching your asset allocation to the current market environment — and adjusting before the environment changes. Most retail investors do the opposite, often at the worst possible time.",
     date: "2026-04-17",
@@ -145,7 +151,15 @@ Yes, indirectly. A drifted watchlist means you are making allocation decisions �
       "portfolio risk",
       "market intelligence",
     ],
-    heroImageUrl: "/blog/regime-alignment-hero.jpg",
+    internalLinks: [
+      { text: "market regime analysis", url: "/lyra" },
+      { text: "portfolio decisions", url: "/lyra" },
+      { text: "regime intelligence", url: "/lyra" },
+      { text: "regime tracking system", url: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day" },
+      { text: "market regime fundamentals", url: "/blog/what-is-market-regime-analysis-and-why-it-matters-for-crypto-investors" },
+      { text: "portfolio health assessment", url: "/blog/how-to-spot-portfolio-fragility-before-it-becomes-a-drawdown" },
+    ],
+    heroImageUrl: "/blog/how-to-use-regime-alignment-to-make-better-portfolio-decisions-hero.webp",
     content: `
 # How to Use Regime Alignment to Make Better Portfolio Decisions
 
@@ -275,7 +289,15 @@ Protocol revenue is a fundamental signal that operates on a longer time horizon 
       "loss recovery",
       "crypto investing",
     ],
-    heroImageUrl: "/blog/drawdown-risk-hero.jpg",
+    internalLinks: [
+      { text: "portfolio risk", url: "/lyra" },
+      { text: "drawdown analysis", url: "/lyra" },
+      { text: "risk management tools", url: "/lyra" },
+      { text: "portfolio fragility signals", url: "/blog/how-to-spot-portfolio-fragility-before-it-becomes-a-drawdown" },
+      { text: "concentration risk", url: "/blog/what-portfolio-concentration-risk-looks-like-in-practice" },
+      { text: "diversification strategy", url: "/blog/why-diversification-alone-does-not-eliminate-crypto-portfolio-risk" },
+    ],
+    heroImageUrl: "/blog/the-hidden-cost-of-ignoring-drawdown-risk-hero.webp",
     content: `
 # The Hidden Cost of Ignoring Drawdown Risk in Crypto Investing
 
@@ -408,7 +430,15 @@ LyraAlpha's portfolio intelligence layer provides a drawdown risk score that mod
       "market intelligence",
       "AI copilot crypto",
     ],
-    heroImageUrl: "/blog/ai-human-research-hero.jpg",
+    internalLinks: [
+      { text: "AI market copilot", url: "/lyra" },
+      { text: "research tools", url: "/lyra" },
+      { text: "AI vs human analysis", url: "/lyra" },
+      { text: "AI research tools", url: "/blog/what-ai-can-actually-do-for-crypto-market-research" },
+      { text: "AI tools comparison", url: "/blog/best-ai-tools-for-crypto-research-a-2026-buyers-guide" },
+      { text: "explainable AI intelligence", url: "/blog/why-fintech-users-need-explainable-intelligence-not-just-alerts" },
+    ],
+    heroImageUrl: "/blog/ai-market-copilots-vs-human-research-where-each-wins-hero.webp",
     content: `
 # AI Market Copilots vs Human Research: Where Each Wins in Crypto
 
@@ -533,6 +563,4 @@ Execution automation — where AI places trades based on its own analysis — in
   },
 ];
 
-export const week3Posts: Omit<BlogPost, "readingTime">[] = _week3Posts.map((p) => ({
-  ...p,
-}));
+export const week3Posts = _week3Posts;

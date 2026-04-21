@@ -202,8 +202,8 @@ export function AddHoldingDialog({ portfolioId, region, onAdd, onClose }: AddHol
                   placeholder="Search BTC-USD, ETH-USD, SOL-USD…"
                   className={cn(
                     "pl-9 pr-9 text-sm font-medium",
-                    errors.symbol && "border-red-400/50",
-                    selectedAsset && "border-emerald-400/40",
+                    errors.symbol && "border-danger/50",
+                    selectedAsset && "border-success/40",
                   )}
                   autoFocus
                   autoComplete="off"
@@ -212,7 +212,7 @@ export function AddHoldingDialog({ portfolioId, region, onAdd, onClose }: AddHol
                   <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground animate-spin" />
                 )}
                 {selectedAsset && !isSearching && (
-                  <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-emerald-400" />
+                  <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-success" />
                 )}
               </div>
 
@@ -259,7 +259,7 @@ export function AddHoldingDialog({ portfolioId, region, onAdd, onClose }: AddHol
 
             {/* Selected asset chip */}
             {selectedAsset && (
-              <div className="flex items-center gap-2 text-[11px] text-emerald-400">
+              <div className="flex items-center gap-2 text-[11px] text-success">
                 <CheckCircle2 className="h-3 w-3" />
                 <span>{selectedAsset.name}</span>
                 {selectedAsset.sector && <span className="text-muted-foreground">· {selectedAsset.sector}</span>}
@@ -267,7 +267,7 @@ export function AddHoldingDialog({ portfolioId, region, onAdd, onClose }: AddHol
             )}
 
             {errors.symbol && (
-              <div className="flex items-start gap-1.5 text-[11px] text-red-400">
+              <div className="flex items-start gap-1.5 text-[11px] text-danger">
                 <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
                 {errors.symbol}
               </div>
@@ -287,9 +287,9 @@ export function AddHoldingDialog({ portfolioId, region, onAdd, onClose }: AddHol
                 value={quantity}
                 onChange={(e) => { setQuantity(e.target.value); setErrors((err) => ({ ...err, quantity: "" })); }}
                 placeholder="10"
-                className={cn("text-sm", errors.quantity && "border-red-400/50")}
+                className={cn("text-sm", errors.quantity && "border-danger/50")}
               />
-              {errors.quantity && <p className="text-[11px] text-red-400">{errors.quantity}</p>}
+              {errors.quantity && <p className="text-[11px] text-danger">{errors.quantity}</p>}
             </div>
 
             <div className="space-y-1.5">
@@ -304,9 +304,9 @@ export function AddHoldingDialog({ portfolioId, region, onAdd, onClose }: AddHol
                 value={avgPrice}
                 onChange={(e) => { setAvgPrice(e.target.value); setErrors((err) => ({ ...err, avgPrice: "" })); }}
                 placeholder={region === "IN" ? "2500.00" : "180.00"}
-                className={cn("text-sm", errors.avgPrice && "border-red-400/50")}
+                className={cn("text-sm", errors.avgPrice && "border-danger/50")}
               />
-              {errors.avgPrice && <p className="text-[11px] text-red-400">{errors.avgPrice}</p>}
+              {errors.avgPrice && <p className="text-[11px] text-danger">{errors.avgPrice}</p>}
             </div>
           </div>
 

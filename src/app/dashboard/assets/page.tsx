@@ -273,7 +273,7 @@ export default function AssetsPage() {
     return (
       <div className="flex h-[80vh] flex-col items-center justify-center gap-6">
         <div className="flex flex-col items-center gap-2">
-          <p className="text-sm font-bold uppercase tracking-[0.3em] text-red-500">
+          <p className="text-sm font-bold uppercase tracking-[0.3em] text-danger">
             Couldn&apos;t Load Data
           </p>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
@@ -388,7 +388,7 @@ export default function AssetsPage() {
                 className={cn(
                   "h-9 sm:h-10 px-3 sm:px-4 md:px-5 border-white/5 rounded-2xl gap-2 font-bold uppercase text-[9px] sm:text-[10px] tracking-widest transition-all",
                   isRegimeSortActive
-                    ? "bg-primary/10 border-primary/30 text-primary opacity-100 shadow-[0_0_20px_rgba(var(--primary),0.1)]"
+                    ? "bg-primary/10 border-primary/30 text-primary opacity-100 shadow-primary/10"
                     : "opacity-60 hover:opacity-100",
                 )}
               >
@@ -543,7 +543,7 @@ export default function AssetsPage() {
                     {successfulActionsCount >= 2 ? (
                       <Link
                         href="/dashboard/upgrade"
-                        className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-primary text-black font-bold text-xs hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/20 group"
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-primary text-primary-foreground font-bold text-xs hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/20 group"
                       >
                         <Sparkles className="h-3.5 w-3.5" />
                         <span>Upgrade to Elite</span>

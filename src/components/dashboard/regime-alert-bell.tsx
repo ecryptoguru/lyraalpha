@@ -58,7 +58,7 @@ export function RegimeAlertBell() {
   const getIcon = (type: RegimeAlert["type"]) => {
     switch (type) {
       case "regime_change": return <Shield className="h-3.5 w-3.5 text-primary" />;
-      case "score_inflection": return <Activity className="h-3.5 w-3.5 text-amber-400" />;
+      case "score_inflection": return <Activity className="h-3.5 w-3.5 text-warning" />;
       case "weekly_digest": return <Crown className="h-3.5 w-3.5 text-primary" />;
     }
   };
@@ -77,7 +77,7 @@ export function RegimeAlertBell() {
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-black text-[8px] font-bold flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[8px] font-bold flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}

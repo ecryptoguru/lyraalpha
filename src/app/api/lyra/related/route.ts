@@ -5,6 +5,7 @@ import { generateObject } from "ai";
 import { auth } from "@/lib/auth";
 import { rateLimitChat } from "@/lib/rate-limit";
 import { getUserPlan } from "@/lib/middleware/plan-gate";
+import { checkPromptInjection } from "@/lib/ai/guardrails";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { isRateLimitBypassEnabled } from "@/lib/runtime-env";
@@ -48,6 +49,17 @@ export async function POST(request: NextRequest) {
     if (!topic && !currentQuestion) {
       return NextResponse.json(
         { success: false, error: "Topic or current question required" },
+        { status: 400 },
+      );
+    }
+
+    // Guardrail: prompt injection scan on user-provided text before LLM
+    const userText = [topic, currentQuestion].filter(Boolean).join(" ");
+    const injectionCheck = checkPromptInjection(userText);
+    if (!injectionCheck.isValid) {
+      logger.warn({ userId }, "Prompt injection detected in related-questions");
+      return NextResponse.json(
+        { success: false, error: injectionCheck.reason ?? "Invalid input" },
         { status: 400 },
       );
     }

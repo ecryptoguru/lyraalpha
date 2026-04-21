@@ -8,8 +8,8 @@ const NavbarAuthControls = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex items-center gap-3">
-        <div className="h-9 w-20 animate-pulse rounded-full border border-slate-200 bg-white/60 dark:border-white/12 dark:bg-white/10" />
-        <div className="h-9 w-24 animate-pulse rounded-full bg-amber-400/60 shadow-[0_12px_40px_rgba(245,158,11,0.16)]" />
+        <div className="h-9 w-20 animate-pulse rounded-full border border-border/50 bg-white/60 dark:border-white/12 dark:bg-white/10" />
+        <div className="h-9 w-24 animate-pulse rounded-full bg-warning/60 shadow-[0_12px_40px_rgba(245,158,11,0.16)]" />
       </div>
     ),
   },

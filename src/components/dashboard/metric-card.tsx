@@ -1,6 +1,8 @@
 import { ArrowUpRight, ArrowDownRight, Minus, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { motion } from "framer-motion";
+import { cardHover } from "@/lib/motion";
 
 interface MetricCardProps {
   label: string;
@@ -41,19 +43,23 @@ export function MetricCard({
     : "";
 
   return (
-    <div className={cn(
-      "relative group overflow-hidden rounded-2xl border bg-card/40 backdrop-blur-xl p-5 transition-all duration-500 hover:bg-card/60 hover:shadow-2xl",
-      isPositive ? "border-border/50 hover:border-emerald-400/40 hover:shadow-emerald-400/10" : 
-      isNeutral ? "border-border/50 hover:border-primary/40 hover:shadow-primary/10" : 
-      "border-border/50 hover:border-rose-400/40 hover:shadow-rose-400/10",
+    <motion.div
+      variants={cardHover}
+      initial="rest"
+      whileHover="hover"
+      className={cn(
+      "relative group overflow-hidden rounded-2xl border bg-card/40 backdrop-blur-xl p-5 transition-colors duration-500 hover:bg-card/60",
+      isPositive ? "border-border/50 hover:border-success/40" : 
+      isNeutral ? "border-border/50 hover:border-primary/40" : 
+      "border-border/50 hover:border-danger/40",
       className
     )}>
       {/* Background Gradient */}
       <div className={cn(
         "absolute inset-0 bg-linear-to-br via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none",
-        isPositive ? "from-emerald-400/5" :
+        isPositive ? "from-success/5" :
         isNeutral ? "from-primary/5" :
-        "from-rose-400/5"
+        "from-danger/5"
       )} />
 
       <div className="relative z-10 flex justify-between items-start mb-4">
@@ -89,10 +95,10 @@ export function MetricCard({
           <div
             className={`flex items-center text-xs font-bold px-2 py-0.5 rounded-2xl w-fit ${
               isPositive
-                ? "text-emerald-400 bg-emerald-400/10 border border-emerald-400/20"
+                ? "text-success bg-success/10 border border-success/20"
                 : isNeutral
                   ? "text-muted-foreground bg-muted/20 border border-border"
-                  : "text-rose-400 bg-rose-400/10 border border-rose-400/20"
+                  : "text-danger bg-danger/10 border border-danger/20"
             }`}
           >
             {isPositive ? (
@@ -120,7 +126,7 @@ export function MetricCard({
               vectorEffect="non-scaling-stroke"
               className={cn(
                 "transition-colors duration-500",
-                isPositive ? "text-emerald-400" : isNeutral ? "text-muted-foreground" : "text-rose-400"
+                isPositive ? "text-success" : isNeutral ? "text-muted-foreground" : "text-danger"
               )}
             />
             {/* Gradient fill */}
@@ -129,12 +135,12 @@ export function MetricCard({
               fill="currentColor"
               className={cn(
                 "opacity-10 transition-colors duration-500",
-                 isPositive ? "text-emerald-400" : isNeutral ? "text-muted-foreground" : "text-rose-400"
+                 isPositive ? "text-success" : isNeutral ? "text-muted-foreground" : "text-danger"
               )}
              />
           </svg>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

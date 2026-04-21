@@ -14,9 +14,9 @@ import type { AnalogSearchResult, HistoricalAnalogResult } from "@/lib/engines/h
 import { fetcher } from "@/lib/swr-fetcher";
 
 const REGIME_COLOR: Record<string, string> = {
-  RISK_ON: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
-  RISK_OFF: "text-red-500 bg-red-500/10 border-red-500/20",
-  DEFENSIVE: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+  RISK_ON: "text-success bg-success/10 border-success/20",
+  RISK_OFF: "text-danger bg-danger/10 border-danger/20",
+  DEFENSIVE: "text-warning bg-warning/10 border-warning/20",
 };
 
 const REGIME_TOOLTIP: Record<string, string> = {
@@ -48,7 +48,7 @@ function fmtReturn(v: number | null) {
 
 function returnColor(v: number | null) {
   if (v === null || Math.abs(v) < 0.5) return "text-muted-foreground";
-  return v > 0 ? "text-emerald-500" : "text-red-500";
+  return v > 0 ? "text-success" : "text-danger";
 }
 
 const TOOLTIP_CLS = "p-3 max-w-[220px] bg-background/95 backdrop-blur-2xl border border-primary/20 shadow-2xl";
@@ -78,7 +78,7 @@ function AnalogRow({ analog }: { analog: HistoricalAnalogResult }) {
             <p className="text-xs text-foreground leading-relaxed">{analog.label}</p>
             {analog.maxDrawdown20d !== null && (
               <p className="text-[10px] text-muted-foreground mt-1.5">
-                Max drawdown (20d): <span className={analog.maxDrawdown20d < -5 ? "text-red-400 font-bold" : "text-foreground font-bold"}>{analog.maxDrawdown20d.toFixed(1)}%</span>
+                Max drawdown (20d): <span className={analog.maxDrawdown20d < -5 ? "text-danger font-bold" : "text-foreground font-bold"}>{analog.maxDrawdown20d.toFixed(1)}%</span>
               </p>
             )}
           </TooltipContent>
@@ -100,14 +100,14 @@ function AnalogRow({ analog }: { analog: HistoricalAnalogResult }) {
           {analog.maxDrawdown20d !== null && analog.maxDrawdown20d < -5 && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="flex items-center gap-0.5 text-[9px] font-bold text-red-400 cursor-help">
+                <span className="flex items-center gap-0.5 text-[9px] font-bold text-danger cursor-help">
                   <AlertTriangle className="h-2.5 w-2.5" />
                   {analog.maxDrawdown20d.toFixed(1)}%
                 </span>
               </TooltipTrigger>
               <TooltipContent side="bottom" className={TOOLTIP_CLS}>
                 <p className="text-xs text-foreground leading-relaxed">
-                  Peak drawdown of <span className="font-bold text-red-400">{analog.maxDrawdown20d.toFixed(1)}%</span> was recorded within 20 days of this pattern. Elevated short-term risk.
+                  Peak drawdown of <span className="font-bold text-danger">{analog.maxDrawdown20d.toFixed(1)}%</span> was recorded within 20 days of this pattern. Elevated short-term risk.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -197,8 +197,8 @@ export function HistoricalAnalogCard({ region = "US" }: { region?: string }) {
 
   const TrendIcon = overallTrend === "bullish" ? TrendingUp : overallTrend === "bearish" ? TrendingDown : Minus;
   const trendColor =
-    overallTrend === "bullish" ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" :
-    overallTrend === "bearish" ? "text-red-500 bg-red-500/10 border-red-500/20" :
+    overallTrend === "bullish" ? "text-success bg-success/10 border-success/20" :
+    overallTrend === "bearish" ? "text-danger bg-danger/10 border-danger/20" :
     "text-muted-foreground bg-muted/20 border-border";
 
   const MEDIAN_ROWS: [string, number | null, string][] = [

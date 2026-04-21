@@ -72,6 +72,28 @@ const PII_PATTERNS: PIIPattern[] = [
     replacement: (_match, prefix: string) => `${prefix}[redacted-private-key]`,
     label: "hex-private-key",
   },
+  // Indian PAN (Permanent Account Number): 5 uppercase letters + 4 digits + 1 uppercase letter
+  // e.g. ABCDE1234F — always preceded by "PAN" or similar context to avoid matching
+  // random alphanumeric strings in financial data (ticker symbols, CUSIPs, etc.)
+  {
+    pattern: /((?:PAN|pan(?:\s+card)?|PAN\s+card)(?:\s*(?:number|no|:|=|is)\s*))[A-Z]{5}\d{4}[A-Z]\b/gi,
+    replacement: (_match, prefix: string) => `${prefix}[redacted-pan]`,
+    label: "pan-number",
+  },
+  // Indian Aadhaar: 12-digit number, typically displayed as XXXX XXXX XXXX or XXXX-XXXX-XXXX
+  // Requires "Aadhaar" or "aadhar" context word to avoid matching 12-digit financial figures.
+  {
+    pattern: /((?:Aadhaar|Aadhar|aadhaar|aadhar)(?:\s*(?:number|no|:|=|is)\s*))\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/gi,
+    replacement: (_match, prefix: string) => `${prefix}[redacted-aadhaar]`,
+    label: "aadhaar-number",
+  },
+  // US SSN: XXX-XX-XXXX or XXX XX XXXX format
+  // Requires "SSN" or "Social Security" context word to avoid matching random digit groups.
+  {
+    pattern: /((?:SSN|Social\s+Security(?:\s+number)?)(?:\s*(?:number|no|:|=|is)\s*))\d{3}[-\s]\d{2}[-\s]\d{4}\b/gi,
+    replacement: (_match, prefix: string) => `${prefix}[redacted-ssn]`,
+    label: "ssn",
+  },
   // Generic API keys / bearer tokens. Targets well-known provider prefixes rather
   // than guessing — avoids false positives on random 32+ char base64-ish content
   // that shows up in financial data blobs.

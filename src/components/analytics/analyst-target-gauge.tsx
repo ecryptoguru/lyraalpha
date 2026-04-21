@@ -29,7 +29,7 @@ export function AnalystTargetGauge({
     return (
       <div className={cn("rounded-2xl border border-white/5 bg-card/60 shadow-xl backdrop-blur-xl p-4", className)}>
         <div className="flex items-center gap-2 mb-3">
-          <Target className="w-4 h-4 text-amber-500" />
+          <Target className="w-4 h-4 text-cyan-400" />
           <h3 className="text-sm font-semibold text-foreground">Analyst Targets</h3>
         </div>
         <p className="text-sm text-muted-foreground">No analyst coverage available</p>
@@ -59,7 +59,7 @@ export function AnalystTargetGauge({
       <div className="px-4 py-3 border-b border-white/5">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <Target className="w-4 h-4 text-amber-500" />
+            <Target className="w-4 h-4 text-cyan-400" />
             Analyst Targets
           </h3>
           {numberOfAnalysts && (
@@ -75,17 +75,17 @@ export function AnalystTargetGauge({
         {/* Gauge visualization */}
         <div className="relative mb-6">
           {/* Track */}
-          <div className="h-2 rounded-full bg-linear-to-r from-red-500/30 via-amber-500/30 to-emerald-500/30" />
+          <div className="h-2 rounded-full bg-linear-to-r from-danger/30 via-warning/30 to-success/30" />
           
           {/* Current price marker */}
           <div 
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-amber-500 border-2 border-background shadow-lg transition-all"
+            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-warning border-2 border-background shadow-lg transition-all"
             style={{ left: `calc(${currentPosition}% - 6px)` }}
           />
           
           {/* Mean target marker */}
           <div 
-            className="absolute -top-1 w-0.5 h-4 bg-amber-500"
+            className="absolute -top-1 w-0.5 h-4 bg-warning"
             style={{ left: `${meanPosition}%` }}
           />
         </div>
@@ -94,15 +94,15 @@ export function AnalystTargetGauge({
         <div className="flex justify-between text-xs mb-4">
           <div className="text-center">
             <div className="text-muted-foreground">Low</div>
-            <div className="font-medium text-red-400">{fmtPrice(low)}</div>
+            <div className="font-medium text-danger">{fmtPrice(low)}</div>
           </div>
           <div className="text-center">
             <div className="text-muted-foreground">Target</div>
-            <div className="font-medium text-amber-400">{fmtPrice(mean)}</div>
+            <div className="font-medium text-cyan-400">{fmtPrice(mean)}</div>
           </div>
           <div className="text-center">
             <div className="text-muted-foreground">High</div>
-            <div className="font-medium text-emerald-400">{fmtPrice(high)}</div>
+            <div className="font-medium text-success">{fmtPrice(high)}</div>
           </div>
         </div>
 
@@ -114,7 +114,7 @@ export function AnalystTargetGauge({
           </div>
           <div className={cn(
             "flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium",
-            isUpside ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"
+            isUpside ? "bg-success/10 text-success" : "bg-danger/10 text-danger"
           )}>
             {isUpside ? (
               <TrendingUp className="w-4 h-4" />

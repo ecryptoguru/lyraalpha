@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSharedAISdkClient, getGpt54Deployment } from "./config";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
-import { redis, redisSetNX } from "@/lib/redis";
+import { redis, redisSetNXStrict } from "@/lib/redis";
 import { logMemoryEvent } from "./monitoring";
 import { INJECTION_PATTERNS } from "./guardrails";
 import { z } from "zod";
@@ -198,7 +198,7 @@ export async function distillSessionNotes(
   // Plain setCache always overwrites and cannot detect a pre-existing key.
   // TTL=90s covers worst-case: DB read + nano call (15s timeout) + transaction write.
   const lockKey = `memory:distill:${userId}:${source}`;
-  const lockAcquired = await redisSetNX(lockKey, 90);
+  const lockAcquired = await redisSetNXStrict(lockKey, 90);
   if (!lockAcquired) {
     logger.debug({ userId, source }, "Memory distillation skipped — lock held by concurrent call");
     logMemoryEvent({ userId, source, outcome: "locked" });
@@ -283,7 +283,21 @@ export async function getGlobalNotes(userId: string, source: MemorySource): Prom
       take: MAX_GLOBAL_NOTES,
     });
     if (rows.length === 0) return "";
-    return rows.map((r) => `- ${r.text}`).join("\n");
+    // Re-scan at read time: filter out any notes that match injection patterns.
+    // Distillation sanitizes input, but a compromised note could persist in the DB
+    // (e.g. via a direct DB write or a distillation bug). Re-checking at read time
+    // prevents poisoned notes from reaching the LLM prompt.
+    const safeRows = rows.filter((r) => {
+      const normalized = r.text.normalize("NFKC");
+      return !INJECTION_PATTERNS.some((p) => p.test(normalized));
+    });
+    if (safeRows.length < rows.length) {
+      logger.warn(
+        { userId, source, filtered: rows.length - safeRows.length },
+        "getGlobalNotes: filtered injection-matching notes at read time",
+      );
+    }
+    return safeRows.map((r) => `- ${r.text}`).join("\n");
   } catch (err) {
     logger.warn({ err: sanitizeError(err), userId, source }, "getGlobalNotes failed");
     return "";
@@ -305,7 +319,18 @@ export async function getSessionNotes(userId: string, source: MemorySource): Pro
       take: MAX_SESSION_NOTES,
     });
     if (rows.length === 0) return "";
-    return rows.map((r) => `- ${r.text}`).join("\n");
+    // Re-scan at read time: same guard as getGlobalNotes
+    const safeRows = rows.filter((r) => {
+      const normalized = r.text.normalize("NFKC");
+      return !INJECTION_PATTERNS.some((p) => p.test(normalized));
+    });
+    if (safeRows.length < rows.length) {
+      logger.warn(
+        { userId, source, filtered: rows.length - safeRows.length },
+        "getSessionNotes: filtered injection-matching notes at read time",
+      );
+    }
+    return safeRows.map((r) => `- ${r.text}`).join("\n");
   } catch (err) {
     logger.warn({ err: sanitizeError(err), userId, source }, "getSessionNotes failed");
     return "";

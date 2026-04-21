@@ -32,23 +32,23 @@ function getHealthLabel(trendPct: number, momentumPct: number): {
   if (composite >= 70) {
     return {
       label: "Broad Participation",
-      color: "text-emerald-400",
-      bg: "bg-emerald-400/10 border-emerald-400/20",
+      color: "text-success",
+      bg: "bg-success/10 border-success/20",
     };
   }
 
   if (composite >= 50) {
     return {
       label: "Mixed Participation",
-      color: "text-amber-400",
-      bg: "bg-amber-400/10 border-amber-400/20",
+      color: "text-warning",
+      bg: "bg-warning/10 border-warning/20",
     };
   }
 
   return {
     label: "Narrow Participation",
-    color: "text-rose-400",
-    bg: "bg-rose-400/10 border-rose-400/20",
+    color: "text-danger",
+    bg: "bg-danger/10 border-danger/20",
   };
 }
 
@@ -144,7 +144,7 @@ export function MarketBreadthPanel({ className }: { className?: string }) {
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-700",
-                momentumPct >= 60 ? "bg-emerald-400/80" : "bg-amber-400/80",
+                momentumPct >= 60 ? "bg-success/80" : "bg-warning/80",
               )}
               style={{ width: formatPct(momentumPct) }}
             />

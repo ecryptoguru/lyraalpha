@@ -63,19 +63,19 @@ const BANNER_CONFIG: Record<CheckoutStatus, {
   body: string;
 }> = {
   success: {
-    color: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    color: "border-success/30 bg-success/10 text-success dark:text-success",
     icon: <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0" />,
     title: "Payment successful — welcome aboard!",
     body: "Your plan has been activated. It may take a moment to reflect across the app.",
   },
   credits_success: {
-    color: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+    color: "border-success/30 bg-success/10 text-success dark:text-success",
     icon: <CheckCircle2 className="h-5 w-5 mt-0.5 shrink-0" />,
     title: "Credits added to your account!",
     body: "Your credits have been topped up and are ready to use with Lyra.",
   },
   canceled: {
-    color: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+    color: "border-warning/30 bg-warning/10 text-primary dark:text-warning",
     icon: <XCircle className="h-5 w-5 mt-0.5 shrink-0" />,
     title: "Checkout canceled",
     body: "No charge was made. You can upgrade or top up anytime below.",
@@ -468,7 +468,7 @@ export default function UpgradePage() {
               <button
                 onClick={() => startCheckout("elite")}
                 disabled={loadingPlan !== null}
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-3xl bg-primary px-4 py-3 text-sm font-bold text-black transition hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed dark:text-black"
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-3xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loadingPlan === "elite" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
                 {loadingPlan === "elite" ? "Redirecting…" : "Unlock Elite systems"}
@@ -478,11 +478,11 @@ export default function UpgradePage() {
         </section>
 
         <section className="grid gap-4 sm:gap-5 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-          <article className="group flex h-full flex-col rounded-4xl border border-white/10 bg-linear-to-br from-white via-card/90 to-card/70 p-6 shadow-[0_24px_80px_-36px_rgba(15,23,42,0.24)] dark:from-slate-900 dark:to-slate-800">
+          <article className="group flex h-full flex-col rounded-4xl border border-white/10 bg-linear-to-br from-white via-card/90 to-card/70 p-6 shadow-[0_24px_80px_-36px_rgba(15,23,42,0.24)] dark:text-foreground">
             <div className="space-y-2.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Starter</p>
-              <p className="text-2xl sm:text-3xl font-bold text-foreground dark:text-slate-100">{starterPrice.label}</p>
-              <p className="text-[12px] leading-5 text-muted-foreground dark:text-slate-300/80">Best for exploring the product, learning the system, and using core analytics with lighter daily usage.</p>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground dark:text-foreground/40">{starterPrice.label}</p>
+              <p className="text-[12px] leading-5 text-muted-foreground dark:text-muted-foreground/80">Best for exploring the product, learning the system, and using core analytics with lighter daily usage.</p>
             </div>
 
             <div className="mt-6 space-y-2.5">
@@ -493,8 +493,8 @@ export default function UpgradePage() {
                 "50 Lyra credits/month",
                 "Core learning modules",
               ].map((item) => (
-                <div key={item} className="flex items-start gap-2 text-[12px] leading-5 text-foreground/85 dark:text-slate-200/85">
-                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary dark:text-slate-400" />
+                <div key={item} className="flex items-start gap-2 text-[12px] leading-5 text-foreground/85 dark:text-muted-foreground/85">
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary dark:text-muted-foreground" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -502,23 +502,23 @@ export default function UpgradePage() {
 
             <div className="mt-auto pt-7">
               {starterIsCurrent ? (
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/75 px-3 py-2 text-xs font-bold text-foreground dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-200">
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/75 px-3 py-2 text-xs font-bold text-foreground dark:border-border/80 dark:bg-foreground/70 dark:text-muted-foreground">
                   <Check className="h-3.5 w-3.5" />
                   Current Plan
                 </div>
               ) : (
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/75 px-3 py-2 text-xs font-bold text-muted-foreground dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-300/80">
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/75 px-3 py-2 text-xs font-bold text-muted-foreground dark:border-border/80 dark:bg-foreground/70 dark:text-muted-foreground/80">
                   Free Forever
                 </div>
               )}
             </div>
           </article>
 
-          <article className="group flex h-full flex-col rounded-4xl border border-white/10 bg-linear-to-br from-white via-card/90 to-card/70 p-6 shadow-[0_24px_80px_-36px_rgba(15,23,42,0.24)] dark:from-slate-900 dark:to-slate-800">
+          <article className="group flex h-full flex-col rounded-4xl border border-white/10 bg-linear-to-br from-white via-card/90 to-card/70 p-6 shadow-[0_24px_80px_-36px_rgba(15,23,42,0.24)] dark:text-foreground">
             <div className="space-y-2.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Pro</p>
-              <p className="text-2xl sm:text-3xl font-bold text-foreground dark:text-slate-100">{proPrice.label}<span className="text-xs font-semibold text-muted-foreground dark:text-slate-400">/month</span></p>
-              <p className="text-[12px] leading-5 text-muted-foreground dark:text-slate-300/80">Best for investors who use Lyra, portfolio intelligence, and discovery regularly and need stronger day-to-day depth.</p>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground dark:text-foreground/40">{proPrice.label}<span className="text-xs font-semibold text-muted-foreground dark:text-muted-foreground">/month</span></p>
+              <p className="text-[12px] leading-5 text-muted-foreground dark:text-muted-foreground/80">Best for investors who use Lyra, portfolio intelligence, and discovery regularly and need stronger day-to-day depth.</p>
             </div>
 
             <div className="mt-6 space-y-2.5">
@@ -530,8 +530,8 @@ export default function UpgradePage() {
                 "GPT-5.4 Nano AI + Mini for COMPLEX queries",
                 "Intermediate learning modules",
               ].map((item) => (
-                <div key={item} className="flex items-start gap-2 text-[12px] leading-5 text-foreground/85 dark:text-slate-200/85">
-                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary dark:text-slate-400" />
+                <div key={item} className="flex items-start gap-2 text-[12px] leading-5 text-foreground/85 dark:text-muted-foreground/85">
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary dark:text-muted-foreground" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -539,19 +539,19 @@ export default function UpgradePage() {
 
             <div className="mt-auto pt-7">
               {proIsCurrent ? (
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/75 px-3 py-2 text-xs font-bold text-foreground dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-200">
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/75 px-3 py-2 text-xs font-bold text-foreground dark:border-border/80 dark:bg-foreground/70 dark:text-muted-foreground">
                   <Check className="h-3.5 w-3.5" />
                   Current Plan
                 </div>
               ) : isElite ? (
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/75 px-3 py-2 text-xs font-bold text-muted-foreground dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-300/80">
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/75 px-3 py-2 text-xs font-bold text-muted-foreground dark:border-border/80 dark:bg-foreground/70 dark:text-muted-foreground/80">
                   Included in Elite
                 </div>
               ) : (
                 <button
                   onClick={() => startCheckout("pro")}
                   disabled={loadingPlan !== null}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-primary/10 px-3 py-2.5 min-h-[44px] text-xs font-bold text-primary transition hover:bg-primary/15 disabled:opacity-60 disabled:cursor-not-allowed dark:border-slate-500/70 dark:bg-slate-700/70 dark:text-slate-100 dark:hover:bg-slate-700"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-primary/10 px-3 py-2.5 min-h-[44px] text-xs font-bold text-primary transition hover:bg-primary/15 disabled:opacity-60 disabled:cursor-not-allowed dark:border-border/70 dark:bg-muted-foreground/70 dark:text-foreground/40 dark:hover:bg-muted-foreground/20"
                 >
                   {loadingPlan === "pro" ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Redirecting…</> : "Unlock Pro systems"}
                 </button>
@@ -560,14 +560,14 @@ export default function UpgradePage() {
           </article>
 
           <article className="group relative z-10 flex h-full flex-col overflow-hidden rounded-4xl border border-primary/30 bg-card/80 p-5 shadow-[0_24px_80px_-32px_rgba(251,191,36,0.24)] backdrop-blur-xl sm:p-6 lg:scale-105">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[9px] font-bold uppercase tracking-widest text-black dark:text-black">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[9px] font-bold uppercase tracking-widest text-primary-foreground">
               Recommended
             </div>
 
             <div className="space-y-2.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-primary">Elite</p>
-              <p className="text-2xl sm:text-3xl font-bold text-foreground dark:text-slate-100">{elitePrice.label}<span className="text-xs font-semibold text-muted-foreground dark:text-slate-400">/month</span></p>
-              <p className="text-[12px] leading-5 text-muted-foreground dark:text-slate-300/80">Full cross-asset intelligence with GPT-routed deeper analysis and promo-based trial access.</p>
+              <p className="text-2xl sm:text-3xl font-bold text-foreground dark:text-foreground/40">{elitePrice.label}<span className="text-xs font-semibold text-muted-foreground dark:text-muted-foreground">/month</span></p>
+              <p className="text-[12px] leading-5 text-muted-foreground dark:text-muted-foreground/80">Full cross-asset intelligence with GPT-routed deeper analysis and promo-based trial access.</p>
             </div>
 
             <div className="mt-6 space-y-2.5">
@@ -581,8 +581,8 @@ export default function UpgradePage() {
                 "Factor DNA + crypto on-chain + macro strategist",
                 "All learning modules + 1.5× XP",
               ].map((item) => (
-                <div key={item} className="flex items-start gap-2 text-[12px] leading-5 text-foreground/85 dark:text-slate-200/85">
-                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary dark:text-slate-400" />
+                <div key={item} className="flex items-start gap-2 text-[12px] leading-5 text-foreground/85 dark:text-muted-foreground/85">
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary dark:text-muted-foreground" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -590,7 +590,7 @@ export default function UpgradePage() {
 
             <div className="mt-auto pt-7">
               {eliteIsCurrent ? (
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/75 px-3 py-2 text-xs font-bold text-foreground dark:border-slate-600/80 dark:bg-slate-800/70 dark:text-slate-200">
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-background/75 px-3 py-2 text-xs font-bold text-foreground dark:border-border/80 dark:bg-foreground/70 dark:text-muted-foreground">
                   <Check className="h-3.5 w-3.5" />
                   Current Plan
                 </div>
@@ -598,7 +598,7 @@ export default function UpgradePage() {
                 <button
                   onClick={() => startCheckout("elite")}
                   disabled={loadingPlan !== null}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-primary/10 px-3 py-2.5 min-h-[44px] text-xs font-bold text-primary transition hover:bg-primary/15 disabled:opacity-60 disabled:cursor-not-allowed dark:border-slate-500/70 dark:bg-slate-700/70 dark:text-slate-100 dark:hover:bg-slate-700"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-primary/10 px-3 py-2.5 min-h-[44px] text-xs font-bold text-primary transition hover:bg-primary/15 disabled:opacity-60 disabled:cursor-not-allowed dark:border-border/70 dark:bg-muted-foreground/70 dark:text-foreground/40 dark:hover:bg-muted-foreground/20"
                 >
                   {loadingPlan === "elite" ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Redirecting…</> : "Explore Elite Trial Options"}
                 </button>
@@ -606,18 +606,18 @@ export default function UpgradePage() {
             </div>
           </article>
 
-          <article className="group relative flex h-full flex-col rounded-4xl border border-slate-600/60 bg-[#0a0a0a]/80 p-5 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl transition-all duration-300 hover:bg-[#0a0a0a] sm:p-6">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-200 px-3 py-0.5 text-[9px] font-bold uppercase tracking-widest text-slate-900 dark:bg-slate-300 dark:text-slate-900">
+          <article className="group relative flex h-full flex-col rounded-4xl border border-border/60 bg-[#0a0a0a]/80 p-5 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl transition-all duration-300 hover:bg-[#0a0a0a] sm:p-6">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-muted/50 px-3 py-0.5 text-[9px] font-bold uppercase tracking-widest text-foreground dark:bg-muted/50 dark:text-foreground">
               For Teams
             </div>
 
             <div className="space-y-2.5">
               <div className="flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-slate-300" />
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-300">Enterprise</p>
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Enterprise</p>
               </div>
               <p className="text-2xl sm:text-3xl font-bold text-white">Coming Soon</p>
-              <p className="text-[12px] leading-5 text-slate-400">Tailored for teams, advisors, and institutions. Packaging, support, and infrastructure are handled directly.</p>
+              <p className="text-[12px] leading-5 text-muted-foreground">Tailored for teams, advisors, and institutions. Packaging, support, and infrastructure are handled directly.</p>
             </div>
 
             <div className="mt-6 space-y-2.5">
@@ -634,8 +634,8 @@ export default function UpgradePage() {
                 "Priority 24/7 support",
                 "On-premise & white-label options",
               ].map((item) => (
-                <div key={item} className="flex items-start gap-2 text-[12px] leading-5 text-slate-200/90">
-                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                <div key={item} className="flex items-start gap-2 text-[12px] leading-5 text-muted-foreground/90">
+                  <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -643,37 +643,37 @@ export default function UpgradePage() {
 
             <div className="mt-auto pt-7 space-y-2">
               {enterpriseIsCurrent ? (
-                <div className="inline-flex items-center gap-2 rounded-2xl border border-slate-500/50 bg-slate-800/70 px-4 py-2 text-xs font-bold text-slate-200">
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-border/50 bg-foreground/70 px-4 py-2 text-xs font-bold text-muted-foreground">
                   <Check className="h-3.5 w-3.5" />
                   Current Plan
                 </div>
               ) : (
                 <a
                   href={`mailto:${contactEmail}?subject=Enterprise%20Plan%20Inquiry`}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-400/30 bg-white px-4 py-3 min-h-[44px] text-sm font-bold text-slate-900 transition hover:bg-slate-100 dark:bg-slate-200 dark:hover:bg-slate-300"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-border/30 bg-white px-4 py-3 min-h-[44px] text-sm font-bold text-foreground transition hover:bg-muted/30 dark:bg-muted/50 dark:hover:bg-muted/50"
                 >
                   <Mail className="h-4 w-4" />
                   Contact Us
                   <ArrowRight className="h-4 w-4" />
                 </a>
               )}
-              <p className="text-[11px] text-slate-500">Custom pricing based on team size and requirements.</p>
+              <p className="text-[11px] text-muted-foreground">Custom pricing based on team size and requirements.</p>
             </div>
           </article>
         </section>
 
         {/* Credit Packages Section */}
         {(!loadingPackages && creditPackages.length > 0) ? (
-          <section className="rounded-3xl border border-amber-500/30 bg-linear-to-br from-amber-500/5 via-card to-card p-5 sm:p-6">
+          <section className="rounded-3xl border border-warning/30 bg-linear-to-br from-warning/5 via-card to-card p-5 sm:p-6">
             <div className="flex items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
-                <Coins className="h-5 w-5 text-amber-500" />
+                <Coins className="h-5 w-5 text-warning" />
                 <h2 className="text-lg font-bold tracking-tight text-foreground">Need More Credits?</h2>
               </div>
               {creditBalance !== null && (
-                <div className="flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1">
-                  <Zap className="h-3 w-3 text-amber-500" />
-                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{creditBalance.toLocaleString()} credits</span>
+                <div className="flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/10 px-3 py-1">
+                  <Zap className="h-3 w-3 text-warning" />
+                  <span className="text-xs font-bold text-primary dark:text-warning">{creditBalance.toLocaleString()} credits</span>
                 </div>
               )}
             </div>
@@ -693,30 +693,30 @@ export default function UpgradePage() {
                     "relative rounded-2xl border p-4 transition flex flex-col",
                     isDisabled ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:-translate-y-0.5 hover:shadow-lg",
                     pkg.isPopular
-                      ? "border-amber-500/50 bg-amber-500/10 shadow-amber-500/20"
-                      : "border-white/5 bg-background/60 hover:border-amber-500/30"
+                      ? "border-warning/50 bg-warning/10 shadow-warning/20"
+                      : "border-white/5 bg-background/60 hover:border-warning/30"
                   )}
                 >
                 {pkg.isPopular && (
-                  <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-black">
+                  <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full bg-warning px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-warning-foreground">
                     Popular
                   </div>
                 )}
                 <div className="flex items-center justify-between mb-2">
                   <p className="font-bold text-sm text-foreground">{pkg.name}</p>
-                  {pkg.isPopular && <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-500" />}
+                  {pkg.isPopular && <Star className="h-3.5 w-3.5 text-warning fill-warning" />}
                 </div>
                 <div className="flex items-baseline gap-1 mb-3">
                   <span className="text-xl font-bold text-foreground">{localizedPrice.label}</span>
                   <span className="text-xs text-muted-foreground">{localizedPrice.currencyCode}</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-sm mb-4">
-                  <Gift className="h-3.5 w-3.5 text-green-500" />
-                  <span className="font-semibold text-green-600 dark:text-green-400">
+                  <Gift className="h-3.5 w-3.5 text-success" />
+                  <span className="font-semibold text-success dark:text-success">
                     {pkg.credits.toLocaleString()}
                   </span>
                   <span className="text-muted-foreground">+</span>
-                  <span className="font-semibold text-green-600 dark:text-green-400">
+                  <span className="font-semibold text-success dark:text-success">
                     {pkg.bonusCredits}
                   </span>
                   <span className="text-xs text-muted-foreground">credits</span>
@@ -727,8 +727,8 @@ export default function UpgradePage() {
                   className={cn(
                     "mt-auto w-full rounded-2xl py-2.5 min-h-[44px] text-xs font-bold uppercase tracking-wide transition",
                     pkg.isPopular
-                      ? "bg-amber-500 text-black hover:bg-amber-400"
-                      : "bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:bg-amber-500/25",
+                      ? "bg-warning text-warning-foreground hover:bg-warning"
+                      : "bg-warning/15 text-primary dark:text-warning hover:bg-warning/25",
                     isDisabled && "pointer-events-none"
                   )}
                 >
@@ -811,7 +811,7 @@ export default function UpgradePage() {
             <button
               onClick={() => startCheckout(bottomCtaPlan)}
               disabled={loadingPlan !== null}
-              className="mx-auto mt-5 inline-flex items-center gap-2 rounded-2xl bg-primary px-8 py-3 text-sm font-bold text-black transition hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed dark:text-black"
+              className="mx-auto mt-5 inline-flex items-center gap-2 rounded-2xl bg-primary px-8 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loadingPlan === bottomCtaPlan ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Redirecting…</>
@@ -859,10 +859,10 @@ function InlineFeatureValue({ value, highlight, enterprise }: { value: string | 
           "font-medium",
           value
             ? enterprise
-              ? "text-slate-500 dark:text-slate-300"
+              ? "text-muted-foreground dark:text-muted-foreground"
               : highlight
                 ? "text-primary"
-                : "text-emerald-400"
+                : "text-success"
             : "text-muted-foreground/60",
         )}
       >
@@ -875,7 +875,7 @@ function InlineFeatureValue({ value, highlight, enterprise }: { value: string | 
     <span
       className={cn(
         "font-medium",
-        enterprise ? "text-slate-500 dark:text-slate-300" : highlight ? "text-primary" : "text-muted-foreground",
+        enterprise ? "text-muted-foreground dark:text-muted-foreground" : highlight ? "text-primary" : "text-muted-foreground",
       )}
     >
       {value}

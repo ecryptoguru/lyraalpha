@@ -40,10 +40,10 @@ export const SignalLeaderboard = memo(function SignalLeaderboard({ assets, class
     .slice(0, mode === "simple" ? 10 : 20), [assets, filter, mode]);
 
   const getSignalColor = useCallback((score: number) => {
-    if (score >= 70) return "text-green-600";
-    if (score >= 50) return "text-amber-600";
-    if (score >= 30) return "text-orange-600";
-    return "text-red-600";
+    if (score >= 70) return "text-success";
+    if (score >= 50) return "text-primary";
+    if (score >= 30) return "text-warning";
+    return "text-danger";
   }, []);
 
   const getRegimeFitBadge = useCallback((fit: number) => {
@@ -103,7 +103,7 @@ export const SignalLeaderboard = memo(function SignalLeaderboard({ assets, class
                     <div className="text-xs text-muted-foreground">Signal</div>
                   </div>
                   <div className="h-12 w-1 rounded-full" style={{ 
-                    background: `linear-gradient(to top, hsl(var(--muted)) ${100 - asset.signalStrength}%, hsl(var(--primary)) ${asset.signalStrength}%)` 
+                    background: `linear-gradient(to top, var(--muted) ${100 - asset.signalStrength}%, var(--primary) ${asset.signalStrength}%)` 
                   }} />
                 </div>
               </div>

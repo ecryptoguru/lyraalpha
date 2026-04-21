@@ -121,6 +121,37 @@ model Asset {
   @@index([region, lastPriceUpdate])
   @@index([region, changePercent(sort: Desc)])
   @@index([coingeckoId])
+  metrics AssetMetrics? @relation("AssetMetrics")
+}
+
+// Normalized metrics table for dynamic asset data (high-churn, cache-friendly)
+model AssetMetrics {
+  id                 String   @id @default(cuid())
+  assetId            String   @unique
+  asset              Asset    @relation("AssetMetrics", fields: [assetId], references: [id], onDelete: Cascade)
+
+  // Factor & correlation data (high-churn)
+  factorData         Json?
+  correlationData    Json?
+  scoreDynamics      Json?
+
+  // Performance data
+  performanceData    Json?
+  signalStrength     Json?
+
+  // Regime & alignment data
+  correlationRegime  Json?
+  factorAlignment    Json?
+  eventAdjustedScores Json?
+
+  // Crypto-specific intelligence
+  cryptoIntelligence Json?
+  scenarioData       Json?
+
+  updatedAt          DateTime @updatedAt
+
+  @@index([assetId])
+  @@index([updatedAt])
 }
 
 model AssetScore {

@@ -3,14 +3,15 @@ import type { ReactNode } from "react";
 
 // ─── StatChip ────────────────────────────────────────────────────────────────
 
-export type StatChipVariant = "default" | "green" | "red" | "amber" | "blue" | "muted";
+export type StatChipVariant = "default" | "green" | "red" | "amber" | "gold" | "blue" | "muted";
 
 const CHIP_VARIANTS: Record<StatChipVariant, string> = {
   default: "border-border/50 bg-card/60 text-foreground",
-  green:   "border-emerald-500/25 bg-emerald-500/10 text-emerald-400",
-  red:     "border-rose-500/25 bg-rose-500/10 text-rose-400",
-  amber:   "border-amber-500/25 bg-amber-500/10 text-amber-400",
-  blue:    "border-sky-500/25 bg-sky-500/10 text-sky-400",
+  green:   "border-success/25 bg-success/10 text-success",
+  red:     "border-danger/25 bg-danger/10 text-danger",
+  amber:   "border-warning/25 bg-warning/10 text-warning",
+  gold:    "border-[#FFD700]/25 bg-[#FFD700]/10 text-[#FFD700]",
+  blue:    "border-info/25 bg-info/10 text-info",
   muted:   "border-border/40 bg-background/40 text-muted-foreground",
 };
 

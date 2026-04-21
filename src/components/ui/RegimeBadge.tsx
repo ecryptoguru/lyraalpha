@@ -9,33 +9,33 @@ interface RegimeBadgeProps {
 const regimeConfig = {
   STRONG_RISK_ON: {
     label: "Strong Risk On",
-    color: "bg-green-500",
-    textColor: "text-green-50",
-    borderColor: "border-green-600",
+    color: "bg-success",
+    textColor: "text-success",
+    borderColor: "border-success",
   },
   RISK_ON: {
     label: "Risk On",
-    color: "bg-green-400",
-    textColor: "text-green-900",
-    borderColor: "border-green-500",
+    color: "bg-success",
+    textColor: "text-success",
+    borderColor: "border-success",
   },
   NEUTRAL: {
     label: "Neutral",
-    color: "bg-gray-400",
-    textColor: "text-gray-900",
-    borderColor: "border-gray-500",
+    color: "bg-muted",
+    textColor: "text-muted-foreground",
+    borderColor: "border-muted-foreground/50",
   },
   DEFENSIVE: {
     label: "Defensive",
-    color: "bg-orange-400",
-    textColor: "text-orange-900",
-    borderColor: "border-orange-500",
+    color: "bg-warning",
+    textColor: "text-warning",
+    borderColor: "border-warning",
   },
   RISK_OFF: {
     label: "Risk Off",
-    color: "bg-red-500",
-    textColor: "text-red-50",
-    borderColor: "border-red-600",
+    color: "bg-danger",
+    textColor: "text-danger",
+    borderColor: "border-danger",
   },
 } as const;
 

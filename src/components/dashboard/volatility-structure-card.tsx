@@ -32,23 +32,23 @@ function getOverallLabel(p: VolatilityPayload["buckets"]): {
   if (p.elevated.percent >= 45) {
     return {
       label: "Elevated Volatility",
-      color: "text-rose-400",
-      bg: "bg-rose-400/10 border-rose-400/20",
+      color: "text-danger",
+      bg: "bg-danger/10 border-danger/20",
     };
   }
 
   if (p.stable.percent >= 45) {
     return {
       label: "Stable Tape",
-      color: "text-emerald-400",
-      bg: "bg-emerald-400/10 border-emerald-400/20",
+      color: "text-success",
+      bg: "bg-success/10 border-success/20",
     };
   }
 
   return {
     label: "Normal Volatility",
-    color: "text-amber-400",
-    bg: "bg-amber-400/10 border-amber-400/20",
+    color: "text-warning",
+    bg: "bg-warning/10 border-warning/20",
   };
 }
 
@@ -111,21 +111,21 @@ export function VolatilityStructureCard({ className }: { className?: string }) {
           value={data.buckets.stable.percent}
           count={data.buckets.stable.count}
           total={data.total}
-          barClass="bg-emerald-400/80"
+          barClass="bg-success/80"
         />
         <BucketRow
           label={data.buckets.normal.label}
           value={data.buckets.normal.percent}
           count={data.buckets.normal.count}
           total={data.total}
-          barClass="bg-amber-400/80"
+          barClass="bg-warning/80"
         />
         <BucketRow
           label={data.buckets.elevated.label}
           value={data.buckets.elevated.percent}
           count={data.buckets.elevated.count}
           total={data.total}
-          barClass="bg-rose-400/80"
+          barClass="bg-danger/80"
         />
       </div>
 

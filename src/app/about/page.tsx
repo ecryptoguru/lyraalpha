@@ -8,10 +8,10 @@ export default function AboutPage() {
       <Navbar />
       <main className="flex-1 px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-3xl">
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-amber-400/80">About</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-warning/80">About</p>
           <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">
             Built for investors<br />
-            <span className="text-amber-400">who think seriously.</span>
+            <span className="text-warning">who think seriously.</span>
           </h1>
           <p className="mt-6 text-base text-white/55 leading-7">
             LyraAlpha AI is a financial intelligence platform that grounds every AI response in deterministic engine computation — so the analysis you get is reasoned, not hallucinated.
@@ -30,7 +30,7 @@ export default function AboutPage() {
               { stat: "5", label: "Asset classes in one system" },
             ].map((item) => (
               <div key={item.label} className="rounded-2xl border border-white/8 bg-white/3 p-6">
-                <p className="text-3xl font-black text-amber-400">{item.stat}</p>
+                <p className="text-3xl font-black text-warning">{item.stat}</p>
                 <p className="mt-2 text-sm text-white/50 uppercase tracking-wider">{item.label}</p>
               </div>
             ))}
@@ -39,7 +39,7 @@ export default function AboutPage() {
           <div className="mt-12">
             <Link
               href="/sign-up"
-              className="inline-flex items-center rounded-full bg-amber-400 px-6 py-3 text-sm font-bold text-slate-950 transition-colors hover:bg-amber-300"
+              className="inline-flex items-center rounded-full bg-warning px-6 py-3 text-sm font-bold text-foreground transition-colors hover:bg-warning2496"
             >
               Start for Free
             </Link>

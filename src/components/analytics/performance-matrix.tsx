@@ -52,14 +52,14 @@ const ReturnBadge = ({ label, value }: { label: string; value: number | null }) 
       <div className="flex items-center gap-1.5">
         <span className={cn(
           "text-sm font-bold",
-          isPositive && "text-emerald-500",
-          isNegative && "text-red-500",
+          isPositive && "text-success",
+          isNegative && "text-danger",
           !isPositive && !isNegative && "text-muted-foreground"
         )}>
           {formatPercent(value)}
         </span>
-        {isPositive && <TrendingUp className="w-3 h-3 text-emerald-500" />}
-        {isNegative && <TrendingDown className="w-3 h-3 text-red-500" />}
+        {isPositive && <TrendingUp className="w-3 h-3 text-success" />}
+        {isNegative && <TrendingDown className="w-3 h-3 text-danger" />}
       </div>
     </div>
   );
@@ -98,7 +98,7 @@ export function PerformanceMatrix({ performance, volatility, currencySymbol = "$
     <div className={cn("rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl backdrop-blur-xl", className)}>
       <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <span className="w-1.5 h-1.5 rounded-full bg-success" />
           Performance Matrix
         </h3>
         <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Returns</span>
@@ -113,23 +113,23 @@ export function PerformanceMatrix({ performance, volatility, currencySymbol = "$
           {hasVolatility ? (
             <div className={cn(
             "flex flex-col gap-1 p-3 rounded-2xl border",
-            (volatility === "Low" || (typeof volatility === 'object' && volatility?.label === "Low")) ? "bg-emerald-500/5 border-emerald-500/10" : 
-            (volatility === "High" || (typeof volatility === 'object' && volatility?.label === "High")) ? "bg-red-500/5 border-red-500/10" : 
-            "bg-amber-500/5 border-amber-500/10"
+            (volatility === "Low" || (typeof volatility === 'object' && volatility?.label === "Low")) ? "bg-success/5 border-success/10" : 
+            (volatility === "High" || (typeof volatility === 'object' && volatility?.label === "High")) ? "bg-danger/5 border-danger/10" : 
+            "bg-warning/5 border-warning/10"
           )}>
             <span className={cn(
               "text-[10px] uppercase tracking-wider font-medium",
-              (volatility === "Low" || (typeof volatility === 'object' && volatility?.label === "Low")) ? "text-emerald-500/70" : 
-              (volatility === "High" || (typeof volatility === 'object' && volatility?.label === "High")) ? "text-red-500/70" : 
-              "text-amber-500/70"
+              (volatility === "Low" || (typeof volatility === 'object' && volatility?.label === "Low")) ? "text-success/70" : 
+              (volatility === "High" || (typeof volatility === 'object' && volatility?.label === "High")) ? "text-danger/70" : 
+              "text-warning/70"
             )}>
               Volatility
             </span>
             <span className={cn(
               "text-sm font-bold",
-              (volatility === "Low" || (typeof volatility === 'object' && volatility?.label === "Low")) ? "text-emerald-500" : 
-              (volatility === "High" || (typeof volatility === 'object' && volatility?.label === "High")) ? "text-red-500" : 
-              "text-amber-500"
+              (volatility === "Low" || (typeof volatility === 'object' && volatility?.label === "Low")) ? "text-success" : 
+              (volatility === "High" || (typeof volatility === 'object' && volatility?.label === "High")) ? "text-danger" : 
+              "text-warning"
             )}>
               {typeof volatility === 'object' ? (volatility?.label || "Medium") : (volatility || "Medium")}
             </span>
@@ -156,11 +156,11 @@ export function PerformanceMatrix({ performance, volatility, currencySymbol = "$
               </div>
               <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden relative">
                 <div 
-                  className="absolute top-0 bottom-0 left-0 bg-amber-500/30 rounded-full"
+                  className="absolute top-0 bottom-0 left-0 bg-warning/30 rounded-full"
                   style={{ width: `${range52W.currentPosition}%` }}
                 />
                 <div 
-                  className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-amber-500 border-2 border-background rounded-full shadow-lg transition-all"
+                  className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-warning border-2 border-background rounded-full shadow-lg transition-all"
                   style={{ left: `calc(${range52W.currentPosition}% - 6px)` }}
                 />
               </div>
@@ -168,18 +168,18 @@ export function PerformanceMatrix({ performance, volatility, currencySymbol = "$
 
             {/* Distance Badges */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-2xl bg-red-500/5 border border-red-500/10 min-w-0">
-                <ArrowDownCircle className="w-3 h-3 sm:w-4 sm:h-4 text-red-500 shrink-0" />
+              <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-2xl bg-danger/5 border border-danger/10 min-w-0">
+                <ArrowDownCircle className="w-3 h-3 sm:w-4 sm:h-4 text-danger shrink-0" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-[9px] sm:text-[10px] text-muted-foreground leading-none mb-1 truncate">From 52W High</span>
-                  <span className="text-xs sm:text-sm font-bold text-red-500 truncate">{formatPercent(range52W.distanceFromHigh)}</span>
+                  <span className="text-xs sm:text-sm font-bold text-danger truncate">{formatPercent(range52W.distanceFromHigh)}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 min-w-0">
-                <ArrowUpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-500 shrink-0" />
+              <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-2xl bg-success/5 border border-success/10 min-w-0">
+                <ArrowUpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-success shrink-0" />
                 <div className="flex flex-col min-w-0">
                   <span className="text-[9px] sm:text-[10px] text-muted-foreground leading-none mb-1 truncate">From 52W Low</span>
-                  <span className="text-xs sm:text-sm font-bold text-emerald-500 truncate">{formatPercent(range52W.distanceFromLow)}</span>
+                  <span className="text-xs sm:text-sm font-bold text-success truncate">{formatPercent(range52W.distanceFromLow)}</span>
                 </div>
               </div>
             </div>

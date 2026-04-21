@@ -70,7 +70,7 @@ export function WatchlistStar({ symbol, region, size = "md", className }: Watchl
       aria-label={active ? `Remove ${getFriendlyAssetName(symbol)} from watchlist` : `Add ${getFriendlyAssetName(symbol)} to watchlist`}
       className={cn(
         "inline-flex items-center justify-center rounded-2xl transition-all duration-200",
-        "hover:bg-amber-500/10 active:scale-90",
+        "hover:bg-[#FFD700]/10 active:scale-90",
         buttonSizeMap[size],
         pending && "opacity-70 pointer-events-none",
         className,
@@ -81,8 +81,8 @@ export function WatchlistStar({ symbol, region, size = "md", className }: Watchl
           sizeMap[size],
           "transition-all duration-200",
           active
-            ? "fill-amber-400 text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]"
-            : "text-muted-foreground hover:text-amber-400/70",
+            ? "fill-[#FFD700] text-[#FFD700] drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]"
+            : "text-muted-foreground hover:text-[#FFD700]/70",
         )}
       />
     </button>

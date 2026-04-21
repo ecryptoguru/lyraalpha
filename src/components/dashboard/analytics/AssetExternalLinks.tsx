@@ -38,7 +38,7 @@ export function AssetExternalLinks({ links }: ExternalLinksProps) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/5 border border-border/30 dark:border-white/5 text-[10px] font-bold text-foreground uppercase tracking-wider hover:bg-foreground/10 transition-colors"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-warning" />
             Website
           </a>
         )}
@@ -49,7 +49,7 @@ export function AssetExternalLinks({ links }: ExternalLinksProps) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/5 border border-border/30 dark:border-white/5 text-[10px] font-bold text-foreground uppercase tracking-wider hover:bg-foreground/10 transition-colors"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-warning" />
             Whitepaper
           </a>
         )}
@@ -71,7 +71,7 @@ export function AssetExternalLinks({ links }: ExternalLinksProps) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/5 border border-border/30 dark:border-white/5 text-[10px] font-bold text-foreground uppercase tracking-wider hover:bg-foreground/10 transition-colors"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-info" />
             Twitter / X
           </a>
         )}
@@ -82,7 +82,7 @@ export function AssetExternalLinks({ links }: ExternalLinksProps) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/5 border border-border/30 dark:border-white/5 text-[10px] font-bold text-foreground uppercase tracking-wider hover:bg-foreground/10 transition-colors"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-warning" />
             Reddit
           </a>
         )}
@@ -93,7 +93,7 @@ export function AssetExternalLinks({ links }: ExternalLinksProps) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/5 border border-border/30 dark:border-white/5 text-[10px] font-bold text-foreground uppercase tracking-wider hover:bg-foreground/10 transition-colors"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-warning" />
             Telegram
           </a>
         )}
@@ -104,7 +104,7 @@ export function AssetExternalLinks({ links }: ExternalLinksProps) {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-foreground/5 border border-border/30 dark:border-white/5 text-[10px] font-bold text-foreground uppercase tracking-wider hover:bg-foreground/10 transition-colors"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span className="w-1.5 h-1.5 rounded-full bg-success" />
             Explorer
           </a>
         )}

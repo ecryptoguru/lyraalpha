@@ -63,7 +63,7 @@ function VoteBar({ value }: { value: number }) {
   return (
     <div className="h-1.5 bg-muted/30 rounded-full overflow-hidden w-full">
       <div
-        className={cn("h-full rounded-full transition-all", pct >= 60 ? "bg-emerald-500" : pct >= 40 ? "bg-amber-400" : "bg-rose-500")}
+        className={cn("h-full rounded-full transition-all", pct >= 60 ? "bg-success" : pct >= 40 ? "bg-warning" : "bg-danger")}
         style={{ width: `${pct}%` }}
       />
     </div>
@@ -119,12 +119,12 @@ export default function LyraAnalyticsPage() {
         eyebrow="Quality telemetry"
         chips={
           <>
-            <StatChip value={summary.total} label="Rated" variant="amber" />
+            <StatChip value={summary.total} label="Rated" variant="gold" />
             <StatChip value={summary.thumbsUp} label="Positive" variant="green" />
             <StatChip
               value={summary.satisfactionRate != null ? `${summary.satisfactionRate}%` : "—"}
               label="Satisfaction"
-              variant={summary.satisfactionRate != null && summary.satisfactionRate >= 70 ? "green" : summary.satisfactionRate != null && summary.satisfactionRate >= 50 ? "amber" : "red"}
+              variant={summary.satisfactionRate != null && summary.satisfactionRate >= 70 ? "green" : summary.satisfactionRate != null && summary.satisfactionRate >= 50 ? "gold" : "red"}
             />
           </>
         }
@@ -143,14 +143,14 @@ export default function LyraAnalyticsPage() {
             summary.satisfactionRate == null
               ? "bg-muted/10"
               : summary.satisfactionRate >= 70
-              ? "bg-emerald-500/10"
+              ? "bg-success/10"
               : summary.satisfactionRate >= 50
-              ? "bg-amber-400/10"
-              : "bg-rose-500/10"
+              ? "bg-warning/10"
+              : "bg-danger/10"
           }
         />
-        <StatCard index={2} icon={ThumbsUp} label="Positive Votes" value={summary.thumbsUp} color="bg-emerald-500/10" />
-        <StatCard index={3} icon={ThumbsDown} label="Negative Votes" value={summary.thumbsDown} color="bg-rose-500/10" />
+        <StatCard index={2} icon={ThumbsUp} label="Positive Votes" value={summary.thumbsUp} color="bg-success/10" />
+        <StatCard index={3} icon={ThumbsDown} label="Negative Votes" value={summary.thumbsDown} color="bg-danger/10" />
       </div>
 
       {/* By Model & By Tier */}
@@ -212,8 +212,8 @@ export default function LyraAnalyticsPage() {
                 className={cn(
                   "p-4 rounded-2xl border text-sm transition-colors",
                   item.vote === 1
-                    ? "border-emerald-500/20 bg-emerald-500/5"
-                    : "border-rose-500/20 bg-rose-500/5",
+                    ? "border-success/20 bg-success/5"
+                    : "border-danger/20 bg-danger/5",
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -236,9 +236,9 @@ export default function LyraAnalyticsPage() {
                     </div>
                   </div>
                   {item.vote === 1 ? (
-                    <ThumbsUp className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <ThumbsUp className="w-4 h-4 text-success shrink-0 mt-0.5" />
                   ) : (
-                    <ThumbsDown className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                    <ThumbsDown className="w-4 h-4 text-danger shrink-0 mt-0.5" />
                   )}
                 </div>
               </div>

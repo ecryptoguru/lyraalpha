@@ -36,7 +36,7 @@ export default async function DiscoveryPage() {
                 <StatChip
                   value={initialData.total ?? initialData.items?.length ?? 0}
                   label="Signals"
-                  variant="amber"
+                  variant="gold"
                 />
                 <StatChip value={initialRegion} label="Market" variant="muted" />
               </>

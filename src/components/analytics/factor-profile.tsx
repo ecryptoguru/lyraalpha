@@ -15,10 +15,10 @@ interface FactorProfileProps {
 
 export function FactorProfile({ data, className }: FactorProfileProps) {
   const chartData = [
-    { factor: "Value", value: Math.round(data.value), color: "bg-amber-500" },
-    { factor: "Growth", value: Math.round(data.growth), color: "bg-green-500" },
-    { factor: "Momentum", value: Math.round(data.momentum), color: "bg-cyan-500" },
-    { factor: "Volatility", value: Math.round(data.volatility), color: "bg-orange-500" },
+    { factor: "Value", value: Math.round(data.value), color: "bg-warning" },
+    { factor: "Growth", value: Math.round(data.growth), color: "bg-success" },
+    { factor: "Momentum", value: Math.round(data.momentum), color: "bg-info" },
+    { factor: "Volatility", value: Math.round(data.volatility), color: "bg-warning" },
   ];
 
   return (

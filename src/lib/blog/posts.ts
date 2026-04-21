@@ -15,6 +15,11 @@ function computeReadingTimeFromWordCount(wordCount: number): string {
   return `${minutes} min read`;
 }
 
+export interface InternalLink {
+  text: string;
+  url: string;
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -30,6 +35,7 @@ export interface BlogPost {
   metaDescription?: string;
   keywords?: string[];
   sourceAgent?: string;
+  internalLinks?: InternalLink[];
 }
 
 export interface BlogPostSummary {

@@ -113,13 +113,13 @@ export function WhatsChangedCard() {
           >
             <div className={cn(
               "w-4 h-4 rounded flex items-center justify-center shrink-0",
-              c.changeType === "price_move" && c.description.startsWith("+") ? "bg-emerald-500/15" :
-              c.changeType === "price_move" ? "bg-rose-500/15" : "bg-primary/10"
+              c.changeType === "price_move" && c.description.startsWith("+") ? "bg-success/15" :
+              c.changeType === "price_move" ? "bg-danger/15" : "bg-primary/10"
             )}>
               {c.changeType === "price_move" && c.description.startsWith("+") ? (
-                <TrendingUp className="h-2.5 w-2.5 text-emerald-400" />
+                <TrendingUp className="h-2.5 w-2.5 text-success" />
               ) : c.changeType === "price_move" ? (
-                <TrendingDown className="h-2.5 w-2.5 text-rose-400" />
+                <TrendingDown className="h-2.5 w-2.5 text-danger" />
               ) : (
                 <Activity className="h-2.5 w-2.5 text-primary" />
               )}

@@ -21,7 +21,7 @@ export default function BillingAdminPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-            <ShieldAlert className="h-8 w-8 text-amber-500" />
+            <ShieldAlert className="h-8 w-8 text-warning" />
             Billing Operations
           </h1>
           <p className="text-muted-foreground mt-2">
@@ -31,30 +31,30 @@ export default function BillingAdminPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-emerald-500/10 border-emerald-500/20">
+        <Card className="bg-success/10 border-success/20">
           <CardHeader className="pb-2">
-            <CardTitle className="text-emerald-700 dark:text-emerald-400 text-sm font-bold uppercase tracking-widest">Active Subscriptions</CardTitle>
+            <CardTitle className="text-success dark:text-success text-sm font-bold uppercase tracking-widest">Active Subscriptions</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400">{activeSubs}</div>
+            <div className="text-4xl font-bold text-success dark:text-success">{activeSubs}</div>
           </CardContent>
         </Card>
         
-        <Card className="bg-amber-500/10 border-amber-500/20">
+        <Card className="bg-warning/10 border-warning/20">
           <CardHeader className="pb-2">
-            <CardTitle className="text-amber-700 dark:text-amber-400 text-sm font-bold uppercase tracking-widest">Past Due / Failing</CardTitle>
+            <CardTitle className="text-primary dark:text-warning text-sm font-bold uppercase tracking-widest">Past Due / Failing</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-amber-600 dark:text-amber-400">{pastDueSubs}</div>
+            <div className="text-4xl font-bold text-primary dark:text-warning">{pastDueSubs}</div>
           </CardContent>
         </Card>
 
-        <Card className="bg-amber-500/10 border-amber-500/20">
+        <Card className="bg-warning/10 border-warning/20">
           <CardHeader className="pb-2">
-            <CardTitle className="text-amber-700 dark:text-amber-400 text-sm font-bold uppercase tracking-widest">System Authority</CardTitle>
+            <CardTitle className="text-primary dark:text-warning text-sm font-bold uppercase tracking-widest">System Authority</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-sm font-medium text-amber-600 dark:text-amber-400 mt-2">
+            <div className="text-sm font-medium text-primary dark:text-warning mt-2">
               All financial mutations must occur in the Stripe Dashboard.
             </div>
           </CardContent>
@@ -130,7 +130,7 @@ export default function BillingAdminPage() {
                       )}
                       <span className="font-medium text-foreground">→ {log.newState}</span>
                       {log.amount !== null && (
-                        <div className="text-xs text-emerald-500 mt-0.5 font-medium">
+                        <div className="text-xs text-success mt-0.5 font-medium">
                           {(log.amount / 100).toFixed(2)} {log.currency?.toUpperCase()}
                         </div>
                       )}

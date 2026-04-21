@@ -102,7 +102,7 @@ const ChatMessageItem = memo(function ChatMessageItem({
       </div>
 
       {message.role === "user" ? (
-        <div className="bg-primary text-black px-4 py-3 rounded-2xl rounded-tr-none shadow-lg shadow-primary/15 max-w-[88%]">
+        <div className="bg-primary text-primary-foreground px-4 py-3 rounded-2xl rounded-tr-none shadow-lg shadow-primary/15 max-w-[88%]">
           <p className="whitespace-pre-wrap font-bold text-xs leading-relaxed tracking-tight">
             {text}
           </p>
@@ -353,8 +353,8 @@ export function LyraInsightSheet({
                 <Sparkles className="h-4 w-4 text-primary" />
               </div>
               <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
               </span>
             </div>
             <div>
@@ -493,7 +493,7 @@ export function LyraInsightSheet({
               type="submit"
               size="icon"
               disabled={isLoading || !localInput.trim()}
-              className="absolute right-1.5 top-1.5 h-9 w-9 rounded-2xl bg-primary hover:bg-primary/90 text-black shadow-md shadow-primary/20 transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center"
+              className="absolute right-1.5 top-1.5 h-9 w-9 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20 transition-all hover:scale-105 active:scale-95 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center"
             >
               <Sparkles className="h-4 w-4 fill-current" />
             </Button>

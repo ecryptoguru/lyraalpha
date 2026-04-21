@@ -160,7 +160,7 @@ The blog layer uses a hybrid static + DB architecture:
 - **Static posts** are seeded at build time in `src/lib/blog/posts.ts` and serve as the zero-dependency baseline
 - **DB posts** are written by AMI 2.0 via the `/api/webhooks/ami` endpoint and stored in the `BlogPost` Prisma model
 - DB posts take priority over static fallbacks when slugs collide
-- Category pages, RSS feed at `/blog/feed.xml`, OG hero images with logo overlay, reading progress bar, share cards, and contextual CTAs
+- Category pages, RSS feed at `/blog/feed.xml`, WebP hero images (1200×800, optimized at ~90KB each), OG share cards, reading progress bar, share cards, and contextual CTAs
 
 #### AMI 2.0 Webhook Bridge
 

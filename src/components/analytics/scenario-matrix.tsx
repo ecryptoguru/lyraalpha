@@ -39,27 +39,27 @@ export const ScenarioMatrix = memo(function ScenarioMatrix({ scenarioData, class
       key: "bull",
       label: "Bull Case",
       icon: TrendingUp,
-      color: "text-green-600",
-      bg: "bg-green-50",
-      borderColor: "border-green-200",
+      color: "text-success",
+      bg: "bg-success/5",
+      borderColor: "border-success/20",
       data: scenarioData.bull,
     },
     {
       key: "base",
       label: "Base Case",
       icon: Minus,
-      color: "text-amber-600",
-      bg: "bg-amber-50",
-      borderColor: "border-amber-200",
+      color: "text-primary",
+      bg: "bg-primary/5",
+      borderColor: "border-primary/20",
       data: scenarioData.base,
     },
     {
       key: "bear",
       label: "Bear Case",
       icon: TrendingDown,
-      color: "text-red-600",
-      bg: "bg-red-50",
-      borderColor: "border-red-200",
+      color: "text-danger",
+      bg: "bg-danger/5",
+      borderColor: "border-danger/20",
       data: scenarioData.bear,
     },
   ] as const, [scenarioData]);
@@ -147,7 +147,7 @@ export const ScenarioMatrix = memo(function ScenarioMatrix({ scenarioData, class
               {scenarioData.var95 !== undefined && (
                 <div className="rounded-2xl border border-white/5 bg-muted/30 p-3">
                   <div className="text-xs text-muted-foreground mb-1">VaR (95%)</div>
-                  <div className="text-lg font-bold text-orange-600">
+                  <div className="text-lg font-bold text-warning">
                     {scenarioData.var95.toFixed(1)}%
                   </div>
                 </div>
@@ -155,7 +155,7 @@ export const ScenarioMatrix = memo(function ScenarioMatrix({ scenarioData, class
               {scenarioData.expectedShortfall !== undefined && (
                 <div className="rounded-2xl border border-white/5 bg-muted/30 p-3">
                   <div className="text-xs text-muted-foreground mb-1">Expected Shortfall</div>
-                  <div className="text-lg font-bold text-red-600">
+                  <div className="text-lg font-bold text-danger">
                     {scenarioData.expectedShortfall.toFixed(1)}%
                   </div>
                 </div>
@@ -166,15 +166,15 @@ export const ScenarioMatrix = memo(function ScenarioMatrix({ scenarioData, class
 
         {/* Fragility Score */}
         {scenarioData.fragilityScore !== undefined && (
-          <div className="flex items-center gap-3 rounded-2xl border border-orange-200 bg-orange-50 p-3">
-            <AlertTriangle className="h-5 w-5 text-orange-600" />
+          <div className="flex items-center gap-3 rounded-2xl border border-warning/20 bg-warning/5 p-3">
+            <AlertTriangle className="h-5 w-5 text-warning" />
             <div className="flex-1">
               <div className="text-xs font-semibold">Fragility Score</div>
               <div className="text-xs text-muted-foreground">
                 Asset vulnerability to market stress
               </div>
             </div>
-            <div className="text-xl font-bold text-orange-600">
+            <div className="text-xl font-bold text-warning">
               {scenarioData.fragilityScore.toFixed(0)}
             </div>
           </div>

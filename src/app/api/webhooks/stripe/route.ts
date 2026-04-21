@@ -12,6 +12,7 @@ import {
   logBillingAudit,
 } from "@/lib/payments/subscription.service";
 import { addCredits } from "@/lib/services/credit.service";
+import { prisma } from "@/lib/prisma";
 import { invalidatePlanCache } from "@/lib/middleware/plan-gate";
 import { CreditTransactionType } from "@/generated/prisma/client";
 import { createLogger } from "@/lib/logger";
@@ -42,23 +43,33 @@ function getStripe(): Stripe {
   return _stripe;
 }
 
-// ─── Helper: extract billing period from subscription ─────────────────────────
-// In API version 2026-01-28.clover, current_period_start/end live on items.data[0],
-// not on the subscription root. Falls back to root for forward-compat.
+// ─── Type-safe subscription period extraction ─────────────────────────────────
+// Stripe API v2026-01-28.clover puts current_period_start/end on items.data[0],
+// not on the subscription root. Not all SDK versions expose these correctly,
+// so we safely extract from the raw object.
 function getSubPeriod(sub: Stripe.Subscription): { start: Date; end: Date } {
-  const item = sub.items?.data?.[0] as unknown as {
-    current_period_start?: number;
-    current_period_end?: number;
-  } | undefined;
+  const raw = sub as unknown as Record<string, unknown>;
 
-  const rawStart = item?.current_period_start
-    ?? (sub as unknown as { current_period_start?: number }).current_period_start;
-  const rawEnd = item?.current_period_end
-    ?? (sub as unknown as { current_period_end?: number }).current_period_end;
+  let rawStart: number | undefined;
+  let rawEnd: number | undefined;
+
+  // Try items.data[0] first (API v2026 structure)
+  const itemsRaw = raw.items as { data?: Array<Record<string, unknown>> } | undefined;
+  const firstItem = itemsRaw?.data?.[0];
+  if (firstItem) {
+    rawStart = firstItem.current_period_start as number | undefined;
+    rawEnd = firstItem.current_period_end as number | undefined;
+  }
+
+  // Fall back to subscription root (older API versions or direct retrieval)
+  if (rawStart === undefined) {
+    rawStart = raw.current_period_start as number | undefined;
+    rawEnd = raw.current_period_end as number | undefined;
+  }
 
   return {
     start: rawStart ? new Date(rawStart * 1000) : new Date(),
-    end:   rawEnd   ? new Date(rawEnd   * 1000) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    end: rawEnd ? new Date(rawEnd * 1000) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   };
 }
 
@@ -122,9 +133,9 @@ export async function POST(req: Request) {
 
   // 1. Verify signature + replay protection
   const verification = verifyStripeWebhook(rawBody, signature, WEBHOOK_SECRET);
-  if (!verification.valid || !verification.event) {
-    logger.warn({ error: verification.error }, "Stripe webhook verification failed");
-    return apiError(verification.error ?? "Webhook verification failed", 400);
+  if (!verification || !verification.valid || !verification.event) {
+    logger.warn({ error: verification?.error }, "Stripe webhook verification failed");
+    return apiError(verification?.error ?? "Webhook verification failed", 400);
   }
 
   const parsedEvent = StripeEventSchema.safeParse(verification.event);
@@ -326,8 +337,15 @@ export async function POST(req: Request) {
         resolvedUserId = await findUserByCustomerId("STRIPE", customerId);
 
         if (subscriptionId) {
-          const periodStart = new Date((obj.period_start as number) * 1000);
-          const periodEnd   = new Date((obj.period_end   as number) * 1000);
+          // API v2026-01-28.clover: period dates are on lines.data[0].period, not invoice root.
+          // Fall back to root-level fields for older API versions or direct retrieval.
+          const lines = (obj.lines as { data?: Array<Record<string, unknown>> } | undefined)?.data;
+          const firstLine = lines?.[0];
+          const linePeriod = firstLine?.period as { start?: number; end?: number } | undefined;
+          const rawStart = linePeriod?.start ?? (obj.period_start as number | undefined);
+          const rawEnd   = linePeriod?.end   ?? (obj.period_end   as number | undefined);
+          const periodStart = rawStart ? new Date(rawStart * 1000) : new Date();
+          const periodEnd   = rawEnd   ? new Date(rawEnd * 1000)   : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
           // Only call renewSubscription (not activateSubscription) to avoid
           // double-writing on the same cycle as invoice.paid
           await renewSubscription(subscriptionId, periodStart, periodEnd, eventId);
@@ -339,10 +357,30 @@ export async function POST(req: Request) {
         const customerId     = obj.customer as string;
         const amountRefunded = obj.amount_refunded as number;
         const currency       = obj.currency as string;
+        const paymentIntentId = obj.payment_intent as string | null;
         const userId = await findUserByCustomerId("STRIPE", customerId);
         resolvedUserId = userId;
 
         if (userId) {
+          // Claw back credits granted for this purchase.
+          // Look up the original CreditTransaction by referenceId (payment_intent or event id).
+          const originalRef = paymentIntentId ?? eventId;
+          const originalTx = await prisma.creditTransaction.findFirst({
+            where: { userId, referenceId: originalRef, type: CreditTransactionType.PURCHASE },
+            select: { amount: true },
+          });
+          if (originalTx && originalTx.amount > 0) {
+            // Use negative addCredits to deduct — creates an ADJUSTMENT transaction for audit trail
+            await addCredits(
+              userId,
+              -originalTx.amount,
+              CreditTransactionType.ADJUSTMENT,
+              `Refund clawback: ${originalTx.amount} credits deducted for refunded charge`,
+              `refund-clawback:${originalRef}`,
+            );
+            logger.info({ userId, creditsClawedBack: originalTx.amount, originalRef }, "Credits clawed back for refunded charge");
+          }
+
           await logBillingAudit({
             userId,
             stripeEventId: eventId,

@@ -35,15 +35,15 @@ interface Sector {
 }
 
 function getScoreColor(score: number): string {
-  if (score >= 70) return "text-emerald-400";
-  if (score >= 40) return "text-amber-400";
-  return "text-rose-400";
+  if (score >= 70) return "text-success";
+  if (score >= 40) return "text-cyan-400";
+  return "text-danger";
 }
 
 function getScoreBg(score: number): string {
-  if (score >= 70) return "bg-emerald-400/10 border-emerald-400/20";
-  if (score >= 40) return "bg-amber-400/10 border-amber-400/20";
-  return "bg-rose-400/10 border-rose-400/20";
+  if (score >= 70) return "bg-success/10 border-success/20";
+  if (score >= 40) return "bg-cyan-400/10 border-cyan-400/20";
+  return "bg-danger/10 border-danger/20";
 }
 
 export function DiscoveryMarketPulse() {
@@ -113,14 +113,14 @@ export function DiscoveryMarketPulse() {
           <div className="space-y-2">
             <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-40">Distribution</p>
             <div className="flex gap-1 h-3 rounded-full overflow-hidden">
-              {riskOn > 0 && <div className="bg-emerald-400 rounded-full transition-all duration-700" style={{ width: `${(riskOn / withRegime.length) * 100}%` }} />}
-              {neutral > 0 && <div className="bg-amber-400 rounded-full transition-all duration-700" style={{ width: `${(neutral / withRegime.length) * 100}%` }} />}
-              {defensive > 0 && <div className="bg-rose-400 rounded-full transition-all duration-700" style={{ width: `${(defensive / withRegime.length) * 100}%` }} />}
+              {riskOn > 0 && <div className="bg-success rounded-full transition-all duration-700" style={{ width: `${(riskOn / withRegime.length) * 100}%` }} />}
+              {neutral > 0 && <div className="bg-warning rounded-full transition-all duration-700" style={{ width: `${(neutral / withRegime.length) * 100}%` }} />}
+              {defensive > 0 && <div className="bg-danger rounded-full transition-all duration-700" style={{ width: `${(defensive / withRegime.length) * 100}%` }} />}
             </div>
             <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest">
-              <span className="text-emerald-400">{riskOn} Risk On</span>
-              <span className="text-amber-400">{neutral} Neutral</span>
-              <span className="text-rose-400">{defensive} Defensive</span>
+              <span className="text-success">{riskOn} Risk On</span>
+              <span className="text-warning">{neutral} Neutral</span>
+              <span className="text-danger">{defensive} Defensive</span>
             </div>
           </div>
 
@@ -169,7 +169,7 @@ export function DiscoveryMarketPulse() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <div className={cn("flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-xl border", isPositive ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" : "text-rose-400 bg-rose-400/10 border-rose-400/20")}>
+                      <div className={cn("flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-xl border", isPositive ? "text-success bg-success/10 border-success/20" : "text-danger bg-danger/10 border-danger/20")}>
                         <MomIcon className="h-2.5 w-2.5" />
                         {isPositive ? "+" : ""}{mom.toFixed(1)}
                       </div>

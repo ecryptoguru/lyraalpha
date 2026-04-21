@@ -12,31 +12,31 @@ interface PortfolioIntelligenceHeroProps {
 }
 
 const SIGNAL_ICONS: Record<string, React.ReactNode> = {
-  positive: <TrendingUp className="h-3.5 w-3.5 text-emerald-400 shrink-0" />,
-  warning:  <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />,
+  positive: <TrendingUp className="h-3.5 w-3.5 text-success shrink-0" />,
+  warning:  <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0" />,
   neutral:  <Shield className="h-3.5 w-3.5 text-muted-foreground shrink-0" />,
 };
 
 const SIGNAL_TONES: Record<string, string> = {
-  positive: "border-emerald-500/20 bg-emerald-500/8 text-emerald-100",
-  warning:  "border-amber-500/20 bg-amber-500/8 text-amber-100",
+  positive: "border-success/20 bg-success/8 text-success/70",
+  warning:  "border-warning/20 bg-warning/8 text-primary/60",
   neutral:  "border-white/8 bg-card/50 text-muted-foreground",
 };
 
 function getBandConfig(band: string) {
   switch (band) {
     case "Exceptional":
-    case "Strong":   return { cls: "border-emerald-500/25 bg-emerald-500/10 text-emerald-300", glow: "#34d399" };
-    case "Balanced": return { cls: "border-amber-500/25 bg-amber-500/10 text-amber-300",       glow: "#fbbf24" };
-    default:         return { cls: "border-red-500/25 bg-red-500/10 text-red-300",             glow: "#f87171" };
+    case "Strong":   return { cls: "border-success/25 bg-success/10 text-success", glow: "#34d399" };
+    case "Balanced": return { cls: "border-warning/25 bg-warning/10 text-warning",       glow: "#fbbf24" };
+    default:         return { cls: "border-danger/25 bg-danger/10 text-danger",             glow: "#f87171" };
   }
 }
 
 function getComponentColor(value: number): string {
-  if (value >= 7)  return "bg-emerald-400";
-  if (value >= 5)  return "bg-amber-400";
-  if (value >= 3)  return "bg-orange-400";
-  return "bg-red-400";
+  if (value >= 7)  return "bg-success";
+  if (value >= 5)  return "bg-warning";
+  if (value >= 3)  return "bg-warning";
+  return "bg-danger";
 }
 
 function ScoreRing({ score }: { score: number }) {
@@ -165,9 +165,9 @@ export function PortfolioIntelligenceHero({ intelligence, supportNote, marketLab
           ))}
 
           {supportNote && (
-            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/8 p-3 flex items-start gap-2">
-              <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-xs text-amber-100 leading-relaxed">{supportNote}</p>
+            <div className="rounded-2xl border border-warning/20 bg-warning/8 p-3 flex items-start gap-2">
+              <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
+              <p className="text-xs text-primary/60 leading-relaxed">{supportNote}</p>
             </div>
           )}
 

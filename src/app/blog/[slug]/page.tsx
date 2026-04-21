@@ -46,6 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       authors: [post.author],
       tags: post.tags,
       images: ogImages,
+      section: post.category,
     },
     twitter: {
       card: "summary_large_image",
@@ -56,6 +57,71 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+function extractFaqs(content: string): FaqItem[] {
+  const faqs: FaqItem[] = [];
+  const lines = content.split("\n");
+
+  let inFaqSection = false;
+  let currentQuestion = "";
+  let currentAnswer: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Detect FAQ section header
+    if (trimmed.startsWith("## ") && (trimmed.includes("Frequently Asked") || trimmed.includes("FAQ"))) {
+      inFaqSection = true;
+      continue;
+    }
+
+    if (inFaqSection) {
+      // Question pattern: **Question text** or **Q: ...**
+      const questionMatch = trimmed.match(/^\*\*[WQ]?:?\s*(.+?)\*\*$/) || trimmed.match(/^\*\*What|How|Why|Can|Should/);
+
+      if (questionMatch || (trimmed.startsWith("**") && trimmed.endsWith("**") && !currentQuestion)) {
+        // Save previous Q&A pair
+        if (currentQuestion && currentAnswer.length > 0) {
+          faqs.push({
+            question: currentQuestion.replace(/\*\*/g, "").trim(),
+            answer: currentAnswer.join(" ").replace(/\*\*/g, "").trim(),
+          });
+        }
+        currentQuestion = trimmed.replace(/\*\*/g, "").trim();
+        currentAnswer = [];
+      } else if (currentQuestion && trimmed && !trimmed.startsWith("## ") && !trimmed.startsWith("**")) {
+        // Accumulate answer lines
+        currentAnswer.push(trimmed);
+      } else if (trimmed.startsWith("## ") && currentQuestion) {
+        // New section, save last FAQ
+        inFaqSection = false;
+        if (currentQuestion && currentAnswer.length > 0) {
+          faqs.push({
+            question: currentQuestion.replace(/\*\*/g, "").trim(),
+            answer: currentAnswer.join(" ").replace(/\*\*/g, "").trim(),
+          });
+        }
+        currentQuestion = "";
+        currentAnswer = [];
+      }
+    }
+  }
+
+  // Don't forget the last FAQ
+  if (currentQuestion && currentAnswer.length > 0) {
+    faqs.push({
+      question: currentQuestion.replace(/\*\*/g, "").trim(),
+      answer: currentAnswer.join(" ").replace(/\*\*/g, "").trim(),
+    });
+  }
+
+  return faqs;
+}
+
 function JsonLd({ post }: { post: NonNullable<Awaited<ReturnType<typeof getPostBySlugAsync>>> }) {
   const schema = {
     "@context": "https://schema.org",
@@ -63,27 +129,153 @@ function JsonLd({ post }: { post: NonNullable<Awaited<ReturnType<typeof getPostB
     headline: post.title,
     description: post.metaDescription ?? post.description,
     author: {
-      "@type": "Organization",
-      name: post.author,
-      url: process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz",
+      "@type": "Person",
+      name: "LyraAlpha Research Team",
+      jobTitle: "Crypto Market Intelligence Analysts",
+      url: "https://lyraalpha.xyz",
     },
     publisher: {
       "@type": "Organization",
       name: "LyraAlpha AI",
-      url: process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz",
+      url: "https://lyraalpha.xyz",
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/logo.png`,
+        url: "https://lyraalpha.xyz/logo.png",
       },
     },
     datePublished: post.date,
     dateModified: post.date,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/blog/${post.slug}`,
+      "@id": `https://lyraalpha.xyz/blog/${post.slug}`,
     },
     keywords: (post.keywords ?? post.tags).join(", "),
     ...(post.heroImageUrl ? { image: post.heroImageUrl } : {}),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+function BreadcrumbJsonLd({ category, title }: { category: string; title: string }) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Blog",
+        item: "https://lyraalpha.xyz/blog",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: category,
+        item: `https://lyraalpha.xyz/blog/category/${encodeURIComponent(category.toLowerCase().replace(/\s+/g, "-"))}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: title,
+      },
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+function FaqJsonLd({ post }: { post: NonNullable<Awaited<ReturnType<typeof getPostBySlugAsync>>> }) {
+  const faqs = extractFaqs(post.content);
+
+  if (faqs.length < 2) return null;
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+    />
+  );
+}
+
+interface HowToStep {
+  name: string;
+  text: string;
+}
+
+function extractSteps(content: string, title: string): HowToStep[] {
+  // Check if this post is likely a how-to
+  const titleStartsHow = /^How\s+(to|I)/i.test(title);
+  const hasStepPatterns = /Step\s+\d+[:)]|##\s+Step/i.test(content);
+
+  if (!titleStartsHow && !hasStepPatterns) return [];
+
+  const steps: HowToStep[] = [];
+  const lines = content.split("\n");
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Match "Step 1:" or "Step 1)" or "Step 1 -" patterns
+    const stepMatch = trimmed.match(/^Step\s+(\d+)[:\)\-–]?\s*(.+)$/i);
+    if (stepMatch) {
+      steps.push({
+        name: `Step ${stepMatch[1]}`,
+        text: stepMatch[2].trim(),
+      });
+      continue;
+    }
+
+    // Match "## Step 1" or "## Step 1: Title" patterns
+    const headerStepMatch = trimmed.match(/^##\s+Step\s+(\d+)[:\s]*(.*)$/i);
+    if (headerStepMatch) {
+      steps.push({
+        name: `Step ${headerStepMatch[1]}`,
+        text: headerStepMatch[2].trim() || `Step ${headerStepMatch[1]}`,
+      });
+    }
+  }
+
+  return steps;
+}
+
+function HowToJsonLd({ post }: { post: NonNullable<Awaited<ReturnType<typeof getPostBySlugAsync>>> }) {
+  const steps = extractSteps(post.content, post.title);
+
+  if (steps.length < 3) return null;
+
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: post.title,
+    description: post.metaDescription ?? post.description,
+    step: steps.map((step) => ({
+      "@type": "HowToStep",
+      name: step.name,
+      text: step.text,
+    })),
   };
 
   return (
@@ -108,7 +300,7 @@ function parseInline(text: string): React.ReactNode[] {
         <a
           key={i}
           href={token.href}
-          className="text-amber-400 underline underline-offset-2 hover:text-amber-300"
+          className="text-warning underline underline-offset-2 hover:text-warning"
           {...(token.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         >
           {token.text}
@@ -134,7 +326,7 @@ function renderContent(content: string) {
       <ul key={key++} className="my-4 space-y-2 pl-5">
         {bulletBuffer.map((item, i) => (
           <li key={i} className="flex items-start gap-2 leading-7 text-white/55">
-            <span className="mt-2.5 h-1 w-1 shrink-0 rounded-full bg-amber-400/60" />
+            <span className="mt-2.5 h-1 w-1 shrink-0 rounded-full bg-warning/60" />
             <span>{parseInline(item)}</span>
           </li>
         ))}
@@ -244,7 +436,7 @@ function renderContent(content: string) {
       elements.push(
         <p key={key++} className="leading-8 text-white/55">
           {parseInline(trimmed)}
-        </p>,
+        </p>
       );
     }
   }
@@ -267,8 +459,11 @@ export default async function BlogPostPage({ params }: Props) {
   const related = recentPosts.filter((p) => p.slug !== slug).slice(0, 2);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#040816] font-sans text-white selection:bg-amber-300/30">
+    <div className="flex min-h-screen flex-col bg-[#040816] font-sans text-white selection:bg-warning12945">
       <JsonLd post={post} />
+      <BreadcrumbJsonLd category={post.category} title={post.title} />
+      <FaqJsonLd post={post} />
+      <HowToJsonLd post={post} />
       <BlogReadingProgress />
       <Navbar />
 
@@ -302,7 +497,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="container relative mx-auto max-w-4xl px-0">
             <Link
               href="/blog"
-              className="group mb-8 inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/35 transition-colors hover:text-amber-400"
+              className="group mb-8 inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/35 transition-colors hover:text-warning"
             >
               <ArrowLeft className="h-3 w-3 transition-transform duration-200 group-hover:-translate-x-0.5" />
               All articles
@@ -311,7 +506,7 @@ export default async function BlogPostPage({ params }: Props) {
             <div className="flex flex-wrap items-center gap-3">
               <Link
                 href={`/blog/category/${encodeURIComponent(post.category.toLowerCase().replace(/\s+/g, "-"))}`}
-                className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/6 px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-amber-300 transition-opacity hover:opacity-80"
+                className="inline-flex items-center gap-1.5 rounded-full border border-warning/20 bg-warning/6 px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-warning transition-opacity hover:opacity-80"
               >
                 {post.category}
               </Link>
@@ -375,11 +570,11 @@ export default async function BlogPostPage({ params }: Props) {
                     href={`/blog/${p.slug}`}
                     className="group rounded-2xl border border-white/8 bg-white/[0.022] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-white/15"
                   >
-                    <p className="text-sm font-semibold leading-snug text-white/80 transition-colors group-hover:text-amber-100">
+                    <p className="text-sm font-semibold leading-snug text-white/80 transition-colors group-hover:text-primary/60">
                       {p.title}
                     </p>
                     <p className="mt-2 text-xs leading-6 text-white/38">{p.description}</p>
-                    <p className="mt-3 flex items-center gap-1.5 font-mono text-[10px] text-amber-400/60 transition-all group-hover:gap-2.5 group-hover:text-amber-400">
+                    <p className="mt-3 flex items-center gap-1.5 font-mono text-[10px] text-warning/60 transition-all group-hover:gap-2.5 group-hover:text-warning">
                       Read article
                       <ArrowLeft className="h-3 w-3 rotate-180 transition-transform duration-200 group-hover:translate-x-0.5" />
                     </p>

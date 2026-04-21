@@ -9,7 +9,7 @@ interface FeatureCardProps {
   description: string;
   icon: ComponentType<{ className?: string }>;
   className?: string;
-  accent?: "amber" | "teal" | "default";
+  accent?: "gold" | "cyan" | "default";
 }
 
 function FeatureCard({
@@ -20,14 +20,14 @@ function FeatureCard({
   accent = "default",
 }: FeatureCardProps) {
   const accentStyles = {
-    amber: "border-amber-400/20 bg-amber-400/5 hover:border-amber-400/35",
-    teal: "border-teal-400/18 bg-teal-400/4 hover:border-teal-400/30",
+    gold: "border-[#FFD700]/25 bg-[#FFD700]/8 hover:border-[#FFD700]/45",
+    cyan: "border-[#00D4FF]/20 bg-[#00D4FF]/5 hover:border-[#00D4FF]/35",
     default: "border-white/8 bg-white/2.8 hover:border-white/15",
   };
 
   const iconStyles = {
-    amber: "border-amber-400/25 bg-amber-400/10 text-amber-400",
-    teal: "border-teal-400/20 bg-teal-400/8 text-teal-400",
+    gold: "border-[#FFD700]/30 bg-[#FFD700]/12 text-[#FFD700]",
+    cyan: "border-[#00D4FF]/25 bg-[#00D4FF]/10 text-[#00D4FF]",
     default: "border-white/12 bg-white/5 text-white/60",
   };
 
@@ -48,27 +48,27 @@ function FeatureCard({
         <p className="leading-7 text-white/45">{description}</p>
       </div>
       {/* Corner glow */}
-      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-amber-400/6 blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#FFD700]/8 blur-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
     </div>
   );
 }
 
 const signals = [
-  { name: "Trend",      desc: "Directional strength and persistence",    score: "78", accent: "amber" },
+  { name: "Trend",      desc: "Directional strength and persistence",    score: "78", accent: "gold" },
   { name: "Momentum",   desc: "Rate of change and acceleration",           score: "65", accent: "default" },
   { name: "Volatility", desc: "Price dispersion and regime risk",          score: "42", accent: "default" },
-  { name: "Liquidity",  desc: "Bid-ask spread and trading depth",          score: "88", accent: "teal" },
+  { name: "Liquidity",  desc: "Bid-ask spread and trading depth",          score: "88", accent: "cyan" },
   { name: "Trust",      desc: "On-chain activity and network health",     score: "72", accent: "default" },
   { name: "Sentiment",  desc: "Market psychology and positioning",         score: "55", accent: "default" },
 ] as const;
 
 const lyraCapabilities = [
-  { icon: LineChart,   title: "Regime-Aware Analysis",      desc: "Every asset read in its macro, sector, and asset-level regime simultaneously.",                       accent: "amber" as const },
-  { icon: GitMerge,    title: "Multi-Asset Synthesis",       desc: "Up to 4 assets across sectors — divergence, correlation, and relative regime alignment in one call.",   accent: "teal" as const },
+  { icon: LineChart,   title: "Regime-Aware Analysis",      desc: "Every asset read in its macro, sector, and asset-level regime simultaneously.",                       accent: "gold" as const },
+  { icon: GitMerge,    title: "Multi-Asset Synthesis",       desc: "Up to 4 assets across sectors — divergence, correlation, and relative regime alignment in one call.",   accent: "cyan" as const },
   { icon: Zap,         title: "Shock Simulator",             desc: "Deterministic stress replays interpreted by Lyra — what happened, and which assets held.",             accent: "default" as const },
   { icon: BookOpen,    title: "Conversation Memory",         desc: "Context carries across sessions. No re-explaining. Deeper analysis over time.",                         accent: "default" as const },
   { icon: ShieldCheck, title: "Research Augmentation",       desc: "Fresh web data via RAG. Every retrieved chunk scanned before Lyra sees it.",                            accent: "default" as const },
-  { icon: Lock,        title: "Portfolio Intelligence",      desc: "Portfolio read as a system — regime fit, fragility, benchmark, Monte Carlo, score velocity.",             accent: "teal" as const },
+  { icon: Lock,        title: "Portfolio Intelligence",      desc: "Portfolio read as a system — regime fit, fragility, benchmark, Monte Carlo, score velocity.",             accent: "cyan" as const },
 ] as const;
 
 export function Features() {
@@ -82,12 +82,12 @@ export function Features() {
         {/* ── Six Core Signals ───────────────────────────────── */}
         <LandingReveal>
           <div className="mx-auto mb-12 max-w-3xl text-center">
-            <p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-amber-400/70">
+            <p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-warning/70">
               Computed before any AI speaks
             </p>
             <h2 className="text-3xl font-light tracking-[-0.04em] text-white md:text-5xl">
               Six core market signals,{" "}
-              <span className="text-amber-400">computed deterministically.</span>
+              <span className="text-warning">computed deterministically.</span>
             </h2>
             <p className="mt-6 text-base leading-8 text-white/42">
               The model interprets what the engines computed — it never invents the structure.
@@ -99,9 +99,9 @@ export function Features() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {signals.map((sig) => {
               const pct = parseInt(sig.score);
-              const accentBar = sig.accent === "amber" ? "bg-amber-400" : sig.accent === "teal" ? "bg-teal-400" : "bg-white/25";
-              const accentText = sig.accent === "amber" ? "text-amber-400" : sig.accent === "teal" ? "text-teal-400" : "text-white/55";
-              const borderClass = sig.accent === "amber" ? "border-amber-400/18 bg-amber-400/4" : sig.accent === "teal" ? "border-teal-400/15 bg-teal-400/4" : "border-white/8 bg-white/2.8";
+              const accentBar = sig.accent === "gold" ? "bg-[#FFD700]" : sig.accent === "cyan" ? "bg-[#00D4FF]" : "bg-white/25";
+              const accentText = sig.accent === "gold" ? "text-[#FFD700]" : sig.accent === "cyan" ? "text-[#00D4FF]" : "text-white/55";
+              const borderClass = sig.accent === "gold" ? "border-[#FFD700]/20 bg-[#FFD700]/5" : sig.accent === "cyan" ? "border-[#00D4FF]/18 bg-[#00D4FF]/5" : "border-white/8 bg-white/2.8";
               return (
                 <div key={sig.name} className={`rounded-2xl border p-5 transition-transform duration-300 hover:-translate-y-1 ${borderClass}`}>
                   <div className="flex items-start justify-between gap-3">
@@ -123,12 +123,12 @@ export function Features() {
         {/* ── Lyra Capabilities ──────────────────────────────── */}
         <LandingReveal delay={60}>
           <div className="mx-auto mb-12 mt-24 max-w-3xl text-center">
-            <p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-amber-400/70">
+            <p className="mb-4 font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-warning/70">
               Lyra — purpose-built market intelligence agent
             </p>
             <h2 className="text-3xl font-light tracking-[-0.04em] text-white md:text-5xl">
               Lyra doesn&apos;t guess.{" "}
-              <span className="text-teal-400">She interprets.</span>
+              <span className="text-info">She interprets.</span>
             </h2>
             <p className="mt-6 text-base leading-8 text-white/42">
               Structured context computed first. Analysis streamed under a strict output contract.
@@ -152,9 +152,9 @@ export function Features() {
 
         <LandingReveal delay={220}>
           <div className="relative mt-12 overflow-hidden rounded-3xl border border-white/8 bg-white/2.5 p-6 backdrop-blur-sm sm:p-8">
-            <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-amber-400/5 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-warning/5 to-transparent" />
             <div className="relative max-w-3xl">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-amber-400/65">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-warning/65">
                 System entry points
               </p>
               <h3 className="mt-4 text-2xl font-light tracking-[-0.04em] text-white sm:text-4xl">
@@ -201,18 +201,18 @@ export function Features() {
                   href={item.href}
                   className={`group cursor-pointer rounded-2xl border p-4 transition-all duration-300 hover:-translate-y-1 ${
                     item.accent === "amber"
-                      ? "border-amber-400/18 bg-amber-400/5 hover:border-amber-400/30 hover:bg-amber-400/8"
+                      ? "border-warning/18 bg-warning/5 hover:border-warning/30 hover:bg-warning/8"
                       : item.accent === "teal"
-                      ? "border-teal-400/15 bg-teal-400/4 hover:border-teal-400/28 hover:bg-teal-400/7"
+                      ? "border-info/15 bg-info/4 hover:border-info/28 hover:bg-info/7"
                       : "border-white/8 bg-white/3 hover:border-white/15 hover:bg-white/5"
                   }`}
                 >
                   <p
                     className={`font-mono text-[9px] font-bold uppercase tracking-[0.2em] ${
                       item.accent === "amber"
-                        ? "text-amber-400/75"
+                        ? "text-warning/75"
                         : item.accent === "teal"
-                        ? "text-teal-400/70"
+                        ? "text-info/70"
                         : "text-white/38"
                     }`}
                   >
@@ -229,7 +229,7 @@ export function Features() {
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/sign-up"
-                className="inline-flex items-center rounded-full border border-white/12 bg-white/4 px-6 min-h-[38px] font-bold text-white/75 backdrop-blur-sm transition-all hover:border-amber-400/30 hover:bg-amber-400/8 hover:text-white"
+                className="inline-flex items-center rounded-full border border-white/12 bg-white/4 px-6 min-h-[38px] font-bold text-white/75 backdrop-blur-sm transition-all hover:border-warning/30 hover:bg-warning/8 hover:text-white"
               >
                 Sign Up Free
               </Link>

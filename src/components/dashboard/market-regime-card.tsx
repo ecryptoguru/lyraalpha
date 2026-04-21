@@ -35,48 +35,48 @@ export function MarketRegimeCard({
   > = {
     STRONG_RISK_ON: {
       icon: Zap,
-      color: "text-emerald-400",
-      bg: "bg-emerald-400/5",
-      border: "border-emerald-500/30",
+      color: "text-success",
+      bg: "bg-success/5",
+      border: "border-success/30",
       label: "Strong Risk On",
-      gradient: "from-emerald-500/20 via-emerald-500/5 to-transparent",
-      dotBg: "bg-emerald-400",
+      gradient: "from-success/20 via-success/5 to-transparent",
+      dotBg: "bg-success",
     },
     RISK_ON: {
       icon: Sun,
-      color: "text-green-400",
-      bg: "bg-green-400/5",
-      border: "border-green-500/30",
+      color: "text-success",
+      bg: "bg-success/5",
+      border: "border-success/30",
       label: "Risk On",
-      gradient: "from-green-500/20 via-green-500/5 to-transparent",
-      dotBg: "bg-green-400",
+      gradient: "from-success/20 via-success/5 to-transparent",
+      dotBg: "bg-success",
     },
     NEUTRAL: {
       icon: Minus,
-      color: "text-slate-400",
-      bg: "bg-slate-400/5",
-      border: "border-slate-500/30",
+      color: "text-muted-foreground",
+      bg: "bg-muted/5",
+      border: "border-muted/30",
       label: "Neutral",
-      gradient: "from-slate-500/20 via-slate-500/5 to-transparent",
-      dotBg: "bg-slate-400",
+      gradient: "from-muted/20 via-muted/5 to-transparent",
+      dotBg: "bg-muted-foreground",
     },
     DEFENSIVE: {
       icon: CloudFog,
-      color: "text-amber-400",
-      bg: "bg-amber-400/5",
-      border: "border-amber-500/30",
+      color: "text-[#FFD700]",
+      bg: "bg-[#FFD700]/5",
+      border: "border-[#FFD700]/30",
       label: "Defensive",
-      gradient: "from-amber-500/20 via-amber-500/5 to-transparent",
-      dotBg: "bg-amber-400",
+      gradient: "from-[#FFD700]/20 via-[#FFD700]/5 to-transparent",
+      dotBg: "bg-[#FFD700]",
     },
     RISK_OFF: {
       icon: CloudRain,
-      color: "text-rose-400",
-      bg: "bg-rose-400/5",
-      border: "border-rose-500/30",
+      color: "text-danger",
+      bg: "bg-danger/5",
+      border: "border-danger/30",
       label: "Risk Off",
-      gradient: "from-rose-500/20 via-rose-500/5 to-transparent",
-      dotBg: "bg-rose-400",
+      gradient: "from-danger/20 via-danger/5 to-transparent",
+      dotBg: "bg-danger",
     },
   };
 
@@ -137,11 +137,11 @@ export function MarketRegimeCard({
             <div className="bg-card/40 border border-white/5 rounded-2xl p-4 backdrop-blur-xl">
                 <div className="flex justify-between items-end mb-2">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Breadth</span>
-                    <span className={cn("text-lg font-mono font-bold", breadth > 50 ? "text-emerald-400" : "text-rose-400")}>{breadth}%</span>
+                    <span className={cn("text-lg font-mono font-bold", breadth > 50 ? "text-success" : "text-danger")}>{breadth}%</span>
                 </div>
-                <div className="h-1.5 w-full bg-muted/60 dark:bg-slate-800/50 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-muted/60 dark:bg-foreground/50 rounded-full overflow-hidden">
                     <div 
-                        className={cn("h-full transition-all duration-1000 ease-out", breadth > 50 ? "bg-emerald-500" : "bg-rose-500")}
+                        className={cn("h-full transition-all duration-1000 ease-out", breadth > 50 ? "bg-success" : "bg-danger")}
                         style={{ width: `${breadth}%` }}
                     />
                 </div>
@@ -151,11 +151,11 @@ export function MarketRegimeCard({
              <div className="bg-card/40 border border-white/5 rounded-2xl p-4 backdrop-blur-xl">
                 <div className="flex justify-between items-end mb-2">
                     <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Volatility (VIX)</span>
-                    <span className="text-lg font-mono font-bold text-amber-400">{volatility}</span>
+                    <span className="text-lg font-mono font-bold text-cyan-400">{volatility}</span>
                 </div>
-                <div className="h-1.5 w-full bg-muted/60 dark:bg-slate-800/50 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-muted/60 dark:bg-foreground/50 rounded-full overflow-hidden">
                     <div 
-                        className="h-full bg-amber-500 transition-all duration-1000 ease-out"
+                        className="h-full bg-cyan-400 transition-all duration-1000 ease-out"
                         style={{ width: `${Math.min(volatility, 100)}%` }}
                     />
                 </div>
@@ -166,7 +166,7 @@ export function MarketRegimeCard({
               <div className="col-span-2 bg-card/40 border border-white/5 rounded-2xl p-4 backdrop-blur-xl">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <GitBranch className="h-3 w-3 text-cyan-400" />
+                    <GitBranch className="h-3 w-3 text-info" />
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest cursor-help flex items-center gap-1">
@@ -182,9 +182,9 @@ export function MarketRegimeCard({
                       <TooltipTrigger asChild>
                         <span className={cn(
                           "text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-xl border cursor-help",
-                          crossSectorCorrelation.regime === "MACRO_DRIVEN" ? "text-rose-400 bg-rose-400/10 border-rose-400/20"
-                            : crossSectorCorrelation.regime === "TRANSITIONING" ? "text-amber-400 bg-amber-400/10 border-amber-400/20"
-                            : "text-cyan-400 bg-cyan-400/10 border-cyan-400/20"
+                          crossSectorCorrelation.regime === "MACRO_DRIVEN" ? "text-danger bg-danger/10 border-danger/20"
+                            : crossSectorCorrelation.regime === "TRANSITIONING" ? "text-cyan-400 bg-cyan-400/10 border-cyan-400/20"
+                            : "text-info bg-info/10 border-info/20"
                         )}>
                           {crossSectorCorrelation.regime.replace("_", " ")}
                         </span>
@@ -200,7 +200,7 @@ export function MarketRegimeCard({
                     {crossSectorCorrelation.trend !== "STABLE" && (
                       <span className={cn(
                         "text-[8px] font-bold uppercase",
-                        crossSectorCorrelation.trend === "RISING" ? "text-rose-400" : "text-emerald-400"
+                        crossSectorCorrelation.trend === "RISING" ? "text-danger" : "text-success"
                       )}>
                         {crossSectorCorrelation.trend === "RISING" ? "↑" : "↓"}
                       </span>
@@ -208,7 +208,7 @@ export function MarketRegimeCard({
                   </div>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="text-sm font-mono font-bold text-cyan-400 cursor-help">
+                      <span className="text-sm font-mono font-bold text-info cursor-help">
                         ρ {crossSectorCorrelation.avgCorrelation.toFixed(2)}
                       </span>
                     </TooltipTrigger>
@@ -217,11 +217,11 @@ export function MarketRegimeCard({
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <div className="h-1.5 w-full bg-muted/60 dark:bg-slate-800/50 rounded-full overflow-hidden mb-2">
+                <div className="h-1.5 w-full bg-muted/60 dark:bg-foreground/50 rounded-full overflow-hidden mb-2">
                   <div
                     className={cn(
                       "h-full transition-all duration-1000 ease-out",
-                      crossSectorCorrelation.avgCorrelation > 0.6 ? "bg-rose-500" : crossSectorCorrelation.avgCorrelation > 0.35 ? "bg-amber-500" : "bg-cyan-500"
+                      crossSectorCorrelation.avgCorrelation > 0.6 ? "bg-danger" : crossSectorCorrelation.avgCorrelation > 0.35 ? "bg-cyan-400" : "bg-info"
                     )}
                     style={{ width: `${Math.min(crossSectorCorrelation.avgCorrelation * 100, 100)}%` }}
                   />

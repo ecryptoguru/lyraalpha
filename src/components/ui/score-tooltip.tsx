@@ -60,9 +60,9 @@ const SCORE_META: Record<
 
 function getScoreColor(value: number, higherIsBetter: boolean): string {
   const effective = higherIsBetter ? value : 100 - value;
-  if (effective >= 70) return "bg-emerald-500";
-  if (effective >= 40) return "bg-amber-500";
-  return "bg-rose-500";
+  if (effective >= 70) return "bg-success";
+  if (effective >= 40) return "bg-warning";
+  return "bg-danger";
 }
 
 function getScoreLabel(value: number, higherIsBetter: boolean): string {
@@ -116,9 +116,9 @@ export function ScoreTooltip({
           </div>
           <div className={cn(
             "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full w-fit",
-            value >= 70 && meta.higherIsBetter ? "bg-emerald-500/15 text-emerald-500" :
-            value < 40 && meta.higherIsBetter ? "bg-rose-500/15 text-rose-500" :
-            "bg-amber-500/15 text-amber-500"
+            value >= 70 && meta.higherIsBetter ? "bg-success/15 text-success" :
+            value < 40 && meta.higherIsBetter ? "bg-danger/15 text-danger" :
+            "bg-warning/15 text-warning"
           )}>
             {strengthLabel}
           </div>

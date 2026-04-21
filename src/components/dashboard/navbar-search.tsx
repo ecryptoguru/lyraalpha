@@ -81,6 +81,7 @@ export function NavbarSearch({ desktopExpanded = false }: NavbarSearchProps) {
               <span className="truncate text-sm font-bold tracking-tight text-muted-foreground/60">
                 Search BTC, Ethereum, Solana
               </span>
+              <kbd className="hidden sm:inline-flex items-center gap-0.5 rounded-md border border-border/40 bg-muted/40 px-1.5 py-0.5 text-[10px] font-mono font-medium text-muted-foreground/60 ml-auto shrink-0">⌘K</kbd>
             </button>
           ) : (
             <LazyAssetSearchInput

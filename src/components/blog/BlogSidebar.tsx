@@ -95,9 +95,9 @@ export async function BlogSidebar({ post }: Props) {
 
       {/* CTA — contextual based on auth state */}
       {isLoggedIn ? (
-        <div className="relative overflow-hidden rounded-2xl border border-teal-400/20 bg-teal-400/5 p-5">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-teal-400/40 to-transparent" />
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-teal-400/70">
+        <div className="relative overflow-hidden rounded-2xl border border-info/20 bg-info/5 p-5">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-info/40 to-transparent" />
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-info/70">
             Ask Lyra
           </p>
           <p className="mt-2 text-sm font-medium leading-6 text-white/70">
@@ -105,15 +105,15 @@ export async function BlogSidebar({ post }: Props) {
           </p>
           <Link
             href={`/dashboard/lyra?q=${lyraQuery}`}
-            className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-teal-400/10 px-4 py-2.5 font-mono text-[10px] font-bold text-teal-300 ring-1 ring-teal-400/20 transition-all hover:bg-teal-400/20"
+            className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-info/10 px-4 py-2.5 font-mono text-[10px] font-bold text-info ring-1 ring-info/20 transition-all hover:bg-info/20"
           >
             Ask Lyra about this →
           </Link>
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-2xl border border-amber-400/20 bg-amber-400/5 p-5">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-amber-400/40 to-transparent" />
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-teal-400/70">
+        <div className="relative overflow-hidden rounded-2xl border border-warning/20 bg-warning/5 p-5">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-warning/40 to-transparent" />
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] text-info/70">
             Beta · Free access
           </p>
           <p className="mt-2 text-sm font-medium leading-6 text-white/70">
@@ -121,7 +121,7 @@ export async function BlogSidebar({ post }: Props) {
           </p>
           <Link
             href="/sign-up"
-            className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 font-mono text-[10px] font-bold text-slate-950 transition-all hover:bg-amber-300"
+            className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-warning px-4 py-2.5 font-mono text-[10px] font-bold text-foreground transition-all hover:bg-warning4739"
           >
             Start Free Beta
           </Link>

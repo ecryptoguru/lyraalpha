@@ -20,7 +20,7 @@ export function BlogReadingProgress() {
   return (
     <div className="fixed left-0 top-0 z-50 h-[2px] w-full bg-white/5">
       <div
-        className="h-full bg-amber-400 transition-[width] duration-75 ease-linear"
+        className="h-full bg-warning transition-[width] duration-75 ease-linear"
         style={{ width: `${progress}%` }}
       />
     </div>

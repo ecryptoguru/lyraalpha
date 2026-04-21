@@ -71,8 +71,8 @@ function FinMetric({
       <span className="text-xs text-muted-foreground">{label}</span>
       <span className={cn(
         "text-xs font-semibold",
-        isPositive === true && "text-emerald-500",
-        isPositive === false && "text-red-500",
+        isPositive === true && "text-success",
+        isPositive === false && "text-danger",
         isPositive === null && "text-foreground",
       )}>
         {value}
@@ -127,7 +127,7 @@ export function FinancialHighlights({
     <div className={cn("rounded-2xl border border-white/5 bg-card/60 backdrop-blur-2xl shadow-xl", className)}>
       <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-emerald-500" />
+          <BarChart3 className="w-4 h-4 text-success" />
           Financial Highlights
         </h3>
         {incomeStatement?.period && (
@@ -142,7 +142,7 @@ export function FinancialHighlights({
         {hasIncome && (
           <div className="p-3 space-y-0.5">
             <div className="flex items-center gap-1.5 mb-2">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-500" />
+              <TrendingUp className="w-3.5 h-3.5 text-success" />
               <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
                 Income
               </span>
@@ -166,7 +166,7 @@ export function FinancialHighlights({
         {hasBalance && (
           <div className="p-3 space-y-0.5">
             <div className="flex items-center gap-1.5 mb-2">
-              <Scale className="w-3.5 h-3.5 text-amber-500" />
+              <Scale className="w-3.5 h-3.5 text-warning" />
               <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
                 Balance Sheet
               </span>
@@ -199,7 +199,7 @@ export function FinancialHighlights({
         {hasCashflow && (
           <div className="p-3 space-y-0.5">
             <div className="flex items-center gap-1.5 mb-2">
-              <Banknote className="w-3.5 h-3.5 text-amber-500" />
+              <Banknote className="w-3.5 h-3.5 text-warning" />
               <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground">
                 Cash Flow
               </span>

@@ -9,6 +9,7 @@ import {
   Send,
   Zap,
   Clock,
+  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -158,7 +159,7 @@ function BriefingStalenessBadge({ region }: { region: string }) {
     : `${Math.floor(ageHours / 24)}d`;
 
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[10px] font-bold text-amber-400">
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning/10 px-3 py-1.5 text-[10px] font-bold text-warning">
       <Clock className="h-3 w-3 shrink-0" />
       Market briefing is {hoursLabel} old — Lyra context may be stale
     </div>
@@ -312,7 +313,7 @@ const AssistantMessage = memo(function AssistantMessage({
       />
       {message.contextTruncated && (
         <p className="text-[10px] text-muted-foreground/50 px-1 flex items-center gap-1">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500/60 shrink-0" />
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-warning/60 shrink-0" />
           Context window capped — some older market data was trimmed to fit your plan’s limit.
         </p>
       )}
@@ -374,6 +375,7 @@ function LyraPageInner() {
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const userHasScrolledUp = useRef(false);
+  const [showScrollPill, setShowScrollPill] = useState(false);
   const autoSubmittedQueryRef = useRef<string | null>(null);
   const regimeDataRef = useRef(regimeData);
   const moversDataRef = useRef(moversData);
@@ -430,7 +432,9 @@ function LyraPageInner() {
     const el = scrollContainerRef.current;
     if (!el) return;
     const handleScroll = () => {
-      userHasScrolledUp.current = !isNearBottom();
+      const scrolled = !isNearBottom();
+      userHasScrolledUp.current = scrolled;
+      setShowScrollPill(scrolled);
     };
     el.addEventListener("scroll", handleScroll, { passive: true });
     return () => el.removeEventListener("scroll", handleScroll);
@@ -465,6 +469,7 @@ function LyraPageInner() {
       const lastMsg = messages[messages.length - 1];
       if (lastMsg?.role === "user") {
         userHasScrolledUp.current = false;
+        setShowScrollPill(false);
       }
       scrollToBottom(!isLoading);
     }
@@ -532,6 +537,7 @@ function LyraPageInner() {
       return;
     }
     userHasScrolledUp.current = false;
+    setShowScrollPill(false);
     await sendMessage(question);
   }, [lyraController, sendMessage]);
 
@@ -705,7 +711,7 @@ function LyraPageInner() {
                         )}
                       </div>
                       {message.role === "user" ? (
-                        <div className="rounded-2xl px-4 py-3 bg-primary text-black border border-primary/20 shadow-lg shadow-primary/10">
+                        <div className="rounded-2xl px-4 py-3 bg-primary text-primary-foreground border border-primary/20 shadow-lg shadow-primary/10">
                           <p className="text-sm font-semibold leading-relaxed">{message.content}</p>
                         </div>
                       ) : (
@@ -739,10 +745,26 @@ function LyraPageInner() {
                 <div ref={messagesEndRef} />
               </div>
 
+              {/* Scroll-to-bottom pill */}
+              {showScrollPill && (
+                <button
+                  onClick={() => {
+                    userHasScrolledUp.current = false;
+                    setShowScrollPill(false);
+                    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-1.5 rounded-full border border-border/40 bg-card/90 backdrop-blur-xl px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-lg transition-all hover:bg-card hover:text-foreground hover:border-primary/30"
+                  aria-label="Scroll to latest message"
+                >
+                  <ChevronDown className="h-3.5 w-3.5" />
+                  Latest
+                </button>
+              )}
+
               {/* Rate-limit low-messages banner — shown proactively before hitting 429 */}
               {rateLimitRemaining !== null && rateLimitRemaining <= 3 && (
                 <div className="shrink-0 mx-1 mb-2 animate-in fade-in slide-in-from-bottom-2 duration-400">
-                  <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-amber-600 dark:text-amber-400">
+                  <div className="flex items-center justify-between gap-3 px-3 py-2 rounded-2xl bg-warning/10 border border-warning/25 text-primary dark:text-warning">
                     <div className="flex items-center gap-2 min-w-0">
                       <Zap className="h-3 w-3 shrink-0" />
                       <span className="text-[11px] font-bold truncate">
@@ -754,7 +776,7 @@ function LyraPageInner() {
                     {!isElite && (
                       <Link
                         href="/dashboard/upgrade"
-                        className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors"
+                        className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-primary dark:text-warning hover:text-warning transition-colors"
                       >
                         Upgrade →
                       </Link>
@@ -840,7 +862,7 @@ function LyraPageInner() {
                           fullWidth: true,
                         })}
                         <div className="flex flex-wrap items-center justify-between gap-3">
-                          <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[10px] text-amber-600/70 dark:text-amber-400/70">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-warning/20 bg-warning/10 px-2.5 py-1 text-[10px] text-primary/70 dark:text-warning/70">
                             <Zap className="h-2.5 w-2.5" />
                             Credits required
                           </span>
@@ -852,7 +874,7 @@ function LyraPageInner() {
 
                       <div className="rounded-3xl border border-border/50 dark:border-white/8 bg-muted/30 dark:bg-black/20 p-4 sm:p-5">
                         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-primary/70">
-                          <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.45)]" />
+                          <span className="h-2 w-2 rounded-full bg-success shadow-[0_0_10px_rgba(52,211,153,0.45)]" />
                           Example questions
                         </div>
                         <div className="mt-3 space-y-2">

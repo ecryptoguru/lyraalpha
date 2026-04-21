@@ -8,7 +8,7 @@ const LazyNavbarUserButton = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="inline-flex h-10 w-10 rounded-full border border-slate-200 bg-white/90 dark:border-white/8 dark:bg-white/3" />
+      <div className="inline-flex h-10 w-10 rounded-full border border-border/50 bg-white/90 dark:border-white/8 dark:bg-white/3" />
     ),
   },
 );
@@ -34,6 +34,6 @@ export function NavbarAccountSlot() {
       <LazyNavbarUserButton />
     </div>
   ) : (
-    <div className="inline-flex h-10 w-10 rounded-full border border-slate-200 bg-white/90 dark:border-white/8 dark:bg-white/3" />
+    <div className="inline-flex h-10 w-10 rounded-full border border-border/50 bg-white/90 dark:border-white/8 dark:bg-white/3" />
   );
 }

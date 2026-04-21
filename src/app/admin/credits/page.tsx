@@ -206,7 +206,7 @@ function BulkCreditAward({ onAwarded }: { onAwarded: () => Promise<unknown> | un
       {result && (
         <div
           className={`mt-3 flex items-center gap-2 text-sm ${
-            result.success ? "text-green-500" : "text-red-500"
+            result.success ? "text-success" : "text-danger"
           }`}
         >
           {result.success ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
@@ -231,10 +231,10 @@ function MetricCard({
   accent?: "green" | "red" | "blue" | "amber";
 }) {
   const accentMap: Record<string, string> = {
-    green: "text-green-500",
-    red: "text-red-500",
-    blue: "text-amber-500",
-    amber: "text-amber-500",
+    green: "text-success",
+    red: "text-danger",
+    blue: "text-warning",
+    amber: "text-warning",
   };
   const accentClass = accent ? (accentMap[accent] ?? "text-muted-foreground/60") : "text-muted-foreground/60";
 
@@ -536,7 +536,7 @@ export default function AdminCreditsPage() {
                   <span
                     className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                       pkg.isActive
-                        ? "bg-green-500/20 text-green-500"
+                        ? "bg-success/20 text-success"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >
@@ -589,12 +589,12 @@ export default function AdminCreditsPage() {
                       {row.plan}
                     </span>
                   </td>
-                  <td className="py-2 text-right font-mono text-red-400">
+                  <td className="py-2 text-right font-mono text-danger">
                     {row.spent.toLocaleString()}
                   </td>
                   <td
                     className={`py-2 text-right font-mono ${
-                      row.balance >= 0 ? "text-green-400" : "text-red-400"
+                      row.balance >= 0 ? "text-success" : "text-danger"
                     }`}
                   >
                     {row.balance.toLocaleString()}

@@ -13,13 +13,12 @@ type RedisLike =
 
 const globalForRedis = global as unknown as { redis: RedisLike | undefined };
 
-function getTrimmedEnv(name: "UPSTASH_REDIS_REST_URL" | "UPSTASH_REDIS_REST_TOKEN"): string | null {
-  const value = process.env[name]?.trim();
-  return value ? value : null;
-}
+// Cache env vars at module level — they're immutable per Vercel deploy.
+const _REDIS_URL = process.env.UPSTASH_REDIS_REST_URL?.trim() || null;
+const _REDIS_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN?.trim() || null;
 
 function hasRedisEnv(): boolean {
-  return Boolean(getTrimmedEnv("UPSTASH_REDIS_REST_URL") && getTrimmedEnv("UPSTASH_REDIS_REST_TOKEN"));
+  return Boolean(_REDIS_URL && _REDIS_TOKEN);
 }
 
 function createNoopRedis(): RedisLike {
@@ -29,12 +28,15 @@ function createNoopRedis(): RedisLike {
     setex: async () => "OK",
     del: async () => 0,
     scan: async () => [0, []],
-    pipeline: () => ({
-      del: () => undefined,
-      hincrby: () => undefined,
-      expire: () => undefined,
-      exec: async () => [],
-    }),
+    pipeline: () => {
+      const noopChain = {
+        del: function () { return noopChain; },
+        hincrby: function () { return noopChain; },
+        expire: function () { return noopChain; },
+        exec: async () => [] as unknown[],
+      };
+      return noopChain;
+    },
     hget: async () => null,
     hgetall: async () => null,
     hset: async () => 0,
@@ -53,8 +55,8 @@ function createRedisClient(): RedisLike {
 
   try {
     return new Redis({
-      url: getTrimmedEnv("UPSTASH_REDIS_REST_URL")!,
-      token: getTrimmedEnv("UPSTASH_REDIS_REST_TOKEN")!,
+      url: _REDIS_URL!,
+      token: _REDIS_TOKEN!,
     });
   } catch (error) {
     logger.error({ err: error }, "Failed to initialize Upstash Redis client, falling back to noop cache");
@@ -209,7 +211,11 @@ export async function delCache(key: string): Promise<void> {
 /**
  * Atomic SET NX (set-if-not-exists) with expiry.
  * Returns true if the key was set (lock acquired), false if it already existed.
- * Falls back to true (allow through) if Redis is unavailable.
+ *
+ * IMPORTANT: On Redis failure, returns TRUE (fail-open). This is the safe default
+ * for idempotency checks — if Redis is down, we must NOT silently drop webhook
+ * events (Clerk retries on non-2xx; a 200 with duplicate=true means the event is
+ * never retried). Use `redisSetNXStrict` when you want fail-closed semantics.
  */
 export async function redisSetNX(key: string, ttlSeconds: number): Promise<boolean> {
   try {
@@ -217,8 +223,26 @@ export async function redisSetNX(key: string, ttlSeconds: number): Promise<boole
       .set(key, "1", { nx: true, ex: ttlSeconds });
     return nx === "OK";
   } catch {
-    // Redis unavailable — allow through, worst case is a duplicate write
+    // Redis unavailable — fail-open so webhook idempotency checks don't drop events.
     return true;
+  }
+}
+
+/**
+ * Strict variant of `redisSetNX` that returns false on Redis failure.
+ *
+ * Use this for in-flight request deduplication (LLM thundering-herd prevention)
+ * where blocking a request on Redis outage is preferable to allowing parallel
+ * LLM calls that could overwhelm the model provider.
+ */
+export async function redisSetNXStrict(key: string, ttlSeconds: number): Promise<boolean> {
+  try {
+    const nx = await (redis as unknown as { set(k: string, v: string, opts: { nx: boolean; ex: number }): Promise<string | null> })
+      .set(key, "1", { nx: true, ex: ttlSeconds });
+    return nx === "OK";
+  } catch {
+    // Redis unavailable — fail-closed to prevent thundering herd on LLM calls.
+    return false;
   }
 }
 
@@ -248,11 +272,14 @@ export async function invalidateCacheByPrefix(prefix: string): Promise<number> {
   try {
     let cursor = 0;
     let totalDeleted = 0;
+    let totalScanned = 0;
     let iterations = 0;
-    const MAX_ITERATIONS = 50; // caps at ~5000 keys — prevents serverless timeout on large keyspaces
+    // Configurable via env — caps at ~N*100 keys to prevent serverless timeout on large keyspaces.
+    // Default 50 (5000 keys) is safe for Vercel 10s function limit; increase for long-running workers.
+    const MAX_ITERATIONS = Number(process.env.REDIS_SCAN_MAX_ITERATIONS) || 50;
     do {
       if (++iterations > MAX_ITERATIONS) {
-        logger.warn({ prefix, totalDeleted }, "invalidateCacheByPrefix: SCAN iteration limit reached, stopping early");
+        logger.warn({ prefix, totalDeleted, totalScanned, maxIterations: MAX_ITERATIONS }, "invalidateCacheByPrefix: SCAN iteration limit reached — some keys may remain stale. Increase REDIS_SCAN_MAX_ITERATIONS if this recurs.");
         break;
       }
       const [nextCursor, keys] = await timed(
@@ -262,6 +289,7 @@ export async function invalidateCacheByPrefix(prefix: string): Promise<number> {
       );
       const next = typeof nextCursor === "number" ? nextCursor : Number(nextCursor);
       cursor = Number.isFinite(next) ? next : 0;
+      totalScanned += keys.length;
       if (keys.length > 0) {
         const pipeline = redis.pipeline();
         for (const key of keys) pipeline.del(key as string);
@@ -383,12 +411,15 @@ export async function withStaleWhileRevalidate<T>(
                 refreshedAt: Date.now(),
               };
               const hardTtlSeconds = Math.max(1, ttlSeconds + staleSeconds);
-              return setCache(key, newEnvelope, hardTtlSeconds);
+              setCache(key, newEnvelope, hardTtlSeconds).catch((e) => logFireAndForgetError(e, "swr-stale-backfill"));
             }
+            // Resolve with the fresh value so concurrent callers awaiting
+            // _inFlight (no-envelope path) receive the correct data instead of null.
+            return fresh;
           })
           .catch((e) => {
             onRefreshError?.(e);
-            return undefined;
+            return null;
           })
           .finally(() => {
             _inFlight.delete(key);

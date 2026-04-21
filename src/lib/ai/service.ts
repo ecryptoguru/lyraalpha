@@ -4,7 +4,7 @@ import { AI_CONFIG, getSharedAISdkClient, getTierConfig, HISTORY_CAPS, getGpt54D
 import { resolveGptDeployment } from "./orchestration";
 import { getUserPlan, normalizePlanTier } from "@/lib/middleware/plan-gate";
 import { BUILD_LYRA_REFERENCE_EXAMPLE, BUILD_LYRA_STATIC_PROMPT, PROMPT_VERSION } from "./prompts/system";
-import { validateInput, SafetyViolationError, UsageLimitError } from "./guardrails";
+import { validateInput, validateConversationLength, SafetyViolationError, UsageLimitError } from "./guardrails";
 import { scrubPII } from "./pii-scrub";
 import { LyraContext } from "@/lib/engines/types";
 // currentUser removed — user creation now handled by Clerk webhook (src/app/api/webhooks/clerk/route.ts)
@@ -26,10 +26,10 @@ import { calculateRiskRewardAsymmetry, formatRiskRewardContext } from "@/lib/eng
 import { classifyQuery } from "./query-classifier";
 import { AssetEnrichment } from "./types";
 import { calculateLLMCost } from "./cost-calculator";
-import { redis, getCache, setCache, redisSetNX } from "@/lib/redis";
+import { redis, getCache, setCache, redisSetNXStrict } from "@/lib/redis";
 import { compressKnowledgeContext } from "./compress";
 import { distillSessionNotes, getGlobalNotes, getSessionNotes } from "./memory";
-import { validateOutput, logValidationResult } from "./output-validation";
+import { validateOutput, logValidationResult, validateSemanticConsistency, logSemanticValidationResult } from "./output-validation";
 import { applyCostCeiling, recordEstimationAccuracy } from "./cost-ceiling";
 import { recordFallbackResult, alertIfDailyCostExceeded, recordLatencyViolation, isFallbackMitigationActive } from "./alerting";
 import {
@@ -37,8 +37,11 @@ import {
   logModelRouting,
   logRetrievalMetric,
   logContextBudgetMetric,
+  logStreamingLatency,
+  logRagQuality,
 } from "./monitoring";
-import { consumeCredits, getCreditCost } from "@/lib/services/credit.service";
+import { consumeCredits, getCreditCost, addCredits } from "@/lib/services/credit.service";
+import { CreditTransactionType } from "@/generated/prisma/enums";
 import { logFireAndForgetError } from "@/lib/fire-and-forget";
 import { awardXP } from "@/lib/engines/gamification";
 import {
@@ -51,95 +54,121 @@ import {
   getModelCacheTtl,
 } from "./lyra-cache";
 
+// Modular imports (new structure)
+import { refundOnStreamError, singleChunkStream } from "./streaming/utils";
+import { executeFallbackChain } from "./streaming/fallback-chain";
+import { handleLateCacheHit } from "./streaming/cache-handler";
+import {
+  DAILY_TOKEN_CAPS_DEFAULTS,
+  DAILY_TOKEN_CAPS_REDIS_KEY,
+  getEffectiveDailyTokenCaps,
+  incrementDailyTokens,
+  getDailyTokensUsed,
+} from "./guards/token-cap";
+
+// Re-exports for backward compatibility
+export {
+  DAILY_TOKEN_CAPS_DEFAULTS,
+  DAILY_TOKEN_CAPS_REDIS_KEY,
+  getEffectiveDailyTokenCaps,
+  incrementDailyTokens,
+  getDailyTokensUsed,
+};
+
+// Re-export types for consumers
+export type { FallbackContext } from "./streaming/fallback-chain";
+export type { CacheHitContext } from "./streaming/cache-handler";
+
 const logger = createLogger({ service: "lyra-ai" });
+
+// Note: refundOnStreamError now imported from ./streaming/utils
+
+// ─── Precompiled query-classification regexes (hoisted from per-request scope) ──
+// Compiling once at module load saves ~10µs per request vs inline RegExp creation.
+const MACRO_DETECTED_RE =
+  /\b(?:macro|regime|inflation|fed|rates|yields|economy|recession|cpi|ppi|gdp|market sentiment|overall market|sector rotation)\b/i;
+const FUNDAMENTAL_EXCLUSION_RE =
+  /(?:fundamental|valuation|earnings|target|insider|dividend|holdings|nav|nav count|peers|coingecko|profile|supply|max supply)/i;
+const HISTORICAL_INTENT_RE =
+  /\b(?:analog|similar|historical|history|past|precedent|before|last time|when did|pattern|repeat|again)\b/i;
+const FRESH_EVIDENCE_RE =
+  /\b(?:news|latest|today|current|recent|just|breaking|earnings|guidance|catalyst|headlines?|announced?|updates?|developments?|rally|selloff|sell-off|crash|surge|drop|rise|rising|falling|movers?)\b/i;
+const MACRO_RECENCY_RE =
+  /\b(?:today|current|recent|latest|now|this week|this month)\b/i;
+
+// ─── Trivial query canned response (greetings/acks — zero LLM cost) ──────────
+const TRIVIAL_QUERY_RESPONSE = `Hey! I'm Lyra from LyraAlpha AI. I analyze crypto assets and digital markets with proprietary on-chain scoring engines.
+
+**What would you like to explore?**
+
+1. **Analyze a crypto asset** — any token or coin by ticker (BTC, ETH, SOL...)
+2. **Market overview** — current regime, sector rotation, top movers
+3. **Compare assets** — how two tokens stack up against each other
+4. **Understand a metric** — what does "TVL", "FDV", or "on-chain momentum" mean?
+5. **Portfolio view** — how is your crypto portfolio positioned in the current regime?
+
+Just ask!`;
+
+// ─── Estimated input tokens by tier for cache-hit cost tracking ────────────
+// Source: p50 of production input token distributions (2026-03 audit).
+const ESTIMATED_INPUT_TOKENS_BY_TIER: Record<string, number> = {
+  SIMPLE: 1_500,
+  MODERATE: 3_500,
+  COMPLEX: 5_000,
+};
+
+// ─── RAG top-K and timeout by tier/response mode (module-scope, pure) ───────
+function resolveRagTopK(
+  tier: string,
+  responseMode: string,
+  resolvedSymbol: string,
+  userPlan: string,
+): number {
+  if (tier === "SIMPLE") return 2;
+  if (responseMode === "compare") return 2;
+  if (responseMode === "stress-test") return 3;
+  if (tier === "MODERATE" && resolvedSymbol !== "GLOBAL") {
+    if (userPlan === "ELITE" || userPlan === "ENTERPRISE") return 5;
+    if (userPlan === "PRO") return 4;
+    return 3;
+  }
+  return 3;
+}
+
+function resolveRagTimeoutMs(responseMode: string, tier: string): number {
+  if (responseMode === "compare") return 2_500;
+  if (tier === "SIMPLE") return 2_000;
+  if (tier === "MODERATE") return 3_500;
+  return 5_000;
+}
+
+// P0: Runtime safety guard for SKIP_CREDITS env var — bypasses all credit checks and daily token caps.
+if (process.env.SKIP_CREDITS === "true") {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "FATAL: SKIP_CREDITS=true in PRODUCTION — all credit checks and daily token caps are DISABLED. " +
+      "This must NEVER be enabled in production. Remove the env var to start the server.",
+    );
+  } else {
+    logger.warn("SKIP_CREDITS=true — credit checks and daily token caps are bypassed (development only)");
+  }
+}
 
 // ─── Emergency asset fallback list (used when DB/cache unavailable) ─────────
 // This is a conservative fallback to ensure the app remains functional during
 // database or cache degradation. Should be kept in sync with major crypto assets.
-export const EMERGENCY_ASSET_FALLBACK = [
+const EMERGENCY_ASSET_FALLBACK = [
   "BTC-USD", "ETH-USD", "SOL-USD", "BNB-USD", "USDT-USD", "USDC-USD",
   "XRP-USD", "ADA-USD", "DOGE-USD", "DOT-USD",
 ] as const;
 
+// Exported for test assertions only — not part of the module's public API.
+export { EMERGENCY_ASSET_FALLBACK };
+
 // ─── Conversation history constants ─────────────────────────────────────────
 export const RECENT_RAW = 2; // Last 1 user + 1 assistant messages always sent raw (uncompressed)
 
-// ─── Daily token spend caps (per-user, per-UTC-day) ─────────────────────
-// Protects against runaway API cost from: infinite loop clients, compromised tokens,
-// unusually large context requests, or prompt-injection that forces long completions.
-// ENTERPRISE has a high but finite cap as a hard backstop — custom SLA still applies.
-// Credits system is the primary STARTER/PRO control; this is a secondary backstop.
-export const DAILY_TOKEN_CAPS_DEFAULTS: Record<string, number> = {
-  STARTER:    50_000,   // ~100 SIMPLE queries at typical token counts
-  PRO:       200_000,   // ~200 MODERATE queries
-  ELITE:     500_000,   // ~250 COMPLEX queries
-  ENTERPRISE: Number(process.env.ENTERPRISE_DAILY_TOKEN_CAP ?? 2_000_000), // ~$500/day hard ceiling
-};
-
-const DAILY_TOKEN_CAPS_REDIS_KEY = "lyra:admin:daily_token_caps";
-
-/** Merge hardcoded defaults with any admin-set Redis overrides.
- *  Redis values win — allows hot-patching caps without a deploy. */
-async function getEffectiveDailyTokenCaps(): Promise<Record<string, number>> {
-  try {
-    const overrides = await redis.hgetall(DAILY_TOKEN_CAPS_REDIS_KEY);
-    if (!overrides) return { ...DAILY_TOKEN_CAPS_DEFAULTS };
-    const merged = { ...DAILY_TOKEN_CAPS_DEFAULTS };
-    for (const [plan, val] of Object.entries(overrides)) {
-      const n = Number(val);
-      if (isFinite(n) && n > 0) merged[plan] = n;
-    }
-    return merged;
-  } catch {
-    return { ...DAILY_TOKEN_CAPS_DEFAULTS };
-  }
-}
-
-export { DAILY_TOKEN_CAPS_REDIS_KEY };
-
-
-/** UTC date string used as the Redis key suffix — resets at midnight UTC. */
-function todayUtc(): string {
-  return new Date().toISOString().slice(0, 10); // "2026-03-24"
-}
-
-/** Atomically increment daily token counter using INCRBY to prevent read-modify-write races.
- *  Multiple concurrent requests each call INCRBY independently — the counter is always
- *  the true cumulative sum, not a last-write-wins value. Fire-and-forget safe. */
-async function incrementDailyTokens(userId: string, tokens: number): Promise<number> {
-  try {
-    const pipeline = redis.pipeline();
-    pipeline.hincrby("lyra:daily_tokens_v2", `${userId}:${todayUtc()}`, tokens);
-    pipeline.expire("lyra:daily_tokens_v2", 90_000);
-    const results = await pipeline.exec();
-    const newTotal = (results?.[0] as number | null) ?? 0;
-    return newTotal;
-  } catch {
-    return 0; // Redis failure must never block the response path
-  }
-}
-
-/** Check whether the user has headroom remaining for this request.
- *  Reads from the same atomic hash field used by incrementDailyTokens.
- *  On Redis failure, returns 0 (allow traffic) — blocking users during Redis
- *  outages is worse than potentially exceeding the daily cap. */
-async function getDailyTokensUsed(userId: string, userPlan: string): Promise<number> {
-  try {
-    const field = `${userId}:${todayUtc()}`;
-    const raw = await redis.hget("lyra:daily_tokens_v2", field);
-    return raw ? Number(raw) : 0;
-  } catch {
-    // R1-FIX: On Redis failure, return 0 (allow traffic) instead of a percentage of the cap.
-    // The daily cap is a secondary backstop; blocking users during Redis outages is worse
-    // than potentially exceeding the cap. The cap will be re-evaluated on the next request
-    // once Redis recovers.
-    logger.warn(
-      { userId, userPlan },
-      "getDailyTokensUsed: Redis error — assuming 0 tokens used (allow traffic)",
-    );
-    return 0;
-  }
-}
+// Note: Daily token cap functions now imported from ./guards/token-cap
 
 // Re-export for backward compatibility
 export type { LyraMessage };
@@ -303,11 +332,9 @@ function emitModelCacheEvent(params: {
   }
 }
 
-// ─── STREAM HELPERS ───────────────────────────────────────────────────
+// Note: singleChunkStream and handleLateCacheHit now imported from ./streaming modules
 
-async function* singleChunkStream(text: string): AsyncGenerator<string> {
-  yield text;
-}
+// Note: FallbackContext and executeFallbackChain now imported from ./streaming/fallback-chain
 
 export interface GenerateLyraStreamOptions {
   sourcesLimit?: number;
@@ -330,12 +357,24 @@ export async function generateLyraStream(
   } = options;
   const timer = createTimer();
   let remainingCredits: number | null = null;
+  let creditsConsumed = false;
+  let consumedCreditCost = 0;
+  // P2: Defensive copy — prevent in-place mutation of the caller's message array
+  // (e.g. history compression, PII scrubbing) from leaking back to the caller.
+  // Shallow spread shares content array references for multimodal messages —
+  // clone arrays to fully isolate the copy. Preserve discriminated union types.
+  const safeMessages: LyraMessage[] = messages.map((m) => {
+    if (Array.isArray(m.content)) {
+      return { ...m, content: [...m.content] } as typeof m;
+    }
+    return { ...m };
+  });
   logger.info(
-    { userId, messageCount: messages.length },
+    { userId, messageCount: safeMessages.length },
     "Lyra stream started",
   );
 
-  const lastUserMessage = messages[messages.length - 1];
+  const lastUserMessage = safeMessages[safeMessages.length - 1];
 
   const query =
     typeof lastUserMessage?.content === "string"
@@ -358,16 +397,16 @@ export async function generateLyraStream(
   // 1. Guardrail Check + PII Scrubbing
   // Apply guardrails to ALL messages (not just last) to prevent API injection attacks via conversation history
   // B3-FIX: Scrub PII from user messages in-place before they enter the LLM context or logs
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
+  for (let i = 0; i < safeMessages.length; i++) {
+    const msg = safeMessages[i];
     if (msg.role === "user" && typeof msg.content === "string" && msg.content) {
       const { scrubbed } = scrubPII(msg.content);
       if (scrubbed !== msg.content) {
-        messages[i] = { ...msg, content: scrubbed };
+        safeMessages[i] = { ...msg, content: scrubbed };
       }
     }
   }
-  for (const msg of messages) {
+  for (const msg of safeMessages) {
     const msgContent = typeof msg.content === "string" ? msg.content : "";
     if (!msgContent) continue;
     const { isValid, reason } = validateInput(msgContent);
@@ -377,9 +416,15 @@ export async function generateLyraStream(
     }
   }
 
+  // P2: Per-conversation char cap — prevents context-window exhaustion
+  const conversationLengthCheck = validateConversationLength(safeMessages);
+  if (!conversationLengthCheck.isValid) {
+    throw new SafetyViolationError(conversationLengthCheck.reason || "Conversation too long");
+  }
+
   // 1.1 Classify Query Complexity + resolve user plan → select tier config
   // messages.length includes the current message, so subtract 1 for conversation history length
-  const tier = classifyQuery(query, Math.max(0, messages.length - 1));
+  const tier = classifyQuery(query, Math.max(0, safeMessages.length - 1));
   // Use pre-resolved plan if provided by caller (avoids redundant DB/Redis round-trip).
   const userPlan = preResolvedPlan
     ? normalizePlanTier(preResolvedPlan)
@@ -432,8 +477,11 @@ export async function generateLyraStream(
   // Hoist trivial detection before any DB work — greetings/acks skip asset resolution entirely.
   const isTrivial = /^(?:hi|hello|hey|thanks|thank you|ok|okay|got it|sure|yes|no|bye|goodbye|good morning|good evening)\s*[.!?]*\s*$/i.test(query.trim());
 
+  // Extract mentioned symbols once from all messages — reuse for symbol resolution, context building, and topic detection.
+  const mentionedSymbols = extractMentionedSymbols(safeMessages as Array<{ role: string; content: string | unknown }>);
+  // For symbol resolution, only consider the last user message's mentions (same as the old single-message extraction)
   const mentionedFromQuery = !context.chatMode
-    ? extractMentionedSymbols([{ role: "user", content: query }])
+    ? mentionedSymbols
     : [];
   let resolvedSymbol = context.symbol || "GLOBAL";
   let resolvedAssetType = context.assetType || "GLOBAL";
@@ -481,7 +529,11 @@ export async function generateLyraStream(
   // Only attempt early hit when not trivial (trivial handled below) and not an edu-cacheable path
   // (edu cache has its own short-circuit later and may have fresher results).
   const earlyEduCacheable = process.env.ENABLE_EDU_CACHE === "true" && tier === "SIMPLE" && !isMultiAssetMode;
+  // Track whether we already checked the GPT cache with the same key that the late
+  // check would use — avoids a redundant Redis round-trip on cache misses.
+  let earlyCacheAlreadyMissed = false;
   if (!earlyEduCacheable && !needsLateAssetTypeResolution) {
+    earlyCacheAlreadyMissed = true; // will be set to false on hit, stays true on miss
     const earlyCacheText = await getCache<string>(earlyGptKey);
     if (earlyCacheText) {
       const cachedSources = await getCache<Source[]>(`${earlyGptKey}:sources`).catch(() => null);
@@ -493,7 +545,7 @@ export async function generateLyraStream(
       // Cache-hit cost tracking: estimate tokens so audit/billing doesn't report $0
       // Input tokens estimated by tier (prompt not built yet at early hit point)
       const earlyCacheDeployment = resolveGptDeployment(tierConfig.gpt54Role);
-      const estimatedInputTokens = tier === "SIMPLE" ? 1500 : tier === "MODERATE" ? 3500 : 5000;
+      const estimatedInputTokens = ESTIMATED_INPUT_TOKENS_BY_TIER[tier] ?? ESTIMATED_INPUT_TOKENS_BY_TIER.COMPLEX!;
       const earlyCacheInputTokens = estimatedInputTokens;
       const earlyCacheOutputTokens = Math.round(earlyCacheText.length / 4);
       const earlyCacheCostBreakdown = calculateLLMCost({
@@ -517,10 +569,16 @@ export async function generateLyraStream(
         logger.warn({ err: sanitizeError(e), userId }, "Failed to log early-cache-hit interaction"),
       );
 
+      // Feed cache-hit spend into daily cost alert (same as non-cached path)
+      alertIfDailyCostExceeded(earlyCacheCostBreakdown.totalCost).catch((e) => logFireAndForgetError(e, "early-cache-cost-alert"));
+
+      earlyCacheAlreadyMissed = false; // hit — late check must not re-check
       return {
         result: { textStream: singleChunkStream(earlyCacheText) },
         sources: cachedSources ?? [],
         remainingCredits,
+        contextTruncated: false,
+        ragDegraded: false,
       };
     }
   }
@@ -529,11 +587,12 @@ export async function generateLyraStream(
   // Pure greetings ("hi", "thanks", "ok") return a canned response — zero LLM cost, instant response.
   if (isTrivial) {
     logger.info({ query }, "Trivial query — returning canned response");
-    const cannedResponse = `Hey! I'm Lyra from LyraAlpha AI. I analyze crypto assets and digital markets with proprietary on-chain scoring engines.\n\n**What would you like to explore?**\n\n1. **Analyze a crypto asset** — any token or coin by ticker (BTC, ETH, SOL...)\n2. **Market overview** — current regime, sector rotation, top movers\n3. **Compare assets** — how two tokens stack up against each other\n4. **Understand a metric** — what does "TVL", "FDV", or "on-chain momentum" mean?\n5. **Portfolio view** — how is your crypto portfolio positioned in the current regime?\n\nJust ask!`;
     return {
-      result: { textStream: singleChunkStream(cannedResponse) },
+      result: { textStream: singleChunkStream(TRIVIAL_QUERY_RESPONSE) },
       sources: [],
       remainingCredits,
+      contextTruncated: false,
+      ragDegraded: false,
     };
   }
 
@@ -552,6 +611,8 @@ export async function generateLyraStream(
         result: { textStream: singleChunkStream(cachedText) },
         sources: [],
         remainingCredits,
+        contextTruncated: false,
+        ragDegraded: false,
       };
     }
     logger.debug({ cacheKey }, "Educational cache MISS — proceeding to LLM");
@@ -560,8 +621,8 @@ export async function generateLyraStream(
   // B1: Per-user in-flight lock using Redis SET NX (set-if-not-exists) semantics.
   // Plain setCache always overwrites — it cannot detect a pre-existing key.
   // redis.set with nx:true returns "OK" only when the key was absent; null when already set.
-  const inFlightKey = `lyra:inflight:${userId}`;
-  const lockAcquired = await redisSetNX(inFlightKey, 60);
+  const inFlightKey = `lyra:inflight:chat:${userId}`;
+  const lockAcquired = await redisSetNXStrict(inFlightKey, 60);
   if (!lockAcquired) {
     logger.warn({ userId }, "In-flight request already active — rejecting duplicate");
     throw new Error("A request is already in progress. Please wait for it to complete before sending another.");
@@ -612,6 +673,8 @@ export async function generateLyraStream(
       );
     }
     remainingCredits = remaining;
+    creditsConsumed = true;
+    consumedCreditCost = creditCost;
     logger.debug({ creditCost, remaining }, "Credits consumed");
   }
 
@@ -636,22 +699,29 @@ export async function generateLyraStream(
   let assetEnrichment: AssetEnrichment | undefined;
   let crossSectorContext = "";
   let historicalAnalogContext = "";
+  let ragDegraded = false; // UX-1: Track RAG timeout/failure for frontend surfacing
 
   // 1.5b MACRO SHORT-CIRCUIT detection
   // If the query is purely macro/regime, we skip asset-specific enrichment even if a symbol was detected.
   // This saves ~1,500-2,000 tokens of irrelevant ticker data.
-  const isMacroDetected = /\b(?:macro|regime|inflation|fed|rates|yields|economy|recession|cpi|ppi|gdp|market sentiment|overall market|sector rotation)\b/i.test(query);
-  const isPureMacro = isMacroDetected && !/(?:fundamental|valuation|earnings|target|insider|dividend|holdings|nav|nav count|peers|coingecko|profile|supply|max supply)/i.test(query);
-  const hasExplicitHistoricalIntent = /\b(?:analog|similar|historical|history|past|precedent|before|last time|when did|pattern|repeat|again)\b/i.test(query);
-  const needsFreshExternalEvidence = /\b(?:news|latest|today|current|recent|just|breaking|earnings|guidance|catalyst|headlines?|announced?|updates?|developments?|rally|selloff|sell-off|crash|surge|drop|rise|rising|falling|movers?)\b/i.test(query);
+  const isMacroDetected = MACRO_DETECTED_RE.test(query);
+  const isPureMacro = isMacroDetected && !FUNDAMENTAL_EXCLUSION_RE.test(query);
+  const hasExplicitHistoricalIntent = HISTORICAL_INTENT_RE.test(query);
+  const needsFreshExternalEvidence = FRESH_EVIDENCE_RE.test(query);
   // GLOBAL queries are inherently about current market conditions — always fetch web context
   // when webSearchEnabled is true for the plan, regardless of recency keywords in the query.
   const isGlobalQuery = resolvedSymbol === "GLOBAL";
-  const isMacroRecencyQuery = isMacroDetected && /\b(?:today|current|recent|latest|now|this week|this month)\b/i.test(query);
+  const isMacroRecencyQuery = isMacroDetected && MACRO_RECENCY_RE.test(query);
 
   if (!isTrivial) {
     // Determine macro/regime query status early
     const isAnalogQueryFlag = hasExplicitHistoricalIntent;
+
+    // Pre-compute search region once — reused by web search and cross-sector tasks
+    const searchRegion = inferSearchRegion(
+      resolvedSymbol,
+      typeof context.region === "string" ? context.region : assetEnrichment?.region ?? undefined,
+    );
 
     // Build parallel tasks array — but we need to await asset enrichment before analogs
     // because analogs now depend on priceData and assetEnrichment for risk/reward.
@@ -728,28 +798,15 @@ export async function generateLyraStream(
     // Build remaining parallel promises array — run concurrently (#8)
     const parallelTasks: Promise<void>[] = [];
     
-    if (assetEnrichmentPromise && !requiresAnalog) {
+    const assetEnrichmentAlreadyAwaited = (requiresAnalog || requiresResolvedAssetType) && !!assetEnrichmentPromise;
+    if (assetEnrichmentPromise && !assetEnrichmentAlreadyAwaited) {
       parallelTasks.push(assetEnrichmentPromise);
     }
 
     // Task 1: RAG Retrieval (conditional based on tier)
     // Reduce chunk count for SIMPLE to save ~1500-2000 input tokens
-    function resolveRagTopK(): number {
-      if (tier === "SIMPLE") return 2;
-      if (responseMode === "compare") return 2;
-      if (responseMode === "stress-test") return 3;
-      if (tier === "MODERATE" && resolvedSymbol !== "GLOBAL") {
-        if (userPlan === "ELITE" || userPlan === "ENTERPRISE") return 5;
-        if (userPlan === "PRO") return 4;
-        return 3;
-      }
-      return 3;
-    }
-    const ragTopK = resolveRagTopK();
-    const RAG_TIMEOUT_MS = responseMode === "compare" ? 2500
-      : tier === "SIMPLE" ? 2000
-      : tier === "MODERATE" ? 3500
-      : 5000;
+    const ragTopK = resolveRagTopK(tier, responseMode, resolvedSymbol, userPlan);
+    const RAG_TIMEOUT_MS = resolveRagTimeoutMs(responseMode, tier);
     const shouldUseRag =
       tierConfig.ragEnabled &&
       (
@@ -762,6 +819,7 @@ export async function generateLyraStream(
     if (query.length > 5 && query !== "Multimodal Input" && shouldUseRag) {
       parallelTasks.push(
         (async () => {
+          const ragStartTime = Date.now();
           try {
             const useFastPath = tier === "SIMPLE";
             logger.info({ userId, tier, ragTopK, useFastPath, timeoutMs: RAG_TIMEOUT_MS }, "Starting RAG retrieval");
@@ -780,7 +838,7 @@ export async function generateLyraStream(
               // useful once enough conversation history exists (turn 2-3 hits are rare given
               // the 0.42 similarity threshold). shouldQueueEmbedding stays at >= 3 so
               // embeddings written on turn 3 are ready for retrieval from turn 4 onward.
-              tierConfig.ragMemoryEnabled && messages.length >= 4
+              tierConfig.ragMemoryEnabled && safeMessages.length >= 4
                 ? retrieveUserMemory(userId, query, {
                     symbol: resolvedSymbol !== "GLOBAL" ? resolvedSymbol : undefined,
                   })
@@ -788,12 +846,24 @@ export async function generateLyraStream(
               // Fetch structured user profile notes (global) and session context notes.
               // Plain-text DB reads — no embedding API call.
               // W5: Skip entirely for new users (< 2 messages) — no notes exist yet, saves 2 DB round-trips.
-              tier !== "SIMPLE" && messages.length >= 2 ? getGlobalNotes(userId, "lyra") : Promise.resolve(""),
-              tier !== "SIMPLE" && messages.length >= 2 ? getSessionNotes(userId, "lyra") : Promise.resolve(""),
+              tier !== "SIMPLE" && safeMessages.length >= 2 ? getGlobalNotes(userId, "lyra") : Promise.resolve(""),
+              tier !== "SIMPLE" && safeMessages.length >= 2 ? getSessionNotes(userId, "lyra") : Promise.resolve(""),
             ]);
             const ragResult = await Promise.race([ragWork, ragTimeout]);
+            const ragRetrievalMs = Date.now() - ragStartTime;
             if (ragResult === null) {
               logger.warn({ tier, timeoutMs: RAG_TIMEOUT_MS }, "RAG retrieval timed out — proceeding without context");
+              ragDegraded = true;
+              // Log RAG quality even on timeout (zero chunks, timedOut=true)
+              logRagQuality({
+                tier,
+                chunkCount: 0,
+                avgSimilarity: 0,
+                p50Similarity: 0,
+                p95Similarity: 0,
+                timedOut: true,
+                retrievalMs: ragRetrievalMs,
+              });
             } else {
               const [knowledgeResult, memoryResult, globalNotesResult, sessionNotesResult] = ragResult;
               knowledgeContext = knowledgeResult.content;
@@ -801,13 +871,40 @@ export async function generateLyraStream(
               memoryContext = memoryResult;
               if (globalNotesResult) globalNotes = globalNotesResult;
               if (sessionNotesResult) sessionNotes = sessionNotesResult;
+              // Calculate similarity statistics for RAG quality logging from knowledgeResult.similarities
+              const similarities = knowledgeResult.similarities ?? [];
+              const avgSim = similarities.length > 0 ? similarities.reduce((a, b) => a + b, 0) / similarities.length : 0;
+              const sortedSims = [...similarities].sort((a, b) => a - b);
+              const p50 = sortedSims[Math.floor(sortedSims.length * 0.5)] ?? 0;
+              const p95 = sortedSims[Math.floor(sortedSims.length * 0.95)] ?? 0;
+              logRagQuality({
+                tier,
+                chunkCount: knowledgeResult.chunkCount,
+                avgSimilarity: avgSim,
+                p50Similarity: p50,
+                p95Similarity: p95,
+                timedOut: false,
+                retrievalMs: ragRetrievalMs,
+              });
               logger.info(
-                { sourceCount: knowledgeSources.length, memorySkipped: !tierConfig.ragMemoryEnabled || messages.length < 4 },
+                { sourceCount: knowledgeSources.length, memorySkipped: !tierConfig.ragMemoryEnabled || safeMessages.length < 4 },
                 "RAG retrieval completed",
               );
             }
           } catch (e) {
+            const failRetrievalMs = Date.now() - ragStartTime;
             logger.error({ err: sanitizeError(e) }, "RAG retrieval failed");
+            ragDegraded = true;
+            // Log RAG quality on failure
+            logRagQuality({
+              tier,
+              chunkCount: 0,
+              avgSimilarity: 0,
+              p50Similarity: 0,
+              p95Similarity: 0,
+              timedOut: false,
+              retrievalMs: failRetrievalMs,
+            });
           }
         })()
       );
@@ -842,7 +939,7 @@ export async function generateLyraStream(
               } else {
                 const peers = await prisma.asset.findMany({
                   where: {
-                    type: (resolvedAssetType !== "GLOBAL" ? resolvedAssetType : undefined) as "CRYPTO" | undefined,
+                    type: resolvedAssetType === "CRYPTO" ? "CRYPTO" as const : undefined,
                     symbol: { not: resolvedSymbol },
                   },
                   orderBy: { marketCap: "desc" },
@@ -884,12 +981,6 @@ export async function generateLyraStream(
       parallelTasks.push(
         (async () => {
           try {
-            const searchRegion = inferSearchRegion(
-              resolvedSymbol,
-              typeof context.region === "string"
-                ? context.region
-                : assetEnrichment?.region ?? undefined,
-            );
             // Tavily handles domain steering natively via includeDomains + topic:"finance"
             // inside searchWeb — no site: query manipulation needed here.
             const searchQuery = resolvedSymbol && resolvedSymbol !== "GLOBAL"
@@ -933,12 +1024,7 @@ export async function generateLyraStream(
           try {
             const latestRegime = await prisma.marketRegime.findFirst({
               where: {
-                region: inferSearchRegion(
-                  resolvedSymbol,
-                  typeof (context as Record<string, unknown>).region === "string"
-                    ? String((context as Record<string, unknown>).region)
-                    : assetEnrichment?.region ?? undefined,
-                ),
+                region: searchRegion,
               },
               orderBy: { date: "desc" },
               select: { correlationMetrics: true },
@@ -1081,14 +1167,14 @@ logRetrievalMetric({
   if (resolvedRegion && !enrichedContext.region) {
     enrichedContext.region = resolvedRegion;
   }
-  const mentionedSymbols = extractMentionedSymbols(messages as Array<{ role: string; content: string | unknown }>);
+  // mentionedSymbols already computed at top of function (L821) — reused here.
 
   // Analyze behavioral patterns from conversation history (MODERATE/COMPLEX only).
   // Builds a lightweight user intent profile from the last N user messages.
-  const recentUserMessages = messages
+  const recentUserMessages = safeMessages
     .filter((m) => m.role === "user")
     .slice(-12);
-  const behavioralInsights = tier !== "SIMPLE" && messages.length >= 5
+  const behavioralInsights = tier !== "SIMPLE" && safeMessages.length >= 5
     ? analyzeBehavioralPatterns(
         recentUserMessages
           .map((m, idx) => ({
@@ -1193,16 +1279,16 @@ logRetrievalMetric({
   // as the previous turn. For pivot questions (user switched assets/topics), inject [NEW_TOPIC]
   // so the model doesn't suppress context the new question actually requires.
   const prevSymbol = (() => {
-    const prevMessages = messages.slice(0, -1);
+    const prevMessages = safeMessages.slice(0, -1);
     if (prevMessages.length === 0) return null;
     const prevMentioned = extractMentionedSymbols(prevMessages as Array<{ role: string; content: string | unknown }>);
     return prevMentioned[0] ?? null;
   })();
   const isSameAssetTopic = prevSymbol === null || prevSymbol === resolvedSymbol;
-  const conversationMeta = messages.length > 1
+  const conversationMeta = safeMessages.length > 1
     ? isSameAssetTopic
-      ? `\n[CONVERSATION_META] Turn:${messages.length} | Topic:${resolvedSymbol} | Build on prior analysis. Do NOT restate the Bottom Line, Risk Assessment, or conclusions from prior turns. Jump directly to the new angle, go deeper on a specific signal, or address the exact follow-up asked.`
-      : `\n[CONVERSATION_META] Turn:${messages.length} | NEW_TOPIC:${resolvedSymbol} | This is a new topic — treat it as a fresh analysis. Do not reference prior conversation conclusions unless directly relevant.`
+      ? `\n[CONVERSATION_META] Turn:${safeMessages.length} | Topic:${resolvedSymbol} | Build on prior analysis. Do NOT restate the Bottom Line, Risk Assessment, or conclusions from prior turns. Jump directly to the new angle, go deeper on a specific signal, or address the exact follow-up asked.`
+      : `\n[CONVERSATION_META] Turn:${safeMessages.length} | NEW_TOPIC:${resolvedSymbol} | This is a new topic — treat it as a fresh analysis. Do not reference prior conversation conclusions unless directly relevant.`
     : "";
   const contextContent = `### LIVE MARKET CONTEXT\n${finalContext}${assetLinkOverride}${conversationMeta}`;
 
@@ -1260,15 +1346,18 @@ logRetrievalMetric({
 
   // 2c. Synchronous work runs while historyCompressionPromise (if any) resolves in background.
   // Key shape matches earlyGptKey (no priceLastUpdated) so reads hit writes.
+  // When the early check already probed the same key shape, reuse it to avoid recomputation.
   const isMarketLevel = resolvedAssetType === "GLOBAL" || resolvedSymbol === "GLOBAL";
-  const gptCacheKey = modelCacheKey({
-    planTier: userPlan,
-    tier,
-    assetType: resolvedAssetType,
-    symbol: resolvedSymbol !== "GLOBAL" ? resolvedSymbol : undefined,
-    responseMode,
-    query,
-  });
+  const gptCacheKey = earlyCacheAlreadyMissed
+    ? earlyGptKey
+    : modelCacheKey({
+        planTier: userPlan,
+        tier,
+        assetType: resolvedAssetType,
+        symbol: resolvedSymbol !== "GLOBAL" ? resolvedSymbol : undefined,
+        responseMode,
+        query,
+      });
 
   const emitCacheEvent = (params: {
     modelFamily: "gpt";
@@ -1333,48 +1422,15 @@ logRetrievalMetric({
   }
 
   // 3. Call LLM (GPT-5.4 family — shared prompt cache)
-  const cachedGptText = await getCache<string>(gptCacheKey);
+  // Skip late cache check when the early check already probed the same key and missed.
+  // The late check is only needed when needsLateAssetTypeResolution was true (early check
+  // was skipped because resolvedAssetType wasn't final yet) or when edu-cache logic
+  // bypassed the early check.
+  const cachedGptText = earlyCacheAlreadyMissed ? null : await getCache<string>(gptCacheKey);
   if (cachedGptText) {
-    emitCacheEvent({ modelFamily: "gpt", operation: "read", outcome: "hit" });
-    logger.info({ tier, cacheKey: gptCacheKey }, "GPT response cache HIT");
-
-    // Cache-hit cost tracking: estimate tokens from cached text so audit/billing
-    // doesn't report $0. Use the deployment that would have been used for this tier.
-    const cacheHitDeployment = resolveGptDeployment(tierConfig.gpt54Role);
-    const cacheHitInputTokens = Math.round(staticPrompt.length / 4);
-    const cacheHitOutputTokens = Math.round(cachedGptText.length / 4);
-    const cacheHitCostBreakdown = calculateLLMCost({
-      model: cacheHitDeployment,
-      inputTokens: cacheHitInputTokens,
-      outputTokens: cacheHitOutputTokens,
-      cachedInputTokens: cacheHitInputTokens, // entire prompt was cached
+    return handleLateCacheHit(cachedGptText, gptCacheKey, emitCacheEvent, {
+      userId, query, tier, tierConfig, staticPrompt, finalSources, remainingCredits, costCeiling,
     });
-    logger.info({
-      tier, tokens: cacheHitInputTokens + cacheHitOutputTokens,
-      inputTokens: cacheHitInputTokens, outputTokens: cacheHitOutputTokens,
-      cachedTokens: cacheHitInputTokens, cost: cacheHitCostBreakdown.totalCost,
-      model: cacheHitDeployment,
-    }, "LLM generation finished (cache hit)");
-
-    storeConversationLog(
-      userId, query, cachedGptText, cacheHitDeployment,
-      {
-        tokensUsed: cacheHitInputTokens + cacheHitOutputTokens,
-        inputTokens: cacheHitInputTokens,
-        outputTokens: cacheHitOutputTokens,
-        cachedInputTokens: cacheHitInputTokens,
-        reasoningTokens: 0,
-        inputCost: cacheHitCostBreakdown.inputCost,
-        outputCost: cacheHitCostBreakdown.outputCost,
-        cachedInputCost: cacheHitCostBreakdown.cachedInputCost,
-        totalCost: cacheHitCostBreakdown.totalCost,
-      },
-      tier, 1, false,
-    ).catch((e: unknown) =>
-      logger.warn({ err: sanitizeError(e), userId }, "Failed to log cache-hit interaction"),
-    );
-
-    return { result: { textStream: singleChunkStream(cachedGptText) }, sources: finalSources, remainingCredits, contextTruncated: costCeiling.exceeded };
   }
   emitCacheEvent({ modelFamily: "gpt", operation: "read", outcome: "miss" });
 
@@ -1434,9 +1490,8 @@ logRetrievalMetric({
         const reasoningTokens = Number.isFinite(usageAny.reasoningTokens) ? (usageAny.reasoningTokens as number) : 0;
         const inputTokens = Number.isFinite(usage.inputTokens) ? usage.inputTokens ?? 0 : 0;
         const outputTokens = Number.isFinite(usage.outputTokens) ? usage.outputTokens ?? 0 : 0;
-        const totalTokens = Number.isFinite(usage.totalTokens) ? usage.totalTokens : (inputTokens + outputTokens);
+        const totalTokens = Number.isFinite(usage.totalTokens) ? usage.totalTokens! : (inputTokens + outputTokens);
         const tokensUsed = Number.isFinite(totalTokens) ? totalTokens : (inputTokens + outputTokens);
-        const safeTokensUsed = tokensUsed as number;
         const durationMs = timer.end();
         const tokenReport = {
           tokens: tokensUsed,
@@ -1448,7 +1503,7 @@ logRetrievalMetric({
           tier,
           reasoningEffort: gptReasoningEffort,
           promptVersion: PROMPT_VERSION,
-          duration: timer.endFormatted(),
+          duration: `${(durationMs / 1000).toFixed(1)}s`,
           durationMs,
         };
         logger.info(tokenReport, "LLM generation finished");
@@ -1474,8 +1529,28 @@ logRetrievalMetric({
             duration: tokenReport.duration,
             durationMs,
           });
+
+          // Streaming latency metrics (OBS-2): TTFT requires stream instrumentation for true measurement.
+          // Using estimated TTFT based on tier-specific heuristics until per-chunk tracking is added.
+          // COMPLEX queries have longer input processing (~30% of duration), SIMPLE is faster (~15%).
+          const estimatedTtftRatio = tier === "COMPLEX" ? 0.30 : tier === "MODERATE" ? 0.20 : 0.15;
+          const estimatedTtftMs = Math.round(durationMs * estimatedTtftRatio);
+          const streamingDurationMs = Math.max(1, durationMs - estimatedTtftMs);
+          const tps = outputTokens > 0 ? (outputTokens / (streamingDurationMs / 1000)) : 0;
+
+          logStreamingLatency({
+            model: effectiveDeployment,
+            tier,
+            plan: userPlan,
+            // TTFT is estimated until per-chunk instrumentation is added
+            ttftMs: estimatedTtftMs,
+            tps,
+            totalTokens: outputTokens,
+            durationMs,
+            wasFallback: false,
+          });
         } catch (e) {
-          logger.warn({ err: sanitizeError(e) }, "Failed to log GPT routing");
+          logger.warn({ err: sanitizeError(e) }, "Failed to log GPT routing or streaming latency");
         }
 
         // Write educational cache for Starter + PRO + SIMPLE (cache miss path)
@@ -1516,7 +1591,7 @@ logRetrievalMetric({
           text || "",
           effectiveDeployment,
           {
-            tokensUsed: safeTokensUsed,
+            tokensUsed: tokensUsed,
             inputTokens,
             outputTokens,
             cachedInputTokens: cachedTokens,
@@ -1527,7 +1602,7 @@ logRetrievalMetric({
             totalCost: costBreakdown.totalCost,
           },
           tier,
-          messages.length,
+          safeMessages.length,
           false,
         ).catch((e: unknown) =>
           logger.error({ err: sanitizeError(e), userId }, "Failed to log interaction"),
@@ -1542,14 +1617,24 @@ logRetrievalMetric({
             resolvedAssetType,
           );
           logValidationResult(validation);
+
+          // H7: Semantic validation (sample-based) for ELITE/COMPLEX — hallucination detection
+          // Checks if factual claims in output are supported by retrieved context
+          const semanticValidation = validateSemanticConsistency(
+            text,
+            knowledgeContext,
+            tier,
+            userPlan,
+          );
+          logSemanticValidationResult(semanticValidation);
         }
 
         // Memory distillation — extract durable notes from session, async non-blocking.
         // R5: Debounce — fire on turn counts that are exact multiples of 2 (turns 2, 4, 6…).
         // Lowered from 4 to capture preferences from shorter sessions (2–3 turns).
-        const userTurnCount = messages.filter((m) => m.role === "user").length;
+        const userTurnCount = safeMessages.filter((m) => m.role === "user").length;
         if (userTurnCount >= 2 && userTurnCount % 2 === 0) {
-          distillSessionNotes(userId, messages as Array<{ role: string; content: unknown }>, "lyra").catch((e: unknown) =>
+          distillSessionNotes(userId, safeMessages as Array<{ role: string; content: unknown }>, "lyra").catch((e: unknown) =>
             logger.warn({ err: sanitizeError(e) }, "Memory distillation failed"),
           );
         }
@@ -1557,7 +1642,10 @@ logRetrievalMetric({
     });
 
     logger.info({ tier }, "Stream initiated successfully");
-    return { result, sources: finalSources, remainingCredits, contextTruncated: costCeiling.exceeded };
+    // Wrap textStream so mid-stream errors trigger credit refund.
+    // AI SDK's textStream is readonly — spread into a new object with the wrapped stream.
+    const wrappedResult = { ...result, textStream: refundOnStreamError(result.textStream, userId, consumedCreditCost, "primary") };
+    return { result: wrappedResult, sources: finalSources, remainingCredits, contextTruncated: costCeiling.exceeded, ragDegraded };
   } catch (primaryError: unknown) {
     // B1-FIX: Clear latency abort timer — primary path failed, no need to keep the timer running
     clearTimeout(latencyAbortTimer);
@@ -1567,156 +1655,26 @@ logRetrievalMetric({
       "Primary model generation failed — attempting graceful fallback",
     );
 
-    // COST-1 + QUALITY: Graceful degradation ladder.
-    //
-    //   lyra-full  → lyra-mini → lyra-nano
-    //   lyra-mini  → lyra-nano
-    //   lyra-nano  → re-throw (no recursive retry)
-    //
-    // The middle-tier step (full → mini) protects paid tiers from a jarring quality
-    // cliff when only the `full` deployment is degraded. Each step uses a tighter
-    // latency budget than the previous since later attempts compound wall-clock time.
-    const nanoDeployment = resolveGptDeployment("lyra-nano");
-    const miniDeployment = resolveGptDeployment("lyra-mini");
-    if (effectiveDeployment === nanoDeployment) {
-      throw primaryError; // nano already failed — nothing left to try
-    }
-
-    // Build the fallback chain for this request. Skip `mini` if primary already was `mini`
-    // (avoids hitting the same failing deployment twice), and always end at `nano`.
-    type FallbackStep = {
-      role: Gpt54Role;
-      deployment: string;
-      timeoutMs: number;
-      maxOutputTokens: number;
-    };
-    const fallbackChain: FallbackStep[] = [];
-    const isFromFull = effectiveDeployment !== miniDeployment && effectiveDeployment !== nanoDeployment;
-    if (isFromFull) {
-      // Middle step: mini. Keep a generous output budget since paid-tier users expect
-      // institutional-grade responses even on the degraded path.
-      fallbackChain.push({
-        role: "lyra-mini",
-        deployment: miniDeployment,
-        timeoutMs: 20_000,
-        maxOutputTokens: Math.min(getTargetOutputTokens(tierConfig, tier as QueryComplexity), 1800),
-      });
-    }
-    // Final step: nano. Short timeout, conservative token budget.
-    fallbackChain.push({
-      role: "lyra-nano",
-      deployment: nanoDeployment,
-      timeoutMs: 15_000,
-      maxOutputTokens: 1200,
+    return executeFallbackChain(primaryError, {
+      userId, query, tier, userPlan, tierConfig, effectiveDeployment,
+      finalMessages, staticPrompt, finalSources, remainingCredits,
+      consumedCreditCost, isEduCacheable, responseMode, resolvedAssetType,
+      safeMessages, timer, ragDegraded,
     });
-
-    let lastError: unknown = primaryError;
-    for (let i = 0; i < fallbackChain.length; i++) {
-      const step = fallbackChain[i];
-      const isLastStep = i === fallbackChain.length - 1;
-      // B1-FIX: Separate abort controller per fallback step
-      const fallbackAbortController = new AbortController();
-      const fallbackAbortTimer = setTimeout(() => {
-        logger.warn({ tier, fallbackDeployment: step.deployment }, "Fallback step latency exceeded — aborting");
-        fallbackAbortController.abort();
-      }, step.timeoutMs);
-
-      try {
-        const fallbackModel = getSharedAISdkClient().responses(step.deployment);
-        const fallbackResult = streamText({
-          model: fallbackModel,
-          messages: finalMessages,
-          system: staticPrompt,
-          maxOutputTokens: step.maxOutputTokens,
-          abortSignal: fallbackAbortController.signal,
-          providerOptions: {
-            openai: {
-              textVerbosity: "high" as const,
-              promptCacheKey: "lyra-static-v1",
-            },
-          },
-          onFinish: async ({ text, usage }) => {
-            // B1-FIX: Clear fallback abort timer once stream finishes naturally
-            clearTimeout(fallbackAbortTimer);
-            const durationMs = timer.end();
-            logModelRouting({
-              model: step.deployment,
-              tier,
-              tokens: usage.totalTokens ?? ((usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)),
-              wasFallback: true,
-              duration: timer.endFormatted(),
-              durationMs,
-            });
-            recordFallbackResult(true, step.deployment).catch((e) => logFireAndForgetError(e, "fallback-result"));
-
-            // Track latency budget violations for fallback as well
-            const latencyBudgetMs = tierConfig.latencyBudgetMs;
-            const exceededBudget = durationMs > latencyBudgetMs;
-            recordLatencyViolation(exceededBudget, durationMs, tier).catch((e) => logFireAndForgetError(e, "latency-violation"));
-
-            incrementDailyTokens(userId, usage.totalTokens ?? 0).catch((e) => logFireAndForgetError(e, "daily-tokens"));
-
-            // AUDIT-4: Fold fallback-path USD spend into the daily cost alert. Previously
-            // only the primary path reported to alertIfDailyCostExceeded, so a degraded
-            // primary that pushed majority traffic onto the fallback ladder was invisible
-            // to the cost alert even as spend accumulated.
-            try {
-              const fbInput = Number.isFinite(usage.inputTokens) ? usage.inputTokens ?? 0 : 0;
-              const fbOutput = Number.isFinite(usage.outputTokens) ? usage.outputTokens ?? 0 : 0;
-              const fbCachedInput = Number.isFinite((usage as Record<string, unknown>).cachedInputTokens)
-                ? ((usage as Record<string, unknown>).cachedInputTokens as number)
-                : 0;
-              const fbCost = calculateLLMCost({
-                model: step.deployment,
-                inputTokens: fbInput,
-                outputTokens: fbOutput,
-                cachedInputTokens: fbCachedInput,
-              });
-              alertIfDailyCostExceeded(fbCost.totalCost).catch((e) => logFireAndForgetError(e, "fallback-cost-alert"));
-            } catch (e) {
-              logFireAndForgetError(e, "fallback-cost-calc");
-            }
-
-            if (text) {
-              storeConversationLog(userId, query, text, step.deployment,
-                { tokensUsed: usage.totalTokens ?? 0 }, tier, messages.length, true,
-              ).catch((e: unknown) => logger.error({ err: sanitizeError(e) }, "Fallback log failed"));
-
-              // R5-FIX: Validate fallback output — previously skipped, creating a blind spot
-              // in the validation failure rate alert. Fallback responses are lower quality
-              // and more likely to fail section checks, so monitoring them is critical.
-              const fallbackValidation = validateOutput(
-                text, tier, userPlan,
-                tier === "SIMPLE" && isEduCacheable,
-                responseMode,
-                resolvedAssetType,
-              );
-              logValidationResult(fallbackValidation);
-            }
-          },
-        });
-        logger.warn({ userId, tier, fallbackDeployment: step.deployment, stepIndex: i }, "Fallback stream initiated");
-        return { result: fallbackResult, sources: finalSources, remainingCredits, contextTruncated: true };
-      } catch (fallbackError: unknown) {
-        clearTimeout(fallbackAbortTimer);
-        lastError = fallbackError;
-        logger.error(
-          { err: sanitizeError(fallbackError), userId, fallbackDeployment: step.deployment, stepIndex: i },
-          isLastStep ? "Final fallback step failed" : "Fallback step failed — trying next",
-        );
-        // Continue to the next step unless this was the last one.
-        if (isLastStep) {
-          throw primaryError; // surface the original error
-        }
-      }
-    }
-    // Should be unreachable — the loop either returns or throws — but satisfy control flow.
-    throw lastError;
   }
 
   } catch (outerError: unknown) {
-    // B1: Re-throw — inner catch already logged; this path only fires for pre-LLM throws
-    // (daily cap exceeded, insufficient credits, or unexpected errors before line ~1214).
+    // P0: Refund credits if consumed but the request failed (LLM failure, fallback exhaustion,
+    // or unexpected error after credit consumption). Pre-credit-check errors (guardrail
+    // violations, daily cap exceeded, insufficient credits) set creditsConsumed=false.
+    if (creditsConsumed && consumedCreditCost > 0) {
+      try {
+        await addCredits(userId, consumedCreditCost, CreditTransactionType.ADJUSTMENT, "LLM failure refund", `lyra-refund:${Date.now()}-${userId.slice(-6)}`);
+        logger.warn({ userId, creditCost: consumedCreditCost }, "Credits refunded after LLM failure");
+      } catch (refundError) {
+        logger.error({ err: sanitizeError(refundError), userId, creditCost: consumedCreditCost }, "Credit refund failed on LLM failure");
+      }
+    }
     throw outerError;
   } finally {
     // B1: Release in-flight lock — fires on ALL exit paths including pre-LLM throws

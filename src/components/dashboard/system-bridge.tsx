@@ -6,25 +6,25 @@ export interface SystemBridgeItem {
   title: string;
   description: string;
   href: string;
-  accent?: "primary" | "emerald" | "amber" | "sky";
+  accent?: "primary" | "emerald" | "gold" | "sky";
 }
 
 function accentClasses(accent: SystemBridgeItem["accent"]) {
   switch (accent) {
     case "emerald":
       return {
-        eyebrow: "text-emerald-400",
-        card: "hover:border-emerald-400/30 hover:bg-emerald-400/5",
+        eyebrow: "text-success",
+        card: "hover:border-success/30 hover:bg-success/5",
       };
-    case "amber":
+    case "gold":
       return {
-        eyebrow: "text-amber-400",
-        card: "hover:border-amber-400/30 hover:bg-amber-400/5",
+        eyebrow: "text-[#FFD700]",
+        card: "hover:border-[#FFD700]/30 hover:bg-[#FFD700]/5",
       };
     case "sky":
       return {
-        eyebrow: "text-sky-400",
-        card: "hover:border-sky-400/30 hover:bg-sky-400/5",
+        eyebrow: "text-info",
+        card: "hover:border-info/30 hover:bg-info/5",
       };
     default:
       return {

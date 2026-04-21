@@ -101,7 +101,7 @@ export function ScoreHistorySparkline({
       <span
         className={cn(
           "text-[8px] font-bold",
-          trend === "up" ? "text-emerald-400" : trend === "down" ? "text-rose-400" : "text-muted-foreground",
+          trend === "up" ? "text-success" : trend === "down" ? "text-danger" : "text-muted-foreground",
         )}
       >
         {trend === "up" ? "↑" : trend === "down" ? "↓" : "→"}

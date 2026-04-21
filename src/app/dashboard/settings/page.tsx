@@ -977,7 +977,7 @@ export default function SettingsPage() {
                     </p>
                   </div>
                 </div>
-                <span className="text-xs text-green-500 font-medium">
+                <span className="text-xs text-success font-medium">
                   Active
                 </span>
               </div>
@@ -1044,7 +1044,7 @@ export default function SettingsPage() {
                       {subscription.cancelAtPeriodEnd ? "Cancels" : "Renews"} on {new Date(subscription.currentPeriodEnd).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                     </p>
                     {subscription.cancelAtPeriodEnd && (
-                      <p className="text-xs text-amber-500 font-medium mt-1">Scheduled to cancel at period end</p>
+                      <p className="text-xs text-warning font-medium mt-1">Scheduled to cancel at period end</p>
                     )}
                   </div>
                   <div>
@@ -1096,8 +1096,8 @@ export default function SettingsPage() {
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between gap-2.5">
             <div className="flex items-center gap-2.5">
-              <div className="p-1.5 rounded-2xl bg-amber-500/10">
-                <Star className="h-4 w-4 text-amber-400" />
+              <div className="p-1.5 rounded-2xl bg-warning/10">
+                <Star className="h-4 w-4 text-warning" />
               </div>
               <div>
                 <CardTitle className="text-base">Credits &amp; XP</CardTitle>
@@ -1142,11 +1142,11 @@ export default function SettingsPage() {
               {/* XP + Level row */}
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/20 border border-border/30">
                 <div className="relative shrink-0">
-                  <div className="h-12 w-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                    <span className="text-base font-bold text-amber-400">{xpPoints?.level ?? 1}</span>
+                  <div className="h-12 w-12 rounded-2xl bg-warning/10 border border-warning/20 flex items-center justify-center">
+                    <span className="text-base font-bold text-warning">{xpPoints?.level ?? 1}</span>
                   </div>
                   {(xpPoints?.streak ?? 0) >= 7 && (
-                    <div className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-orange-500 flex items-center justify-center shadow">
+                    <div className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-warning flex items-center justify-center shadow">
                       <Flame className="h-2.5 w-2.5 text-white" />
                     </div>
                   )}
@@ -1159,7 +1159,7 @@ export default function SettingsPage() {
                     {(xpPoints?.xp ?? 0).toLocaleString()} XP
                   </div>
                   {(xpPoints?.streak ?? 0) > 0 && (
-                    <div className="flex items-center gap-1 text-xs text-orange-400">
+                    <div className="flex items-center gap-1 text-xs text-warning">
                       <Flame className="h-3 w-3" />
                       {xpPoints?.streak}-day streak
                     </div>
@@ -1172,11 +1172,11 @@ export default function SettingsPage() {
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                     <span>Level Progress</span>
-                    <span className="text-amber-400">{xpPoints?.progressPercent ?? 0}%</span>
+                    <span className="text-warning">{xpPoints?.progressPercent ?? 0}%</span>
                   </div>
                   <div className="h-2 rounded-full bg-muted/30 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-linear-to-r from-amber-500/80 to-amber-400 transition-all duration-700 ease-out"
+                      className="h-full rounded-full bg-linear-to-r from-warning/80 to-warning transition-all duration-700 ease-out"
                       style={{ width: `${xpPoints?.progressPercent ?? 0}%` }}
                     />
                   </div>
@@ -1186,7 +1186,7 @@ export default function SettingsPage() {
                 </div>
               )}
               {xpPoints?.isMaxLevel && (
-                <p className="text-xs text-amber-400 font-bold">👑 Maximum level reached</p>
+                <p className="text-xs text-warning font-bold">👑 Maximum level reached</p>
               )}
 
               <div className="flex items-center gap-2 pt-1">

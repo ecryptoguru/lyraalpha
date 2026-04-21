@@ -95,7 +95,7 @@ export function CryptoChart({ symbol, data }: CryptoChartProps) {
   }, [rawData]);
 
   return (
-    <Card className="my-6 overflow-hidden border-primary/10 bg-white/80 dark:bg-slate-950/50 backdrop-blur-xl">
+    <Card className="my-6 overflow-hidden border-primary/10 bg-white/80 dark:bg-foreground/50 backdrop-blur-xl">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-mono text-primary flex items-center gap-2">
@@ -115,10 +115,10 @@ export function CryptoChart({ symbol, data }: CryptoChartProps) {
         />
         <div className="grid grid-cols-4 border-t border-primary/10 py-3">
           {[
-            { l: "1D", v: "+3.28%", c: "text-green-500" },
-            { l: "1M", v: "-12.70%", c: "text-red-500" },
-            { l: "1Y", v: "+9.92%", c: "text-green-500" },
-            { l: "5Y", v: "+58.65%", c: "text-green-500" },
+            { l: "1D", v: "+3.28%", c: "text-success" },
+            { l: "1M", v: "-12.70%", c: "text-danger" },
+            { l: "1Y", v: "+9.92%", c: "text-success" },
+            { l: "5Y", v: "+58.65%", c: "text-success" },
           ].map((m) => (
             <div key={m.l} className="text-center">
               <div className="text-[10px] text-muted-foreground font-bold">{m.l}</div>

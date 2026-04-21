@@ -226,7 +226,7 @@ function EliteUpgradeModal({ onClose }: { onClose: () => void }) {
         <div className="px-6 py-4 border-t border-white/5 bg-background/80 shrink-0">
           <Link
             href="/dashboard/upgrade"
-            className="w-full max-w-md mx-auto flex items-center justify-center gap-2 rounded-2xl bg-primary text-black font-bold text-sm px-5 py-3 hover:bg-primary/90 transition-colors group"
+            className="w-full max-w-md mx-auto flex items-center justify-center gap-2 rounded-2xl bg-primary text-primary-foreground font-bold text-sm px-5 py-3 hover:bg-primary/90 transition-colors group"
           >
             <span>{copy.cta}</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />

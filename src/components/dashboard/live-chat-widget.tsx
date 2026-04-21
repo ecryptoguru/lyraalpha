@@ -51,7 +51,7 @@ function TypingDots() {
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
-          className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-white/45"
+          className="h-1.5 w-1.5 rounded-full bg-muted dark:bg-white/45"
           animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1, 0.8] }}
           transition={{
             duration: 1.1,
@@ -362,8 +362,8 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
 
   const showQuickReplies = !loading && allMessages.length === 0;
   const hasHistory = !loading && allMessages.length > 0;
-  const cardClass = "relative overflow-hidden rounded-4xl border border-slate-200/80 bg-white/96 shadow-[0_30px_90px_rgba(15,23,42,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#07111f]/96 dark:shadow-[0_30px_90px_rgba(0,0,0,0.48)]";
-  const launcherClassName = "group relative flex h-16 w-16 items-center justify-center rounded-full border border-amber-300/40 bg-white text-amber-500 shadow-[0_16px_48px_rgba(245,158,11,0.16)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/60 hover:bg-amber-50 dark:border-amber-300/30 dark:bg-[#0b1322] dark:text-amber-200 dark:shadow-[0_16px_48px_rgba(0,0,0,0.42)] dark:hover:border-amber-300/45 dark:hover:bg-[#0f182b]";
+  const cardClass = "relative overflow-hidden rounded-4xl border border-border/80 bg-white/96 shadow-[0_30px_90px_rgba(15,23,42,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#07111f]/96 dark:shadow-[0_30px_90px_rgba(0,0,0,0.48)]";
+  const launcherClassName = "group relative flex h-16 w-16 items-center justify-center rounded-full border border-cyan-400/40 bg-white text-cyan-400 shadow-[0_16px_48px_rgba(0,212,255,0.16)] transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/60 hover:bg-primary/5 dark:border-cyan-400/30 dark:bg-[#0b1322] dark:text-primary/60 dark:shadow-[0_16px_48px_rgba(0,0,0,0.42)] dark:hover:border-cyan-400/45 dark:hover:bg-[#0f182b]";
 
   // ─── Minimized bubble ───
   if (isMinimized) {
@@ -378,9 +378,9 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
         className={launcherClassName}
         aria-label="Open Myra support chat"
       >
-        <span className="absolute inset-1 rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.24),rgba(245,158,11,0.02)_68%,transparent)] blur-md transition-opacity duration-300 group-hover:opacity-100 dark:bg-[radial-gradient(circle,rgba(251,191,36,0.22),rgba(251,191,36,0.02)_68%,transparent)]" />
+        <span className="absolute inset-1 rounded-full bg-[radial-gradient(circle,rgba(0,212,255,0.24),rgba(0,212,255,0.02)_68%,transparent)] blur-md transition-opacity duration-300 group-hover:opacity-100 dark:bg-[radial-gradient(circle,rgba(0,212,255,0.22),rgba(0,212,255,0.02)_68%,transparent)]" />
         <MessageCircle className="relative z-10 h-7 w-7" />
-        <span className="absolute inset-0 rounded-full border border-amber-300/18" />
+        <span className="absolute inset-0 rounded-full border border-cyan-400/18" />
       </motion.button>
     );
   }
@@ -396,13 +396,13 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
       >
         <div className="flex flex-col items-center gap-3">
           <motion.div
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-amber-300/18 bg-amber-300/8 text-amber-200 shadow-inner"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-cyan-400/18 bg-cyan-400/10 text-primary/60 shadow-inner"
             animate={{ scale: [1, 1.08, 1] }}
             transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
           >
             <Sparkles className="h-5 w-5" />
           </motion.div>
-          <span className="text-sm text-slate-500 dark:text-white/42">Connecting to Myra…</span>
+          <span className="text-sm text-muted-foreground dark:text-white/42">Connecting to Myra…</span>
         </div>
       </motion.div>
     );
@@ -417,22 +417,22 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
       className={`w-[calc(100vw-1.5rem)] sm:w-[410px] flex flex-col overflow-hidden ${cardClass}`}
       style={{ height: "min(640px, calc(100dvh - 3rem))" }}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.65),transparent_22%,transparent_78%,rgba(245,158,11,0.08))] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_22%,transparent_78%,rgba(245,158,11,0.06))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.65),transparent_22%,transparent_78%,rgba(0,212,255,0.08))] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_22%,transparent_78%,rgba(0,212,255,0.06))]" />
       {/* Header */}
-      <div className="relative flex shrink-0 items-center justify-between border-b border-slate-200/80 px-5 py-4 dark:border-white/8">
+      <div className="relative flex shrink-0 items-center justify-between border-b border-border/80 px-5 py-4 dark:border-white/8">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-full border border-amber-300/30 bg-amber-50 text-amber-500 shadow-inner dark:border-amber-300/18 dark:bg-amber-300/8 dark:text-amber-200">
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-full border border-cyan-400/30 bg-primary/5 text-cyan-400 shadow-inner dark:border-cyan-400/18 dark:bg-cyan-400/10 dark:text-primary/60">
             <Sparkles className="h-5 w-5" />
-            <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white bg-emerald-400 dark:border-[#07111f]" />
+            <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white bg-success dark:border-[#07111f]" />
           </div>
           <div>
             <div className="mb-1 flex items-center gap-2">
-              <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white">Myra</span>
-              <span className="rounded-full border border-amber-300/30 bg-amber-50 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.28em] text-amber-600 dark:border-amber-300/18 dark:bg-amber-300/8 dark:text-amber-100/75">
+              <span className="text-base font-bold tracking-tight text-foreground dark:text-white">Myra</span>
+              <span className="rounded-full border border-cyan-400/30 bg-primary/5 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.28em] text-primary dark:border-cyan-400/18 dark:bg-cyan-400/10 dark:text-primary/75">
                 AI
               </span>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-slate-500 dark:text-white/38">Online · replies instantly</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-muted-foreground dark:text-white/38">Online · replies instantly</span>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -440,7 +440,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsMinimized(true)}
-            className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer dark:text-white/48 dark:hover:bg-white/6 dark:hover:text-white/75"
+            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground cursor-pointer dark:text-white/48 dark:hover:bg-white/6 dark:hover:text-white/75"
             aria-label="Minimise"
           >
             <Minus className="h-4 w-4" />
@@ -449,7 +449,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer dark:text-white/48 dark:hover:bg-white/6 dark:hover:text-white/75"
+            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground cursor-pointer dark:text-white/48 dark:hover:bg-white/6 dark:hover:text-white/75"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -458,10 +458,10 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
       </div>
 
       {/* Status bar */}
-      <div className="relative shrink-0 border-b border-amber-200/70 bg-amber-50/80 px-5 py-3 dark:border-white/8 dark:bg-amber-300/6">
-        <span className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 dark:text-white/56">
+      <div className="relative shrink-0 border-b border-primary/70 bg-primary/80 px-5 py-3 dark:border-white/8 dark:bg-cyan-400/10">
+        <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground dark:text-white/56">
           Financial questions? Use{" "}
-          <a href="/dashboard/lyra" className="font-bold text-amber-600 transition-colors hover:text-amber-500 dark:text-amber-100 dark:hover:text-white">
+          <a href="/dashboard/lyra" className="font-bold text-primary transition-colors hover:text-cyan-400 dark:text-primary/60 dark:hover:text-white">
             Lyra Intel →
           </a>
         </span>
@@ -474,9 +474,9 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mb-2 rounded-[1.35rem] border border-slate-200/80 bg-slate-50/90 px-3 py-2 text-center dark:border-white/8 dark:bg-white/3"
+            className="mb-2 rounded-[1.35rem] border border-border/80 bg-muted/90 px-3 py-2 text-center dark:border-white/8 dark:bg-white/3"
           >
-            <p className="text-xs text-slate-500 dark:text-white/46">
+            <p className="text-xs text-muted-foreground dark:text-white/46">
               Welcome back! Myra remembers your previous conversation.
             </p>
           </motion.div>
@@ -494,17 +494,17 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
             >
               <div className="space-y-3 text-center">
                 <motion.div
-                  className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full border border-amber-300/30 bg-amber-50 text-amber-500 shadow-[0_10px_30px_rgba(245,158,11,0.12)] dark:border-amber-300/18 dark:bg-amber-300/8 dark:text-amber-200 dark:shadow-[0_10px_30px_rgba(245,158,11,0.08)]"
+                  className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full border border-cyan-400/30 bg-primary/5 text-cyan-400 shadow-[0_10px_30px_rgba(0,212,255,0.12)] dark:border-cyan-400/18 dark:bg-cyan-400/10 dark:text-primary/60 dark:shadow-[0_10px_30px_rgba(0,212,255,0.08)]"
                   animate={{ scale: [1, 1.06, 1] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <Sparkles className="h-8 w-8" />
                 </motion.div>
-                <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Hi! I am Myra.</p>
-                <p className="px-4 text-sm font-medium leading-relaxed text-slate-500 dark:text-white/52">
+                <p className="text-lg font-bold tracking-tight text-foreground dark:text-white">Hi! I am Myra.</p>
+                <p className="px-4 text-sm font-medium leading-relaxed text-muted-foreground dark:text-white/52">
                   I&apos;m Lyra&apos;s companion for platform support. I can help you navigate LyraAlpha AI and answer your questions.
                 </p>
-                <p className="pt-1 text-sm font-medium text-amber-600 dark:text-amber-300">
+                <p className="pt-1 text-sm font-medium text-primary dark:text-cyan-400">
                   How may I help you today?
                 </p>
               </div>
@@ -517,7 +517,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
                     whileHover={{ scale: 1.02, transition: { duration: 0.12 } }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => sendMessage(qr)}
-                    className="rounded-[1.35rem] border border-slate-200/80 bg-white/90 p-3 text-left text-sm text-slate-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300/40 hover:bg-amber-50 hover:text-slate-900 cursor-pointer dark:border-white/8 dark:bg-white/2.5 dark:text-white/72 dark:hover:border-amber-300/18 dark:hover:bg-amber-300/[0.07] dark:hover:text-white"
+                    className="rounded-[1.35rem] border border-border/80 bg-white/90 p-3 text-left text-sm text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-400/40 hover:bg-primary/5 hover:text-foreground cursor-pointer dark:border-white/8 dark:bg-white/2.5 dark:text-white/72 dark:hover:border-cyan-400/18 dark:hover:bg-cyan-400/10 dark:hover:text-white"
                   >
                     {qr}
                   </motion.button>
@@ -540,33 +540,33 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
               <div
                 className={`max-w-[84%] rounded-[1.35rem] px-3.5 py-3 text-sm ${
                   msg.senderRole === "USER"
-                    ? "rounded-br-sm border border-amber-300/40 bg-amber-50 text-slate-900 dark:border-amber-300/24 dark:bg-amber-300/12 dark:text-white"
-                    : "rounded-bl-sm border border-slate-200/80 bg-white/92 text-slate-700 dark:border-white/8 dark:bg-white/3 dark:text-white/82"
+                    ? "rounded-br-sm border border-cyan-400/40 bg-primary/5 text-foreground dark:border-cyan-400/24 dark:bg-cyan-400/10 dark:text-white"
+                    : "rounded-bl-sm border border-border/80 bg-white/92 text-foreground dark:border-white/8 dark:bg-white/3 dark:text-white/82"
                 }`}
               >
                 {isAiMessage(msg) && (
-                  <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/70">
+                  <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-primary dark:text-primary/70">
                     <Sparkles className="w-2.5 h-2.5" />
                     Myra
                   </span>
                 )}
                 {msg.senderId === "AI_VOICE" && (
-                  <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/70">
+                  <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-primary dark:text-primary/70">
                     <Sparkles className="w-2.5 h-2.5" />
                     Myra
-                    <span className="ml-1 rounded-full border border-amber-300/40 bg-amber-50 px-1.5 py-px text-[8px] font-bold uppercase tracking-[0.2em] text-amber-600 dark:border-amber-300/22 dark:bg-amber-300/8 dark:text-amber-200/80">
+                    <span className="ml-1 rounded-full border border-cyan-400/40 bg-primary/5 px-1.5 py-px text-[8px] font-bold uppercase tracking-[0.2em] text-primary dark:border-cyan-400/22 dark:bg-cyan-400/10 dark:text-primary/80">
                       Voice
                     </span>
                   </span>
                 )}
                 {msg.senderId === "user_voice" && (
-                  <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-amber-700 dark:text-amber-200/60">
+                  <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-primary dark:text-primary/60">
                     <Mic className="w-2.5 h-2.5" />
                     You
                   </span>
                 )}
                 <p className="leading-relaxed">{renderContent(msg.content)}</p>
-                <span className="mt-1 block text-[10px] text-slate-400 dark:text-white/28">
+                <span className="mt-1 block text-[10px] text-muted-foreground dark:text-white/28">
                   {formatTime(msg.createdAt)}
                 </span>
               </div>
@@ -583,8 +583,8 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
             animate="visible"
             className="flex justify-start"
           >
-            <div className="max-w-[84%] rounded-[1.35rem] rounded-bl-sm border border-slate-200/80 bg-white/92 px-3.5 py-3 text-sm text-slate-700 dark:border-white/8 dark:bg-white/3 dark:text-white/82">
-              <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/70">
+            <div className="max-w-[84%] rounded-[1.35rem] rounded-bl-sm border border-border/80 bg-white/92 px-3.5 py-3 text-sm text-foreground dark:border-white/8 dark:bg-white/3 dark:text-white/82">
+              <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-primary dark:text-primary/70">
                 <Sparkles className="w-2.5 h-2.5" />
                 Myra
               </span>
@@ -603,9 +603,9 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
               exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
               className="flex justify-start"
             >
-              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-slate-200/80 bg-white/92 px-3 py-2.5 dark:border-white/8 dark:bg-white/3">
-                <Sparkles className="h-3 w-3 text-amber-600 dark:text-amber-200/70" />
-                <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 dark:text-white/42">Myra is typing</span>
+              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-border/80 bg-white/92 px-3 py-2.5 dark:border-white/8 dark:bg-white/3">
+                <Sparkles className="h-3 w-3 text-primary dark:text-primary/70" />
+                <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground dark:text-white/42">Myra is typing</span>
                 <TypingDots />
               </div>
             </motion.div>
@@ -622,9 +622,9 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
               exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
               className="flex justify-start"
             >
-              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-amber-300/40 bg-amber-50/90 px-3 py-2.5 dark:border-amber-300/22 dark:bg-amber-300/8">
-                <Sparkles className="h-3 w-3 text-amber-600 dark:text-amber-200/70" />
-                <span className="text-[10px] uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/80">Myra is thinking</span>
+              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-cyan-400/40 bg-primary/90 px-3 py-2.5 dark:border-cyan-400/22 dark:bg-cyan-400/10">
+                <Sparkles className="h-3 w-3 text-primary dark:text-primary/70" />
+                <span className="text-[10px] uppercase tracking-[0.22em] text-primary dark:text-primary/80">Myra is thinking</span>
                 <TypingDots />
               </div>
             </motion.div>
@@ -641,15 +641,15 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
               exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
               className="flex justify-start"
             >
-              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-amber-300/40 bg-amber-50/90 px-3 py-2.5 dark:border-amber-300/22 dark:bg-amber-300/8">
-                <Volume2 className="h-3 w-3 text-amber-600 dark:text-amber-200/70" />
-                <span className="flex items-center gap-1 text-[10px] uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/80">
+              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-cyan-400/40 bg-primary/90 px-3 py-2.5 dark:border-cyan-400/22 dark:bg-cyan-400/10">
+                <Volume2 className="h-3 w-3 text-primary dark:text-primary/70" />
+                <span className="flex items-center gap-1 text-[10px] uppercase tracking-[0.22em] text-primary dark:text-primary/80">
                   Myra is speaking
                   <span className="flex items-end gap-px">
                     {[0.4, 1, 0.65, 1, 0.4].map((h, i) => (
                       <motion.span
                         key={i}
-                        className="w-[2px] rounded-full bg-amber-500 dark:bg-amber-200/80"
+                        className="w-[2px] rounded-full bg-cyan-400 dark:bg-primary/80"
                         style={{ height: 3 }}
                         animate={{ scaleY: [h, 1, h * 0.5, 1, h] }}
                         transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.08, ease: "easeInOut" }}
@@ -672,14 +672,14 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
               exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
               className="flex justify-start"
             >
-              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-amber-300/40 bg-amber-50/90 px-3 py-2.5 dark:border-amber-300/22 dark:bg-amber-300/8">
+              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-warning/40 bg-primary/90 px-3 py-2.5 dark:border-warning/22 dark:bg-warning29462">
                 <motion.span
                   animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
                   transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <Mic className="h-3 w-3 text-amber-600 dark:text-amber-200/70" />
+                  <Mic className="h-3 w-3 text-primary dark:text-primary/70" />
                 </motion.span>
-                <span className="text-[10px] uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/80">Connecting voice…</span>
+                <span className="text-[10px] uppercase tracking-[0.22em] text-primary dark:text-primary/80">Connecting voice…</span>
               </div>
             </motion.div>
           )}
@@ -689,9 +689,9 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
       </div>
 
       {/* Input */}
-      <div className="relative shrink-0 border-t border-slate-200/80 bg-slate-50/90 p-3 dark:border-white/8 dark:bg-black/18">
+      <div className="relative shrink-0 border-t border-border/80 bg-muted/90 p-3 dark:border-white/8 dark:bg-black/18">
         {sendError && (
-          <p className="mb-2 rounded-xl bg-red-500/10 px-3 py-2 text-xs font-medium text-red-500 dark:text-red-400">
+          <p className="mb-2 rounded-xl bg-danger/10 px-3 py-2 text-xs font-medium text-danger dark:text-danger">
             {sendError}
           </p>
         )}
@@ -704,7 +704,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
             placeholder={voiceState === "active" ? "Type or speak…" : "Ask Myra anything..."}
             disabled={sending}
-            className="flex-1 rounded-full border border-slate-200/80 bg-white px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-amber-300/50 focus:outline-none focus:ring-1 focus:ring-amber-300/18 disabled:opacity-80 dark:border-white/10 dark:bg-white/3 dark:text-white dark:placeholder:text-white/28 dark:focus:border-amber-300/28"
+            className="flex-1 rounded-full border border-border/80 bg-white px-4 py-3 text-sm text-foreground transition-all placeholder:text-muted-foreground focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/18 disabled:opacity-80 dark:border-white/10 dark:bg-white/3 dark:text-white dark:placeholder:text-white/28 dark:focus:border-warning/28"
           />
           <MyraVoiceButton
             state={voiceState}
@@ -717,7 +717,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
             whileTap={{ scale: 0.9 }}
             onClick={() => sendMessage()}
             disabled={!input.trim() || sending}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-amber-400 text-slate-950 shadow-[0_10px_30px_rgba(245,158,11,0.22)] transition-all hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-warning text-foreground shadow-[0_10px_30px_rgba(245,158,11,0.22)] transition-all hover:bg-warning31734 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
           >
             <Send className="h-4 w-4" />
           </motion.button>
@@ -728,23 +728,23 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
               {silenceCountdown !== null && silenceCountdown <= 10 ? (
                 <button
                   onClick={keepAlive}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-orange-300/60 bg-orange-50 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-orange-600 transition-colors hover:bg-orange-100 dark:border-orange-300/30 dark:bg-orange-300/10 dark:text-orange-200 dark:hover:bg-orange-300/18"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/60 bg-cyan-400/5 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-cyan-400 transition-colors hover:bg-cyan-400/10 dark:border-cyan-400/30 dark:bg-cyan-400/10 dark:text-cyan-400 dark:hover:bg-cyan-400/18"
                 >
                   <AlertCircle className="h-2.5 w-2.5" />
                   Ending in {silenceCountdown}s — tap to continue
                 </button>
               ) : voiceThinking ? (
-                <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-50 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-amber-600 dark:border-amber-300/22 dark:bg-amber-300/8 dark:text-amber-200/80">
+                <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/40 bg-primary/5 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-primary dark:border-cyan-400/22 dark:bg-cyan-400/10 dark:text-primary/80">
                   <Sparkles className="h-2.5 w-2.5" />
                   Thinking…
                 </span>
               ) : voiceSpeaking ? (
-                <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-50 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-amber-600 dark:border-amber-300/22 dark:bg-amber-300/8 dark:text-amber-200/80">
+                <span className="inline-flex items-center gap-1 rounded-full border border-cyan-400/40 bg-primary/5 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-primary dark:border-cyan-400/22 dark:bg-cyan-400/10 dark:text-primary/80">
                   <Volume2 className="h-2.5 w-2.5" />
                   Speaking…
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/40 bg-amber-50 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-amber-600 dark:border-amber-300/22 dark:bg-amber-300/8 dark:text-amber-200/80">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/40 bg-primary/5 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-primary dark:border-cyan-400/22 dark:bg-cyan-400/10 dark:text-primary/80">
                   <Mic className="h-2.5 w-2.5" />
                   Listening
                   {micLevel > 0.05 && (
@@ -752,7 +752,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
                       {[0.3, 0.6, 1, 0.6, 0.3].map((h, i) => (
                         <motion.span
                           key={i}
-                          className="w-[2px] rounded-full bg-amber-500 dark:bg-amber-200/80"
+                          className="w-[2px] rounded-full bg-cyan-400 dark:bg-primary/80"
                           style={{ height: 3 }}
                           animate={{ scaleY: micLevel > 0.1 ? [h * micLevel, micLevel, h * micLevel] : [0.2, 0.3, 0.2] }}
                           transition={{ duration: 0.3, repeat: Infinity, delay: i * 0.04, ease: "easeInOut" }}
@@ -764,7 +764,7 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
               )}
             </>
           ) : voiceState === "connecting" ? (
-            <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-50 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-amber-600 dark:border-amber-300/22 dark:bg-amber-300/8 dark:text-amber-200/80">
+            <span className="inline-flex items-center gap-1 rounded-full border border-warning/40 bg-primary/5 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-primary dark:border-warning/22 dark:bg-warning34808 dark:text-primary/80">
               <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.8, repeat: Infinity }}>
                 <Mic className="h-2.5 w-2.5" />
               </motion.span>
@@ -773,13 +773,13 @@ export function LiveChatWidget({ onClose, onUnread }: LiveChatWidgetProps) {
           ) : voiceError && voiceState === "error" ? (
             <span
               title={voiceError}
-              className="inline-flex items-center gap-1 rounded-full border border-red-300/50 bg-red-50 px-3 py-1 text-[10px] text-red-500 dark:border-red-400/28 dark:bg-red-400/8 dark:text-red-400 max-w-[260px] truncate"
+              className="inline-flex items-center gap-1 rounded-full border border-danger/50 bg-danger/5 px-3 py-1 text-[10px] text-danger dark:border-danger/28 dark:bg-danger/8 dark:text-danger max-w-[260px] truncate"
             >
               {voiceError.length > 60 ? voiceError.slice(0, 60) + "…" : voiceError}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/90 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-slate-400 dark:border-white/8 dark:bg-white/3 dark:text-white/46">
-              <Sparkles className="h-2.5 w-2.5 text-amber-600 dark:text-amber-200/70" />
+            <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-white/90 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-muted-foreground dark:border-white/8 dark:bg-white/3 dark:text-white/46">
+              <Sparkles className="h-2.5 w-2.5 text-primary dark:text-primary/70" />
               Transcribes only English, Hinglish, Hindi
             </span>
           )}

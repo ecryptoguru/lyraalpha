@@ -23,10 +23,10 @@ export function PageErrorFallback({
         INTELLIGENCE
       </div>
       
-      <div className="max-w-2xl w-full bg-card/60 backdrop-blur-2xl border border-white/5 shadow-xl border-white/5 rounded-3xl p-10 relative z-10">
+      <div className="max-w-2xl w-full bg-card/60 backdrop-blur-2xl border border-white/5 shadow-xl rounded-3xl p-10 relative z-10">
         <div className="flex items-center justify-center mb-6">
-          <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
-            <AlertTriangle className="w-12 h-12 text-red-600 dark:text-red-400" />
+          <div className="p-3 bg-danger/10 dark:bg-danger/30 rounded-full">
+            <AlertTriangle className="w-12 h-12 text-danger dark:text-danger" />
           </div>
         </div>
 
@@ -39,8 +39,8 @@ export function PageErrorFallback({
         </p>
 
         {(isDev || showDetails) && (
-          <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-            <p className="text-sm font-mono text-red-800 dark:text-red-300 break-all">
+          <div className="mb-6 p-4 bg-danger/5 dark:bg-danger/20 border border-danger/20 dark:border-danger rounded-xl">
+            <p className="text-sm font-mono text-danger dark:text-danger break-all">
               {error.message}
             </p>
 
@@ -48,7 +48,7 @@ export function PageErrorFallback({
               <div className="mt-4">
                 <button
                   onClick={() => setShowStack(!showStack)}
-                  className="flex items-center gap-2 text-sm text-red-700 dark:text-red-400 hover:text-red-900 dark:hover:text-red-200"
+                  className="flex items-center gap-2 text-sm text-danger dark:text-danger hover:text-danger dark:hover:text-danger"
                 >
                   <ChevronDown
                     className={`w-4 h-4 transition-transform ${showStack ? "rotate-180" : ""}`}
@@ -57,7 +57,7 @@ export function PageErrorFallback({
                 </button>
 
                 {showStack && (
-                  <pre className="mt-2 p-3 bg-gray-900 text-gray-100 rounded text-xs overflow-x-auto">
+                  <pre className="mt-2 p-3 bg-muted/80 text-muted-foreground rounded text-xs overflow-x-auto">
                     {error.stack}
                   </pre>
                 )}
@@ -69,7 +69,7 @@ export function PageErrorFallback({
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={resetError}
-            className="flex items-center justify-center gap-2 px-8 py-3 bg-primary text-black rounded-2xl font-bold uppercase tracking-widest text-xs hover:scale-105 transition-transform"
+            className="flex items-center justify-center gap-2 px-8 py-3 bg-primary text-primary-foreground rounded-2xl font-bold uppercase tracking-widest text-xs hover:scale-105 transition-transform"
           >
             <RefreshCw className="w-4 h-4" />
             Reformat Terminal
@@ -77,7 +77,7 @@ export function PageErrorFallback({
 
           <a
             href="/dashboard"
-            className="flex items-center justify-center gap-2 px-8 py-3 bg-card/60 backdrop-blur-2xl border border-white/5 shadow-xl border-white/5 hover:bg-muted/50 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all"
+            className="flex items-center justify-center gap-2 px-8 py-3 bg-card/60 backdrop-blur-2xl border border-white/5 shadow-xl hover:bg-muted/50 rounded-2xl font-bold uppercase tracking-widest text-xs transition-all"
           >
             <Home className="w-4 h-4" />
             Return to Vault
@@ -106,18 +106,18 @@ export function SectionErrorFallback({
   const isDev = process.env.NODE_ENV === "development";
 
   return (
-    <div className="w-full p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+    <div className="w-full p-6 bg-danger/5 dark:bg-danger/20 border border-danger/20 dark:border-danger rounded-xl">
       <div className="flex items-start gap-4">
         <div className="shrink-0">
-          <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+          <AlertTriangle className="w-6 h-6 text-danger dark:text-danger" />
         </div>
 
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-foreground mb-2">
             Unable to load this section
           </h3>
 
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+          <p className="text-sm text-muted-foreground mb-4">
             {isDev || showDetails
               ? error.message
               : "An error occurred while loading this content."}
@@ -125,7 +125,7 @@ export function SectionErrorFallback({
 
           <button
             onClick={resetError}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-danger hover:bg-danger text-danger-foreground rounded-lg text-sm font-medium transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             Retry
@@ -142,14 +142,14 @@ export function SectionErrorFallback({
  */
 export function InlineErrorFallback({ resetError }: ErrorFallbackProps) {
   return (
-    <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-sm">
-      <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0" />
-      <span className="text-gray-700 dark:text-gray-300 flex-1">
+    <div className="flex items-center gap-2 p-3 bg-danger/5 dark:bg-danger/20 border border-danger/20 dark:border-danger rounded text-sm">
+      <AlertTriangle className="w-4 h-4 text-danger dark:text-danger shrink-0" />
+      <span className="text-muted-foreground flex-1">
         Error loading component
       </span>
       <button
         onClick={resetError}
-        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 font-medium"
+        className="text-danger dark:text-danger hover:text-danger dark:hover:text-danger font-medium"
       >
         Retry
       </button>

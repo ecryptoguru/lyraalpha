@@ -16,7 +16,7 @@ const severityConfig = {
   },
   MEDIUM: {
     icon: AlertTriangle,
-    color: "bg-amber-500/10 text-amber-500 border-amber-500/20",
+    color: "bg-warning/10 text-warning border-warning/20",
     label: "Medium Impact",
   },
   LOW: {
@@ -50,7 +50,7 @@ export function EventImpactBadge({
         <span
           className={cn(
             "text-xs font-semibold",
-            isPositive ? "text-green-700" : "text-red-700",
+            isPositive ? "text-success" : "text-danger",
           )}
         >
           {isPositive ? "+" : ""}

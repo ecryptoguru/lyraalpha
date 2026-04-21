@@ -14,7 +14,7 @@ import {
 describe("Utils Library", () => {
   describe("cn", () => {
     test("merges tailwind classes correctly", () => {
-      expect(cn("px-2 py-1", "bg-red-500", "px-4")).toBe("py-1 bg-red-500 px-4");
+      expect(cn("px-2 py-1", "bg-danger", "px-4")).toBe("py-1 bg-danger px-4");
       expect(cn("px-2", null, undefined, "py-1")).toBe("px-2 py-1");
     });
   });

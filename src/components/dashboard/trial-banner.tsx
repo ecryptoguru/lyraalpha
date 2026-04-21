@@ -46,7 +46,7 @@ export function TrialBanner({ trialEndsAt, plan }: TrialBannerProps) {
       className={cn(
         "flex items-center justify-between gap-3 px-4 py-2.5 text-sm font-medium border-b",
         isUrgent
-          ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
+          ? "bg-warning/10 border-warning/30 text-warning"
           : "bg-primary/5 border-primary/20 text-primary"
       )}
     >

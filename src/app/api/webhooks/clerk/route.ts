@@ -12,13 +12,17 @@ import { invalidatePlanCache } from "@/lib/middleware/plan-gate";
 import { isPrivilegedEmail } from "@/lib/auth";
 import { z } from "zod";
 import { apiError } from "@/lib/api-response";
+import { redisSetNX, delCache } from "@/lib/redis";
 
 const logger = createLogger({ service: "clerk-webhook" });
+
+// Idempotency: track processed svix-id values for 24h to prevent Clerk retries
+// from causing duplicate user creation/updates. 24h covers webhook retry windows.
+const WEBHOOK_IDEMPOTENCY_TTL = 24 * 60 * 60;
 
 const ClerkUserEventSchema = z.object({
   data: z.object({
     id: z.string(),
-    // Optional: user.deleted events omit email fields
     email_addresses: z.array(
       z.object({
         email_address: z.string(),
@@ -34,6 +38,14 @@ const ClerkUserEventSchema = z.object({
 });
 
 type ClerkUserEvent = z.infer<typeof ClerkUserEventSchema>;
+
+// Idempotency check — acquire lock for this svix-id. If already locked, this is a duplicate.
+async function isClerkWebhookDuplicate(svixId: string): Promise<boolean> {
+  const lockKey = `clerk:webhook:${svixId}`;
+  const acquired = await redisSetNX(lockKey, WEBHOOK_IDEMPOTENCY_TTL);
+  // If acquire failed (key exists), this is a duplicate
+  return !acquired;
+}
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -72,6 +84,12 @@ export async function POST(req: Request) {
   }
 
   const { type, data } = event;
+
+  // Idempotency: check if we've already processed this svix-id
+  if (await isClerkWebhookDuplicate(svixId)) {
+    logger.info({ svixId, type }, "Duplicate Clerk webhook — skipping (already processed)");
+    return NextResponse.json({ success: true, duplicate: true });
+  }
 
   try {
     switch (type) {
@@ -137,7 +155,15 @@ export async function POST(req: Request) {
             }
           });
         } catch (creditErr) {
-          logger.error({ err: sanitizeError(creditErr), userId: data.id }, "Failed to create user or grant sign-up bonus credits");
+          // P2002 = unique constraint violation — concurrent webhook already created the user.
+          // This is safe to swallow since the upsert is idempotent and the bonus credit grant
+          // is guarded by totalCreditsEarned === 0.
+          if (typeof creditErr === "object" && creditErr !== null && (creditErr as { code?: string }).code === "P2002") {
+            logger.warn({ userId: data.id, email }, "User created webhook hit unique constraint; continuing without failing event");
+          } else {
+            logger.error({ err: sanitizeError(creditErr), userId: data.id }, "Failed to create user or grant sign-up bonus credits — re-throwing so Clerk retries");
+            throw creditErr;
+          }
         }
 
         const welcome = buildWelcomeEmail({ firstName });
@@ -148,16 +174,28 @@ export async function POST(req: Request) {
           attributes: { SOURCE: "clerk_webhook" },
         });
 
-        const welcomeSent = await sendBrevoEmail({
-          to: [{ email, name: [firstName, lastName].filter(Boolean).join(" ") || undefined }],
-          subject: welcome.subject,
-          htmlContent: welcome.html,
-          textContent: welcome.text,
-          tags: ["onboarding", "welcome"],
+        // Check if welcome email was already sent (prevents double-send on webhook retry)
+        const existingPref = await prisma.userPreference.findUnique({
+          where: { userId: data.id },
+          select: { welcomeEmailSentAt: true },
         });
+        const alreadySentWelcome = Boolean(existingPref?.welcomeEmailSentAt);
 
-        if (!welcomeSent) {
-          logger.warn({ userId: data.id, email }, "Welcome email failed to send — user will not receive onboarding email");
+        let welcomeSent = false;
+        if (!alreadySentWelcome) {
+          welcomeSent = await sendBrevoEmail({
+            to: [{ email, name: [firstName, lastName].filter(Boolean).join(" ") || undefined }],
+            subject: welcome.subject,
+            htmlContent: welcome.html,
+            textContent: welcome.text,
+            tags: ["onboarding", "welcome"],
+          });
+
+          if (!welcomeSent) {
+            logger.warn({ userId: data.id, email }, "Welcome email failed to send — user will not receive onboarding email");
+          }
+        } else {
+          logger.info({ userId: data.id }, "Welcome email already sent — skipping on retry");
         }
 
         await prisma.userPreference.upsert({
@@ -262,10 +300,12 @@ export async function POST(req: Request) {
 
       case "user.deleted": {
         // GDPR: anonymize PII and purge all user-generated content
-        await prisma.$transaction([
+        // Use a proper transaction so any failure rolls back the entire deletion.
+        // This prevents partial deletion state where some tables are cleaned and others aren't.
+        await prisma.$transaction(async (tx) => {
           // Anonymize the User row — keep the row so FK cascades don't break,
           // but scrub all PII fields
-          prisma.user.updateMany({
+          await tx.user.updateMany({
             where: { id: data.id },
             data: {
               email: `deleted-${data.id}@removed.invalid`,
@@ -278,40 +318,45 @@ export async function POST(req: Request) {
               totalCreditsEarned: 0,
               totalCreditsSpent: 0,
             },
-          }),
-          // AI & content
-          prisma.aIRequestLog.deleteMany({ where: { userId: data.id } }),
-          prisma.lyraFeedback.deleteMany({ where: { userId: data.id } }),
-          prisma.userMemoryNote.deleteMany({ where: { userId: data.id } }),
-          // Portfolio & watchlist
-          prisma.watchlistItem.deleteMany({ where: { userId: data.id } }),
-          prisma.portfolio.deleteMany({ where: { userId: data.id } }),
-          // Preferences & notifications
-          prisma.userPreference.deleteMany({ where: { userId: data.id } }),
-          prisma.notification.deleteMany({ where: { userId: data.id } }),
-          // Billing & credits
-          prisma.creditTransaction.deleteMany({ where: { userId: data.id } }),
-          prisma.creditLot.deleteMany({ where: { userId: data.id } }),
-          prisma.subscription.deleteMany({ where: { userId: data.id } }),
-          prisma.billingAuditLog.deleteMany({ where: { userId: data.id } }),
-          prisma.paymentEvent.deleteMany({ where: { userId: data.id } }),
-          // Gamification & XP
-          prisma.pointTransaction.deleteMany({ where: { userId: data.id } }),
-          prisma.userProgress.deleteMany({ where: { userId: data.id } }),
-          prisma.userBadge.deleteMany({ where: { userId: data.id } }),
-          prisma.xPTransaction.deleteMany({ where: { userId: data.id } }),
-          prisma.xPRedemption.deleteMany({ where: { userId: data.id } }),
-          prisma.learningCompletion.deleteMany({ where: { userId: data.id } }),
-          // Sessions & activity
-          prisma.userSession.deleteMany({ where: { userId: data.id } }),
-          prisma.userActivityEvent.deleteMany({ where: { userId: data.id } }),
-          // Referrals (user can be referrer or referee)
-          prisma.referral.deleteMany({ where: { referrerId: data.id } }),
-          prisma.referral.deleteMany({ where: { refereeId: data.id } }),
-          // Support
-          prisma.supportMessage.deleteMany({ where: { senderId: data.id } }),
-          prisma.supportConversation.deleteMany({ where: { userId: data.id } }),
-        ]);
+          });
+          // Parallelize independent deletes — none depend on each other.
+          // This reduces ~20 sequential DB round-trips to ~3-4 concurrent batches,
+          // well within the 30s transaction timeout.
+          await Promise.all([
+            // AI & content
+            tx.aIRequestLog.deleteMany({ where: { userId: data.id } }),
+            tx.lyraFeedback.deleteMany({ where: { userId: data.id } }),
+            tx.userMemoryNote.deleteMany({ where: { userId: data.id } }),
+            // Portfolio & watchlist
+            tx.watchlistItem.deleteMany({ where: { userId: data.id } }),
+            tx.portfolio.deleteMany({ where: { userId: data.id } }),
+            // Preferences & notifications
+            tx.userPreference.deleteMany({ where: { userId: data.id } }),
+            tx.notification.deleteMany({ where: { userId: data.id } }),
+            // Billing & credits
+            tx.creditTransaction.deleteMany({ where: { userId: data.id } }),
+            tx.creditLot.deleteMany({ where: { userId: data.id } }),
+            tx.subscription.deleteMany({ where: { userId: data.id } }),
+            tx.billingAuditLog.deleteMany({ where: { userId: data.id } }),
+            tx.paymentEvent.deleteMany({ where: { userId: data.id } }),
+            // Gamification & XP
+            tx.pointTransaction.deleteMany({ where: { userId: data.id } }),
+            tx.userProgress.deleteMany({ where: { userId: data.id } }),
+            tx.userBadge.deleteMany({ where: { userId: data.id } }),
+            tx.xPTransaction.deleteMany({ where: { userId: data.id } }),
+            tx.xPRedemption.deleteMany({ where: { userId: data.id } }),
+            tx.learningCompletion.deleteMany({ where: { userId: data.id } }),
+            // Sessions & activity
+            tx.userSession.deleteMany({ where: { userId: data.id } }),
+            tx.userActivityEvent.deleteMany({ where: { userId: data.id } }),
+            // Referrals (user can be referrer or referee)
+            tx.referral.deleteMany({ where: { referrerId: data.id } }),
+            tx.referral.deleteMany({ where: { refereeId: data.id } }),
+            // Support
+            tx.supportMessage.deleteMany({ where: { senderId: data.id } }),
+            tx.supportConversation.deleteMany({ where: { userId: data.id } }),
+          ]);
+        }, { timeout: 30_000, maxWait: 5_000 });
         // Invalidate plan cache so stale ELITE isn't served
         void invalidatePlanCache(data.id);
         logger.info({ userId: data.id }, "User deleted — PII anonymized and content purged");
@@ -322,7 +367,10 @@ export async function POST(req: Request) {
         logger.debug({ type }, "Unhandled webhook event type");
     }
   } catch (error) {
-    logger.error({ err: sanitizeError(error), type, userId: data.id }, "Webhook handler failed");
+    // Release idempotency lock on failure so Clerk retries are not silently dropped.
+    // Without this, a transient DB/Prisma error permanently blocks the svix-id.
+    try { await delCache(`clerk:webhook:${svixId}`); } catch { /* non-fatal */ }
+    logger.error({ err: sanitizeError(error), type, userId: data.id }, "Webhook handler failed — lock released for retry");
     return apiError("Handler failed", 500);
   }
 

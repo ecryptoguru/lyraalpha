@@ -5,7 +5,7 @@
 export const week1Posts = [
   {
     slug: "what-is-market-regime-analysis-and-why-it-matters-for-crypto-investors",
-    title: "What Is Market Regime Analysis and Why It Matters for Crypto Investors",
+    title: "What Is Market Regime Analysis for Crypto Investors",
     description:
       "Market regime analysis sounds like a macroeconomics term. For crypto investors, it is one of the most practical tools you can have in 2026. Here's why it changes how you read every signal.",
     date: "2026-04-21",
@@ -13,9 +13,17 @@ export const week1Posts = [
     author: "LyraAlpha Research",
     category: "Market Intelligence",
     featured: false,
-    metaDescription: "Learn what market regime analysis is, why it changes everything for crypto investors, and how LyraAlpha AI reads regime signals before you decide.",
+    metaDescription: "Learn what market regime analysis is, why it changes everything for crypto investors, and how LyraAlpha AI reads regime signals before you decide to act.",
     keywords: ["market regime analysis", "crypto investors", "macro analysis", "crypto market intelligence", "regime risk"],
-    heroImageUrl: "/blog/market-regime-hero.jpg",
+    internalLinks: [
+      { text: "LyraAlpha platform", url: "/lyra" },
+      { text: "market intelligence tools", url: "/tools" },
+      { text: "daily briefing", url: "/dashboard" },
+      { text: "portfolio fragility analysis", url: "/blog/how-to-spot-portfolio-fragility-before-it-becomes-a-drawdown" },
+      { text: "portfolio health score", url: "/blog/why-diversification-alone-does-not-eliminate-crypto-portfolio-risk" },
+      { text: "regime alignment decisions", url: "/blog/how-to-use-regime-alignment-to-make-better-portfolio-decisions" },
+    ],
+    heroImageUrl: "/blog/what-is-market-regime-analysis-and-why-it-matters-for-crypto-investors-hero.webp",
     content: `
 # What Is Market Regime Analysis and Why It Matters for Crypto Investors
 
@@ -134,7 +142,15 @@ LyraAlpha computes a multi-horizon regime score for every supported crypto asset
     featured: false,
     metaDescription: "Portfolio fragility in crypto often hides in plain sight until a drawdown hits. Here's how to identify it before it costs you — and what to do about it.",
     keywords: ["portfolio fragility", "crypto portfolio", "drawdown", "concentration risk", "crypto risk management"],
-    heroImageUrl: "/blog/portfolio-fragility-hero.jpg",
+    internalLinks: [
+      { text: "LyraAlpha portfolio tools", url: "/lyra" },
+      { text: "portfolio health score", url: "/lyra" },
+      { text: "risk management", url: "/lyra" },
+      { text: "market regime analysis", url: "/blog/what-is-market-regime-analysis-and-why-it-matters-for-crypto-investors" },
+      { text: "concentration risk", url: "/blog/what-portfolio-concentration-risk-looks-like-in-practice" },
+      { text: "drawdown risk management", url: "/blog/the-hidden-cost-of-ignoring-drawdown-risk" },
+    ],
+    heroImageUrl: "/blog/how-to-spot-portfolio-fragility-before-it-becomes-a-drawdown-hero.webp",
     content: `
 # How to Spot Portfolio Fragility Before It Becomes a Drawdown
 
@@ -259,7 +275,15 @@ LyraAlpha's Portfolio Intelligence workspace computes fragility scores across yo
     featured: false,
     metaDescription: "Most crypto investors build watchlists that show price but miss regime context. Here's the smarter way to build a signal-driven crypto watchlist in 2026.",
     keywords: ["crypto watchlist", "crypto research", "asset discovery", "crypto screener", "crypto market intelligence"],
-    heroImageUrl: "/blog/crypto-watchlist-hero.jpg",
+    internalLinks: [
+      { text: "LyraAlpha watchlist", url: "/lyra" },
+      { text: "crypto discovery", url: "/lyra" },
+      { text: "watchlist alerts", url: "/lyra" },
+      { text: "watchlist drift detection", url: "/blog/what-watchlist-drift-means-and-why-it-matters" },
+      { text: "portfolio monitoring", url: "/blog/how-to-use-regime-alignment-to-make-better-portfolio-decisions" },
+      { text: "crypto fundamentals guide", url: "/blog/how-lyraalpha-daily-briefing-helps-you-see-the-crypto-market-faster" },
+    ],
+    heroImageUrl: "/blog/the-best-way-to-build-a-smarter-crypto-watchlist-in-2026-hero.webp",
     content: `
 # The Best Way to Build a Smarter Crypto Watchlist in 2026
 
@@ -376,7 +400,7 @@ LyraAlpha's regime-aware score framework computes Trend, Momentum, Volatility, L
 
   {
     slug: "lyraalpha-vs-traditional-market-research-tools-whats-different",
-    title: "LyraAlpha vs Traditional Market Research Tools: What's Different?",
+    title: "LyraAlpha vs Traditional Market Research Tools",
     description:
       "Crypto investors have never had more data. Most still make worse decisions. Here's the structural difference between data-rich tools and genuinely smarter analysis — and why that distinction matters.",
     date: "2026-04-24",
@@ -384,9 +408,17 @@ LyraAlpha's regime-aware score framework computes Trend, Momentum, Volatility, L
     author: "LyraAlpha Research",
     category: "AI & Technology",
     featured: false,
-    metaDescription: "Crypto investors have never had more data. Most still make worse decisions. Here's the difference between data-rich tools and genuinely smarter analysis — and why it matters.",
+    metaDescription: "Crypto investors have never had more data. Most still make worse decisions. Here's the structural difference between data-rich tools and genuinely smarter analysis that actually helps.",
     keywords: ["crypto research tools", "market intelligence", "AI crypto analysis", "LyraAlpha vs", "crypto tools comparison"],
-    heroImageUrl: "/blog/lyraalpha-vs-traditional-hero.jpg",
+    internalLinks: [
+      { text: "LyraAlpha vs alternatives", url: "/lyra" },
+      { text: "market intelligence", url: "/lyra" },
+      { text: "AI research tools", url: "/lyra" },
+      { text: "AI crypto research", url: "/blog/what-ai-can-actually-do-for-crypto-market-research" },
+      { text: "AI tools buyers guide", url: "/blog/best-ai-tools-for-crypto-research-a-2026-buyers-guide" },
+      { text: "AI copilot capabilities", url: "/blog/ai-market-copilots-vs-human-research-where-each-wins" },
+    ],
+    heroImageUrl: "/blog/lyraalpha-vs-traditional-market-research-tools-whats-different-hero.webp",
     content: `
 # LyraAlpha vs Traditional Market Research Tools: What's Different?
 

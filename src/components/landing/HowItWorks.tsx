@@ -33,14 +33,14 @@ export function HowItWorks() {
       className="relative bg-[#040816] px-4 py-24 sm:px-6 sm:py-28"
       suppressHydrationWarning
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_40%_at_50%_60%,rgba(20,184,166,0.05),transparent_65%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_40%_at_50%_60%,rgba(129,140,248,0.05),transparent_65%)]" />
       <div className="pointer-events-none absolute inset-0 obsidian-grid opacity-30" />
 
       <div className="container relative z-10 mx-auto max-w-7xl px-0">
         <LandingReveal>
           <div className="grid gap-12 xl:grid-cols-[0.8fr_1.2fr] xl:items-start">
             <div className="max-w-xl xl:sticky xl:top-28">
-              <p className="text-[10px] font-bold uppercase tracking-[0.38em] text-amber-200/65">
+              <p className="text-[10px] font-bold uppercase tracking-[0.38em] text-primary/65">
                 Three distinct layers
               </p>
               <h2 className="mt-4 text-3xl font-black tracking-[-0.05em] text-white sm:text-5xl">
@@ -66,14 +66,14 @@ export function HowItWorks() {
                       >
                         <div className="flex flex-wrap items-center justify-between gap-4">
                           <div className="flex items-center gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-[1.35rem] border border-amber-300/18 bg-amber-300/9 text-amber-200">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-[1.35rem] border border-warning/18 bg-warning3396 text-primary/60">
                               <Icon className="h-5 w-5" />
                             </div>
                             <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-white/36">
                               Step 0{index + 1}
                             </p>
                           </div>
-                          <div className="landing-pulse-line h-px w-14 bg-amber-300/45" />
+                          <div className="landing-pulse-line h-px w-14 bg-warning3815" />
                         </div>
                         <h3 className="mt-8 max-w-xl text-2xl font-bold tracking-tight text-white sm:text-[1.85rem]">
                           {step.title}

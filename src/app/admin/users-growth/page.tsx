@@ -29,10 +29,10 @@ import {
 } from "recharts";
 
 const PLAN_BADGE: Record<string, { bg: string; text: string }> = {
-  STARTER: { bg: "bg-slate-500/10", text: "text-slate-400" },
-  PRO: { bg: "bg-amber-500/10", text: "text-amber-400" },
-  ELITE: { bg: "bg-amber-500/10", text: "text-amber-400" },
-  ENTERPRISE: { bg: "bg-amber-500/10", text: "text-amber-400" },
+  STARTER: { bg: "bg-muted/10", text: "text-muted-foreground" },
+  PRO: { bg: "bg-warning/10", text: "text-warning" },
+  ELITE: { bg: "bg-warning/10", text: "text-warning" },
+  ENTERPRISE: { bg: "bg-warning/10", text: "text-warning" },
 };
 
 const PLAN_ORDER = ["ENTERPRISE", "ELITE", "PRO", "STARTER"];
@@ -197,14 +197,14 @@ function UsersTab({ page, setPage }: { page: number; setPage: (p: number) => voi
                     <td className="py-2.5 px-3 text-right font-mono text-foreground">{user.aiRequestCount.toLocaleString()}</td>
                     <td className="py-2.5 px-3 text-right font-mono text-muted-foreground">{user.totalTokens.toLocaleString()}</td>
                     <td className="py-2.5 px-3 text-right font-mono">
-                      <span className={user.credits !== undefined && user.credits < 10 ? "text-red-400" : "text-foreground"}>
+                      <span className={user.credits !== undefined && user.credits < 10 ? "text-danger" : "text-foreground"}>
                         {user.credits?.toLocaleString() ?? "—"}
                       </span>
                     </td>
                     <td className="py-2.5 px-3 text-right text-muted-foreground">{user.watchlistCount}</td>
                     <td className="py-2.5 px-3 text-center">
                       {user.onboardingCompleted ? (
-                        <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
+                        <span className="inline-block w-2 h-2 rounded-full bg-success" />
                       ) : (
                         <span className="inline-block w-2 h-2 rounded-full bg-muted-foreground/30" />
                       )}

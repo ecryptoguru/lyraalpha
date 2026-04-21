@@ -25,7 +25,7 @@ export const LEARNING_PATHS: LearningPathDefinition[] = [
       "what-is-trust-score",
     ],
     isEliteOnly: false,
-    color: "from-amber-500/20 to-orange-500/5 border-amber-500/30",
+    color: "from-warning/20 to-warning/5 border-warning/30",
   },
   {
     id: "lyra-mastery",
@@ -55,7 +55,7 @@ export const LEARNING_PATHS: LearningPathDefinition[] = [
       "sector-rotation-basics",
     ],
     isEliteOnly: false,
-    color: "from-rose-500/20 to-orange-500/5 border-rose-500/30",
+    color: "from-danger/20 to-warning/5 border-danger/30",
   },
   {
     id: "platform-workflows",
@@ -70,7 +70,7 @@ export const LEARNING_PATHS: LearningPathDefinition[] = [
       "rewards-and-xp-explained",
     ],
     isEliteOnly: false,
-    color: "from-emerald-500/20 to-teal-500/5 border-emerald-500/30",
+    color: "from-success/20 to-info/5 border-success/30",
   },
   {
     id: "crypto-deep-dive",
@@ -84,7 +84,7 @@ export const LEARNING_PATHS: LearningPathDefinition[] = [
       "crypto-trust-model",
     ],
     isEliteOnly: false,
-    color: "from-amber-500/20 to-cyan-500/5 border-amber-500/30",
+    color: "from-warning/20 to-info/5 border-warning/30",
   },
   {
     id: "elite-portfolio-lab",
@@ -100,7 +100,7 @@ export const LEARNING_PATHS: LearningPathDefinition[] = [
       "monte-carlo-explained",
     ],
     isEliteOnly: true,
-    color: "from-amber-500/20 to-pink-500/5 border-amber-500/30",
+    color: "from-warning/20 text-danger/5 border-warning/30",
   },
 ];
 

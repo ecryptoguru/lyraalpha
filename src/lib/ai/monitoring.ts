@@ -124,3 +124,82 @@ export function logMemoryEvent(params: MemoryEvent) {
     "Memory distillation telemetry",
   );
 }
+
+/**
+ * Streaming latency metrics for per-chunk performance monitoring.
+ * Tracks time-to-first-token (TTFT) and tokens-per-second (TPS) for quality detection.
+ */
+export interface StreamingLatencyEvent {
+  model: string;
+  tier: string;
+  plan: string;
+  /** Time from request start to first token received (milliseconds) */
+  ttftMs: number;
+  /** Tokens per second after first token */
+  tps: number;
+  /** Total tokens streamed */
+  totalTokens: number;
+  /** Total stream duration (milliseconds) */
+  durationMs: number;
+  /** Whether this was a fallback model */
+  wasFallback?: boolean;
+}
+
+/**
+ * Log streaming latency metrics for model performance monitoring.
+ * Use this to detect model degradation, cold starts, or routing issues.
+ */
+export function logStreamingLatency(params: StreamingLatencyEvent) {
+  logger.info(
+    {
+      event: "ai_streaming_latency",
+      model: params.model,
+      tier: params.tier,
+      plan: params.plan,
+      ttftMs: params.ttftMs,
+      tps: Number(params.tps.toFixed(2)),
+      totalTokens: params.totalTokens,
+      durationMs: params.durationMs,
+      wasFallback: params.wasFallback ?? false,
+    },
+    `Streaming latency: ${params.ttftMs}ms TTFT, ${params.tps.toFixed(2)} TPS`,
+  );
+}
+
+/**
+ * RAG retrieval quality metrics including similarity scores.
+ */
+export interface RagQualityEvent {
+  tier: string;
+  /** Number of chunks retrieved */
+  chunkCount: number;
+  /** Average similarity score of retrieved chunks (0-1) */
+  avgSimilarity: number;
+  /** p50 similarity score */
+  p50Similarity: number;
+  /** p95 similarity score */
+  p95Similarity: number;
+  /** Whether retrieval timed out */
+  timedOut: boolean;
+  /** Time spent on retrieval (milliseconds) */
+  retrievalMs: number;
+}
+
+/**
+ * Log RAG retrieval quality metrics for monitoring relevance and performance.
+ */
+export function logRagQuality(params: RagQualityEvent) {
+  logger.info(
+    {
+      event: "ai_rag_quality",
+      tier: params.tier,
+      chunkCount: params.chunkCount,
+      avgSimilarity: Number(params.avgSimilarity.toFixed(4)),
+      p50Similarity: Number(params.p50Similarity.toFixed(4)),
+      p95Similarity: Number(params.p95Similarity.toFixed(4)),
+      timedOut: params.timedOut,
+      retrievalMs: params.retrievalMs,
+    },
+    `RAG quality: ${params.chunkCount} chunks, avg_sim=${params.avgSimilarity.toFixed(4)}`,
+  );
+}

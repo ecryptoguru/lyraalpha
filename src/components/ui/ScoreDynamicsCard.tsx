@@ -35,11 +35,11 @@ export function ScoreDynamicsCard({
   const getTrendColor = () => {
     switch (dynamics.trend) {
       case "IMPROVING":
-        return "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
+        return "text-success bg-success/10 border-success/20";
       case "DETERIORATING":
-        return "text-rose-400 bg-rose-500/10 border-rose-500/20";
+        return "text-danger bg-danger/10 border-danger/20";
       default:
-        return "text-zinc-400 bg-zinc-500/5 border-zinc-500/10";
+        return "text-muted-foreground bg-muted/5 border-border/10";
     }
   };
 
@@ -94,7 +94,7 @@ export function ScoreDynamicsCard({
               <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Velocity</span>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className={cn("text-2xl font-bold tracking-tighter", dynamics.momentum >= 0 ? "text-emerald-400" : "text-rose-400")}>
+              <span className={cn("text-2xl font-bold tracking-tighter", dynamics.momentum >= 0 ? "text-success" : "text-danger")}>
                 {dynamics.momentum > 0 ? "+" : ""}{dynamics.momentum.toFixed(2)}
               </span>
               <span className="text-[10px] font-bold text-muted-foreground opacity-40">σ</span>
@@ -108,11 +108,11 @@ export function ScoreDynamicsCard({
               <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Inertia</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className={cn("text-lg font-bold tracking-tight", dynamics.acceleration >= 0 ? "text-emerald-400" : "text-rose-400")}>
+              <span className={cn("text-lg font-bold tracking-tight", dynamics.acceleration >= 0 ? "text-success" : "text-danger")}>
                 {dynamics.acceleration > 0 ? "+" : ""}{dynamics.acceleration.toFixed(2)}
               </span>
               {dynamics.acceleration !== 0 && (
-                dynamics.acceleration > 0 ? <ArrowUp className="h-3 w-3 text-emerald-500" /> : <ArrowDown className="h-3 w-3 text-rose-500" />
+                dynamics.acceleration > 0 ? <ArrowUp className="h-3 w-3 text-success" /> : <ArrowDown className="h-3 w-3 text-danger" />
               )}
             </div>
           </div>
@@ -125,7 +125,7 @@ export function ScoreDynamicsCard({
           {/* Volatility Row */}
           <div className="flex items-center justify-between py-2 px-3 rounded-2xl bg-background/20 border border-border/20">
             <div className="flex items-center gap-2">
-              <Activity className="h-3.5 w-3.5 text-zinc-500" />
+              <Activity className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Dispersion / Vol</span>
             </div>
             <span className="text-xs font-bold text-foreground">
@@ -136,11 +136,11 @@ export function ScoreDynamicsCard({
           {/* Global Rank Row */}
           <div className="flex items-center justify-between py-2 px-3 rounded-2xl bg-background/20 border border-border/20">
             <div className="flex items-center gap-2">
-              <Globe className="h-3.5 w-3.5 text-zinc-500" />
+              <Globe className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Global Percentile</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-1 w-12 rounded-full bg-muted/60 dark:bg-zinc-800 overflow-hidden">
+              <div className="h-1 w-12 rounded-full bg-muted/60 dark:bg-foreground/10 overflow-hidden">
                 <div 
                   className="h-full bg-primary transition-all duration-1000 shadow-[0_0_10px_rgba(139,92,246,0.5)]"
                   style={{ width: `${dynamics.percentileRank}%` }}
@@ -155,17 +155,17 @@ export function ScoreDynamicsCard({
           {/* Sector Rank Row */}
           <div className="flex items-center justify-between py-2 px-3 rounded-2xl bg-background/20 border border-border/20">
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-3.5 w-3.5 text-zinc-500" />
+              <BarChart3 className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Sector Strength</span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-1 w-12 rounded-full bg-muted/60 dark:bg-zinc-800 overflow-hidden">
+              <div className="h-1 w-12 rounded-full bg-muted/60 dark:bg-foreground/10 overflow-hidden">
                 <div 
-                  className="h-full bg-cyan-500 transition-all duration-1000 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
+                  className="h-full bg-info transition-all duration-1000 shadow-[0_0_10px_rgba(6,182,212,0.5)]"
                   style={{ width: `${dynamics.sectorPercentile}%` }}
                 />
               </div>
-              <span className="text-xs font-bold text-cyan-500 min-w-[3ch]">
+              <span className="text-xs font-bold text-info min-w-[3ch]">
                 {dynamics.sectorPercentile.toFixed(0)}%
               </span>
             </div>

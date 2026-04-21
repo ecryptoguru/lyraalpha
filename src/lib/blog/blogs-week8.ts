@@ -1,8 +1,6 @@
 // Week 8 Blog Posts — 4 high-quality SEO articles, 1200-1500 words each
 // Category: AI & Technology, Market Intelligence, Portfolio Intelligence
 
-import type { BlogPost } from "./posts";
-
 const _week8Posts = [
   {
     slug: "what-makes-a-good-market-intelligence-platform-in-2026",
@@ -15,7 +13,14 @@ const _week8Posts = [
     category: "AI & Technology",
     featured: false,
     metaDescription:
-      "The best market intelligence platforms in 2026 share five characteristics that separate them from dashboards that just display data. Here is the evaluation framework for choosing a platform that actually improves your decisions.",
+      "The best market intelligence platforms in 2026 share five characteristics that separate them from dashboards that just display data. Here is the evaluation framework for choosing one.",
+    internalLinks: [
+      { text: "market intelligence platform", url: "/lyra" },
+      { text: "crypto intelligence", url: "/lyra" },
+      { text: "platform review", url: "/lyra" },
+      { text: "lyraalpha vs traditional market research tools whats different", url: "/blog/lyraalpha-vs-traditional-market-research-tools-whats-different" },
+      { text: "how to track regime shifts without reading 50 tabs a day", url: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day" },
+    ],
     keywords: [
       "market intelligence platform 2026",
       "crypto intelligence platform evaluation",
@@ -24,7 +29,7 @@ const _week8Posts = [
       "AI market intelligence",
       "fintech platform comparison",
     ],
-    heroImageUrl: "/blog/market-intelligence-platform-hero.jpg",
+    heroImageUrl: "/blog/what-makes-a-good-market-intelligence-platform-in-2026-hero.webp",
     content: `
 # What Makes a Good Market Intelligence Platform in 2026
 
@@ -144,7 +149,14 @@ The biggest limitation is AI quality: many platforms claim AI-powered intelligen
     category: "Market Intelligence",
     featured: false,
     metaDescription:
-      "Finance teams have more data than ever but make worse decisions than teams with less data and more clarity. The problem is context, not data volume. Here is why and how the best teams are solving it.",
+      "Finance teams have more data than ever but make worse decisions than teams with less data and more clarity. The problem is context, not data volume. Here is why.",
+    internalLinks: [
+      { text: "financial context", url: "/lyra" },
+      { text: "data vs intelligence", url: "/lyra" },
+      { text: "market analysis", url: "/lyra" },
+      { text: "how to use regime alignment to make better portfolio decisions", url: "/blog/how-to-use-regime-alignment-to-make-better-portfolio-decisions" },
+      { text: "lyraalpha vs traditional market research tools whats different", url: "/blog/lyraalpha-vs-traditional-market-research-tools-whats-different" },
+    ],
     keywords: [
       "finance team data overload",
       "context vs data",
@@ -153,7 +165,7 @@ The biggest limitation is AI quality: many platforms claim AI-powered intelligen
       "financial data overwhelm",
       "context-driven finance",
     ],
-    heroImageUrl: "/blog/finance-context-hero.jpg",
+    heroImageUrl: "/blog/why-finance-teams-need-better-context-not-more-data-hero.webp",
     content: `
 # Why Finance Teams Need Better Context, Not More Data
 
@@ -259,7 +271,14 @@ AI is particularly good at the synthesis step — connecting multiple data point
     category: "AI & Technology",
     featured: false,
     metaDescription:
-      "Most fintech SaaS tools provide noise, not signals. Here is the evaluation framework for determining whether a tool's signals are actually decision-relevant — and what questions to ask before committing.",
+      "Most fintech SaaS tools provide noise, not signals. Here is the evaluation framework for determining whether a tool's signals are actually decision-relevant.",
+    internalLinks: [
+      { text: "fintech tools", url: "/lyra" },
+      { text: "signal quality", url: "/lyra" },
+      { text: "SaaS evaluation", url: "/lyra" },
+      { text: "best AI tools for crypto research a 2026 buyers guide", url: "/blog/best-ai-tools-for-crypto-research-a-2026-buyers-guide" },
+      { text: "why crypto AI tools hallucinate and how to fix it", url: "/blog/why-crypto-ai-tools-hallucinate-and-how-to-fix-it" },
+    ],
     keywords: [
       "fintech SaaS evaluation",
       "signal quality fintech",
@@ -268,7 +287,7 @@ AI is particularly good at the synthesis step — connecting multiple data point
       "SaaS tool evaluation investing",
       "market signal quality",
     ],
-    heroImageUrl: "/blog/signal-quality-evaluation-hero.jpg",
+    heroImageUrl: "/blog/how-to-evaluate-fintech-saas-tools-for-signal-quality-hero.webp",
     content: `
 # How to Evaluate Fintech SaaS Tools for Signal Quality
 
@@ -378,7 +397,14 @@ Three essential questions: (1) show me the last 20 signals this tool produced an
     category: "Market Intelligence",
     featured: false,
     metaDescription:
-      "Most crypto intelligence tools are built for active traders. Long-term investors have different needs. Here is how LyraAlpha's regime monitoring, portfolio intelligence, and signal framework serve the buy-and-hold investor.",
+      "Most crypto intelligence tools are built for active traders. Long-term investors have different needs. Here is how LyraAlpha's regime monitoring serves buy-and-hold investors.",
+    internalLinks: [
+      { text: "long-term investing", url: "/lyra" },
+      { text: "portfolio intelligence", url: "/lyra" },
+      { text: "investment tools", url: "/lyra" },
+      { text: "how to track regime shifts without reading 50 tabs a day", url: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day" },
+      { text: "what AI can actually do for crypto market research", url: "/blog/what-ai-can-actually-do-for-crypto-market-research" },
+    ],
     keywords: [
       "LyraAlpha long-term investing",
       "crypto buy and hold tools",
@@ -387,7 +413,7 @@ Three essential questions: (1) show me the last 20 signals this tool produced an
       "LyraAlpha for investors",
       "crypto intelligence long-term",
     ],
-    heroImageUrl: "/blog/long-term-investing-hero.jpg",
+    heroImageUrl: "/blog/lyraalpha-for-long-term-investors-what-it-helps-you-see-hero.webp",
     content: `
 # LyraAlpha for Long-Term Investors: What It Helps You See
 
@@ -478,6 +504,4 @@ Yes. LyraAlpha is designed to augment, not replace, a long-term investment strat
   },
 ];
 
-export const week8Posts: Omit<BlogPost, "readingTime">[] = _week8Posts.map((p) => ({
-  ...p,
-}));
+export const week8Posts = _week8Posts;

@@ -142,8 +142,8 @@ export function DiscoverySearch() {
                           className="flex items-center justify-between p-4 rounded-2xl hover:bg-muted/20 transition-colors group/item min-h-[56px] cursor-pointer"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 shrink-0">
-                              <Zap className="h-4 w-4 text-amber-500" />
+                            <div className="p-2.5 rounded-2xl bg-warning/10 border border-warning/20 shrink-0">
+                              <Zap className="h-4 w-4 text-warning" />
                             </div>
                             <div className="font-data">
                               <p className="font-bold text-foreground/90 tracking-tight">

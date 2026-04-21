@@ -1,6 +1,6 @@
 import { getEmbeddingClient, getAzureEmbeddingDeployment } from "./config";
 import { prisma } from "@/lib/prisma";
-import { getCache, setCache } from "@/lib/redis";
+import { getCache, setCache, redisSetNXStrict, redis } from "@/lib/redis";
 import fs from "fs";
 import path from "path";
 import { randomUUID, createHash } from "crypto";
@@ -10,7 +10,7 @@ import { chunkMarkdownFile } from "./chunker";
 import { createLogger } from "@/lib/logger";
 import { INJECTION_PATTERNS } from "./guardrails";
 import { scrubPIIString } from "./pii-scrub";
-import { recordRagResult } from "./alerting";
+import { recordRagResult, recordRagGrounding } from "./alerting";
 import { logFireAndForgetError } from "@/lib/fire-and-forget";
 
 const logger = createLogger({ service: "rag" });
@@ -200,6 +200,20 @@ class PrismaVectorStore {
   private async _doInitialize() {
     if (this.isInitialized) return;
 
+    // Boot-level Redis lock: prevent multiple server instances from hydrating
+    // the knowledge base simultaneously (e.g., during a rolling deploy).
+    // Uses fail-closed lock (redisSetNXStrict) — if Redis is down, skip hydration
+    // rather than risking N instances all embedding the same files in parallel.
+    const KB_LOCK_KEY = "rag:kb:hydration_lock";
+    const KB_LOCK_TTL = 300; // 5 min — generous for full hydration
+    const lockAcquired = await redisSetNXStrict(KB_LOCK_KEY, KB_LOCK_TTL);
+    if (!lockAcquired) {
+      logger.info("KB hydration lock held by another instance — skipping hydration");
+      this.isInitialized = true;
+      return;
+    }
+
+    try {
     const knowledgeDir = path.join(process.cwd(), "src/lib/ai/knowledge");
     if (!fs.existsSync(knowledgeDir)) {
       logger.warn("Knowledge directory not found");
@@ -248,6 +262,12 @@ class PrismaVectorStore {
     this.warmAllAssetTypeCaches().catch((e) =>
       logger.warn({ err: e }, "Background asset type cache warming failed"),
     );
+    } finally {
+      // Release boot-level lock so other instances can hydrate if needed
+      redis.del(KB_LOCK_KEY).catch((e) =>
+        logger.debug({ err: e }, "Failed to release KB hydration lock (non-critical)"),
+      );
+    }
   }
 
   private async hydrateMissingFiles(files: string[], knowledgeDir: string): Promise<void> {
@@ -781,8 +801,9 @@ class PrismaVectorStore {
         return true;
       });
 
-      // RAG-1: Low-grounding confidence log — warn when avg similarity is low for MODERATE/COMPLEX.
-      // Flags potential confabulation risk when retrieved chunks are marginally above threshold.
+      // RAG-1: Low-grounding confidence log + sliding-window alert.
+      // Per-request log warns when avg similarity is low; recordRagGrounding tracks the
+      // rate over a 15-min window and fires a webhook when sustained low grounding is detected.
       if (tier && tier !== "SIMPLE" && cleanResults.length > 0) {
         const avgSimilarity = cleanResults.reduce((sum, r) => sum + r.similarity, 0) / cleanResults.length;
         if (avgSimilarity < 0.45) {
@@ -791,6 +812,7 @@ class PrismaVectorStore {
             "RAG low-grounding warning — avg similarity below 0.45, responses may be weakly grounded",
           );
         }
+        recordRagGrounding(avgSimilarity, tier).catch((e) => logFireAndForgetError(e, "rag-grounding-alert"));
       }
 
       return cleanResults;
@@ -1008,15 +1030,25 @@ export async function retrieveContext(query: string): Promise<string> {
   return content;
 }
 
+export interface KnowledgeRetrievalResult {
+  content: string;
+  sources: Source[];
+  /** Similarity scores of retrieved chunks for quality metrics (0-1) */
+  similarities: number[];
+  /** Number of chunks retrieved */
+  chunkCount: number;
+}
+
 export async function retrieveInstitutionalKnowledge(
   query: string,
   topK: number = RAG_CONFIG.knowledgeTopK,
   assetType?: string,
   useFastPath: boolean = false,
   tier?: string,
-): Promise<{ content: string; sources: Source[] }> {
+): Promise<KnowledgeRetrievalResult> {
   let content = "";
   const sources: Source[] = [];
+  const similarities: number[] = [];
 
   try {
     // 1. Chunked Knowledge Retrieval (topK relevant chunks, threshold-filtered)
@@ -1044,14 +1076,18 @@ export async function retrieveInstitutionalKnowledge(
               type: "knowledge_base" as const,
             });
           }
+          // Capture similarity for quality metrics
+          if (d.similarity != null) {
+            similarities.push(d.similarity);
+          }
         }
 
-        const similarities = localDocs.map((d) => d.similarity || 0);
+        const docSimilarities = localDocs.map((d) => d.similarity || 0);
         logger.info(
           {
             chunks: localDocs.length,
-            avgSimilarity: +(similarities.reduce((s, v) => s + v, 0) / similarities.length).toFixed(3),
-            minSimilarity: +Math.min(...similarities).toFixed(3),
+            avgSimilarity: +(docSimilarities.reduce((s, v) => s + v, 0) / docSimilarities.length).toFixed(3),
+            minSimilarity: +Math.min(...docSimilarities).toFixed(3),
           },
           "Knowledge retrieval completed",
         );
@@ -1063,10 +1099,10 @@ export async function retrieveInstitutionalKnowledge(
       recordRagResult(false).catch((e) => logFireAndForgetError(e, "rag-result-failed"));
     }
 
-    return { content, sources };
+    return { content, sources, similarities, chunkCount: similarities.length };
   } catch (e) {
     logger.error({ err: e }, "Retrieval logic failed");
-    return { content, sources };
+    return { content, sources, similarities, chunkCount: 0 };
   }
 }
 

@@ -106,10 +106,10 @@ const US_DEMO_EQUITY_CURVE = [
 ];
 
 const US_DEMO_AI_INSIGHTS = [
-  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "Concentration alert", body: "BTC-USD now represents 34% of portfolio weight. A 20% drawdown in this single position would reduce total portfolio value by ~6.8%." },
-  { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Sector correlation risk", body: "BTC-USD, ETH-USD, SOL-USD, and ADA-USD are in the same narrative cluster. A L1 sector rotation could trigger correlated drawdowns across 56% of the portfolio." },
-  { icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", title: "Hedge quality is strong", body: "BNB-USD and XRP-USD provide meaningful negative correlation during risk-off regimes. This reduces fragility by an estimated 8 points vs an all-L1 portfolio." },
-  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Consider trimming BTC-USD below 25% and rotating proceeds into DeFi or Payments sectors to reduce sector correlation without sacrificing expected return." },
+  { icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10 border-warning/20", title: "Concentration alert", body: "BTC-USD now represents 34% of portfolio weight. A 20% drawdown in this single position would reduce total portfolio value by ~6.8%." },
+  { icon: GitBranch, color: "text-danger", bg: "bg-danger/10 border-danger/20", title: "Sector correlation risk", body: "BTC-USD, ETH-USD, SOL-USD, and ADA-USD are in the same narrative cluster. A L1 sector rotation could trigger correlated drawdowns across 56% of the portfolio." },
+  { icon: Zap, color: "text-success", bg: "bg-success/10 border-success/20", title: "Hedge quality is strong", body: "BNB-USD and XRP-USD provide meaningful negative correlation during risk-off regimes. This reduces fragility by an estimated 8 points vs an all-L1 portfolio." },
+  { icon: Target, color: "text-info", bg: "bg-info/10 border-info/20", title: "Next action", body: "Consider trimming BTC-USD below 25% and rotating proceeds into DeFi or Payments sectors to reduce sector correlation without sacrificing expected return." },
 ];
 
 const US_DEMO_RISK_METRICS = [
@@ -202,10 +202,10 @@ const IN_DEMO_EQUITY_CURVE = [
 ];
 
 const IN_DEMO_AI_INSIGHTS = [
-  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "L1 sector clustering", body: "BTC-USD, SOL-USD, and ADA-USD represent 51.5% combined weight in the same sector. A L1 rotation could compress all three simultaneously." },
-  { icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", title: "Payments hedge working well", body: "XRP-USD provides meaningful negative correlation during risk-off events, reducing portfolio fragility by ~9 points." },
-  { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Exchange exposure is diversified", body: "BNB-USD spans exchange and DeFi narratives, reducing single-protocol failure risk while maintaining crypto core alignment." },
-  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Consider adding a DeFi or Layer 2 position (e.g. UNI-USD or ARB-USD) to reduce L1 concentration and improve sector diversity score above 75." },
+  { icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10 border-warning/20", title: "L1 sector clustering", body: "BTC-USD, SOL-USD, and ADA-USD represent 51.5% combined weight in the same sector. A L1 rotation could compress all three simultaneously." },
+  { icon: Zap, color: "text-success", bg: "bg-success/10 border-success/20", title: "Payments hedge working well", body: "XRP-USD provides meaningful negative correlation during risk-off events, reducing portfolio fragility by ~9 points." },
+  { icon: GitBranch, color: "text-danger", bg: "bg-danger/10 border-danger/20", title: "Exchange exposure is diversified", body: "BNB-USD spans exchange and DeFi narratives, reducing single-protocol failure risk while maintaining crypto core alignment." },
+  { icon: Target, color: "text-info", bg: "bg-info/10 border-info/20", title: "Next action", body: "Consider adding a DeFi or Layer 2 position (e.g. UNI-USD or ARB-USD) to reduce L1 concentration and improve sector diversity score above 75." },
 ];
 
 const IN_DEMO_RISK_METRICS = [
@@ -391,10 +391,10 @@ function DemoPanelContent({ onClose, region }: { onClose: () => void; region: st
           <motion.div variants={fadeUp} initial="hidden" animate="show" transition={{ duration: 0.35 }}
             className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: "Portfolio Value", value: fmt(totalValue), sub: `+${fmt(totalPnl)} unrealised`, icon: TrendingUp, color: "text-emerald-400", accent: "border-emerald-500/20 bg-emerald-500/5" },
-              { label: "Total Return", value: `+${pnlPct.toFixed(1)}%`, sub: `${fmt(totalCost)} invested`, icon: ArrowUpRight, color: "text-emerald-400", accent: "border-emerald-500/20 bg-emerald-500/5" },
-              { label: "Day Change", value: `+${fmt(dayChange)}`, sub: "+0.71% today", icon: Activity, color: "text-blue-400", accent: "border-blue-500/20 bg-blue-500/5" },
-              { label: "Health Score", value: `${cfg.healthScore}/100`, sub: `${cfg.healthTone} · 6 dimensions`, icon: ShieldCheck, color: "text-amber-400", accent: "border-amber-500/20 bg-amber-500/5" },
+              { label: "Portfolio Value", value: fmt(totalValue), sub: `+${fmt(totalPnl)} unrealised`, icon: TrendingUp, color: "text-success", accent: "border-success/20 bg-success/5" },
+              { label: "Total Return", value: `+${pnlPct.toFixed(1)}%`, sub: `${fmt(totalCost)} invested`, icon: ArrowUpRight, color: "text-success", accent: "border-success/20 bg-success/5" },
+              { label: "Day Change", value: `+${fmt(dayChange)}`, sub: "+0.71% today", icon: Activity, color: "text-info", accent: "border-info/20 bg-info/5" },
+              { label: "Health Score", value: `${cfg.healthScore}/100`, sub: `${cfg.healthTone} · 6 dimensions`, icon: ShieldCheck, color: "text-warning", accent: "border-warning/20 bg-warning/5" },
             ].map(({ label, value, sub, icon: Icon, color, accent }) => (
               <div key={label} className={cn("rounded-2xl border p-3.5 backdrop-blur-xl", accent)}>
                 <div className="flex items-center justify-between mb-1.5">
@@ -434,7 +434,7 @@ function DemoPanelContent({ onClose, region }: { onClose: () => void; region: st
                       </div>
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-amber-400">{cfg.healthTone}</p>
+                      <p className="text-sm font-bold text-warning">{cfg.healthTone}</p>
                       <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">{cfg.healthDesc}</p>
                     </div>
                   </div>
@@ -533,8 +533,8 @@ function DemoPanelContent({ onClose, region }: { onClose: () => void; region: st
                     </ResponsiveContainer>
                   </div>
                   <div className="flex items-center gap-4 mt-2">
-                    <div className="flex items-center gap-1.5"><div className="h-2 w-2 rounded-full bg-blue-500" /><span className="text-[10px] text-muted-foreground">Portfolio</span></div>
-                    <div className="flex items-center gap-1.5"><div className="h-2 w-2 rounded-full bg-slate-400" /><span className="text-[10px] text-muted-foreground">{cfg.benchmarkLabel}</span></div>
+                    <div className="flex items-center gap-1.5"><div className="h-2 w-2 rounded-full bg-info" /><span className="text-[10px] text-muted-foreground">Portfolio</span></div>
+                    <div className="flex items-center gap-1.5"><div className="h-2 w-2 rounded-full bg-muted" /><span className="text-[10px] text-muted-foreground">{cfg.benchmarkLabel}</span></div>
                   </div>
                 </div>
               </div>
@@ -544,10 +544,10 @@ function DemoPanelContent({ onClose, region }: { onClose: () => void; region: st
                 <SectionHeader icon={Cpu} title="Monte Carlo Simulation" sub={`${cfg.monteCarlo.pathCount.toLocaleString()} paths · 1-year horizon`} />
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                   {[
-                    { label: "Expected Return", value: `+${cfg.monteCarlo.expectedReturn}%`, color: "text-emerald-400" },
-                    { label: "VaR (95%)", value: `${cfg.monteCarlo.var95}%`, color: "text-amber-400" },
-                    { label: "CVaR (95%)", value: `${cfg.monteCarlo.cvar95}%`, color: "text-rose-400" },
-                    { label: "Sharpe Ratio", value: String(cfg.monteCarlo.sharpeRatio), color: "text-blue-400" },
+                    { label: "Expected Return", value: `+${cfg.monteCarlo.expectedReturn}%`, color: "text-success" },
+                    { label: "VaR (95%)", value: `${cfg.monteCarlo.var95}%`, color: "text-warning" },
+                    { label: "CVaR (95%)", value: `${cfg.monteCarlo.cvar95}%`, color: "text-danger" },
+                    { label: "Sharpe Ratio", value: String(cfg.monteCarlo.sharpeRatio), color: "text-info" },
                   ].map(({ label, value, color }) => (
                     <div key={label} className="rounded-2xl bg-muted/10 border border-white/5 p-3">
                       <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold mb-1">{label}</p>
@@ -613,12 +613,12 @@ function DemoPanelContent({ onClose, region }: { onClose: () => void; region: st
                             <td className="py-2.5 text-right font-medium text-foreground">{fmtSmall(h.price)}</td>
                             <td className="py-2.5 text-right font-bold text-foreground">{fmt(val)}</td>
                             <td className="py-2.5 text-right">
-                              <span className={cn("flex items-center justify-end gap-0.5 font-bold", isUp ? "text-emerald-400" : "text-rose-400")}>
+                              <span className={cn("flex items-center justify-end gap-0.5 font-bold", isUp ? "text-success" : "text-danger")}>
                                 {isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                                 {pnlPctH >= 0 ? "+" : ""}{pnlPctH.toFixed(1)}%
                               </span>
                             </td>
-                            <td className="py-2.5 text-right"><span className={cn("text-[10px] font-bold", dayUp ? "text-emerald-400" : "text-rose-400")}>{dayUp ? "+" : ""}{h.changePercent.toFixed(2)}%</span></td>
+                            <td className="py-2.5 text-right"><span className={cn("text-[10px] font-bold", dayUp ? "text-success" : "text-danger")}>{dayUp ? "+" : ""}{h.changePercent.toFixed(2)}%</span></td>
                             <td className="py-2.5 text-right">
                               <div className="flex items-center justify-end gap-1.5">
                                 <div className="h-1.5 w-10 bg-muted/20 rounded-full overflow-hidden"><div className="h-full bg-primary/60 rounded-full" style={{ width: `${h.weight}%` }} /></div>
@@ -633,21 +633,21 @@ function DemoPanelContent({ onClose, region }: { onClose: () => void; region: st
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-5">
-                  <div className="flex items-center gap-2 mb-3"><TrendingUp className="h-4 w-4 text-emerald-400" /><h3 className="text-sm font-bold text-foreground">Top Gainers</h3></div>
+                <div className="rounded-3xl border border-success/20 bg-success/5 p-5">
+                  <div className="flex items-center gap-2 mb-3"><TrendingUp className="h-4 w-4 text-success" /><h3 className="text-sm font-bold text-foreground">Top Gainers</h3></div>
                   <div className="space-y-2">
                     {[...cfg.holdings].sort((a, b) => ((b.price - b.avgPrice) / b.avgPrice) - ((a.price - a.avgPrice) / a.avgPrice)).slice(0, 4).map((h) => {
                       const p = ((h.price - h.avgPrice) / h.avgPrice) * 100;
-                      return <div key={h.symbol} className="flex items-center justify-between"><span className="text-xs font-bold text-foreground">{h.symbol}</span><span className="text-xs font-bold text-emerald-400">+{p.toFixed(1)}%</span></div>;
+                      return <div key={h.symbol} className="flex items-center justify-between"><span className="text-xs font-bold text-foreground">{h.symbol}</span><span className="text-xs font-bold text-success">+{p.toFixed(1)}%</span></div>;
                     })}
                   </div>
                 </div>
-                <div className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-5">
-                  <div className="flex items-center gap-2 mb-3"><TrendingDown className="h-4 w-4 text-rose-400" /><h3 className="text-sm font-bold text-foreground">Underperformers</h3></div>
+                <div className="rounded-3xl border border-danger/20 bg-danger/5 p-5">
+                  <div className="flex items-center gap-2 mb-3"><TrendingDown className="h-4 w-4 text-danger" /><h3 className="text-sm font-bold text-foreground">Underperformers</h3></div>
                   <div className="space-y-2">
                     {[...cfg.holdings].sort((a, b) => ((a.price - a.avgPrice) / a.avgPrice) - ((b.price - b.avgPrice) / b.avgPrice)).slice(0, 4).map((h) => {
                       const p = ((h.price - h.avgPrice) / h.avgPrice) * 100;
-                      return <div key={h.symbol} className="flex items-center justify-between"><span className="text-xs font-bold text-foreground">{h.symbol}</span><span className={cn("text-xs font-bold", p >= 0 ? "text-emerald-400" : "text-rose-400")}>{p >= 0 ? "+" : ""}{p.toFixed(1)}%</span></div>;
+                      return <div key={h.symbol} className="flex items-center justify-between"><span className="text-xs font-bold text-foreground">{h.symbol}</span><span className={cn("text-xs font-bold", p >= 0 ? "text-success" : "text-danger")}>{p >= 0 ? "+" : ""}{p.toFixed(1)}%</span></div>;
                     })}
                   </div>
                 </div>
@@ -667,8 +667,8 @@ function DemoPanelContent({ onClose, region }: { onClose: () => void; region: st
                   </div>
                 ))}
               </div>
-              <div className="rounded-3xl border border-amber-500/20 bg-amber-500/5 p-5">
-                <div className="flex items-center gap-2 mb-4"><Activity className="h-4 w-4 text-amber-400" /><h3 className="text-sm font-bold text-foreground">Fragility Analysis</h3><span className="ml-auto text-xs font-bold text-amber-400">Score: {cfg.fragilityScore}/100</span></div>
+              <div className="rounded-3xl border border-warning/20 bg-warning/5 p-5">
+                <div className="flex items-center gap-2 mb-4"><Activity className="h-4 w-4 text-warning" /><h3 className="text-sm font-bold text-foreground">Fragility Analysis</h3><span className="ml-auto text-xs font-bold text-warning">Score: {cfg.fragilityScore}/100</span></div>
                 <p className="text-[11px] text-muted-foreground mb-3">{cfg.fragilityDesc}</p>
                 <div className="space-y-2.5">
                   {cfg.fragility.map(({ label, pct, color }) => (
@@ -693,13 +693,13 @@ function DemoPanelContent({ onClose, region }: { onClose: () => void; region: st
                   </ResponsiveContainer>
                 </div>
               </div>
-              <div className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-5">
-                <div className="flex items-center gap-2 mb-3"><Info className="h-4 w-4 text-rose-400" /><h3 className="text-sm font-bold text-foreground">Correlation Warning</h3></div>
+              <div className="rounded-3xl border border-danger/20 bg-danger/5 p-5">
+                <div className="flex items-center gap-2 mb-3"><Info className="h-4 w-4 text-danger" /><h3 className="text-sm font-bold text-foreground">Correlation Warning</h3></div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {cfg.correlations.map(([a, b, corr]) => (
-                    <div key={`${a}-${b}`} className="rounded-xl bg-rose-500/8 border border-rose-500/15 p-3 text-center">
+                    <div key={`${a}-${b}`} className="rounded-xl bg-danger/8 border border-danger/15 p-3 text-center">
                       <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest mb-1">{a} ↔ {b}</p>
-                      <p className="text-sm font-bold text-rose-400">ρ = {corr}</p>
+                      <p className="text-sm font-bold text-danger">ρ = {corr}</p>
                     </div>
                   ))}
                 </div>

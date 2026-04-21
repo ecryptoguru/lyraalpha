@@ -10,6 +10,9 @@ import {
   Info,
   SquareArrowOutUpRight,
 } from "lucide-react";
+import { createClientLogger } from "@/lib/logger/client";
+
+const logger = createClientLogger("crypto-card");
 
 /** Map rating labels to human-readable display */
 function formatRatingLabel(rating: string): string {
@@ -29,9 +32,9 @@ function formatRatingLabel(rating: string): string {
 function getRatingColor(rating: string): string {
   const bullish = ["STRONG_BUY", "BUY", "Bullish"];
   const bearish = ["STRONG_SELL", "SELL", "Bearish"];
-  if (bullish.includes(rating)) return "text-emerald-400";
-  if (bearish.includes(rating)) return "text-rose-400";
-  return "text-amber-400";
+  if (bullish.includes(rating)) return "text-success";
+  if (bearish.includes(rating)) return "text-danger";
+  return "text-cyan-400";
 }
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -90,7 +93,7 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
         }
       }
     } catch (error) {
-      console.error("[Lyra Research] Failed to fetch explanation:", error);
+      logger.error("Failed to fetch explanation", { error });
       // Silently fail in UI - user will see fallback message
       setExplanation("Unable to retrieve institutional research at this time.");
     } finally {
@@ -99,9 +102,9 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 70) return "text-emerald-400";
-    if (score >= 40) return "text-amber-400";
-    return "text-rose-400";
+    if (score >= 70) return "text-success";
+    if (score >= 40) return "text-cyan-400";
+    return "text-danger";
   };
 
   return (
@@ -133,8 +136,8 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
                   className={cn(
                     "text-[9px] font-bold flex items-center gap-0.5",
                     data.oneYearChange.isPositive
-                      ? "text-emerald-400"
-                      : "text-rose-400"
+                      ? "text-success"
+                      : "text-danger"
                   )}
                 >
                   {data.oneYearChange.isPositive ? (
@@ -154,28 +157,28 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 px-2 sm:px-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 hover:bg-amber-500/20 hover:text-amber-400 transition-all flex items-center justify-center gap-1.5 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest shadow-[0_0_10px_rgba(245,158,11,0.05)] shrink-0"
+                  className="h-8 px-2 sm:px-3 rounded-2xl bg-accent-cta/10 border border-accent-cta/20 text-accent-cta hover:bg-accent-cta/20 hover:text-accent-cta transition-all flex items-center justify-center gap-1.5 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest shadow-(--shadow-glow-cta) shrink-0"
                   onClick={fetchExplanation}
                 >
                   <span>ASK</span>
                   <Sparkles className="h-3 w-3" />
                 </Button>
               </SheetTrigger>
-              <SheetContent className="w-full sm:max-w-md border-border dark:border-white/5 bg-background/98 dark:bg-neutral-950/98 backdrop-blur-xl text-foreground p-0! overflow-hidden flex flex-col">
+              <SheetContent className="w-full sm:max-w-md border-border dark:border-white/5 bg-background/98 dark:bg-foreground/98 backdrop-blur-xl text-foreground p-0! overflow-hidden flex flex-col">
                 <Tabs defaultValue="insight" className="flex-1 flex flex-col min-h-0">
                   <div className="p-4 sm:p-8 pb-4 space-y-6 shrink-0">
                     <SheetHeader className="p-0 space-y-4 font-data">
                       <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-2xl bg-linear-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
-                            <Sparkles className="h-5 w-5 text-amber-400" />
+                          <div className="p-2 rounded-2xl bg-linear-to-br from-accent-cta/20 to-warning/10 border border-accent-cta/30 shadow-(--shadow-glow-cta)">
+                            <Sparkles className="h-5 w-5 text-accent-cta" />
                           </div>
-                          <SheetTitle className="text-2xl font-bold tracking-tight uppercase bg-clip-text text-transparent bg-linear-to-r from-amber-200 to-amber-500">
+                          <SheetTitle className="text-2xl font-bold tracking-tight uppercase bg-clip-text text-transparent bg-linear-to-r from-accent-cta/70 to-accent-cta">
                             Lyra Research
                           </SheetTitle>
                         </div>
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.1)]">
-                          <span className="text-[9px] font-black text-amber-400 tracking-widest uppercase">1 Credit</span>
+                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent-cta/10 border border-accent-cta/30 shadow-(--shadow-glow-cta)">
+                          <span className="text-[9px] font-black text-accent-cta tracking-widest uppercase">1 Credit</span>
                         </div>
                       </div>
                       <SheetDescription className="text-muted-foreground font-medium leading-relaxed font-sans">
@@ -189,13 +192,13 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
                     <TabsList className="w-full grid grid-cols-2 bg-muted/20 p-1 rounded-2xl">
                       <TabsTrigger 
                         value="insight" 
-                        className="rounded-2xl text-xs font-bold uppercase tracking-wider data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-500"
+                        className="rounded-2xl text-xs font-bold uppercase tracking-wider data-[state=active]:bg-accent-cta/10 data-[state=active]:text-accent-cta"
                       >
                         Insight
                       </TabsTrigger>
                       <TabsTrigger 
                         value="chat" 
-                        className="rounded-2xl text-xs font-bold uppercase tracking-wider data-[state=active]:bg-amber-500/10 data-[state=active]:text-amber-500"
+                        className="rounded-2xl text-xs font-bold uppercase tracking-wider data-[state=active]:bg-accent-cta/10 data-[state=active]:text-accent-cta"
                       >
                         Ask Lyra
                       </TabsTrigger>
@@ -214,16 +217,16 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
                         {loading ? (
                           <div className="flex flex-col items-center justify-center py-16 gap-6">
                             <div className="relative flex items-center justify-center">
-                              <div className="absolute inset-0 rounded-full border-t-2 border-r-2 border-amber-400/30 animate-[spin_3s_linear_infinite]" />
-                              <div className="absolute inset-2 rounded-full border-b-2 border-l-2 border-amber-500/60 animate-[spin_2s_linear_infinite_reverse]" />
-                              <Loader2 className="h-8 w-8 animate-spin text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                              <div className="absolute inset-0 rounded-full border-t-2 border-r-2 border-accent-cta/30 animate-[spin_3s_linear_infinite]" />
+                              <div className="absolute inset-2 rounded-full border-b-2 border-l-2 border-accent-cta/60 animate-[spin_2s_linear_infinite_reverse]" />
+                              <Loader2 className="h-8 w-8 animate-spin text-accent-cta drop-shadow-[0_0_10px_color-mix(in_srgb,var(--accent-cta)_50%,transparent)]" />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] font-data text-amber-400/80 animate-pulse">
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] font-data text-accent-cta/80 animate-pulse">
                               Synthesizing Evidence...
                             </span>
                           </div>
                         ) : explanation ? (
-                          <div className="prose dark:prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-p:opacity-90 prose-headings:text-amber-400 prose-headings:font-bold prose-headings:tracking-tight prose-li:marker:text-amber-500 prose-strong:text-amber-200/90">
+                          <div className="prose dark:prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-p:opacity-90 prose-headings:text-accent-cta prose-headings:font-bold prose-headings:tracking-tight prose-li:marker:text-accent-cta prose-strong:text-accent-cta/90">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>
                               {explanation}
                             </ReactMarkdown>
@@ -269,16 +272,16 @@ export function CryptoCard({ data, inclusionReason }: CryptoCardProps) {
                   </TabsContent>
 
                   <TabsContent value="chat" className="flex-1 flex flex-col items-center justify-center gap-4 p-8 mt-0">
-                    <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
-                      <Sparkles className="h-8 w-8 text-amber-500 opacity-90" />
+                    <div className="p-4 rounded-2xl bg-accent-cta/10 border border-accent-cta/20 shadow-(--shadow-glow-cta)">
+                      <Sparkles className="h-8 w-8 text-accent-cta opacity-90" />
                     </div>
                     <div className="text-center space-y-1.5">
-                      <p className="text-sm font-black tracking-tight text-amber-100">Ask Lyra about {data.symbol}</p>
+                      <p className="text-sm font-black tracking-tight text-accent-cta-foreground">Ask Lyra about {data.symbol}</p>
                       <p className="text-xs text-muted-foreground/80">Get an institutional-grade analysis in a full panel</p>
                     </div>
                     <button
                       onClick={() => setLyraOpen(true)}
-                      className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-amber-500 text-black font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/20 hover:bg-amber-400 active:scale-95 transition-all duration-200"
+                      className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-accent-cta text-accent-cta-foreground font-black text-xs uppercase tracking-wider shadow-lg shadow-accent-cta/20 hover:bg-accent-cta/90 active:scale-95 transition-all duration-200"
                     >
                       <Sparkles className="h-4 w-4" />
                       Open Lyra
@@ -433,10 +436,10 @@ function SignalItem({
   color: string;
 }) {
   const getProgressBarColor = (colorClass: string) => {
-    if (colorClass.includes("emerald")) return "bg-emerald-400";
-    if (colorClass.includes("amber")) return "bg-amber-400";
-    if (colorClass.includes("rose")) return "bg-rose-400";
-    return "bg-slate-400";
+    if (colorClass.includes("success")) return "bg-success";
+    if (colorClass.includes("warning") || colorClass.includes("accent-cta")) return "bg-warning";
+    if (colorClass.includes("danger")) return "bg-danger";
+    return "bg-muted-foreground";
   };
 
   return (

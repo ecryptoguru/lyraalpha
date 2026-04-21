@@ -111,10 +111,10 @@ export function BrokerImportDialog({ portfolioName, onClose, onImport }: BrokerI
             <Textarea
               value={payload}
               onChange={(e) => setPayload(e.target.value)}
-              className={cn("min-h-[280px] font-mono text-[11px] leading-relaxed", error && "border-red-400/50")}
+              className={cn("min-h-[280px] font-mono text-[11px] leading-relaxed", error && "border-danger/50")}
               spellCheck={false}
             />
-            {error && <p className="text-[11px] text-red-400">{error}</p>}
+            {error && <p className="text-[11px] text-danger">{error}</p>}
           </div>
 
           <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-muted/20 px-4 py-3">

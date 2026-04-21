@@ -25,14 +25,14 @@ export default function SignUpPage() {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center">
         <div className="relative grid w-full gap-6 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="overflow-hidden rounded-4xl border border-white/10 bg-card/70 p-6 shadow-[0_24px_80px_-32px_rgba(2,6,23,0.72)] backdrop-blur-xl sm:p-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/25 bg-emerald-500/8 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-400">
+            <div className="inline-flex items-center gap-2 rounded-full border border-success/25 bg-success/8 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-success">
               Create your account
             </div>
             <h1 className="mt-5 text-4xl font-bold tracking-tighter text-foreground sm:text-5xl">
               Join LyraAlpha.
             </h1>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-              Create a Clerk account to access market intelligence, portfolio tools, and Lyra.
+              Create your LyraAlpha account to access market intelligence, portfolio tools, and Lyra.
             </p>
 
             <FeatureCards items={featureItems} />

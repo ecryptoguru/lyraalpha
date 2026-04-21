@@ -74,6 +74,8 @@ vi.mock("@/lib/ai/rag", () => ({
   retrieveInstitutionalKnowledge: vi.fn().mockResolvedValue({
     content: "[KB: engines > Trend]\nThe trend engine measures...",
     sources: [{ title: "engines", url: "/docs/engines", type: "knowledge_base" }],
+    similarities: [0.85, 0.82, 0.78],
+    chunkCount: 3,
   }),
   retrieveUserMemory: vi.fn().mockResolvedValue(""),
   storeConversationLog: vi.fn().mockResolvedValue(undefined),
@@ -98,6 +100,7 @@ vi.mock("../compress", () => ({
   compressKnowledgeContext: vi.fn().mockImplementation(async (raw: string) => raw),
 }));
 
+
 vi.mock("../orchestration", () => ({
   resolveGptDeployment: vi.fn().mockReturnValue("gpt-5.4-chat"),
 }));
@@ -121,11 +124,14 @@ vi.mock("../monitoring", () => ({
   logModelCacheEvent: vi.fn(),
   logRetrievalMetric: vi.fn(),
   logContextBudgetMetric: vi.fn(),
+  logStreamingLatency: vi.fn(),
+  logRagQuality: vi.fn(),
 }));
 
 vi.mock("@/lib/services/credit.service", () => ({
   consumeCredits: vi.fn().mockResolvedValue({ success: true, remaining: 49 }),
   getCreditCost: vi.fn().mockReturnValue(1),
+  addCredits: vi.fn().mockResolvedValue({ success: true }),
 }));
 
 vi.mock("@/lib/redis", () => ({
@@ -145,6 +151,7 @@ vi.mock("@/lib/redis", () => ({
   getCache: vi.fn().mockResolvedValue(null),
   setCache: vi.fn().mockResolvedValue(undefined),
   redisSetNX: vi.fn(async () => true),
+  redisSetNXStrict: vi.fn(async () => true),
 }));
 
 vi.mock("@/lib/logger", () => ({
@@ -179,7 +186,7 @@ import { streamText } from "ai";
 import * as monitoring from "../monitoring";
 import { getCache, setCache } from "@/lib/redis";
 import { modelCacheKey } from "../lyra-cache";
-import { consumeCredits } from "@/lib/services/credit.service";
+import { consumeCredits, addCredits } from "@/lib/services/credit.service";
 import { searchWeb } from "@/lib/ai/search";
 
 describe("Service Optimizations", () => {
@@ -677,7 +684,7 @@ describe("Service Optimizations", () => {
         callOrder.push("rag-start");
         await new Promise((r) => setTimeout(r, 10));
         callOrder.push("rag-end");
-        return { content: "test", sources: [] };
+        return { content: "test", sources: [], similarities: [], chunkCount: 0 };
       });
 
       await generateLyraStream(
@@ -787,7 +794,7 @@ describe("Service Optimizations", () => {
     it("uses resolved asset type for auto-detected asset RAG, skips early global cache, and returns fallback asset sources", async () => {
       vi.clearAllMocks();
       vi.mocked(getCache).mockResolvedValue(null);
-      vi.mocked(retrieveInstitutionalKnowledge).mockResolvedValueOnce({ content: "", sources: [] });
+      vi.mocked(retrieveInstitutionalKnowledge).mockResolvedValueOnce({ content: "", sources: [], similarities: [], chunkCount: 0 });
       vi.mocked(prisma.asset.findUnique).mockResolvedValueOnce({
         price: null,
         changePercent: null,
@@ -907,6 +914,36 @@ describe("Service Optimizations", () => {
       const streamCall = vi.mocked(streamText).mock.calls[0][0] as any;
       expect(streamCall.system).toContain("Lyra");
       expect(streamCall.system).toContain("### CORE RULES");
+    });
+  });
+
+  describe("Credit refund on LLM failure", () => {
+    it("does NOT refund when guardrail rejects before credit consumption", async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_norefund", plan: "STARTER" } as any);
+      // Single-message > 5000 chars triggers SafetyViolationError before credits are consumed
+      const longMessage = "A".repeat(5001);
+      await expect(
+        generateLyraStream(
+          [{ role: "user", content: longMessage }],
+          { scores: {}, assetType: "CRYPTO" },
+          "user_norefund",
+        ),
+      ).rejects.toThrow();
+
+      // No refund should happen since credits were never consumed
+      expect(addCredits).not.toHaveBeenCalled();
+    });
+
+    it("does NOT call addCredits on successful stream", async () => {
+      vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ id: "user_ok", plan: "ELITE" } as any);
+      await generateLyraStream(
+        [{ role: "user", content: "How is BTC-USD?" }],
+        { scores: {}, assetType: "CRYPTO" },
+        "user_ok",
+      );
+
+      // addCredits should only be called for refunds — not on success
+      expect(addCredits).not.toHaveBeenCalled();
     });
   });
 });

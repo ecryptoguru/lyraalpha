@@ -6,7 +6,8 @@ import {
   getMyraResponseCache,
   setMyraResponseCache,
 } from "@/lib/support/ai-responder";
-import { checkPromptInjection } from "@/lib/ai/guardrails";
+import { validateInput } from "@/lib/ai/guardrails";
+import { scrubPII } from "@/lib/ai/pii-scrub";
 import { rateLimitChat, rateLimitPublicChatBurst } from "@/lib/rate-limit";
 import { logFireAndForgetError } from "@/lib/fire-and-forget";
 import { getClientIp } from "@/lib/rate-limit/utils";
@@ -54,17 +55,25 @@ export async function POST(req: NextRequest) {
       return apiError("Message too long", 400);
     }
 
-    const injectionCheck = checkPromptInjection(message.trim());
-    if (!injectionCheck.isValid) {
-      logger.warn({ ip: identifier }, "Prompt injection detected in public chat");
-      return apiError(injectionCheck.reason ?? "Invalid input", 400);
+    const validation = validateInput(message.trim());
+    if (!validation.isValid) {
+      logger.warn({ ip: identifier, reason: validation.reason }, "Input validation failed in public chat");
+      return apiError(validation.reason ?? "Invalid input", 400);
     }
+
+    // P0: Scrub PII from message and history (parity with authenticated chat)
+    const { scrubbed: scrubbedMessage } = scrubPII(message.trim());
+    const scrubbedHistory = cappedHistory.map((msg) =>
+      msg.role === "user" && typeof msg.content === "string"
+        ? { ...msg, content: scrubPII(msg.content).scrubbed }
+        : msg,
+    );
 
     const prompt = await buildSupportPrompt(
       "__public__",
-      message.trim(),
+      scrubbedMessage,
       { plan: "STARTER", isLoggedIn: false, currentPage: "landing" },
-      cappedHistory,
+      scrubbedHistory,
     );
 
     if (prompt.staticReply) {
@@ -81,7 +90,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Myra response cache: public FAQ traffic is highly repetitive ──
-    const trimmedMessage = message.trim();
+    const trimmedMessage = scrubbedMessage;
     const cachedResponse = await getMyraResponseCache(trimmedMessage, "STARTER", true);
     if (cachedResponse) {
       logger.info("Public Myra response cache HIT");

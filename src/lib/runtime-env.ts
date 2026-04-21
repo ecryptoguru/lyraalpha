@@ -3,8 +3,13 @@ export function isVercelProduction(): boolean {
 }
 
 function isBypassRuntimeAllowed(): boolean {
-  return !isVercelProduction()
-    && (process.env.NODE_ENV !== "production" || process.env.E2E_BYPASS === "true");
+  // NEVER allow bypass on Vercel (preview or production) — VERCEL_ENV is always set there.
+  if (process.env.VERCEL_ENV) return false;
+  // Allow bypass in local dev (NODE_ENV !== "production") OR when E2E_BYPASS=true.
+  // The E2E_BYPASS flag is needed for Playwright tests that run `next start` (which
+  // forces NODE_ENV=production) — without it, every E2E suite that relies on
+  // SKIP_AUTH / SKIP_RATE_LIMIT breaks.
+  return process.env.NODE_ENV !== "production" || process.env.E2E_BYPASS === "true";
 }
 
 export function isAuthBypassEnabled(): boolean {

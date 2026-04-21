@@ -37,18 +37,18 @@ function IntelligenceCardComponent({
       case "NEWS":
         return {
           icon: Newspaper,
-          bg: "bg-amber-500/10",
-          text: "text-amber-400",
-          border: "border-amber-500/20",
-          glow: "from-amber-500/10",
+          bg: "bg-cyan-400/10",
+          text: "text-cyan-400",
+          border: "border-cyan-400/20",
+          glow: "from-cyan-400/10",
         };
       case "RISK":
         return {
           icon: ShieldAlert,
-          bg: "bg-rose-500/10",
-          text: "text-rose-400",
-          border: "border-rose-500/20",
-          glow: "from-rose-500/10",
+          bg: "bg-danger/10",
+          text: "text-danger",
+          border: "border-danger/20",
+          glow: "from-danger/10",
         };
       default:
         return {
@@ -66,19 +66,19 @@ function IntelligenceCardComponent({
 
     const config = {
       HIGH: {
-        bg: "bg-rose-500/10",
-        text: "text-rose-400",
-        border: "border-rose-500/30",
+        bg: "bg-danger/10",
+        text: "text-danger",
+        border: "border-danger/30",
       },
       MEDIUM: {
-        bg: "bg-amber-500/10",
-        text: "text-amber-400",
-        border: "border-amber-500/30",
+        bg: "bg-[#FFD700]/10",
+        text: "text-[#FFD700]",
+        border: "border-[#FFD700]/30",
       },
       LOW: {
-        bg: "bg-emerald-500/10",
-        text: "text-emerald-400",
-        border: "border-emerald-500/30",
+        bg: "bg-success/10",
+        text: "text-success",
+        border: "border-success/30",
       },
     }[impact];
 
@@ -117,7 +117,7 @@ function IntelligenceCardComponent({
         "hover:shadow-lg hover:border-border/60 cursor-pointer",
         "animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both",
         typeConfig.border,
-        "bg-card/60 backdrop-blur-2xl shadow-xl backdrop-blur-xl",
+        "bg-card/60 backdrop-blur-2xl shadow-xl",
         className,
       )}
       style={{ animationDelay: `${index * 50}ms` }}

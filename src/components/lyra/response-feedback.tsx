@@ -29,18 +29,18 @@ function FeedbackButton({ direction, vote, isLocked, submitting, onVote }: Feedb
   const isOtherLocked = isLocked && !isActive;
 
   const activeClasses = isUp
-    ? ["border-emerald-400 bg-emerald-500/20 text-emerald-400 cursor-default",
+    ? ["border-success bg-success/20 text-success cursor-default",
        "shadow-[0_0_8px_2px_rgba(52,211,153,0.5),0_0_20px_4px_rgba(52,211,153,0.2)]"]
-    : ["border-rose-400 bg-rose-500/20 text-rose-400 cursor-default",
+    : ["border-danger bg-danger/20 text-danger cursor-default",
        "shadow-[0_0_8px_2px_rgba(251,113,133,0.5),0_0_20px_4px_rgba(251,113,133,0.2)]"];
 
   const hoverClasses = isUp
-    ? "hover:border-emerald-500/50 hover:text-emerald-400 hover:bg-emerald-500/10 hover:scale-110"
-    : "hover:border-rose-500/50 hover:text-rose-400 hover:bg-rose-500/10 hover:scale-110";
+    ? "hover:border-success/50 hover:text-success hover:bg-success/10 hover:scale-110"
+    : "hover:border-danger/50 hover:text-danger hover:bg-danger/10 hover:scale-110";
 
   const dotClasses = isUp
-    ? "bg-emerald-400 shadow-[0_0_6px_2px_rgba(52,211,153,0.7)]"
-    : "bg-rose-400 shadow-[0_0_6px_2px_rgba(251,113,133,0.7)]";
+    ? "bg-success shadow-[0_0_6px_2px_rgba(52,211,153,0.7)]"
+    : "bg-danger shadow-[0_0_6px_2px_rgba(251,113,133,0.7)]";
 
   const Icon = isUp ? ThumbsUp : ThumbsDown;
 
@@ -163,7 +163,7 @@ export function ResponseFeedback({
             transition={{ duration: 0.2 }}
             className={cn(
               "text-[10px] font-bold uppercase tracking-widest",
-              vote === 1 ? "text-emerald-400/80" : "text-rose-400/80",
+              vote === 1 ? "text-success/80" : "text-danger/80",
             )}
           >
             {changeCount === 2

@@ -21,13 +21,13 @@ export function ScoreBadge({
   let colorClass = "bg-muted text-muted-foreground hover:bg-muted/80";
   if (score >= 70)
     colorClass =
-      "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50";
+      "bg-success/10 text-success dark:bg-success/30 dark:text-success hover:bg-success/20 dark:hover:bg-success/50";
   else if (score <= 30)
     colorClass =
-      "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50";
+      "bg-danger/10 text-danger dark:bg-danger/30 dark:text-danger hover:bg-danger/20 dark:hover:bg-danger/50";
   else
     colorClass =
-      "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50";
+      "bg-warning/10 text-warning dark:bg-warning/30 dark:text-warning hover:bg-warning/20 dark:hover:bg-warning/50";
 
   // Determine Icon
   const Icon =

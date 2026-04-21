@@ -39,9 +39,9 @@ function MobileThemeButton() {
       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background/90 shadow-sm backdrop-blur-xl transition-colors hover:bg-background"
     >
       {isDark ? (
-        <Sun className="h-3.5 w-3.5 text-amber-400" />
+        <Sun className="h-3.5 w-3.5 text-warning" />
       ) : (
-        <Moon className="h-3.5 w-3.5 text-slate-500" />
+        <Moon className="h-3.5 w-3.5 text-muted-foreground" />
       )}
     </button>
   );

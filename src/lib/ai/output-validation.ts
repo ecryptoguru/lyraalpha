@@ -299,3 +299,160 @@ export function logMyraValidationResult(result: MyraValidationResult): void {
     logger.debug({ err: e }, "recordValidationResult failed for Myra");
   });
 }
+
+// ─── Semantic Output Validation (Sample-based) ─────────────────────────────────
+// Lightweight hallucination detection for high-value tiers (ELITE/COMPLEX).
+// Samples 5% of responses and checks for factual claims not supported by context.
+// Non-blocking: logs warnings for manual review, never blocks the user.
+
+// Pre-compiled patterns for claim extraction (avoid per-call compilation)
+const CLAIM_NUMBER_PATTERN = /(?:\$|€|₹|£)?\s?\d[\d,.]+(?:\s?(?:million|billion|bn|m|k|thousand|percent|%|bps|x|USD|EUR|INR))?/gi;
+const CLAIM_DATE_PATTERN = /\b(?:Q[1-4]\s+20\d{2}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+20\d{2}|20\d{2}-\d{2}|YTD|MTD|QTD)\b/gi;
+const CLAIM_COMPARATIVE_PATTERN = /\b(?:up|down|(?:increased|decreased|gained|lost|rose|fell|dropped)\s+(?:by\s+)?(?:\$|€|₹|£)?\s?\d[\d,.]*)\b/gi;
+
+/** Result of semantic validation against retrieved context */
+export interface SemanticValidationResult {
+  /** Whether the response appears factually consistent with context */
+  consistent: boolean;
+  /** Confidence score (0-1) based on claim verification */
+  confidence: number;
+  /** Specific claims that couldn't be verified in context */
+  unverifiedClaims: string[];
+  /** Sampled flag — true if this response was selected for sampling */
+  sampled: boolean;
+}
+
+/**
+ * Extract potential factual claims from text for verification.
+ * Looks for patterns like numbers, dates, specific metrics, and comparative statements.
+ */
+function extractClaims(text: string): string[] {
+  const claims: string[] = [];
+
+  // Number + unit patterns (prices, percentages, market cap, etc.)
+  CLAIM_NUMBER_PATTERN.lastIndex = 0; // Reset regex state
+  const numberMatches = text.match(CLAIM_NUMBER_PATTERN);
+  if (numberMatches) {
+    claims.push(...numberMatches.slice(0, 5)); // Limit to first 5 numeric claims
+  }
+
+  // Date/time patterns (Q1 2024, March 2024, YTD, etc.)
+  CLAIM_DATE_PATTERN.lastIndex = 0;
+  const dateMatches = text.match(CLAIM_DATE_PATTERN);
+  if (dateMatches) {
+    claims.push(...dateMatches.slice(0, 3));
+  }
+
+  // Comparative performance claims
+  CLAIM_COMPARATIVE_PATTERN.lastIndex = 0;
+  const comparativeMatches = text.match(CLAIM_COMPARATIVE_PATTERN);
+  if (comparativeMatches) {
+    claims.push(...comparativeMatches.slice(0, 3));
+  }
+
+  return [...new Set(claims)]; // Deduplicate
+}
+
+/**
+ * Check if a claim is supported by the retrieved context (lightweight check).
+ * Uses substring matching — not perfect, but catches obvious hallucinations.
+ */
+function isClaimSupported(claim: string, context: string): boolean {
+  const normalizedClaim = claim.toLowerCase().replace(/[^\w\s]/g, "");
+  const normalizedContext = context.toLowerCase();
+
+  // Direct substring match
+  if (normalizedContext.includes(normalizedClaim)) return true;
+
+  // Match numeric value without formatting (e.g., "1,234" vs "1234")
+  const numericValue = normalizedClaim.replace(/[^\d.]/g, "");
+  if (numericValue.length > 0 && normalizedContext.includes(numericValue)) return true;
+
+  // Match without units (e.g., "1.5 million" → "1.5")
+  const valueOnly = normalizedClaim.replace(/\s*(?:million|billion|bn|m|k|thousand|percent|%|bps|x|usd|eur|inr)\b/g, "").trim();
+  if (valueOnly.length > 0 && valueOnly !== normalizedClaim && normalizedContext.includes(valueOnly)) return true;
+
+  return false;
+}
+
+/**
+ * Sample-based semantic validation for ELITE/COMPLEX tiers.
+ * Only validates ~5% of responses to avoid overhead.
+ * Checks if factual claims in the output are supported by retrieved context.
+ *
+ * @param text LLM output text
+ * @param context Retrieved knowledge context (RAG + web search)
+ * @param tier Query tier (SIMPLE/MODERATE/COMPLEX)
+ * @param plan User plan (STARTER/PRO/ELITE/ENTERPRISE)
+ * @returns Validation result with consistency flag and unverified claims
+ */
+export function validateSemanticConsistency(
+  text: string,
+  context: string,
+  tier: string,
+  plan: string,
+): SemanticValidationResult {
+  // Only sample ELITE/COMPLEX responses (high-value, high-hallucination-risk)
+  const shouldSample = (plan === "ELITE" || plan === "ENTERPRISE") && tier === "COMPLEX";
+  if (!shouldSample) {
+    return { consistent: true, confidence: 1, unverifiedClaims: [], sampled: false };
+  }
+
+  // Sample 5% using a hash of user query (deterministic but pseudo-random)
+  const sampleThreshold = 0.05;
+  const textHash = text.slice(0, 50).split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const sampleRoll = (textHash % 1000) / 1000;
+  if (sampleRoll > sampleThreshold) {
+    return { consistent: true, confidence: 1, unverifiedClaims: [], sampled: false };
+  }
+
+  // Extract and verify claims
+  const claims = extractClaims(text);
+  if (claims.length === 0) {
+    return { consistent: true, confidence: 1, unverifiedClaims: [], sampled: true };
+  }
+
+  const unverifiedClaims: string[] = [];
+  let verifiedCount = 0;
+
+  for (const claim of claims) {
+    if (isClaimSupported(claim, context)) {
+      verifiedCount++;
+    } else {
+      unverifiedClaims.push(claim);
+    }
+  }
+
+  const confidence = claims.length > 0 ? verifiedCount / claims.length : 1;
+  // Flag as inconsistent if >50% of claims are unverified (high hallucination risk)
+  const consistent = confidence >= 0.5;
+
+  return { consistent, confidence, unverifiedClaims, sampled: true };
+}
+
+/**
+ * Log semantic validation results. Emits warnings when hallucination risk is detected.
+ */
+export function logSemanticValidationResult(result: SemanticValidationResult): void {
+  if (!result.sampled) return; // Don't log non-sampled results
+
+  if (!result.consistent) {
+    logger.warn(
+      {
+        event: "semantic_validation_hallucination_risk",
+        confidence: Number(result.confidence.toFixed(2)),
+        unverifiedClaims: result.unverifiedClaims.slice(0, 5), // Cap log size
+        unverifiedCount: result.unverifiedClaims.length,
+      },
+      `Semantic validation: ${result.unverifiedClaims.length} unverified claims detected (hallucination risk)`,
+    );
+  } else {
+    logger.debug(
+      {
+        event: "semantic_validation_pass",
+        confidence: Number(result.confidence.toFixed(2)),
+      },
+      "Semantic validation: response factually consistent with context",
+    );
+  }
+}

@@ -118,11 +118,11 @@ export default function SectorDetailPage() {
           )}
           {data.rationale && (
             <div className="p-4 md:p-5 rounded-2xl bg-muted/20 border border-border flex items-start gap-3.5 text-xs text-muted-foreground backdrop-blur-2xl group hover:bg-muted/30 transition-colors">
-              <div className="p-2 rounded-2xl bg-amber-500/10 border border-amber-500/20 shrink-0 group-hover:scale-110 transition-transform">
-                <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+              <div className="p-2 rounded-2xl bg-warning/10 border border-warning/20 shrink-0 group-hover:scale-110 transition-transform">
+                <Sparkles className="h-3.5 w-3.5 text-warning" />
               </div>
               <div className="space-y-1 font-data flex-1">
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-amber-700 dark:text-amber-500/60">
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary dark:text-warning/60">
                   Discovery Rationale
                 </p>
                 <p className="leading-tight font-bold text-foreground/80 font-sans">
@@ -167,7 +167,7 @@ export default function SectorDetailPage() {
                         tierName === "Strong"
                           ? "bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary),0.8)]"
                           : tierName === "Moderate"
-                            ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                            ? "bg-warning shadow-[0_0_8px_rgba(245,158,11,0.5)]"
                             : "bg-muted-foreground/40",
                       )}
                     />

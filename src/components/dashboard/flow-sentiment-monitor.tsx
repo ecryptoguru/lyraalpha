@@ -51,11 +51,11 @@ export const FlowSentimentMonitor = memo(function FlowSentimentMonitor({
 
 
   const getDivergenceLabel = useCallback((divergence: number) => {
-    if (divergence > 50) return { label: "Strong Bullish Divergence", color: "text-green-600" };
-    if (divergence > 30) return { label: "Bullish Divergence", color: "text-green-500" };
-    if (divergence < -50) return { label: "Strong Bearish Divergence", color: "text-red-600" };
-    if (divergence < -30) return { label: "Bearish Divergence", color: "text-red-500" };
-    return { label: "No Divergence", color: "text-gray-600" };
+    if (divergence > 50) return { label: "Strong Bullish Divergence", color: "text-success" };
+    if (divergence > 30) return { label: "Bullish Divergence", color: "text-success" };
+    if (divergence < -50) return { label: "Strong Bearish Divergence", color: "text-danger" };
+    if (divergence < -30) return { label: "Bearish Divergence", color: "text-danger" };
+    return { label: "No Divergence", color: "text-muted-foreground" };
   }, []);
 
   if (mode === "simple") {
@@ -70,14 +70,14 @@ export const FlowSentimentMonitor = memo(function FlowSentimentMonitor({
         <CardContent className="space-y-4">
           {/* Accumulation Summary */}
           {accumulationAssets.length > 0 && (
-            <div className="rounded-2xl border border-green-200 bg-green-50 p-3">
+            <div className="rounded-2xl border border-success/20 bg-success/5 p-3">
               <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-semibold text-green-900">
+                <TrendingUp className="h-4 w-4 text-success" />
+                <span className="text-sm font-semibold text-success">
                   Institutional Accumulation
                 </span>
               </div>
-              <p className="text-xs text-green-700">
+              <p className="text-xs text-success">
                 Smart money is accumulating in {accumulationAssets.map((a) => a.symbol).join(", ")}
               </p>
             </div>
@@ -85,12 +85,12 @@ export const FlowSentimentMonitor = memo(function FlowSentimentMonitor({
 
           {/* Distribution Warning */}
           {distributionAssets.length > 0 && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-3">
+            <div className="rounded-2xl border border-danger/20 bg-danger/5 p-3">
               <div className="flex items-center gap-2 mb-2">
-                <TrendingDown className="h-4 w-4 text-red-600" />
-                <span className="text-sm font-semibold text-red-900">Exhaustion Risk</span>
+                <TrendingDown className="h-4 w-4 text-danger" />
+                <span className="text-sm font-semibold text-danger">Exhaustion Risk</span>
               </div>
-              <p className="text-xs text-red-700">
+              <p className="text-xs text-danger">
                 Distribution detected in {distributionAssets.map((a) => a.symbol).join(", ")}
               </p>
             </div>
@@ -98,12 +98,12 @@ export const FlowSentimentMonitor = memo(function FlowSentimentMonitor({
 
           {/* Divergence Alert */}
           {divergenceAssets.length > 0 && (
-            <div className="rounded-2xl border border-orange-200 bg-orange-50 p-3">
+            <div className="rounded-2xl border border-warning/20 bg-warning/5 p-3">
               <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="h-4 w-4 text-orange-600" />
-                <span className="text-sm font-semibold text-orange-900">OBV Divergence</span>
+                <AlertCircle className="h-4 w-4 text-warning" />
+                <span className="text-sm font-semibold text-warning">OBV Divergence</span>
               </div>
-              <p className="text-xs text-orange-700">
+              <p className="text-xs text-warning">
                 {divergenceAssets.length} asset{divergenceAssets.length > 1 ? "s" : ""} showing
                 price-volume divergence
               </p>
@@ -172,7 +172,7 @@ export const FlowSentimentMonitor = memo(function FlowSentimentMonitor({
           {/* Accumulation */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-green-600" />
+              <TrendingUp className="h-4 w-4 text-success" />
               <span className="text-xs font-semibold">Accumulation</span>
             </div>
             {accumulationAssets.length > 0 ? (
@@ -180,10 +180,10 @@ export const FlowSentimentMonitor = memo(function FlowSentimentMonitor({
                 {accumulationAssets.map((asset) => (
                   <div
                     key={asset.symbol}
-                    className="rounded-2xl border border-green-200 bg-green-50 p-2"
+                    className="rounded-2xl border border-success/20 bg-success/5 p-2"
                   >
-                    <div className="text-xs font-semibold text-green-900">{getFriendlySymbol(asset.symbol, asset.type, asset.name)}</div>
-                    <div className="text-xs text-green-700">
+                    <div className="text-xs font-semibold text-success">{getFriendlySymbol(asset.symbol, asset.type, asset.name)}</div>
+                    <div className="text-xs text-success">
                       +{asset.volumeAcceleration.toFixed(1)}% volume
                     </div>
                   </div>
@@ -197,15 +197,15 @@ export const FlowSentimentMonitor = memo(function FlowSentimentMonitor({
           {/* Distribution */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-red-600" />
+              <TrendingDown className="h-4 w-4 text-danger" />
               <span className="text-xs font-semibold">Distribution</span>
             </div>
             {distributionAssets.length > 0 ? (
               <div className="space-y-1">
                 {distributionAssets.map((asset) => (
-                  <div key={asset.symbol} className="rounded-2xl border border-red-200 bg-red-50 p-2">
-                    <div className="text-xs font-semibold text-red-900">{getFriendlySymbol(asset.symbol, asset.type, asset.name)}</div>
-                    <div className="text-xs text-red-700">
+                  <div key={asset.symbol} className="rounded-2xl border border-danger/20 bg-danger/5 p-2">
+                    <div className="text-xs font-semibold text-danger">{getFriendlySymbol(asset.symbol, asset.type, asset.name)}</div>
+                    <div className="text-xs text-danger">
                       {asset.volumeAcceleration.toFixed(1)}% volume
                     </div>
                   </div>

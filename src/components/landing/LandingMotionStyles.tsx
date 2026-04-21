@@ -46,7 +46,7 @@ export function LandingMotionStyles() {
         position: absolute;
         inset: -1px;
         border-radius: 9999px;
-        background: linear-gradient(135deg, rgba(245,158,11,0.4), rgba(20,184,166,0.2));
+        background: linear-gradient(135deg, rgba(245,158,11,0.4), rgba(129,140,248,0.2));
         opacity: 0;
         transition: opacity 300ms ease;
         filter: blur(8px);

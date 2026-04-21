@@ -150,7 +150,7 @@ export function PersonalBriefingCard() {
                       {asset.signalScore != null && (
                         <span className={cn(
                           "text-[9px] font-bold",
-                          asset.signalScore >= 70 ? "text-emerald-400" : asset.signalScore >= 50 ? "text-amber-400" : "text-rose-400"
+                          asset.signalScore >= 70 ? "text-success" : asset.signalScore >= 50 ? "text-warning" : "text-danger"
                         )}>
                           {Math.round(asset.signalScore)}
                         </span>
@@ -158,7 +158,7 @@ export function PersonalBriefingCard() {
                       {asset.changePercent != null && (
                         <span className={cn(
                           "text-[9px] font-bold flex items-center gap-0.5",
-                          asset.changePercent >= 0 ? "text-emerald-400" : "text-rose-400"
+                          asset.changePercent >= 0 ? "text-success" : "text-danger"
                         )}>
                           {asset.changePercent >= 0 ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
                           {asset.changePercent >= 0 ? "+" : ""}{asset.changePercent.toFixed(1)}%
@@ -174,9 +174,9 @@ export function PersonalBriefingCard() {
           {/* Alerts row */}
           <div className="flex flex-wrap gap-2 pt-1">
             {briefing.strongMomentum.length > 0 && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/8">
-                <Activity className="h-2.5 w-2.5 text-emerald-400" />
-                <span className="text-[8px] font-bold text-emerald-400">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-success/30 bg-success/8">
+                <Activity className="h-2.5 w-2.5 text-success" />
+                <span className="text-[8px] font-bold text-success">
                   Strong momentum: {briefing.strongMomentum.slice(0, 3).map((symbol) => {
                     const asset = briefing.topAssets.find((item) => item.symbol === symbol);
                     return getFriendlySymbol(symbol, asset?.type, asset?.name);
@@ -185,9 +185,9 @@ export function PersonalBriefingCard() {
               </div>
             )}
             {briefing.misaligned.length > 0 && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-500/30 bg-amber-500/8">
-                <AlertTriangle className="h-2.5 w-2.5 text-amber-400" />
-                <span className="text-[8px] font-bold text-amber-400">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-warning/30 bg-warning/8">
+                <AlertTriangle className="h-2.5 w-2.5 text-warning" />
+                <span className="text-[8px] font-bold text-warning">
                   Regime-misaligned: {briefing.misaligned.slice(0, 3).map((symbol) => {
                     const asset = briefing.topAssets.find((item) => item.symbol === symbol);
                     return getFriendlySymbol(symbol, asset?.type, asset?.name);

@@ -42,10 +42,10 @@ export default function PricingPage() {
       <main className="flex-1">
         <section className="px-4 py-24 sm:px-6">
           <div className="mx-auto max-w-5xl text-center">
-            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-amber-400/80">Pricing</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-warning/80">Pricing</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">
               Invest smarter.<br />
-              <span className="text-amber-400">Pay less than one bad trade.</span>
+              <span className="text-warning">Pay less than one bad trade.</span>
             </h1>
             <p className="mt-5 text-base text-white/55 max-w-2xl mx-auto">
               Every plan includes AI-powered crypto intelligence, deterministic engine signals, and no hallucinated metrics.
@@ -58,12 +58,12 @@ export default function PricingPage() {
                 key={plan.name}
                 className={`relative flex flex-col rounded-3xl border p-7 ${
                   plan.highlight
-                    ? "border-amber-400/40 bg-amber-400/6 shadow-[0_0_40px_rgba(245,158,11,0.12)]"
+                    ? "border-warning/40 bg-warning/6 shadow-[0_0_40px_rgba(245,158,11,0.12)]"
                     : "border-white/10 bg-white/3"
                 }`}
               >
                 {plan.highlight && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border border-amber-400/30 bg-amber-400/15 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-amber-300">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border border-warning/30 bg-warning/15 px-3 py-1 text-[9px] font-bold uppercase tracking-[0.2em] text-warning">
                     Most Popular
                   </span>
                 )}
@@ -76,7 +76,7 @@ export default function PricingPage() {
                 <ul className="mt-6 flex-1 space-y-3">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-start gap-2.5 text-sm text-white/70">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
                       {f}
                     </li>
                   ))}
@@ -85,7 +85,7 @@ export default function PricingPage() {
                   href={plan.href}
                   className={`mt-8 block rounded-full py-3 text-center text-sm font-bold transition-colors ${
                     plan.highlight
-                      ? "bg-amber-400 text-slate-950 hover:bg-amber-300"
+                      ? "bg-warning text-foreground hover:bg-warning3963"
                       : "border border-white/15 bg-white/5 text-white hover:bg-white/10"
                   }`}
                 >

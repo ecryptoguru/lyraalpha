@@ -72,24 +72,24 @@ const ICON_MAP: Record<string, LucideIcon> = {
 
 // Color mapping helper based on sector nature
 const COLOR_MAP: Record<string, string> = {
-  ai: "text-yellow-500",
-  blockchain: "text-amber-500",
-  semiconductors: "text-cyan-500",
-  cybersecurity: "text-red-500",
-  "clean-energy": "text-amber-400",
-  default: "text-slate-400",
+  ai: "text-cyan-400",
+  blockchain: "text-cyan-400",
+  semiconductors: "text-info",
+  cybersecurity: "text-danger",
+  "clean-energy": "text-[#FFD700]",
+  default: "text-muted-foreground",
 };
 
 function getScoreColor(score: number): string {
-  if (score >= 70) return "text-emerald-400";
-  if (score >= 40) return "text-amber-400";
-  return "text-rose-400";
+  if (score >= 70) return "text-success";
+  if (score >= 40) return "text-cyan-400";
+  return "text-danger";
 }
 
 function getScoreBg(score: number): string {
-  if (score >= 70) return "bg-emerald-400/10 border-emerald-400/20";
-  if (score >= 40) return "bg-amber-400/10 border-amber-400/20";
-  return "bg-rose-400/10 border-rose-400/20";
+  if (score >= 70) return "bg-success/10 border-success/20";
+  if (score >= 40) return "bg-cyan-400/10 border-cyan-400/20";
+  return "bg-danger/10 border-danger/20";
 }
 
 function getRegimeLabel(regime: string): string {
@@ -172,7 +172,7 @@ export function DiscoverySectorGrid() {
     <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {sectors.map((data: Sector) => {
         const Icon = ICON_MAP[data.slug] || Globe;
-        const colorClass = COLOR_MAP[data.slug] || "text-slate-400";
+        const colorClass = COLOR_MAP[data.slug] || "text-muted-foreground";
         const assets = data.assetSectors.map((m) => m.asset.symbol);
         const regime = data.latestRegime;
         const score = regime?.regimeScore ?? 0;
@@ -210,8 +210,8 @@ export function DiscoverySectorGrid() {
                         </div>
                       )}
                       {/* Momentum Arrow */}
-                      <div className={cn("p-1 rounded-xl border", momentum > 5 ? "bg-emerald-400/10 border-emerald-400/20" : momentum < -5 ? "bg-rose-400/10 border-rose-400/20" : "bg-muted/30 border-border/30")}>
-                        <MomentumIcon className={cn("h-3 w-3", momentum > 5 ? "text-emerald-400" : momentum < -5 ? "text-rose-400" : "text-muted-foreground/40")} />
+                      <div className={cn("p-1 rounded-xl border", momentum > 5 ? "bg-success/10 border-success/20" : momentum < -5 ? "bg-danger/10 border-danger/20" : "bg-muted/30 border-border/30")}>
+                        <MomentumIcon className={cn("h-3 w-3", momentum > 5 ? "text-success" : momentum < -5 ? "text-danger" : "text-muted-foreground/40")} />
                       </div>
                     </div>
                   </div>
@@ -288,12 +288,12 @@ export function DiscoverySectorGrid() {
 }
 
 function FactorMini({ label, value }: { label: string; value: number }) {
-  const color = value >= 70 ? "bg-emerald-400" : value >= 40 ? "bg-amber-400" : "bg-rose-400";
+  const color = value >= 70 ? "bg-success" : value >= 40 ? "bg-warning" : "bg-danger";
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
         <span className="text-[7px] font-bold text-muted-foreground/40 uppercase tracking-widest">{label}</span>
-        <span className={cn("text-[8px] font-bold font-mono", value >= 70 ? "text-emerald-400" : value >= 40 ? "text-amber-400" : "text-rose-400")}>{Math.round(value)}</span>
+        <span className={cn("text-[8px] font-bold font-mono", value >= 70 ? "text-success" : value >= 40 ? "text-warning" : "text-danger")}>{Math.round(value)}</span>
       </div>
       <div className="h-1 bg-muted/30 rounded-full overflow-hidden">
         <div className={cn("h-full rounded-full transition-all duration-700", color)} style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />

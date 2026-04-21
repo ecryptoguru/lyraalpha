@@ -82,6 +82,7 @@ The platform ships a public blog system with a hybrid static + DB architecture.
 **Data layer:**
 - `BlogPost` Prisma model stores agent-published content with fields: slug, title, description, content, category, tags, keywords, metaDescription, heroImageUrl, author, featured, status (`published` / `archived`), sourceAgent, sourceContentId
 - `src/lib/blog/posts.ts` merges DB posts with static seed posts; DB posts take priority when slugs collide
+- All hero images stored as WebP (1200×800, 85% quality, ~90KB avg). Total 101 images serving 103 posts. Original PNG format was ~2.3MB per image (233MB total); WebP compression achieves 96% size reduction with imperceptible quality loss on dark financial graphics.
 - `getAllPosts()`, `getPostBySlugAsync()`, `getAllCategories()`, `getRecentPostsAsync()` are the primary async read helpers
 
 **Public routes:**

@@ -43,44 +43,44 @@ const SIGNAL_CONFIG: Record<SignalLabel, {
   gradientStop: string;
 }> = {
   "Strong Bullish": {
-    color: "text-emerald-400",
-    bgColor: "bg-emerald-500/10",
-    borderColor: "border-emerald-500/30",
-    glowColor: "bg-emerald-500/5",
+    color: "text-success",
+    bgColor: "bg-success-subtle",
+    borderColor: "border-success/30",
+    glowColor: "bg-success/5",
     icon: TrendingUp,
-    gradientStop: "emerald",
+    gradientStop: "success",
   },
   "Bullish": {
-    color: "text-green-400",
-    bgColor: "bg-green-500/10",
-    borderColor: "border-green-500/30",
-    glowColor: "bg-green-500/5",
+    color: "text-success",
+    bgColor: "bg-success-subtle",
+    borderColor: "border-success/30",
+    glowColor: "bg-success/5",
     icon: TrendingUp,
-    gradientStop: "green",
+    gradientStop: "success",
   },
   "Neutral": {
-    color: "text-amber-400",
-    bgColor: "bg-amber-500/10",
-    borderColor: "border-amber-500/30",
-    glowColor: "bg-amber-500/5",
+    color: "text-cyan-400",
+    bgColor: "bg-cyan-400/5",
+    borderColor: "border-cyan-400/30",
+    glowColor: "bg-cyan-400/5",
     icon: Minus,
-    gradientStop: "amber",
+    gradientStop: "cyan",
   },
   "Bearish": {
-    color: "text-orange-400",
-    bgColor: "bg-orange-500/10",
-    borderColor: "border-orange-500/30",
-    glowColor: "bg-orange-500/5",
+    color: "text-[#FFD700]",
+    bgColor: "bg-[#FFD700]/5",
+    borderColor: "border-[#FFD700]/30",
+    glowColor: "bg-[#FFD700]/5",
     icon: TrendingDown,
-    gradientStop: "orange",
+    gradientStop: "gold",
   },
   "Strong Bearish": {
-    color: "text-rose-400",
-    bgColor: "bg-rose-500/10",
-    borderColor: "border-rose-500/30",
-    glowColor: "bg-rose-500/5",
+    color: "text-danger",
+    bgColor: "bg-danger-subtle",
+    borderColor: "border-danger/30",
+    glowColor: "bg-danger/5",
     icon: TrendingDown,
-    gradientStop: "rose",
+    gradientStop: "danger",
   },
 };
 
@@ -218,11 +218,11 @@ function BreakdownBar({
   }, [score]);
 
   const getBarColor = (s: number) => {
-    if (s >= 70) return "bg-emerald-500";
-    if (s >= 55) return "bg-green-500";
-    if (s >= 45) return "bg-amber-500";
-    if (s >= 30) return "bg-orange-500";
-    return "bg-rose-500";
+    if (s >= 70) return "bg-success";
+    if (s >= 55) return "bg-success";
+    if (s >= 45) return "bg-warning";
+    if (s >= 30) return "bg-warning";
+    return "bg-danger";
   };
 
   return (
@@ -264,9 +264,9 @@ function BreakdownBar({
 
 function ConfidenceBadge({ confidence }: { confidence: "low" | "medium" | "high" }) {
   const config = {
-    high: { icon: ShieldCheck, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", label: "High Confidence" },
-    medium: { icon: ShieldAlert, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", label: "Medium Confidence" },
-    low: { icon: AlertTriangle, color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20", label: "Low Confidence" },
+    high: { icon: ShieldCheck, color: "text-success", bg: "bg-success-subtle", border: "border-success/20", label: "High Confidence" },
+    medium: { icon: ShieldAlert, color: "text-warning", bg: "bg-warning-subtle", border: "border-warning/20", label: "Medium Confidence" },
+    low: { icon: AlertTriangle, color: "text-danger", bg: "bg-danger-subtle", border: "border-danger/20", label: "Low Confidence" },
   };
 
   const c = config[confidence];
@@ -400,7 +400,7 @@ export function SignalStrengthCard({
               <div className="space-y-1.5">
                 {signalStrength.keyDrivers.map((driver, i) => (
                   <div key={i} className="flex items-start gap-2 group/driver">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 mt-0.5 shrink-0 opacity-70 group-hover/driver:opacity-100 transition-opacity" />
+                    <CheckCircle2 className="h-3.5 w-3.5 text-success mt-0.5 shrink-0 opacity-70 group-hover/driver:opacity-100 transition-opacity" />
                     <span className="text-xs text-muted-foreground leading-relaxed group-hover/driver:text-foreground transition-colors">
                       {driver}
                     </span>
@@ -419,7 +419,7 @@ export function SignalStrengthCard({
               <div className="space-y-1.5">
                 {signalStrength.riskFactors.map((risk, i) => (
                   <div key={i} className="flex items-start gap-2 group/risk">
-                    <AlertTriangle className="h-3.5 w-3.5 text-amber-400 mt-0.5 shrink-0 opacity-70 group-hover/risk:opacity-100 transition-opacity" />
+                    <AlertTriangle className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0 opacity-70 group-hover/risk:opacity-100 transition-opacity" />
                     <span className="text-xs text-muted-foreground leading-relaxed group-hover/risk:text-foreground transition-colors">
                       {risk}
                     </span>
@@ -487,11 +487,11 @@ export function SignalStrengthCard({
 
 function EngineDirectionChip({ engine, direction }: { engine: string; direction: string }) {
   const dirConfig: Record<string, { color: string; bg: string; border: string; dotBg: string }> = {
-    STRONG_BULLISH: { color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", dotBg: "bg-emerald-400" },
-    BULLISH: { color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20", dotBg: "bg-green-400" },
-    NEUTRAL: { color: "text-muted-foreground", bg: "bg-muted/20", border: "border-white/5", dotBg: "bg-muted-foreground" },
-    BEARISH: { color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20", dotBg: "bg-orange-400" },
-    STRONG_BEARISH: { color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20", dotBg: "bg-rose-400" },
+    STRONG_BULLISH: { color: "text-success", bg: "bg-success-subtle", border: "border-success/20", dotBg: "bg-success" },
+    BULLISH: { color: "text-success", bg: "bg-success-subtle", border: "border-success/20", dotBg: "bg-success" },
+    NEUTRAL: { color: "text-muted-foreground", bg: "bg-muted/20", border: "border-border/5", dotBg: "bg-muted-foreground" },
+    BEARISH: { color: "text-warning", bg: "bg-warning-subtle", border: "border-warning/20", dotBg: "bg-warning" },
+    STRONG_BEARISH: { color: "text-danger", bg: "bg-danger-subtle", border: "border-danger/20", dotBg: "bg-danger" },
   };
 
   const c = dirConfig[direction] || dirConfig.NEUTRAL;

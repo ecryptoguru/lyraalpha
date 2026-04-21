@@ -1,8 +1,6 @@
 // Week 6 Blog Posts — 4 high-quality SEO articles, 1200-1500 words each
 // Category: Market Intelligence, AI & Technology, Portfolio Intelligence
 
-import type { BlogPost } from "./posts";
-
 const _week6Posts = [
   {
     slug: "how-to-track-regime-shifts-without-reading-50-tabs-a-day",
@@ -15,7 +13,15 @@ const _week6Posts = [
     category: "Market Intelligence",
     featured: false,
     metaDescription:
-      "Most investors monitor regimes through chaos — 30-50 open tabs across platforms. A systematic regime-tracking workflow eliminates tab overload while capturing every regime signal that matters.",
+      "Most investors monitor regimes through chaos — 30-50 open tabs. A systematic regime-tracking workflow eliminates tab overload while capturing every signal that matters.",
+    internalLinks: [
+      { text: "LyraAlpha regime tracking", url: "/lyra" },
+      { text: "daily briefing", url: "/dashboard" },
+      { text: "market intelligence", url: "/lyra" },
+      { text: "market regime fundamentals", url: "/blog/what-is-market-regime-analysis-and-why-it-matters-for-crypto-investors" },
+      { text: "regime alignment strategy", url: "/blog/how-to-use-regime-alignment-to-make-better-portfolio-decisions" },
+      { text: "momentum analysis", url: "/blog/how-to-read-momentum-volatility-and-trend-together" },
+    ],
     keywords: [
       "track crypto regime shifts",
       "regime monitoring without tabs",
@@ -24,7 +30,7 @@ const _week6Posts = [
       "regime shift signals",
       "market intelligence automation",
     ],
-    heroImageUrl: "/blog/regime-tracking-hero.jpg",
+    heroImageUrl: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day-hero.webp",
     content: `
 # How to Track Regime Shifts Without Reading 50 Tabs a Day
 
@@ -199,7 +205,15 @@ Regime shifts in crypto can happen within days, unlike traditional markets where
     category: "Market Intelligence",
     featured: false,
     metaDescription:
-      "Most crypto research workflows were never designed — they accumulated by accident. Here is the intentional framework for building a financial intelligence workflow that surfaces the right information at the right time, without consuming your entire day.",
+      "Most crypto research workflows were never designed — they accumulated by accident. Build an intelligence workflow that surfaces the right info at the right time.",
+    internalLinks: [
+      { text: "financial intelligence", url: "/lyra" },
+      { text: "workflow tools", url: "/lyra" },
+      { text: "market analysis", url: "/lyra" },
+      { text: "daily briefing workflow", url: "/blog/how-to-build-an-investing-workflow-around-daily-crypto-market-briefings" },
+      { text: "market signals processing", url: "/blog/how-to-turn-market-signals-into-better-investment-decisions" },
+      { text: "regime monitoring", url: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day" },
+    ],
     keywords: [
       "crypto research workflow",
       "financial intelligence workflow",
@@ -208,7 +222,7 @@ Regime shifts in crypto can happen within days, unlike traditional markets where
       "crypto workflow productivity",
       "intelligence workflow",
     ],
-    heroImageUrl: "/blog/intelligence-workflow-hero.jpg",
+    heroImageUrl: "/blog/how-to-build-a-better-financial-intelligence-workflow-hero.webp",
     content: `
 # How to Build a Better Financial Intelligence Workflow
 
@@ -365,7 +379,15 @@ Prioritize ruthlessly. The average investor does not need to deeply research eve
     category: "AI & Technology",
     featured: false,
     metaDescription:
-      "Most AI crypto briefings are too generic or too dense to be useful. Here is the framework for what a genuinely useful daily AI briefing contains — and why each component is essential for actual investment decisions.",
+      "Most AI crypto briefings are too generic or too dense to be useful. Here is the framework for what a genuinely useful daily AI briefing contains — and why each component matters.",
+    internalLinks: [
+      { text: "AI briefing", url: "/lyra" },
+      { text: "investor tools", url: "/lyra" },
+      { text: "market briefing", url: "/dashboard" },
+      { text: "daily briefing features", url: "/blog/how-lyraalpha-daily-briefing-helps-you-see-the-crypto-market-faster" },
+      { text: "explainable AI intelligence", url: "/blog/why-fintech-users-need-explainable-intelligence-not-just-alerts" },
+      { text: "AI research automation", url: "/blog/what-ai-can-actually-do-for-crypto-market-research" },
+    ],
     keywords: [
       "AI briefing investors",
       "crypto daily briefing anatomy",
@@ -374,7 +396,7 @@ Prioritize ruthlessly. The average investor does not need to deeply research eve
       "daily market briefing components",
       "AI investment briefing",
     ],
-    heroImageUrl: "/blog/ai-briefing-anatomy-hero.jpg",
+    heroImageUrl: "/blog/the-anatomy-of-a-useful-ai-briefing-for-investors-hero.webp",
     content: `
 # The Anatomy of a Useful AI Briefing for Investors
 
@@ -523,7 +545,7 @@ Only if it connects to a specific market signal. News about a regulatory announc
   },
   {
     slug: "lyraalpha-alternatives-what-to-compare-before-you-choose",
-    title: "LyraAlpha Alternatives: What to Compare Before You Choose a Crypto Intelligence Platform",
+    title: "LyraAlpha Alternatives: What to Compare Before Choosing",
     description:
       "Before choosing a crypto market intelligence platform, you need to know what you are comparing. The market has fragmented into distinct categories — each with different strengths, different data sources, and different use cases. Here is the honest comparison framework.",
     date: "2026-05-05",
@@ -532,7 +554,15 @@ Only if it connects to a specific market signal. News about a regulatory announc
     category: "AI & Technology",
     featured: false,
     metaDescription:
-      "Comparing LyraAlpha to other crypto intelligence platforms requires understanding what you are actually comparing. Here is the honest framework for evaluating LyraAlpha alternatives — and what each dimension reveals about which platform is right for you.",
+      "Comparing LyraAlpha to other crypto intelligence platforms requires understanding what you are actually comparing. Here is the honest framework for evaluating alternatives.",
+    internalLinks: [
+      { text: "LyraAlpha features", url: "/lyra" },
+      { text: "platform comparison", url: "/lyra" },
+      { text: "alternative tools", url: "/lyra" },
+      { text: "AI tools buyers guide", url: "/blog/best-ai-tools-for-crypto-research-a-2026-buyers-guide" },
+      { text: "AI copilot capabilities", url: "/blog/ai-market-copilots-vs-human-research-where-each-wins" },
+      { text: "market intelligence comparison", url: "/blog/lyraalpha-vs-traditional-market-research-tools-whats-different" },
+    ],
     keywords: [
       "LyraAlpha alternatives",
       "crypto intelligence platform comparison",
@@ -541,7 +571,7 @@ Only if it connects to a specific market signal. News about a regulatory announc
       "crypto research tool comparison",
       "AI crypto tools",
     ],
-    heroImageUrl: "/blog/alternatives-comparison-hero.jpg",
+    heroImageUrl: "/blog/lyraalpha-alternatives-what-to-compare-before-you-choose-hero.webp",
     content: `
 # LyraAlpha Alternatives: What to Compare Before You Choose a Crypto Intelligence Platform
 
@@ -708,6 +738,4 @@ LyraAlpha aggregates from multiple on-chain data providers, exchange APIs, and p
   },
 ];
 
-export const week6Posts: Omit<BlogPost, "readingTime">[] = _week6Posts.map((p) => ({
-  ...p,
-}));
+export const week6Posts = _week6Posts;

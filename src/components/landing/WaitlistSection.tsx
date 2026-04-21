@@ -11,7 +11,7 @@ const roadmapQuarters = [
       {
         title: "Daily Market Briefings",
         tier: "PRO+",
-        tierAccent: "amber",
+        tierAccent: "gold",
         desc: "Automated daily analysis of portfolio and watchlist.",
       },
     ],
@@ -22,19 +22,19 @@ const roadmapQuarters = [
       {
         title: "Lyra Reports",
         tier: "ELITE+",
-        tierAccent: "teal",
+        tierAccent: "cyan",
         desc: "Scheduled portfolio and market analysis, delivered in plain language.",
       },
       {
         title: "TYRA Research Agent",
         tier: "ELITE+",
-        tierAccent: "teal",
+        tierAccent: "cyan",
         desc: "Hours-long analytical tasks, deep dives.",
       },
       {
         title: "LYRA Voice Fintech Consultant",
         tier: "ELITE+",
-        tierAccent: "teal",
+        tierAccent: "cyan",
         desc: "Voice-enabled AI consultant for hands-free portfolio and market analysis.",
       },
     ],
@@ -70,12 +70,12 @@ function RoadmapSection() {
       <div className="container relative z-10 mx-auto max-w-7xl px-0">
         <LandingReveal>
           <div className="mb-12">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-amber-400/70">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-warning/70">
               Six major features shipping across Q1–Q4
             </p>
             <h2 className="mt-4 text-3xl font-light tracking-[-0.04em] text-white md:text-5xl">
               What&apos;s coming{" "}
-              <span className="text-amber-400">in 2026.</span>
+              <span className="text-warning">in 2026.</span>
             </h2>
             <p className="mt-4 text-base leading-7 text-white/42">
               Staggered by plan tier. Each feature has a natural upgrade trigger built in.
@@ -86,11 +86,11 @@ function RoadmapSection() {
         <LandingReveal delay={80}>
           {/* Timeline connector line */}
           <div className="relative mb-10 hidden sm:block">
-            <div className="absolute top-2 left-0 right-0 h-px bg-linear-to-r from-amber-400/40 via-teal-400/30 to-white/10" />
+            <div className="absolute top-2 left-0 right-0 h-px bg-linear-to-r from-warning/40 via-info/30 to-white/10" />
             <div className="grid grid-cols-4">
               {roadmapQuarters.map((q) => (
                 <div key={q.quarter} className="flex flex-col items-start">
-                  <div className="h-4 w-4 rounded-sm border border-amber-400/50 bg-amber-400/20" />
+                  <div className="h-4 w-4 rounded-sm border border-warning/50 bg-warning/20" />
                 </div>
               ))}
             </div>
@@ -105,20 +105,20 @@ function RoadmapSection() {
                     <div
                       key={item.title}
                       className={`rounded-2xl border p-4 ${
-                        item.tierAccent === "teal"
-                          ? "border-teal-400/18 bg-teal-400/4"
-                          : item.tierAccent === "amber"
-                          ? "border-amber-400/18 bg-amber-400/4"
+                        item.tierAccent === "cyan"
+                          ? "border-[#00D4FF]/18 bg-[#00D4FF]/4"
+                          : item.tierAccent === "gold"
+                          ? "border-[#FFD700]/18 bg-[#FFD700]/4"
                           : "border-white/8 bg-white/[0.028]"
                       }`}
                     >
                       <p className="text-sm font-semibold text-white">{item.title}</p>
                       <span
                         className={`mt-1.5 inline-block rounded-full border px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] ${
-                          item.tierAccent === "teal"
-                            ? "border-teal-400/25 bg-teal-400/8 text-teal-400"
-                            : item.tierAccent === "amber"
-                            ? "border-amber-400/25 bg-amber-400/8 text-amber-400"
+                          item.tierAccent === "cyan"
+                            ? "border-[#00D4FF]/25 bg-[#00D4FF]/8 text-[#00D4FF]"
+                            : item.tierAccent === "gold"
+                            ? "border-[#FFD700]/25 bg-[#FFD700]/8 text-[#FFD700]"
                             : "border-white/15 bg-white/5 text-white/45"
                         }`}
                       >
@@ -144,8 +144,8 @@ const betaBenefits = [
 ] as const;
 
 const betaSignals = [
-  { label: "Access type",  value: "Open Beta · no invite required",        accent: "teal"    },
-  { label: "Your plan",    value: "ELITE — free for all beta users",        accent: "amber"   },
+  { label: "Access type",  value: "Open Beta · no invite required",        accent: "cyan"    },
+  { label: "Your plan",    value: "ELITE — free for all beta users",        accent: "gold"   },
   { label: "Credits",      value: "300 credits · ready on day one",         accent: "default" },
 ] as const;
 
@@ -165,31 +165,31 @@ function BetaSignupSection() {
       className="relative bg-[#040816] px-4 py-24 sm:px-6 sm:py-28"
       suppressHydrationWarning
     >
-      <div className="pointer-events-none absolute inset-x-0 top-1/3 h-80 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(20,184,166,0.07),transparent_65%)] blur-2xl" />
+      <div className="pointer-events-none absolute inset-x-0 top-1/3 h-80 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(129,140,248,0.07),transparent_65%)] blur-2xl" />
       <div className="pointer-events-none absolute inset-0 obsidian-grid opacity-25" />
 
       <div className="container relative z-10 mx-auto max-w-7xl px-0">
         <LandingReveal>
           <div className="overflow-hidden rounded-3xl border border-white/8 bg-white/2 backdrop-blur-sm">
-            <div className="h-px w-full bg-linear-to-r from-transparent via-teal-400/60 to-transparent" />
+            <div className="h-px w-full bg-linear-to-r from-transparent via-info/60 to-transparent" />
 
             <div className="grid xl:grid-cols-[1.1fr_0.9fr]">
               {/* Left: info panel */}
               <div className="p-7 sm:p-10">
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-teal-400/25 bg-teal-400/8 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal-400" />
+                  <span className="inline-flex items-center gap-2 rounded-full border border-info/25 bg-info/8 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-info">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-info" />
                     Beta · Open Access
                   </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/6 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-amber-300/80">
-                    <Sparkles className="h-3 w-3 text-amber-400" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-warning/20 bg-warning/6 px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.25em] text-warning/80">
+                    <Sparkles className="h-3 w-3 text-warning" />
                     Free ELITE plan
                   </span>
                 </div>
 
                 <h2 className="mt-6 max-w-2xl text-4xl font-light tracking-[-0.05em] text-white sm:text-5xl lg:text-6xl">
                   Start free.
-                  <span className="block text-teal-400">ELITE access, day one.</span>
+                  <span className="block text-info">ELITE access, day one.</span>
                 </h2>
                 <p className="mt-6 max-w-xl text-base leading-8 text-white/45 sm:text-lg">
                   LyraAlpha is now open for Beta. Sign up and instantly unlock ELITE plan features,
@@ -201,19 +201,19 @@ function BetaSignupSection() {
                     <div
                       key={signal.label}
                       className={`rounded-2xl border p-4 ${
-                        signal.accent === "teal"
-                          ? "border-teal-400/18 bg-teal-400/5"
-                          : signal.accent === "amber"
-                          ? "border-amber-400/15 bg-amber-400/4"
+                        signal.accent === "cyan"
+                          ? "border-[#00D4FF]/18 bg-[#00D4FF]/5"
+                          : signal.accent === "gold"
+                          ? "border-[#FFD700]/15 bg-[#FFD700]/4"
                           : "border-white/8 bg-white/2.5"
                       }`}
                     >
                       <p
                         className={`font-mono text-[10px] font-bold uppercase tracking-[0.28em] ${
-                          signal.accent === "teal"
-                            ? "text-teal-400/60"
-                            : signal.accent === "amber"
-                            ? "text-amber-400/55"
+                          signal.accent === "cyan"
+                            ? "text-[#00D4FF]/60"
+                            : signal.accent === "gold"
+                            ? "text-[#FFD700]/55"
                             : "text-white/30"
                         }`}
                       >
@@ -232,7 +232,7 @@ function BetaSignupSection() {
                       key={benefit}
                       className="flex items-start gap-3 rounded-2xl border border-white/8 bg-white/2.5 px-4 py-4"
                     >
-                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-teal-400/25 bg-teal-400/8 text-teal-400">
+                      <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-info/25 bg-info/8 text-info">
                         <Check className="h-3.5 w-3.5" />
                       </div>
                       <p className="text-sm leading-7 text-white/55">{benefit}</p>
@@ -243,12 +243,12 @@ function BetaSignupSection() {
 
               {/* Right: CTA panel */}
               <div className="relative border-t border-white/8 bg-white/2 px-6 py-8 sm:px-8 sm:py-10 xl:border-l xl:border-t-0">
-                <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-teal-400/4 via-transparent to-amber-400/3" />
-                <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-teal-400/8 blur-2xl" />
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-b from-info/4 via-transparent to-warning/3" />
+                <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-info/8 blur-2xl" />
 
                 <LandingReveal delay={120}>
                   <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/3 p-6 shadow-[0_24px_64px_rgba(0,0,0,0.3)] sm:p-7">
-                    <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-teal-400/50 to-transparent" />
+                    <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-info/50 to-transparent" />
 
                     <div className="flex items-center justify-between gap-3 border-b border-white/8 pb-5">
                       <div>
@@ -259,7 +259,7 @@ function BetaSignupSection() {
                           Create your free account
                         </p>
                       </div>
-                      <div className="landing-float-fast rounded-full border border-teal-400/20 bg-teal-400/8 p-3 text-teal-400">
+                      <div className="landing-float-fast rounded-full border border-info/20 bg-info/8 p-3 text-info">
                         <Sparkles className="h-4 w-4" />
                       </div>
                     </div>
@@ -267,8 +267,8 @@ function BetaSignupSection() {
                     <div className="mt-6 space-y-4">
                       <div className="grid grid-cols-3 gap-3">
                         {[
-                          { label: "Plan", value: "ELITE", color: "text-teal-400" },
-                          { label: "Credits", value: "300", color: "text-amber-400" },
+                          { label: "Plan", value: "ELITE", color: "text-info" },
+                          { label: "Credits", value: "300", color: "text-warning" },
                           { label: "Card", value: "None", color: "text-white/60" },
                         ].map((item) => (
                           <div key={item.label} className="rounded-2xl border border-white/8 bg-white/2 px-3 py-3 text-center">
@@ -280,7 +280,7 @@ function BetaSignupSection() {
 
                       <Link
                         href="/sign-up"
-                        className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-amber-400 font-bold text-slate-950 shadow-[0_8px_30px_rgba(245,158,11,0.25)] transition-all hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-[0_14px_45px_rgba(245,158,11,0.35)]"
+                        className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-warning font-bold text-foreground shadow-[0_8px_30px_rgba(245,158,11,0.25)] transition-all hover:-translate-y-0.5 hover:bg-warning12607 hover:shadow-[0_14px_45px_rgba(245,158,11,0.35)]"
                       >
                         <Sparkles className="h-4 w-4" />
                         Start Free — Get ELITE Access
@@ -288,7 +288,7 @@ function BetaSignupSection() {
 
                       <div className="rounded-2xl border border-white/8 bg-white/2 px-4 py-4 text-sm leading-7 text-white/40">
                         <div className="flex items-center gap-2 text-white/60">
-                          <ShieldCheck className="h-4 w-4 text-teal-400" />
+                          <ShieldCheck className="h-4 w-4 text-info" />
                           <span className="font-mono text-[10px] uppercase tracking-wide">
                             No card · No catch · Cancel anytime
                           </span>
@@ -306,7 +306,7 @@ function BetaSignupSection() {
               </div>
             </div>
 
-            <div className="h-px w-full bg-linear-to-r from-transparent via-amber-400/40 to-transparent" />
+            <div className="h-px w-full bg-linear-to-r from-transparent via-warning/40 to-transparent" />
           </div>
         </LandingReveal>
       </div>

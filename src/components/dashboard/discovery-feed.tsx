@@ -37,7 +37,7 @@ function SignalClusterBanner({ items }: { items: DiscoveryFeedItem[] }) {
   if (!cluster) return null;
 
   return (
-    <div className="flex items-center gap-2 rounded-2xl border border-amber-500/25 bg-amber-500/8 px-3.5 py-2.5 text-[11px] font-semibold text-amber-400">
+    <div className="flex items-center gap-2 rounded-2xl border border-warning/25 bg-warning/8 px-3.5 py-2.5 text-[11px] font-semibold text-warning">
       <Zap className="h-3.5 w-3.5 shrink-0" />
       <span>
         <span className="font-bold">Momentum cluster detected</span>

@@ -40,7 +40,7 @@ const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-DNS-Prefetch-Control", value: "on" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=(), interest-cohort=()" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
   { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
 ];
 
@@ -122,6 +122,11 @@ const nextConfig: NextConfig = {
   ],
   async redirects() {
     return [
+      {
+        source: "/portfolio/demo",
+        destination: "/tools/demo-portfolio",
+        permanent: true,
+      },
       {
         source: "/dashboard/screener",
         destination: "/dashboard/discovery",
@@ -205,6 +210,14 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=60" },
           { key: "CDN-Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=60" },
+        ],
+      },
+      // Voice session endpoint — scoped microphone permission (global is "microphone=()")
+      {
+        source: "/api/support/voice-session",
+        headers: [
+          { key: "Permissions-Policy", value: "camera=(), microphone=(self), geolocation=(), interest-cohort=()" },
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate" },
         ],
       },
       // NOTE: `/api/stocks/*` routes set their own `Cache-Control` per-response

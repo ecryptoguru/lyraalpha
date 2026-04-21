@@ -58,7 +58,7 @@ Premium intelligence experiences built on structured crypto engine computation:
 - **Shock Simulator** — stress-scenario replay with Lyra hedge interpretation
 - **Crypto Portfolio Intelligence Workspace** — health, fragility, benchmark, Monte Carlo, regime alignment, holdings heatmap in sequence
 - **Asset Intelligence Pages** — scored, regime-aware, Lyra-interpreted per-crypto-asset views
-- **Public Blog** — crypto-focused content (on-chain signals, regime cycles, AI hallucination risks), hybrid static + DB posts, category pages, RSS feed, OG share cards, reading progress. Fed by AMI 2.0 via secure webhook bridge. Weekly digest Mondays.
+- **Public Blog** — crypto-focused content (on-chain signals, regime cycles, AI hallucination risks), hybrid static + DB posts, WebP hero images (1200×800, optimized at ~90KB), category pages, RSS feed, OG share cards, reading progress. Fed by AMI 2.0 via secure webhook bridge. Weekly digest Mondays.
 
 These are workflow products. Not chat with more tokens.
 

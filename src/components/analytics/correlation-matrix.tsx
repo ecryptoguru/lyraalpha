@@ -12,19 +12,19 @@ interface CorrelationMatrixProps {
 type BenchmarkMeta = { label: string; icon: LucideIcon; color: string };
 
 const BENCHMARK_METADATA: Record<string, BenchmarkMeta> = {
-  "BTC-USD": { label: "Bitcoin", icon: Globe, color: "text-amber-400" },
-  "ETH-USD": { label: "Ethereum", icon: Target, color: "text-cyan-400" },
-  "SOL-USD": { label: "Solana", icon: Globe, color: "text-orange-400" },
-  "BNB-USD": { label: "BNB", icon: Coins, color: "text-amber-400" },
-  "XRP-USD": { label: "XRP", icon: Target, color: "text-emerald-400" },
-  "ADA-USD": { label: "Cardano", icon: Target, color: "text-cyan-400" },
+  "BTC-USD": { label: "Bitcoin", icon: Globe, color: "text-warning" },
+  "ETH-USD": { label: "Ethereum", icon: Target, color: "text-info" },
+  "SOL-USD": { label: "Solana", icon: Globe, color: "text-warning" },
+  "BNB-USD": { label: "BNB", icon: Coins, color: "text-warning" },
+  "XRP-USD": { label: "XRP", icon: Target, color: "text-success" },
+  "ADA-USD": { label: "Cardano", icon: Target, color: "text-info" },
 };
 
 const FALLBACK_META: BenchmarkMeta = { label: "", icon: Globe, color: "text-muted-foreground" };
 
 function correlationColor(c: number): string {
-  if (c > 0.3) return "text-emerald-400";
-  if (c < -0.3) return "text-rose-400";
+  if (c > 0.3) return "text-success";
+  if (c < -0.3) return "text-danger";
   return "text-foreground";
 }
 

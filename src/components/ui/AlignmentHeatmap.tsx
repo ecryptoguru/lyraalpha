@@ -65,15 +65,15 @@ function AlignmentHeatmapComponent({
   const getBorderColor = (regime: MarketRegime) => {
     switch (regime) {
       case "STRONG_RISK_ON":
-        return "border-emerald-500/40";
+        return "border-success/40";
       case "RISK_ON":
-        return "border-green-500/40";
+        return "border-success/40";
       case "NEUTRAL":
-        return "border-slate-400/40";
+        return "border-border/40";
       case "DEFENSIVE":
-        return "border-amber-500/40";
+        return "border-warning/40";
       case "RISK_OFF":
-        return "border-rose-500/40";
+        return "border-danger/40";
       default:
         return "border-white/5";
     }
@@ -90,10 +90,10 @@ function AlignmentHeatmapComponent({
           className={cn(
             "text-xs font-bold tracking-tighter",
             alignmentScore >= 75
-              ? "text-emerald-400"
+              ? "text-success"
               : alignmentScore >= 50
-                ? "text-amber-400"
-                : "text-rose-400",
+                ? "text-warning"
+                : "text-danger",
           )}
         >
           {Math.round(alignmentScore)}%

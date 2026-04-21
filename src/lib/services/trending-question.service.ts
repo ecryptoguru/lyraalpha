@@ -1,9 +1,12 @@
 import { prisma } from "../prisma";
 import { getGpt54Model } from "@/lib/ai/service";
 import { buildHumanizerGuidance } from "@/lib/ai/prompts/humanizer";
-import { generateText } from "ai";
+import { generateObject } from "ai";
+import { z } from "zod";
 import { createLogger } from "@/lib/logger";
-import { safeJsonParse } from "@/lib/utils/json";
+import { recordCronLlmCall } from "@/lib/ai/alerting";
+import { calculateLLMCost } from "@/lib/ai/cost-calculator";
+import { resolveGptDeployment } from "@/lib/ai/orchestration";
 
 const logger = createLogger({ service: "trending-question-service" });
 
@@ -80,22 +83,30 @@ Return ONLY a JSON array of 6 objects with this structure:
   }
 ]`;
 
+    const llmStart = Date.now();
     try {
-      const result = await generateText({
+      const questionSchema = z.object({
+        questions: z.array(z.object({
+          question: z.string(),
+          category: z.enum(["whats-moving", "risk-check", "big-picture", "asset-spotlight", "compared-to", "how-it-works"]),
+        })).min(1).max(6),
+      });
+
+      const { object } = await generateObject({
         model: getGpt54Model("lyra-nano"),
+        schema: questionSchema,
         prompt,
       });
 
-      const response = result.text;
+      const newQuestions = object.questions;
 
-      // Clean and parse
-      const cleanedResponse = response
-        .replace(/```json\n?/g, "")
-        .replace(/```\n?/g, "")
-        .trim();
-      const newQuestions = safeJsonParse<{ question: string; category: string }[]>(cleanedResponse);
+      // P1: Wire cron LLM call into alerting
+      const latencyMs = Date.now() - llmStart;
+      const deployment = resolveGptDeployment("lyra-nano");
+      const costBreakdown = calculateLLMCost({ model: deployment, inputTokens: Math.round(prompt.length / 4), outputTokens: Math.round(JSON.stringify(object).length / 4) });
+      recordCronLlmCall({ job: "trending-questions", costUsd: costBreakdown.totalCost, latencyMs, success: true }).catch(() => {});
 
-      if (!newQuestions || !Array.isArray(newQuestions) || newQuestions.length === 0) {
+      if (newQuestions.length === 0) {
         throw new Error("Invalid question format from AI");
       }
 
@@ -125,6 +136,8 @@ Return ONLY a JSON array of 6 objects with this structure:
       );
       return { success: true, count: newQuestions.length };
     } catch (error) {
+      const latencyMs = Date.now() - llmStart;
+      recordCronLlmCall({ job: "trending-questions", costUsd: 0, latencyMs, success: false }).catch(() => {});
       logger.error({ error }, "❌ Failed to refresh trending questions");
       throw error;
     }

@@ -5,8 +5,8 @@ import { LandingReveal } from "@/components/landing/LandingReveal";
 import { getRecentPostsAsync, formatDate } from "@/lib/blog/posts";
 
 const categoryAccent: Record<string, string> = {
-  "AI & Technology":   "border-teal-400/20 bg-teal-400/6 text-teal-300",
-  "Market Intelligence": "border-amber-400/20 bg-amber-400/6 text-amber-300",
+  "AI & Technology":   "border-info/20 bg-info/6 text-info",
+  "Market Intelligence": "border-warning/20 bg-warning/6 text-warning",
   Markets:             "border-white/15 bg-white/5 text-white/55",
 };
 
@@ -23,12 +23,12 @@ export async function BlogPreview() {
           {/* Header row */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-amber-400/65">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-warning/65">
                 From the journal
               </p>
               <h2 className="mt-3 text-3xl font-light tracking-[-0.04em] text-white sm:text-4xl">
                 Intelligence,{" "}
-                <span className="text-amber-400">written down.</span>
+                <span className="text-warning">written down.</span>
               </h2>
               <p className="mt-3 max-w-xl text-sm leading-7 text-white/40">
                 Deep dives on AI-grounded analysis, market regimes, and how
@@ -37,7 +37,7 @@ export async function BlogPreview() {
             </div>
             <Link
               href="/blog"
-              className="group shrink-0 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/3 px-5 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-white/55 transition-all duration-300 hover:border-amber-400/25 hover:bg-amber-400/6 hover:text-amber-300"
+              className="group shrink-0 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/3 px-5 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-white/55 transition-all duration-300 hover:border-warning/25 hover:bg-warning/6 hover:text-warning"
             >
               All articles
               <ArrowRight className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-0.5" />
@@ -64,7 +64,7 @@ export async function BlogPreview() {
                 </span>
 
                 {/* Title */}
-                <h3 className="mt-4 flex-1 text-base font-semibold leading-snug tracking-tight text-white transition-colors group-hover:text-amber-100 sm:text-[17px]">
+                <h3 className="mt-4 flex-1 text-base font-semibold leading-snug tracking-tight text-white transition-colors group-hover:text-primary/60 sm:text-[17px]">
                   {post.title}
                 </h3>
 
@@ -82,7 +82,7 @@ export async function BlogPreview() {
                   <span className="font-mono text-[10px] text-white/28">
                     {formatDate(post.date)}
                   </span>
-                  <ArrowRight className="ml-auto h-3.5 w-3.5 text-amber-400/40 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-amber-400" />
+                  <ArrowRight className="ml-auto h-3.5 w-3.5 text-warning/40 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-warning" />
                 </div>
               </Link>
             </LandingReveal>
@@ -94,7 +94,7 @@ export async function BlogPreview() {
           <div className="mt-10 flex justify-center">
             <Link
               href="/blog"
-              className="group inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.28em] text-white/35 transition-all duration-300 hover:text-amber-400"
+              className="group inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.28em] text-white/35 transition-all duration-300 hover:text-warning"
             >
               View all articles
               <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />

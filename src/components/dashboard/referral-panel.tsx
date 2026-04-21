@@ -51,11 +51,11 @@ export function ReferralPanel() {
   };
 
   const tierColors: Record<string, string> = {
-    bronze: "from-amber-700 to-amber-900",
-    silver: "from-gray-400 to-gray-600",
-    gold: "from-yellow-400 to-yellow-600",
-    platinum: "from-cyan-400 to-amber-500",
-    none: "from-gray-400 to-gray-500",
+    bronze: "from-[#FFD700]/70 to-[#FFD700]/90",
+    silver: "from-muted-foreground/40 to-muted-foreground/60",
+    gold: "from-[#FFD700] to-[#FFD700]",
+    platinum: "from-cyan-400 to-[#FFD700]",
+    none: "from-muted-foreground/40 to-muted-foreground/50",
   };
 
   const tierBadges: Record<string, string> = {
@@ -127,7 +127,7 @@ export function ReferralPanel() {
         </div>
         <div className="bg-muted/30 rounded-2xl p-3">
           <p className="text-[10px] uppercase text-muted-foreground font-bold">Credits Earned</p>
-          <p className="text-2xl font-bold text-green-500">+{data.totalCreditsEarned}</p>
+          <p className="text-2xl font-bold text-success">+{data.totalCreditsEarned}</p>
         </div>
       </div>
 
@@ -155,12 +155,12 @@ export function ReferralPanel() {
       {/* How it works */}
       <div className="text-xs text-muted-foreground space-y-1">
         <p className="flex items-center gap-2">
-          <Gift className="h-3 w-3 text-green-500" />
-          Friend signs up → They get <span className="text-green-500 font-bold">50 credits</span>
+          <Gift className="h-3 w-3 text-success" />
+          Friend signs up → They get <span className="text-success font-bold">50 credits</span>
         </p>
         <p className="flex items-center gap-2">
-          <Trophy className="h-3 w-3 text-amber-500" />
-          They use 10 credits → You get <span className="text-amber-500 font-bold">75 credits</span>
+          <Trophy className="h-3 w-3 text-warning" />
+          They use 10 credits → You get <span className="text-warning font-bold">75 credits</span>
         </p>
       </div>
     </div>

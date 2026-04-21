@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createClientLogger } from "@/lib/logger/client";
+
+const logger = createClientLogger("myra-voice");
 
 export type VoiceState = "idle" | "connecting" | "active" | "error";
 
@@ -249,7 +252,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
             // Try to find a real (non-virtual) microphone
             const realMic = audioInputs.find((d) => d.label && !isVirtual(d.label));
             if (realMic) {
-              console.info(`[Myra voice] selecting real mic: ${realMic.label} (deviceId: ${realMic.deviceId.slice(0, 8)}…)`);
+              logger.info("Selecting real mic", { label: realMic.label, deviceId: `${realMic.deviceId.slice(0, 8)}…` });
               return navigator.mediaDevices.getUserMedia({
                 audio: {
                   deviceId: { exact: realMic.deviceId },
@@ -261,10 +264,10 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
             }
             // No real mic found — fall through to default
             if (audioInputs.length > 0) {
-              console.warn(`[Myra voice] no real mic found among ${audioInputs.length} devices, using default (may be virtual)`);
+              logger.warn(`No real mic found among ${audioInputs.length} devices, using default (may be virtual)`);
             }
           } catch (e) {
-            console.warn("[Myra voice] device enumeration failed, using default:", e);
+            logger.warn("Device enumeration failed, using default", { error: e });
           }
 
           // Fallback: use default device with echoCancellation
@@ -344,28 +347,30 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       if (outputAudioCtxRef.current.state === "suspended") {
         await outputAudioCtxRef.current.resume();
       }
-      console.info(
-        `[Myra voice] AudioContext sample rates — input: ${inputAudioCtxRef.current.sampleRate}, output: ${outputAudioCtxRef.current.sampleRate}`,
-      );
+      logger.info("AudioContext sample rates", {
+        inputSampleRate: inputAudioCtxRef.current.sampleRate,
+        outputSampleRate: outputAudioCtxRef.current.sampleRate,
+      });
 
       // Log MediaStream track state to verify mic is live
       const micTrack = mediaStream.getAudioTracks()[0];
       if (micTrack) {
-        console.info(
-          `[Myra voice] mic track — enabled: ${micTrack.enabled}, readyState: ${micTrack.readyState}, muted: ${micTrack.muted}, label: ${micTrack.label}`,
-        );
+        logger.info("Mic track state", {
+          enabled: micTrack.enabled,
+          readyState: micTrack.readyState,
+          muted: micTrack.muted,
+          label: micTrack.label,
+        });
         // Warn if the selected device looks like a virtual audio driver
         // (BlackHole, Soundflower, VB-Audio, etc.) — these often produce
         // silence unless audio is explicitly routed through them.
         const label = micTrack.label.toLowerCase();
         const virtualKeywords = ["blackhole", "soundflower", "vb-audio", "virtual", "cable", "loopback"];
         if (virtualKeywords.some((kw) => label.includes(kw))) {
-          console.warn(
-            `[Myra voice] selected mic "${micTrack.label}" appears to be a virtual audio device — it may produce silence. Please select your real microphone in browser settings.`,
-          );
+          logger.warn(`Selected mic "${micTrack.label}" appears to be a virtual audio device — it may produce silence`);
         }
       } else {
-        console.error("[Myra voice] no audio track in MediaStream!");
+        logger.error("No audio track in MediaStream");
       }
 
       nextPlayTimeRef.current = outputAudioCtxRef.current.currentTime;
@@ -412,16 +417,16 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
           micLevelAccumCount = 0;
         }
         if (audioChunkCount === 1) {
-          console.info(`[Myra voice] first audio chunk — rms: ${rms.toFixed(4)}, samples: ${float32.length}`);
+          logger.info("First audio chunk", { rms: rms.toFixed(4), samples: float32.length });
         } else if (audioChunkCount % 500 === 0) {
           const avgRms = audioRmsSum / audioRmsCount;
-          console.info(`[Myra voice] audio chunk ${audioChunkCount} — avg rms: ${avgRms.toFixed(4)}, transport status: ${activeSession.transport?.status ?? "unknown"}`);
+          logger.info(`Audio chunk ${audioChunkCount}`, { avgRms: avgRms.toFixed(4), transportStatus: activeSession.transport?.status ?? "unknown" });
           audioRmsSum = 0;
           audioRmsCount = 0;
           // After ~4s of audio (500 chunks × 128 samples / 24kHz), warn if mic is silent
           if (avgRms < 0.001 && !silenceWarningShown) {
             silenceWarningShown = true;
-            console.warn("[Myra voice] microphone is producing silence — check your mic selection in browser settings");
+            logger.warn("Microphone is producing silence — check mic selection in browser settings");
             setErrorMessage("Microphone not detecting audio. Please check your mic selection in browser settings.");
             // Auto-clear the error after 5s so the session can continue
             setTimeout(() => {
@@ -467,21 +472,21 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
 
         // ── Diagnostic logging for key events ─────────────────────────────
         if (type === "session.created" || type === "session.updated") {
-          console.info(`[Myra voice] ${type}`);
+          logger.info(`Realtime event: ${type}`);
         }
         if (type === "response.created") {
-          console.info("[Myra voice] response.created — model is generating");
+          logger.info("Response created — model is generating");
           setIsThinking(true);
           setIsSpeaking(false);
         }
         if (type === "input_audio_buffer.speech_started") {
-          console.info("[Myra voice] user speech detected (VAD)");
+          logger.info("User speech detected (VAD)");
         }
         if (type === "input_audio_buffer.speech_stopped") {
-          console.info("[Myra voice] user speech ended (VAD)");
+          logger.info("User speech ended (VAD)");
         }
         if (type === "error") {
-          console.error("[Myra voice] server error event:", event);
+          logger.error("Server error event", { event });
         }
 
         // ── Silence auto-stop ──────────────────────────────────────────────
@@ -496,7 +501,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
         if (type === "response.done") {
           const wasGreetingPending = greetingResponsePendingRef.current;
           greetingResponsePendingRef.current = false;
-          console.info(`[Myra voice] response.done (wasGreetingPending=${wasGreetingPending})`);
+          logger.info("Response done", { wasGreetingPending });
           setIsThinking(false);
           setIsSpeaking(false);
           hasReceivedAudio = false;
@@ -554,7 +559,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
 
           // V-INJ: Check user transcript for injection patterns — defense-in-depth logging
           if (checkVoiceInjection(text)) {
-            console.warn("[Myra voice] Injection pattern detected in user transcript — model should disregard via system prompt guardrails");
+            logger.warn("Injection pattern detected in user transcript — model should disregard via system prompt guardrails");
           }
 
           // PII-1: Redact PII from user transcript before emitting to UI
@@ -593,7 +598,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
             ? (rawErr as { message?: string }).message!
             : typeof rawErr === "string" ? rawErr
             : JSON.stringify(rawErr).slice(0, 200);
-        console.error("[Myra voice] session error:", err);
+        logger.error("Session error", { error: err });
         // Reset greeting pending so silence timer works for future responses
         greetingResponsePendingRef.current = false;
         setErrorMessage(msg ?? "Voice session error");
@@ -644,7 +649,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
         try {
           session.transport.requestResponse?.({});
         } catch (e) {
-          console.warn("[Myra voice] greeting requestResponse failed:", e);
+          logger.warn("Greeting requestResponse failed", { error: e });
         }
       };
 
@@ -660,7 +665,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       // fire the greeting anyway (the config was likely already applied).
       const greetingTimeout = setTimeout(() => {
         if (!greetingFiredRef.current) {
-          console.warn("[Myra voice] session.updated not received within 2s, firing greeting anyway");
+          logger.warn("session.updated not received within 2s, firing greeting anyway");
           fireGreeting();
         }
       }, 2_000);
@@ -669,7 +674,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       // pending flag so subsequent response.done events start the silence timer.
       const greetingPendingTimeout = setTimeout(() => {
         if (greetingResponsePendingRef.current) {
-          console.warn("[Myra voice] greeting response.done never received, clearing pending flag");
+          logger.warn("Greeting response.done never received, clearing pending flag");
           greetingResponsePendingRef.current = false;
         }
       }, 8_000);
@@ -687,7 +692,7 @@ export function useMyraVoice({ onTranscript }: UseMyraVoiceOptions) {
       acquiredStream?.getTracks().forEach((t) => t.stop());
       // Invalidate cache on error — token may have expired
       sessionCacheRef.current = null;
-      console.error("[Myra voice] startVoice error:", err);
+      logger.error("StartVoice error", { error: err });
       const msg = err instanceof Error ? err.message : "Failed to start voice session";
       setErrorMessage(msg);
       setState("error");

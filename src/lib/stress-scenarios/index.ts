@@ -1,5 +1,5 @@
 import { US_SCENARIOS } from "./us";
-import type { ScenarioDefinition, ScenarioProxyPath, StressScenarioId, SupportedStressAssetType } from "./types";
+import type { ScenarioDefinition, ScenarioProxyPath, StressScenarioId } from "./types";
 
 export * from "./types";
 
@@ -9,14 +9,6 @@ export const STRESS_SCENARIO_IDS = [...new Set(ALL_SCENARIOS.map((scenario) => s
 
 export function getScenario(id: StressScenarioId | string, region: "US" | "IN"): ScenarioDefinition | undefined {
   return ALL_SCENARIOS.find((s) => s.id === id && s.region === region);
-}
-
-function normalizeType(assetType: string): SupportedStressAssetType {
-  if (assetType === "CRYPTO" || assetType === "DEFI" || assetType === "NFTS" || assetType === "LAYER1" || assetType === "LAYER2") {
-    return assetType;
-  }
-
-  return "CRYPTO";
 }
 
 function pickProxy(paths: ScenarioProxyPath[], candidates: string[]) {
@@ -31,11 +23,10 @@ function pickProxy(paths: ScenarioProxyPath[], candidates: string[]) {
 // Map asset type/region to the best proxy path within a scenario
 export function getBestProxyPath(
   scenario: ScenarioDefinition,
-  assetType: string,
+  _assetType: string,
   symbol: string,
 ): ScenarioProxyPath {
   const paths = scenario.proxyPaths;
-  const normalizedType = normalizeType(assetType);
 
   // Exact symbol match first (if asset IS one of the proxies)
   const exactMatch = paths.find(
@@ -43,18 +34,8 @@ export function getBestProxyPath(
   );
   if (exactMatch) return exactMatch;
 
-  if (scenario.region === "US") {
-    if (normalizedType === "CRYPTO") {
-      return pickProxy(paths, ["BTC-USD", "ETH-USD", "SOL-USD"]);
-    }
-    return pickProxy(paths, ["BTC-USD", "ETH-USD", "SOL-USD"]);
-  }
-
-  if (scenario.region === "IN") {
-    return pickProxy(paths, ["BTC-USD", "ETH-USD", "SOL-USD"]);
-  }
-
-  return paths[0];
+  // All regions and asset types currently resolve to the same proxy preference order
+  return pickProxy(paths, ["BTC-USD", "ETH-USD", "SOL-USD"]);
 }
 
 // Compute a simple beta estimate from recent daily returns vs the proxy's known annualized vol.
@@ -86,8 +67,8 @@ export function estimateBeta(
 }
 
 function stdDev(arr: number[]): number {
-  if (!arr.length) return 0;
+  if (arr.length < 2) return 0;
   const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
-  const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length;
+  const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (arr.length - 1);
   return Math.sqrt(variance);
 }

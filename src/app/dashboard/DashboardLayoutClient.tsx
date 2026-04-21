@@ -3,6 +3,7 @@
 import { type CSSProperties, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
+import { MotionConfig } from "framer-motion";
 
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { CreditDisplay } from "@/components/dashboard/credit-display";
@@ -21,6 +22,8 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { OnboardingGate } from "@/components/onboarding/onboarding-gate";
 import { DisclaimerBanner } from "@/components/compliance/DisclaimerBanner";
 import { useSessionTracking } from "@/hooks/use-session-tracking";
+import { useDensity } from "@/hooks/use-density";
+import { ErrorBoundary } from "@/components/dashboard/error-boundary";
 import type { PlanTier } from "@/lib/ai/config";
 import { getDashboardBreadcrumbSegments } from "@/lib/dashboard-routes";
 import { PlanProvider, usePlanContext } from "@/lib/context/plan-context";
@@ -31,8 +34,23 @@ const LiveChatBubble = dynamic(
   { ssr: false },
 );
 
-const EliteCommandPalette = dynamic(
-  () => import("@/components/dashboard/elite-command-palette").then((mod) => mod.EliteCommandPalette),
+const CommandPalette = dynamic(
+  () => import("@/components/dashboard/command-palette").then((mod) => mod.CommandPalette),
+  { ssr: false },
+);
+
+const KeyboardShortcutsProvider = dynamic(
+  () => import("@/components/dashboard/keyboard-shortcuts-provider").then((mod) => mod.KeyboardShortcutsProvider),
+  { ssr: false },
+);
+
+const DensityToggleProvider = dynamic(
+  () => import("@/components/dashboard/density-toggle-provider").then((mod) => mod.DensityToggleProvider),
+  { ssr: false },
+);
+
+const CoachmarkTour = dynamic(
+  () => import("@/components/onboarding/coachmark-tour").then((mod) => mod.CoachmarkTour),
   { ssr: false },
 );
 
@@ -40,6 +58,23 @@ const WhatsChangedCard = dynamic(
   () => import("@/components/dashboard/whats-changed-card").then((mod) => mod.WhatsChangedCard),
   { ssr: false },
 );
+
+// ─── Density badge — compact toggle in navbar ──────────────────────────────────
+function DensityBadge() {
+  const { density, toggleDensity } = useDensity();
+  return (
+    <button
+      onClick={toggleDensity}
+      className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-border/40 bg-muted/30 px-2 py-1 text-[10px] font-medium text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/50 transition-colors"
+      aria-label={`Density: ${density}. Click to toggle.`}
+      data-coachmark="density-badge"
+      title={`Density: ${density} (⌘⇧P)`}
+    >
+      <span className="text-[9px] leading-none">{density === "cozy" ? "≋" : "≡"}</span>
+      <span className="font-mono">{density}</span>
+    </button>
+  );
+}
 
 // ─── Inner layout — reads LIVE plan from PlanProvider context ────────────────
 // Must be a child of PlanProvider so usePlanContext() reflects real-time plan.
@@ -96,9 +131,10 @@ function DashboardLayoutInner({
 
   const breadcrumbSegments = useMemo(() => getDashboardBreadcrumbSegments(pathname), [pathname]);
 
+  // MotionConfig reducedMotion="user" respects the OS prefers-reduced-motion setting.
   return (
-    <>
-      <SidebarProvider
+    <MotionConfig reducedMotion="user">
+    <SidebarProvider
         style={
           {
             "--sidebar-width": "18rem",
@@ -108,20 +144,21 @@ function DashboardLayoutInner({
       >
         <AppSidebar />
         <SidebarInset
+          id="main-content"
           className="bg-background flex flex-col h-dvh md:h-svh overflow-x-clip overflow-y-auto scroll-smooth will-change-scroll overscroll-contain transition-colors duration-300 min-w-0 w-full max-w-full"
           style={{ WebkitOverflowScrolling: "touch", scrollBehavior: "smooth" }}
         >
           <DisclaimerBanner />
-          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b border-border/30 bg-background/80 backdrop-blur-xl sticky top-0 z-50 pr-4 w-full max-w-full">
+          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 border-b border-border/20 bg-background/70 backdrop-blur-2xl sticky top-0 z-50 pr-4 w-full max-w-full shadow-[0_1px_0_0_rgba(0,212,255,0.06)]">
             <div className="flex items-center gap-2 px-4" suppressHydrationWarning>
-              <SidebarTrigger className="-ml-1 inline-flex text-muted-foreground hover:text-foreground" />
+              <SidebarTrigger className="-ml-1 inline-flex text-muted-foreground hover:text-foreground" data-coachmark="sidebar-trigger" />
               <Separator orientation="vertical" className="mr-2 h-4 bg-border hidden sm:block" />
               <Breadcrumb className="hidden md:flex">
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
                     <BreadcrumbLink
                       href="/dashboard"
-                      className="text-muted-foreground hover:text-primary transition-colors py-2 px-1 min-h-[38px] flex items-center"
+                      className="text-muted-foreground hover:text-cyan-400 transition-colors py-2 px-1 min-h-[38px] flex items-center"
                     >
                       Dashboard
                     </BreadcrumbLink>
@@ -140,7 +177,7 @@ function DashboardLayoutInner({
                           ) : (
                             <BreadcrumbLink
                               href={segment.href}
-                              className="text-muted-foreground hover:text-primary transition-colors py-2 px-1 min-h-[38px] flex items-center"
+                              className="text-muted-foreground hover:text-cyan-400 transition-colors py-2 px-1 min-h-[38px] flex items-center"
                             >
                               {segment.label}
                             </BreadcrumbLink>
@@ -165,13 +202,14 @@ function DashboardLayoutInner({
               <div className="inline-flex md:hidden">
                 {userId ? <CreditDisplay userId={userId} /> : null}
               </div>
-              <div className="hidden md:flex items-center min-w-[320px] lg:min-w-[380px] xl:min-w-[440px]">
+              <div className="hidden md:flex items-center min-w-[320px] lg:min-w-[380px] xl:min-w-[440px]" data-coachmark="navbar-search">
                 <NavbarSearch desktopExpanded />
               </div>
               <div className="flex items-center md:hidden">
                 <NavbarSearch />
               </div>
-              <RegionToggle />
+              <div data-coachmark="region-toggle"><RegionToggle /></div>
+              <DensityBadge />
             </div>
           </header>
           {isElite && showDeferredSurface ? <WhatsChangedCard /> : null}
@@ -179,14 +217,19 @@ function DashboardLayoutInner({
             className="flex flex-1 flex-col animate-in fade-in slide-in-from-bottom-2 duration-200 ease-out min-w-0 w-full max-w-full"
             suppressHydrationWarning
           >
-            {children}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
           </div>
         </SidebarInset>
-        {pathname === "/dashboard/lyra" ? null : <LiveChatBubble />}
-        {isElite && showOverlayHelpers ? <EliteCommandPalette /> : null}
+        {pathname === "/dashboard/lyra" ? null : <div data-coachmark="live-chat-bubble"><LiveChatBubble /></div>}
+        {showOverlayHelpers ? <CommandPalette /> : null}
+        {showOverlayHelpers ? <KeyboardShortcutsProvider /> : null}
+        {showOverlayHelpers ? <DensityToggleProvider /> : null}
+        {showOverlayHelpers ? <CoachmarkTour /> : null}
         <OnboardingGate initialCompleted={initialOnboardingCompleted} />
       </SidebarProvider>
-    </>
+    </MotionConfig>
   );
 }
 

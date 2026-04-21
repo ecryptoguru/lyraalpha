@@ -33,8 +33,8 @@ export function ScoreVelocityBadge({ trendDelta, momentumDelta, className }: Sco
             className={cn(
               "inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[9px] font-bold tabular-nums cursor-help",
               isRising
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                : "border-red-500/30 bg-red-500/10 text-red-400",
+                ? "border-success/30 bg-success/10 text-success"
+                : "border-danger/30 bg-danger/10 text-danger",
               className,
             )}
           >

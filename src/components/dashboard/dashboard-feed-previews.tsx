@@ -9,13 +9,13 @@ import { ShareInsightButton } from "@/components/dashboard/share-insight-button"
 function healthToneClass(healthBand: DashboardPortfolioPreview["healthBand"]): string {
   switch (healthBand) {
     case "Strong":
-      return "text-emerald-400";
+      return "text-success";
     case "Balanced":
-      return "text-amber-400";
+      return "text-cyan-400";
     case "Fragile":
-      return "text-amber-400";
+      return "text-[#FFD700]";
     case "High Risk":
-      return "text-rose-400";
+      return "text-danger";
     default:
       return "text-muted-foreground";
   }
@@ -75,24 +75,24 @@ export function DashboardFeedPreviews({
                 </div>
               ) : null}
               {portfolioPreview.guidanceTitle && portfolioPreview.guidanceBody ? (
-                <div className="mt-3 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-300">{portfolioPreview.guidanceTitle}</p>
+                <div className="mt-3 rounded-2xl border border-warning/20 bg-warning/5 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-warning">{portfolioPreview.guidanceTitle}</p>
                   <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">{portfolioPreview.guidanceBody}</p>
                 </div>
               ) : null}
               {portfolioPreview.missingInsight ? (
-                <p className="mt-3 text-[11px] text-amber-300 leading-relaxed">{portfolioPreview.missingInsight}</p>
+                <p className="mt-3 text-[11px] text-warning leading-relaxed">{portfolioPreview.missingInsight}</p>
               ) : null}
               {portfolioPreview.stressHeadline ? (
-                <div className="mt-3 rounded-2xl border border-rose-500/20 bg-rose-500/5 p-3">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-rose-300">Stress test trigger</p>
+                <div className="mt-3 rounded-2xl border border-danger/20 bg-danger/5 p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-danger">Stress test trigger</p>
                   <p className="mt-1 text-xs font-semibold text-foreground">{portfolioPreview.stressHeadline}</p>
                   {portfolioPreview.stressBody ? (
                     <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">{portfolioPreview.stressBody}</p>
                   ) : null}
                   <Link
                     href="/dashboard/stress-test"
-                    className="mt-3 inline-flex min-h-[38px] items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-rose-300 hover:text-rose-200 transition-colors"
+                    className="mt-3 inline-flex min-h-[38px] items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-danger hover:text-danger/50 transition-colors"
                   >
                     Run stress test
                     <ArrowRight className="h-3 w-3" />

@@ -33,7 +33,7 @@ export function renderInline(text: string, keyPrefix: string) {
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-0.5 text-amber-600 underline underline-offset-2 transition-colors hover:text-amber-500 dark:text-amber-300 dark:hover:text-amber-200"
+          className="inline-flex items-center gap-0.5 text-primary underline underline-offset-2 transition-colors hover:text-warning dark:text-warning dark:hover:text-primary/60"
         >
           {linkMatch[1]}
           <ExternalLink className="w-3 h-3 shrink-0" />
@@ -65,7 +65,7 @@ export function renderContent(content: string) {
       if (i < lines.length) i++;
       elements.push(
         <pre key={`block-code-${i}`} className="my-1.5 overflow-x-auto rounded-lg bg-black/10 p-2.5 font-mono text-[11px] leading-relaxed dark:bg-white/8">
-          {lang && <span className="mb-1 block text-[9px] uppercase tracking-wider text-slate-400 dark:text-white/30">{lang}</span>}
+          {lang && <span className="mb-1 block text-[9px] uppercase tracking-wider text-muted-foreground dark:text-white/30">{lang}</span>}
           <code>{codeLines.join("\n")}</code>
         </pre>
       );
@@ -76,7 +76,7 @@ export function renderContent(content: string) {
     const h3 = line.match(/^### (.+)/);
     if (h3) {
       elements.push(
-        <p key={`h3-${i}`} className="mt-2 mb-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-white/40">
+        <p key={`h3-${i}`} className="mt-2 mb-0.5 text-[11px] font-bold uppercase tracking-wide text-muted-foreground dark:text-white/40">
           {renderInline(h3[1], `h3-${i}`)}
         </p>
       );
@@ -88,7 +88,7 @@ export function renderContent(content: string) {
     const h2 = line.match(/^## (.+)/);
     if (h2) {
       elements.push(
-        <p key={`h2-${i}`} className="mt-2.5 mb-1 text-[12px] font-bold text-slate-700 dark:text-white/80">
+        <p key={`h2-${i}`} className="mt-2.5 mb-1 text-[12px] font-bold text-foreground dark:text-white/80">
           {renderInline(h2[1], `h2-${i}`)}
         </p>
       );
@@ -101,7 +101,7 @@ export function renderContent(content: string) {
     if (bullet) {
       elements.push(
         <span key={`li-${i}`} className="flex items-start gap-1.5 text-[12px] leading-relaxed">
-          <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500/70" />
+          <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-warning/70" />
           <span>{renderInline(bullet[1], `li-${i}`)}</span>
         </span>
       );
@@ -114,7 +114,7 @@ export function renderContent(content: string) {
     if (numbered) {
       elements.push(
         <span key={`nl-${i}`} className="flex items-start gap-1.5 text-[12px] leading-relaxed">
-          <span className="mt-0.5 shrink-0 text-[10px] font-bold text-amber-500/70">{numbered[1]}.</span>
+          <span className="mt-0.5 shrink-0 text-[10px] font-bold text-warning/70">{numbered[1]}.</span>
           <span>{renderInline(numbered[2], `nl-${i}`)}</span>
         </span>
       );

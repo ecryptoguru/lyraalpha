@@ -124,7 +124,7 @@ function SparklineChartComponent({
       <div className="absolute -top-1 -right-1">
         <span
           className={`text-[8px] font-bold ${
-            trend === "up" ? "text-emerald-400" : "text-rose-400"
+            trend === "up" ? "text-success" : "text-danger"
           }`}
         >
           {trend === "up" ? "↗" : "↘"}

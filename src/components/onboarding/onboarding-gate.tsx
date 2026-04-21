@@ -5,6 +5,9 @@ import { Check, ChevronRight, Loader2, Globe, TrendingUp, Cpu, BarChart2, Coins,
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRegion, type Region } from "@/lib/context/RegionContext";
+import { createClientLogger } from "@/lib/logger/client";
+
+const logger = createClientLogger("onboarding");
 
 interface UserPreferences {
   preferredRegion: "US" | "IN" | "BOTH";
@@ -91,7 +94,7 @@ export function OnboardingGate({ initialCompleted = false }: { initialCompleted?
         setOnboardingCompleted(completed);
         try { window.localStorage.setItem(ONBOARDING_CACHE_KEY, completed ? "1" : "0"); } catch { /* ignore */ }
       } catch (err) {
-        console.warn("Failed to load preferences from server", err);
+        logger.warn("Failed to load preferences from server", { error: err });
         // Do not block user on load failure, just use defaults.
       } finally {
         if (active) setLoading(false);
@@ -151,7 +154,7 @@ export function OnboardingGate({ initialCompleted = false }: { initialCompleted?
       }
       setOnboardingCompleted(true);
       try { window.localStorage.setItem(ONBOARDING_CACHE_KEY, "1"); } catch { /* ignore */ }
-      console.warn("Failed to save preferences to server", err);
+      logger.warn("Failed to save preferences to server", { error: err });
     } finally {
       if (preferredRegion === "US" || preferredRegion === "IN") {
         setRegion(preferredRegion as Region);
@@ -327,7 +330,7 @@ export function OnboardingGate({ initialCompleted = false }: { initialCompleted?
               )}
 
               {error && (
-                <p className="mt-4 text-sm font-medium text-rose-400">{error}</p>
+                <p className="mt-4 text-sm font-medium text-danger">{error}</p>
               )}
             </div>
 

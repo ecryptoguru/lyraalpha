@@ -11,7 +11,7 @@ const PublicMyraPanel = dynamic(
     ssr: false,
     loading: () => (
       <div className="fixed bottom-6 right-4 z-50 sm:right-6">
-        <div className="h-[min(640px,calc(100dvh-3rem))] w-[calc(100vw-1.5rem)] sm:w-[410px] rounded-4xl border border-slate-200/80 bg-white/96 shadow-[0_30px_90px_rgba(15,23,42,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#07111f]/96 dark:shadow-[0_30px_90px_rgba(0,0,0,0.48)]" />
+        <div className="h-[min(640px,calc(100dvh-3rem))] w-[calc(100vw-1.5rem)] sm:w-[410px] rounded-4xl border border-border/80 bg-white/96 shadow-[0_30px_90px_rgba(15,23,42,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#07111f]/96 dark:shadow-[0_30px_90px_rgba(0,0,0,0.48)]" />
       </div>
     ),
   },
@@ -45,7 +45,7 @@ export function PublicMyraWidget() {
   }, []);
 
   const launcherClassName =
-    "group relative flex h-16 w-16 items-center justify-center rounded-full border border-amber-300/40 bg-white text-amber-500 shadow-[0_16px_48px_rgba(245,158,11,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/60 hover:bg-amber-50 dark:border-amber-300/30 dark:bg-[#0b1322] dark:text-amber-200 dark:shadow-[0_16px_48px_rgba(0,0,0,0.42)] dark:hover:border-amber-300/45 dark:hover:bg-[#0f182b]";
+    "group relative flex h-16 w-16 items-center justify-center rounded-full border border-warning/40 bg-white text-warning shadow-[0_16px_48px_rgba(245,158,11,0.2)] transition-all duration-300 hover:-translate-y-1 hover:border-warning/60 hover:bg-primary/5 dark:border-warning/30 dark:bg-[#0b1322] dark:text-primary/60 dark:shadow-[0_16px_48px_rgba(0,0,0,0.42)] dark:hover:border-warning/45 dark:hover:bg-[#0f182b]";
 
   const preparePanel = () => {
     setShouldRenderPanel(true);
@@ -85,8 +85,8 @@ export function PublicMyraWidget() {
           >
             <span className="absolute inset-1 rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.24),rgba(245,158,11,0.02)_68%,transparent)] blur-md transition-opacity duration-300 group-hover:opacity-100 dark:bg-[radial-gradient(circle,rgba(251,191,36,0.22),rgba(251,191,36,0.02)_68%,transparent)]" />
             <MessageCircle className="relative z-10 h-7 w-7" />
-            <span className="absolute inset-0 rounded-full border border-amber-300/18" />
-            <span className="absolute inset-0 rounded-full bg-amber-300/10" style={{ animation: "ping 1s cubic-bezier(0,0,0.2,1) 7" }} />
+            <span className="absolute inset-0 rounded-full border border-warning/18" />
+            <span className="absolute inset-0 rounded-full bg-warning3634" style={{ animation: "ping 1s cubic-bezier(0,0,0.2,1) 7" }} />
           </button>
         )}
       </AnimatePresence>

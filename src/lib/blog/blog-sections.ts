@@ -110,44 +110,44 @@ export const BLOG_SECTIONS: BlogSection[] = [
 // Section color mappings for UI
 export const SECTION_COLORS: Record<string, { border: string; bg: string; text: string }> = {
   slate: {
-    border: "border-slate-400/20",
-    bg: "bg-slate-400/6",
-    text: "text-slate-300",
+    border: "border-border/20",
+    bg: "bg-muted/6",
+    text: "text-muted-foreground",
   },
   blue: {
-    border: "border-blue-400/20",
-    bg: "bg-blue-400/6",
-    text: "text-blue-300",
+    border: "border-info/20",
+    bg: "bg-info/6",
+    text: "text-info/60",
   },
   green: {
-    border: "border-green-400/20",
-    bg: "bg-green-400/6",
-    text: "text-green-300",
+    border: "border-success/20",
+    bg: "bg-success/6",
+    text: "text-success",
   },
   purple: {
-    border: "border-purple-400/20",
-    bg: "bg-purple-400/6",
-    text: "text-purple-300",
+    border: "border-primary/20",
+    bg: "bg-primary/6",
+    text: "text-primary/60",
   },
   amber: {
-    border: "border-amber-400/20",
-    bg: "bg-amber-400/6",
-    text: "text-amber-300",
+    border: "border-warning/20",
+    bg: "bg-warning/6",
+    text: "text-warning",
   },
   cyan: {
-    border: "border-cyan-400/20",
-    bg: "bg-cyan-400/6",
-    text: "text-cyan-300",
+    border: "border-info/20",
+    bg: "bg-info/6",
+    text: "text-info",
   },
   rose: {
-    border: "border-rose-400/20",
-    bg: "bg-rose-400/6",
-    text: "text-rose-300",
+    border: "border-danger/20",
+    bg: "bg-danger/6",
+    text: "text-danger",
   },
   indigo: {
-    border: "border-indigo-400/20",
-    bg: "bg-indigo-400/6",
-    text: "text-indigo-300",
+    border: "border-primary/20",
+    bg: "bg-primary/6",
+    text: "text-primary/60",
   },
 };
 

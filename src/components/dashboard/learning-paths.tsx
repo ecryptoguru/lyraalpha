@@ -11,14 +11,14 @@ import { LEARNING_PATHS, type LearningPathDefinition, type LearningPathIconKey }
 function getPathIcon(iconKey: LearningPathIconKey) {
   switch (iconKey) {
     case "award":
-      return <Award className="h-4 w-4 text-emerald-500" />;
+      return <Award className="h-4 w-4 text-success" />;
     case "play":
-      return <PlayCircle className="h-4 w-4 text-amber-500" />;
+      return <PlayCircle className="h-4 w-4 text-cyan-400" />;
     case "clock":
-      return <Clock className="h-4 w-4 text-amber-500" />;
+      return <Clock className="h-4 w-4 text-[#FFD700]" />;
     case "star":
     default:
-      return <Star className="h-4 w-4 text-amber-500" />;
+      return <Star className="h-4 w-4 text-[#FFD700]" />;
   }
 }
 
@@ -96,7 +96,7 @@ export function LearningPathsCarousel({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ["#f59e0b", "#10b981", "#3b82f6", "#0ea5e9"],
+          colors: ["#FFD700", "#10b981", "#3b82f6", "#00D4FF"],
         });
         toast.success(`Path Completed! +${data.amount} XP`, {
           icon: "🌟",
@@ -144,7 +144,7 @@ export function LearningPathsCarousel({
           const cardClassName = cn(
             "min-w-[280px] sm:min-w-[320px] shrink-0 snap-start rounded-2xl border bg-linear-to-br p-5 flex flex-col relative overflow-hidden transition-all",
             path.color,
-            locked ? "opacity-80 grayscale-[0.15] hover:border-amber-400/40" : "hover:border-primary/50"
+            locked ? "opacity-80 grayscale-[0.15] hover:border-warning/40" : "hover:border-primary/50"
           );
 
           const cardContent = (
@@ -170,13 +170,13 @@ export function LearningPathsCarousel({
               <div className="mt-auto space-y-3 relative z-10">
                 <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
                   <span className="text-muted-foreground">{completedCount} / {totalCount} Modules</span>
-                  <span className={isComplete ? "text-emerald-500" : "text-foreground"}>{percent}%</span>
+                  <span className={isComplete ? "text-success" : "text-foreground"}>{percent}%</span>
                 </div>
                 <div className="h-1.5 w-full bg-background/50 rounded-full overflow-hidden">
                   <div
                     className={cn(
                       "h-full rounded-full transition-all duration-1000",
-                      isComplete ? "bg-emerald-500" : "bg-primary"
+                      isComplete ? "bg-success" : "bg-primary"
                     )}
                     style={{ width: `${percent}%` }}
                   />
@@ -188,7 +188,7 @@ export function LearningPathsCarousel({
                       type="button"
                       onClick={() => handleClaimReward(path.id)}
                       disabled={claiming === path.id}
-                      className="w-full py-2 rounded-2xl bg-emerald-500/10 text-emerald-500 text-xs font-bold border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
+                      className="w-full py-2 rounded-2xl bg-success/10 text-success text-xs font-bold border border-success/20 hover:bg-success/20 transition-colors"
                     >
                       {claiming === path.id ? "Claiming..." : "Claim Bonus XP"}
                     </button>

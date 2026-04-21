@@ -33,12 +33,12 @@ function MetricCard({
   color?: "blue" | "emerald" | "amber" | "red" | "cyan2" | "cyan";
 }) {
   const colorMap = {
-    blue: "bg-amber-500/10 border-amber-500/20 text-amber-500",
-    emerald: "bg-emerald-500/10 border-emerald-500/20 text-emerald-500",
-    amber: "bg-amber-500/10 border-amber-500/20 text-amber-500",
-    red: "bg-red-500/10 border-red-500/20 text-red-500",
-    cyan2: "bg-cyan-500/10 border-cyan-500/20 text-cyan-500",
-    cyan: "bg-cyan-500/10 border-cyan-500/20 text-cyan-500",
+    blue: "bg-warning/10 border-warning/20 text-warning",
+    emerald: "bg-success/10 border-success/20 text-success",
+    amber: "bg-warning/10 border-warning/20 text-warning",
+    red: "bg-danger/10 border-danger/20 text-danger",
+    cyan2: "bg-info/10 border-info/20 text-info",
+    cyan: "bg-info/10 border-info/20 text-info",
   };
 
   return (
@@ -119,12 +119,12 @@ export function NSEIntelligence({
     >
       <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+          <span className="w-1.5 h-1.5 rounded-full bg-warning" />
           NSE Intelligence
         </h3>
         <div className="flex items-center gap-2">
           {isFnO && (
-            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[9px] font-bold text-amber-500 uppercase tracking-wider">
+            <span className="px-2 py-0.5 rounded-full bg-warning/10 border border-warning/20 text-[9px] font-bold text-warning uppercase tracking-wider">
               F&O
             </span>
           )}

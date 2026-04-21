@@ -32,7 +32,7 @@ export default function SignInPage() {
               Sign in to LyraAlpha.
             </h1>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-muted-foreground sm:text-base">
-              Use your Clerk account to access the dashboard, Lyra, portfolio analysis, and market intelligence.
+              Sign in to access the dashboard, Lyra, portfolio analysis, and market intelligence.
             </p>
             <FeatureCards items={featureItems} />
           </div>

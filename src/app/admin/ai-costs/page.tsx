@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { useAdminAICosts } from "@/hooks/use-admin";
-import { Loader2, ShieldAlert, Brain, Zap, Database, TrendingUp, Mic } from "lucide-react";
+import Link from "next/link";
+import { useAdminAICosts, useAdminAIOps } from "@/hooks/use-admin";
+import { Loader2, ShieldAlert, Brain, Zap, Database, TrendingUp, Mic, AlertTriangle, CheckCircle2, DollarSign } from "lucide-react";
 import {
   estimateVoiceSessionCost,
   REALTIME_VOICE_AUDIO_INPUT_TOKENS_PER_MINUTE,
@@ -38,6 +39,58 @@ function MetricCard({ label, value, icon: Icon, subtitle }: {
   );
 }
 
+interface AIOpsSnapshot {
+  dailyCost: { date: string; cumulativeCostUsd: number; thresholdUsd: number; pctOfThreshold: number };
+  fallbackMitigation: { active: boolean; ttlSeconds: number | null };
+}
+
+function OpsBanner() {
+  const { data } = useAdminAIOps();
+  const ops = (data ?? null) as AIOpsSnapshot | null;
+  if (!ops) return null;
+  const pct = ops.dailyCost.pctOfThreshold;
+  const costColor = pct >= 100 ? "text-danger" : pct >= 75 ? "text-warning" : "text-success";
+  const barColor = pct >= 100 ? "#ef4444" : pct >= 75 ? "#f59e0b" : "#22c55e";
+  return (
+    <div className="rounded-2xl border border-white/5 bg-card/80 backdrop-blur-xl p-4 space-y-3">
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-1 min-w-[220px]">
+          <DollarSign className="h-3.5 w-3.5 text-muted-foreground/70" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Today&apos;s AI Spend</span>
+          <span className={`text-sm font-bold font-mono ml-auto ${costColor}`}>
+            ${ops.dailyCost.cumulativeCostUsd.toFixed(2)}
+            <span className="text-[10px] text-muted-foreground ml-1">/ ${ops.dailyCost.thresholdUsd}</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {ops.fallbackMitigation.active ? (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-warning/15 text-warning">
+              <AlertTriangle className="h-3 w-3" /> Fallback mitigation ACTIVE
+              {ops.fallbackMitigation.ttlSeconds && <span className="font-normal normal-case ml-1">· {Math.ceil(ops.fallbackMitigation.ttlSeconds / 60)}m left</span>}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-success/10 text-success">
+              <CheckCircle2 className="h-3 w-3" /> Primary model healthy
+            </span>
+          )}
+          <Link
+            href="/admin/ai-limits"
+            className="text-[10px] font-semibold text-primary hover:underline whitespace-nowrap"
+          >
+            Adjust thresholds →
+          </Link>
+        </div>
+      </div>
+      <div className="w-full bg-muted/30 rounded-full h-1 overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-500"
+          style={{ width: `${Math.min(100, pct)}%`, background: barColor }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function AdminAICostsPage() {
   const { data, error, isLoading } = useAdminAICosts();
 
@@ -63,6 +116,9 @@ export default function AdminAICostsPage() {
         <h1 className="text-2xl font-bold tracking-tight">AI Cost Intelligence</h1>
         <p className="text-xs text-muted-foreground mt-1">Token usage, cost tracking, heavy user detection</p>
       </div>
+
+      {/* Live ops banner — daily spend vs threshold + fallback mitigation status */}
+      <OpsBanner />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -206,7 +262,7 @@ export default function AdminAICostsPage() {
                     <td className="py-2 font-medium text-foreground">{user.email}</td>
                     <td className="py-2 text-right text-muted-foreground">{user.count.toLocaleString()}</td>
                     <td className="py-2 text-right font-mono text-foreground">{user.tokens.toLocaleString()}</td>
-                    <td className="py-2 text-right font-mono text-amber-400">${(user.costUsd ?? 0).toFixed(4)}</td>
+                    <td className="py-2 text-right font-mono text-warning">${(user.costUsd ?? 0).toFixed(4)}</td>
                   </tr>
                 );
               })}
@@ -240,7 +296,7 @@ export default function AdminAICostsPage() {
                     <td className="py-2 font-mono text-foreground">{row.model}</td>
                     <td className="py-2 text-right text-muted-foreground">{row.count.toLocaleString()}</td>
                     <td className="py-2 text-right font-mono text-foreground">{row.tokens.toLocaleString()}</td>
-                    <td className="py-2 text-right font-mono text-amber-400">${row.costUsd.toFixed(4)}</td>
+                    <td className="py-2 text-right font-mono text-warning">${row.costUsd.toFixed(4)}</td>
                     <td className="py-2 text-right font-mono text-muted-foreground">${avgCost.toFixed(5)}</td>
                   </tr>
                 );
@@ -267,9 +323,9 @@ export default function AdminAICostsPage() {
         ];
         const p = REALTIME_VOICE_PRICING;
         return (
-          <div className="rounded-2xl border border-amber-400/20 bg-card/80 backdrop-blur-xl p-5 space-y-5">
+          <div className="rounded-2xl border border-warning/20 bg-card/80 backdrop-blur-xl p-5 space-y-5">
             <div className="flex items-center gap-2">
-              <Mic className="h-3.5 w-3.5 text-amber-400" />
+              <Mic className="h-3.5 w-3.5 text-warning" />
               <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                 Myra Voice Agent — gpt-realtime-mini Cost Reference
               </h3>
@@ -289,15 +345,15 @@ export default function AdminAICostsPage() {
                 <tbody>
                   <tr className="border-b border-border/20">
                     <td className="py-2 font-medium text-foreground">Audio</td>
-                    <td className="py-2 text-right font-mono text-amber-400">${p.audioInputPerMillion.toFixed(2)}</td>
-                    <td className="py-2 text-right font-mono text-emerald-400">${p.cachedAudioInputPerMillion.toFixed(2)}</td>
-                    <td className="py-2 text-right font-mono text-amber-400">${p.audioOutputPerMillion.toFixed(2)}</td>
+                    <td className="py-2 text-right font-mono text-warning">${p.audioInputPerMillion.toFixed(2)}</td>
+                    <td className="py-2 text-right font-mono text-success">${p.cachedAudioInputPerMillion.toFixed(2)}</td>
+                    <td className="py-2 text-right font-mono text-warning">${p.audioOutputPerMillion.toFixed(2)}</td>
                   </tr>
                   <tr className="border-b border-border/20">
                     <td className="py-2 font-medium text-foreground">Text</td>
-                    <td className="py-2 text-right font-mono text-amber-400">${p.textInputPerMillion.toFixed(2)}</td>
-                    <td className="py-2 text-right font-mono text-emerald-400">${p.cachedTextInputPerMillion.toFixed(2)}</td>
-                    <td className="py-2 text-right font-mono text-amber-400">${p.textOutputPerMillion.toFixed(2)}</td>
+                    <td className="py-2 text-right font-mono text-warning">${p.textInputPerMillion.toFixed(2)}</td>
+                    <td className="py-2 text-right font-mono text-success">${p.cachedTextInputPerMillion.toFixed(2)}</td>
+                    <td className="py-2 text-right font-mono text-warning">${p.textOutputPerMillion.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -329,7 +385,7 @@ export default function AdminAICostsPage() {
                       <td className="py-2 text-right font-mono text-muted-foreground">
                         ${(cost.textInputCost + cost.cachedTextInputCost + cost.textOutputCost).toFixed(4)}
                       </td>
-                      <td className="py-2 text-right font-mono font-bold text-amber-400">${cost.totalCost.toFixed(4)}</td>
+                      <td className="py-2 text-right font-mono font-bold text-warning">${cost.totalCost.toFixed(4)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -346,7 +402,7 @@ export default function AdminAICostsPage() {
               ].map(({ label, value }) => (
                 <div key={label} className="rounded-xl border border-white/5 bg-card/60 p-3 space-y-1">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
-                  <div className="text-lg font-bold text-amber-400">{value}</div>
+                  <div className="text-lg font-bold text-warning">{value}</div>
                 </div>
               ))}
             </div>
@@ -373,7 +429,7 @@ export default function AdminAICostsPage() {
                   <td className="py-2 text-foreground font-medium">{row.plan}</td>
                   <td className="py-2 font-mono text-foreground">{row.model}</td>
                   <td className="py-2 text-right text-muted-foreground">{row.count.toLocaleString()}</td>
-                  <td className="py-2 text-right font-mono text-amber-400">${row.costUsd.toFixed(4)}</td>
+                  <td className="py-2 text-right font-mono text-warning">${row.costUsd.toFixed(4)}</td>
                 </tr>
               ))}
               {(!data.planModelBreakdown || data.planModelBreakdown.length === 0) && (

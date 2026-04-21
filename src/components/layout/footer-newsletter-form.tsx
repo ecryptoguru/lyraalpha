@@ -1,25 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export function FooterNewsletterForm() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Ensure client-side only rendering for form state
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isValidEmail = useMemo(() => {
+    return EMAIL_REGEX.test(email.trim());
+  }, [email]);
+
+  const isDisabled = !mounted || submitting || !isValidEmail;
 
   async function subscribeToBlog(e?: React.FormEvent) {
     e?.preventDefault();
-    if (!email.trim()) return;
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) return;
 
     setSubmitting(true);
     try {
       const response = await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: trimmedEmail }),
       });
 
       if (!response.ok) {
@@ -42,16 +57,16 @@ export function FooterNewsletterForm() {
         value={email}
         onChange={(event) => setEmail(event.target.value)}
         placeholder="you@domain.com"
-        className="h-11 rounded-[1.2rem] border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 dark:border-white/10 dark:bg-black/20 dark:text-white dark:placeholder:text-white/28"
+        className="h-11 rounded-[1.2rem] border-border/50 bg-white text-foreground placeholder:text-muted-foreground dark:border-white/10 dark:bg-black/20 dark:text-white dark:placeholder:text-white/28"
         aria-label="Subscribe to blog"
-        required
+        disabled={submitting}
       />
       <Button
         type="submit"
-        disabled={submitting || !email.trim()}
-        className="h-11 w-full rounded-full bg-amber-400 font-bold text-slate-950 hover:bg-amber-300"
+        disabled={isDisabled}
+        className="h-11 w-full rounded-full bg-warning font-bold text-foreground hover:bg-warning1623 disabled:opacity-50"
       >
-        Subscribe
+        {submitting ? "Subscribing..." : "Subscribe"}
       </Button>
     </form>
   );

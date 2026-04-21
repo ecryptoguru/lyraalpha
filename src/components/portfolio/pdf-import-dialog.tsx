@@ -277,7 +277,7 @@ export function PdfImportDialog({
                   <button
                     type="button"
                     onClick={() => { setFile(null); setSummary(null); setResults(null); }}
-                    className="text-[11px] text-muted-foreground hover:text-red-400 transition-colors flex items-center gap-1"
+                    className="text-[11px] text-muted-foreground hover:text-danger transition-colors flex items-center gap-1"
                   >
                     <Trash2 className="h-3 w-3" />
                     Remove
@@ -321,12 +321,12 @@ export function PdfImportDialog({
                   <p className="text-lg font-bold text-foreground">{summary.parsedCount}</p>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Detected</p>
                 </div>
-                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3 text-center">
-                  <p className="text-lg font-bold text-emerald-400">{summary.importedCount}</p>
+                <div className="rounded-xl border border-success/20 bg-success/5 p-3 text-center">
+                  <p className="text-lg font-bold text-success">{summary.importedCount}</p>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Imported</p>
                 </div>
-                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 text-center">
-                  <p className="text-lg font-bold text-amber-400">{summary.skippedCount}</p>
+                <div className="rounded-xl border border-warning/20 bg-warning/5 p-3 text-center">
+                  <p className="text-lg font-bold text-warning">{summary.skippedCount}</p>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Skipped</p>
                 </div>
               </div>
@@ -338,21 +338,21 @@ export function PdfImportDialog({
                     key={i}
                     className={cn(
                       "flex items-center justify-between px-4 py-2.5 border-b border-white/5 last:border-0 text-xs",
-                      r.status === "imported" ? "bg-emerald-500/5" : "bg-amber-500/5",
+                      r.status === "imported" ? "bg-success/5" : "bg-warning/5",
                     )}
                   >
                     <div className="flex items-center gap-2">
                       {r.status === "imported" ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
                       ) : (
-                        <AlertCircle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+                        <AlertCircle className="h-3.5 w-3.5 text-warning shrink-0" />
                       )}
                       <span className="font-bold text-foreground">{r.symbol}</span>
                     </div>
                     <span
                       className={cn(
                         "text-[10px]",
-                        r.status === "imported" ? "text-emerald-400" : "text-amber-400",
+                        r.status === "imported" ? "text-success" : "text-warning",
                       )}
                     >
                       {r.status === "imported" ? "Imported" : (r.message ?? "Skipped")}

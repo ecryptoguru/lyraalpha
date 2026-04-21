@@ -133,10 +133,10 @@ export function InstitutionalTimeline({
                 className={cn(
                   "absolute left-0 top-0 h-7 w-7 rounded-full border-4 border-background flex items-center justify-center z-10 transition-all duration-300 group-hover:scale-105",
                   event.severity === "HIGH"
-                    ? "bg-rose-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.3)]"
+                    ? "bg-danger text-danger-foreground shadow-danger/30"
                     : event.severity === "MEDIUM"
-                      ? "bg-amber-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)]"
-                      : "bg-primary text-white shadow-[0_0_20px_rgba(var(--primary),0.3)]",
+                      ? "bg-warning text-warning-foreground shadow-warning/30"
+                      : "bg-primary text-primary-foreground shadow-primary/30",
                 )}
               >
                 {recent && (
@@ -169,10 +169,10 @@ export function InstitutionalTimeline({
                         className={cn(
                           "px-2 py-0.5 rounded-2xl text-[9px] font-bold uppercase tracking-widest flex items-center gap-1",
                           metadata.sentiment === "POSITIVE"
-                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            ? "bg-success/10 text-success border border-success/20"
                             : metadata.sentiment === "NEGATIVE"
-                              ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+                              ? "bg-danger/10 text-danger border border-danger/20"
+                              : "bg-warning/10 text-warning border border-warning/20",
                         )}
                       >
                         {metadata.sentiment === "POSITIVE"

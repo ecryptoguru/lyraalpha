@@ -127,7 +127,7 @@ function NeuralLattice() {
         </bufferGeometry>
         <pointsMaterial
           size={0.038}
-          color="#F59E0B"
+          color="#818CF8"
           transparent
           opacity={0.85}
           sizeAttenuation
@@ -145,7 +145,7 @@ function NeuralLattice() {
           />
         </bufferGeometry>
         <lineBasicMaterial
-          color="#14B8A6"
+          color="#22D3EE"
           transparent
           opacity={0.12}
           blending={THREE.AdditiveBlending}
@@ -163,7 +163,7 @@ function NeuralLattice() {
         </bufferGeometry>
         <pointsMaterial
           size={0.022}
-          color="#14B8A6"
+          color="#22D3EE"
           transparent
           opacity={0.7}
           sizeAttenuation
@@ -202,7 +202,7 @@ function LightRings() {
       <mesh ref={ring1Ref}>
         <torusGeometry args={[3.6, 0.012, 8, 180]} />
         <meshBasicMaterial
-          color="#F59E0B"
+          color="#818CF8"
           transparent
           opacity={0.12}
           blending={THREE.AdditiveBlending}
@@ -212,7 +212,7 @@ function LightRings() {
       <mesh ref={ring2Ref}>
         <torusGeometry args={[4.1, 0.008, 8, 180]} />
         <meshBasicMaterial
-          color="#14B8A6"
+          color="#22D3EE"
           transparent
           opacity={0.08}
           blending={THREE.AdditiveBlending}
@@ -241,7 +241,7 @@ function StarField() {
       </bufferGeometry>
       <pointsMaterial
         size={0.012}
-        color="#ffffff"
+        color="#C4B5FD"
         transparent
         opacity={0.28}
         sizeAttenuation
@@ -290,15 +290,15 @@ function HudCard({ label, value, delta, positive = true, icon, className = "" }:
           </p>
           {delta && (
             <p
-              className={`mt-0.5 font-mono text-[10px] font-semibold ${positive ? "text-teal-400" : "text-rose-400"}`}
+              className={`mt-0.5 font-mono text-[10px] font-semibold ${positive ? "text-info" : "text-danger"}`}
             >
               {delta}
             </p>
           )}
         </div>
-        <div className="mt-0.5 text-amber-400/70">{icon}</div>
+        <div className="mt-0.5 text-warning/70">{icon}</div>
       </div>
-      <div className="hud-scan-line pointer-events-none absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-teal-400/40 to-transparent" />
+      <div className="hud-scan-line pointer-events-none absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-info/40 to-transparent" />
     </div>
   );
 }
@@ -325,7 +325,7 @@ function MiniCandlestick() {
             y1={b.high}
             x2={b.x + 3}
             y2={b.low}
-            stroke={b.up ? "#14B8A6" : "#F59E0B"}
+            stroke={b.up ? "#22D3EE" : "#818CF8"}
             strokeWidth="0.8"
           />
           <rect
@@ -333,7 +333,7 @@ function MiniCandlestick() {
             y={Math.min(b.open, b.close)}
             width={6}
             height={Math.abs(b.open - b.close)}
-            fill={b.up ? "#14B8A6" : "#F59E0B"}
+            fill={b.up ? "#22D3EE" : "#818CF8"}
             opacity={0.85}
           />
         </g>
@@ -391,8 +391,8 @@ export function HeroWebGL() {
 
       {/* Fallback gradient for no-motion / SSR */}
       <div className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(20,184,166,0.08),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(245,158,11,0.07),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_40%,rgba(129,140,248,0.08),transparent_60%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(34,211,238,0.07),transparent_55%)]" />
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(4,8,22,0)_60%,rgba(4,8,22,1)_100%)]" />
       </div>
 
@@ -408,12 +408,12 @@ export function HeroWebGL() {
             <div className="space-y-8">
               {/* Eyebrow */}
               <div className="flex flex-wrap items-center gap-3">
-                <span className="inline-flex items-center gap-2 rounded-full border border-teal-400/25 bg-teal-400/8 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-teal-300">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal-400" />
+                <span className="inline-flex items-center gap-2 rounded-full border border-info/25 bg-info/8 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-info">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-info" />
                   Beta · Open Access
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-teal-400/20 bg-teal-400/6 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-teal-300/80">
-                  <Zap className="h-3 w-3 text-teal-400" />
+                <span className="inline-flex items-center gap-2 rounded-full border border-info/20 bg-info/6 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-info/80">
+                  <Zap className="h-3 w-3 text-info" />
                   US &amp; India · 5 Asset Classes
                 </span>
               </div>
@@ -426,12 +426,12 @@ export function HeroWebGL() {
                 <h1 className="hero-headline mt-5 text-[2.4rem] font-extralight leading-[0.92] tracking-[-0.055em] text-white sm:text-[3.6rem] lg:text-[4.4rem] xl:text-[5.2rem]">
                   engines compute.
                   <span className="block font-thin text-white-300">AI interprets.</span>
-                  <span className="block font-thin text-amber-300 text-[3rem] sm:text-[4.4rem] lg:text-[5.6rem] xl:text-[6.8rem] mt-3">AI OS for Investments.</span>
+                  <span className="block font-thin text-warning text-[3rem] sm:text-[4.4rem] lg:text-[5.6rem] xl:text-[6.8rem] mt-3">AI OS for Investments.</span>
                 </h1>
               </div>
 
               {/* Sub copy */}
-              <p className="max-w-xl border-l-2 border-teal-400/50 pl-5 font-mono text-sm leading-8 text-white/75 sm:text-base">
+              <p className="max-w-xl border-l-2 border-info/50 pl-5 font-mono text-sm leading-8 text-white/75 sm:text-base">
                 Engines compute the signals. Lyra interprets them. No hallucinated metrics — ever.
               </p>
 
@@ -439,7 +439,7 @@ export function HeroWebGL() {
               <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
                 <Link
                   href="/sign-up"
-                  className="hero-cta-primary group inline-flex h-14 items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400 px-8 font-bold text-slate-950 shadow-[0_0_40px_rgba(245,158,11,0.3),0_18px_60px_rgba(245,158,11,0.2)] transition-all duration-300 hover:-translate-y-1 hover:bg-amber-300 hover:shadow-[0_0_60px_rgba(245,158,11,0.45),0_24px_80px_rgba(245,158,11,0.28)]"
+                  className="hero-cta-primary group inline-flex h-14 items-center gap-2 rounded-full border border-warning/30 bg-warning px-8 font-bold text-foreground shadow-[0_0_40px_rgba(245,158,11,0.3),0_18px_60px_rgba(245,158,11,0.2)] transition-all duration-300 hover:-translate-y-1 hover:bg-warning15337 hover:shadow-[0_0_60px_rgba(245,158,11,0.45),0_24px_80px_rgba(245,158,11,0.28)]"
                 >
                   Sign Up Free
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -448,7 +448,7 @@ export function HeroWebGL() {
                   size="lg"
                   variant="outline"
                   targetId="scrollytelling"
-                  className="h-14 rounded-full border border-white/15 bg-white/4 px-8 font-bold text-white/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-teal-400/40 hover:bg-teal-400/8 hover:text-white"
+                  className="h-14 rounded-full border border-white/15 bg-white/4 px-8 font-bold text-white/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-info/40 hover:bg-info/8 hover:text-white"
                 >
                   See How It Works
                 </ScrollToSectionButton>
@@ -461,21 +461,21 @@ export function HeroWebGL() {
               <div className="grid grid-cols-3 gap-3 pt-2">
                 {[
                   { value: "250M+", label: "Investors · US & India", accent: "amber" },
-                  { value: "6",     label: "Signals computed first", accent: "teal" },
+                  { value: "6",     label: "Signals computed first", accent: "info" },
                   { value: "5",     label: "Asset classes", accent: "default" },
                 ].map((s) => (
                   <div
                     key={s.label}
                     className={`rounded-2xl border p-4 backdrop-blur-sm ${
                       s.accent === "amber"
-                        ? "border-amber-400/18 bg-amber-400/5"
-                        : s.accent === "teal"
-                        ? "border-teal-400/15 bg-teal-400/4"
+                        ? "border-warning/18 bg-warning/5"
+                        : s.accent === "info"
+                        ? "border-info/15 bg-info/4"
                         : "border-white/8 bg-white/3"
                     }`}
                   >
                     <p className={`font-mono text-2xl font-bold tracking-tight sm:text-3xl ${
-                      s.accent === "amber" ? "text-amber-400" : s.accent === "teal" ? "text-teal-400" : "text-white"
+                      s.accent === "amber" ? "text-warning" : s.accent === "info" ? "text-info" : "text-white"
                     }`}>
                       {s.value}
                     </p>
@@ -513,11 +513,11 @@ export function HeroWebGL() {
                       Price Action
                     </p>
                     <p className="mt-1 font-mono text-lg font-bold text-white">Cross-Asset</p>
-                    <p className="font-mono text-[10px] text-teal-400">Illustrative example</p>
+                    <p className="font-mono text-[10px] text-info">Illustrative example</p>
                   </div>
                   <MiniCandlestick />
                 </div>
-                <div className="hud-scan-line pointer-events-none absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-amber-400/40 to-transparent" />
+                <div className="hud-scan-line pointer-events-none absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-warning/40 to-transparent" />
               </div>
 
               {/* Sentiment gauge */}
@@ -530,7 +530,7 @@ export function HeroWebGL() {
                   <div className="mt-3 flex items-center gap-3">
                     <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/8">
                       <div
-                        className="h-full rounded-full bg-linear-to-r from-teal-500 to-amber-400"
+                        className="h-full rounded-full bg-linear-to-r from-info to-warning"
                         style={{ width: "68%" }}
                       />
                     </div>
@@ -538,11 +538,11 @@ export function HeroWebGL() {
                   </div>
                   <div className="mt-2 flex justify-between">
                     <span className="font-mono text-[9px] text-white/30">Bear</span>
-                    <span className="font-mono text-[9px] text-amber-400">Bullish Bias</span>
+                    <span className="font-mono text-[9px] text-warning">Bullish Bias</span>
                     <span className="font-mono text-[9px] text-white/30">Bull</span>
                   </div>
                 </div>
-                <div className="hud-scan-line pointer-events-none absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-teal-400/40 to-transparent" />
+                <div className="hud-scan-line pointer-events-none absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-info/40 to-transparent" />
               </div>
             </div>
           </div>

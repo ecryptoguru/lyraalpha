@@ -74,7 +74,7 @@ export function DashboardMarketBriefCard({
               {formatTimeAgo(briefing.generatedAt)} · {briefing.regimeLabel}
             </p>
             {briefing.source === "live_fallback" ? (
-              <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.16em] text-amber-300">
+              <p className="mt-1 text-[9px] font-bold uppercase tracking-[0.16em] text-warning">
                 Fallback briefing
               </p>
             ) : null}
@@ -105,8 +105,8 @@ export function DashboardMarketBriefCard({
           </p>
 
           {briefing.source === "live_fallback" ? (
-            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-3">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-300">Why this brief differs</p>
+            <div className="rounded-2xl border border-warning/20 bg-warning/5 p-3">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-warning">Why this brief differs</p>
               <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
                 The scheduled brief is still warming up, so this view is stitched together from current regime, movers and fresh discovery signals.
               </p>
@@ -124,13 +124,13 @@ export function DashboardMarketBriefCard({
             </div>
             <div className="rounded-2xl border border-white/10 bg-card/60 p-3">
               <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Gainer</p>
-              <p className="mt-2 text-sm font-bold text-emerald-400 truncate">
+              <p className="mt-2 text-sm font-bold text-success truncate">
                 {briefing.topMovers.gainers[0] ? getFriendlySymbol(briefing.topMovers.gainers[0].symbol, undefined, briefing.topMovers.gainers[0].name) : "—"}
               </p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-card/60 p-3">
               <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Loser</p>
-              <p className="mt-2 text-sm font-bold text-rose-400 truncate">
+              <p className="mt-2 text-sm font-bold text-danger truncate">
                 {briefing.topMovers.losers[0] ? getFriendlySymbol(briefing.topMovers.losers[0].symbol, undefined, briefing.topMovers.losers[0].name) : "—"}
               </p>
             </div>
@@ -151,7 +151,7 @@ export function DashboardMarketBriefCard({
             {briefing.risksToWatch.slice(0, 1).map((risk) => (
               <div key={risk} className="rounded-2xl border border-white/10 bg-background/65 p-3 md:col-span-2">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-3.5 w-3.5 text-rose-400" />
+                  <AlertTriangle className="h-3.5 w-3.5 text-danger" />
                   <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Risk watch</p>
                 </div>
                 <p className="mt-2 text-sm text-foreground/75 leading-relaxed">{risk}</p>

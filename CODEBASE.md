@@ -2,6 +2,7 @@
 ## Version 2.3 · April 2026
 
 ### Recent Changes (Last 24 Hours)
+- **Blog hero images** — All 103 posts now have WebP hero images (1200×800, 85% quality, ~90KB avg). Total blog image size reduced from 233 MB to 9.1 MB (96% reduction). heroImageUrl updated from .jpg to .webp across all blog data files.
 - **Beta branding** — Replaced "Elite Edition" with "Beta" badge across sidebar and landing navbar
 - **New static pages** — Added pricing, methodology, about, careers, legal pages with Footer integration
 - **Landing page refinements** — Trimmed hero/trust/how-it-works copy for clarity, updated logo styling with amber Beta badge

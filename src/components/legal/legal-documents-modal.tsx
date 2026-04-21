@@ -69,7 +69,7 @@ export function LegalDocumentsModal({
                 className={cn(
                   "h-8 rounded-xl px-3 text-[11px] font-bold uppercase tracking-widest",
                   activeType === option.type
-                    ? "bg-primary text-black hover:bg-primary/90"
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >

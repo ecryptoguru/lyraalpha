@@ -50,6 +50,16 @@ export const INJECTION_PATTERNS: RegExp[] = [
   /\[INST\]|\[\/INST\]|<\|im_start\|>|<\|im_end\|>/,  // Llama/ChatML instruction tokens
   /do\s+anything\s+now|dan\s+mode|jailbreak/i,
   /pretend\s+(?:you\s+(?:are|have\s+no)|there\s+are\s+no)\s+(?:restrictions?|rules?|guidelines?)/i,
+  // Expanded variants — additional evasion vectors identified in audit
+  /forget\s+(?:your|all|previous|the|above)\s+(?:instructions?|rules?|guidelines?|training)/i,
+  /override\s+(?:your|all|previous|the|safety)\s+(?:instructions?|rules?|guidelines?|training|filters?)/i,
+  /bypass\s+(?:your|all|safety|security|content)\s+(?:filters?|rules?|guidelines?|restrictions?|checks?)/i,
+  /you\s+(?:must|should|have\s+to|need\s+to)\s+(?:ignore|disregard|forget|override|bypass)/i,
+  /new\s+rules?:/i,
+  /from\s+now\s+on[,.\s]*(?:you|always|never|ignore|disregard)/i,
+  /(?:output|respond|reply|answer)\s+(?:only\s+)?(?:with|in)\s+(?:raw|unfiltered|uncensored|harmful)/i,
+  /(?:reveal|show|display|print|repeat)\s+(?:your|the|system|initial|original)\s+(?:prompt|instructions?|rules?)/i,
+  /\<\/?system\>|\<\/?assistant\>|\<\/?user\>/i,  // XML-style role injection
 ];
 
 // Phrases matched exactly (substring match is fine for multi-word terms)
@@ -155,6 +165,70 @@ export function checkFinancialGuardrails(query: string): { isValid: boolean; rea
   return { isValid: true };
 }
 
+// P2: Per-conversation character cap — prevents context-window exhaustion from
+// extremely long single messages. 5000 chars is the single-message limit; this
+// cap applies to the full conversation history passed to the LLM.
+const CONVERSATION_CHAR_CAP = 50_000;
+
+export function validateConversationLength(messages: Array<{ role: string; content: string | unknown }>): {
+  isValid: boolean;
+  reason?: string;
+} {
+  const totalChars = messages.reduce((sum, m) => {
+    const text = typeof m.content === "string" ? m.content : "";
+    return sum + text.length;
+  }, 0);
+  if (totalChars > CONVERSATION_CHAR_CAP) {
+    return {
+      isValid: false,
+      reason: `Conversation is too long (${Math.round(totalChars / 1000)}k chars). Please start a new conversation to continue.`,
+    };
+  }
+  return { isValid: true };
+}
+
+// P2: Base64 / high-entropy injection scan — second-line defense against encoded payloads.
+// Attackers may base64-encode prompt injections to bypass regex-based injection detection.
+// This scan detects suspiciously dense base64-like strings that could hide instructions.
+// Requires ≥2 high-entropy runs to block — single occurrences (data URLs, tx signatures)
+// are common in legitimate crypto queries and should not hard-reject.
+const BASE64_PATTERN = /[A-Za-z0-9+/]{40,}={0,2}/g;
+// Shannon entropy threshold — base64 encoded text has entropy ~6 bits/char.
+// Natural language is ~4-4.5 bits/char. We flag strings above 5.8 as suspicious.
+// 5.8 avoids false-positives on hex addresses and partial base64 in URLs.
+const ENTROPY_THRESHOLD = 5.8;
+const MIN_SUSPICIOUS_RUNS = 2;
+
+function shannonEntropy(str: string): number {
+  const freq = new Map<string, number>();
+  for (const ch of str) freq.set(ch, (freq.get(ch) ?? 0) + 1);
+  let entropy = 0;
+  for (const count of freq.values()) {
+    const p = count / str.length;
+    entropy -= p * Math.log2(p);
+  }
+  return entropy;
+}
+
+function checkBase64Injection(query: string): { isValid: boolean; reason?: string } {
+  const matches = query.match(BASE64_PATTERN);
+  if (!matches) return { isValid: true };
+  let suspiciousCount = 0;
+  for (const match of matches) {
+    const entropy = shannonEntropy(match);
+    if (entropy >= ENTROPY_THRESHOLD) {
+      suspiciousCount++;
+      if (suspiciousCount >= MIN_SUSPICIOUS_RUNS) {
+        return {
+          isValid: false,
+          reason: "Your query contains encoded content that cannot be processed.",
+        };
+      }
+    }
+  }
+  return { isValid: true };
+}
+
 export function validateInput(query: string): {
   isValid: boolean;
   reason?: string;
@@ -172,6 +246,10 @@ export function validateInput(query: string): {
 
   const injectionCheck = checkPromptInjection(normalized);
   if (!injectionCheck.isValid) return injectionCheck;
+
+  // P2: Base64/high-entropy injection scan — second-line defense after regex patterns
+  const base64Check = checkBase64Injection(normalized);
+  if (!base64Check.isValid) return base64Check;
 
   const financialCheck = checkFinancialGuardrails(normalized);
   if (!financialCheck.isValid) return financialCheck;

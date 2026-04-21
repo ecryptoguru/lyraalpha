@@ -311,9 +311,9 @@ function ShareSheetBody({
       </div>
 
       {share.invite ? (
-        <div className="flex items-start justify-between gap-4 rounded-2xl border border-cyan-500/15 bg-cyan-500/5 p-4">
+        <div className="flex items-start justify-between gap-4 rounded-2xl border border-info/15 bg-info/5 p-4">
           <div className="space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-300">Invite mode</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-info">Invite mode</p>
             <p className="text-sm font-semibold text-foreground">Switch between an authority-first product share and a referral-aware invite.</p>
             <p className="text-xs text-muted-foreground">Keep this off when you want to share the product story. Turn it on when you want your personal referral link included.</p>
           </div>

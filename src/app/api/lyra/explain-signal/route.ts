@@ -1,34 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateText } from "ai";
+import { generateObject } from "ai";
+import { z } from "zod";
 import { createHash } from "crypto";
 import { getGpt54Model } from "@/lib/ai/service";
+import { resolveGptDeployment } from "@/lib/ai/orchestration";
+import { calculateLLMCost } from "@/lib/ai/cost-calculator";
+import { alertIfDailyCostExceeded } from "@/lib/ai/alerting";
+import { checkPromptInjection } from "@/lib/ai/guardrails";
+import { scrubPIIString } from "@/lib/ai/pii-scrub";
 import { auth } from "@/lib/auth";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { getCache, setCache } from "@/lib/redis";
 import { apiError } from "@/lib/api-response";
 import { logFireAndForgetError } from "@/lib/fire-and-forget";
+import { rateLimitGeneral } from "@/lib/rate-limit";
 
 const logger = createLogger({ service: "lyra-explain-signal" });
 
 export const dynamic = "force-dynamic";
 export const preferredRegion = "bom1";
 
-interface ExplainSignalRequest {
-  title: string;
-  score: number;
-  definition: string;
-  drivers: string[];
-  context: string;
-  limitations: string;
-}
+const ExplainSignalInputSchema = z.object({
+  title: z.string().min(1).max(200).trim(),
+  score: z.number().min(0).max(100),
+  definition: z.string().min(1).max(1000).trim(),
+  drivers: z.array(z.string().max(200)).max(10).default([]),
+  context: z.string().max(2000).trim().default(""),
+  limitations: z.string().max(1000).trim().default(""),
+});
 
-interface ExplainSignalResponse {
-  summary: string;
-  whatItMeans: string;
-  whatToWatch: string;
-  nextAction: string;
-}
+type ExplainSignalRequest = z.infer<typeof ExplainSignalInputSchema>;
+
+const ExplainSignalSchema = z.object({
+  summary: z.string(),
+  whatItMeans: z.string(),
+  whatToWatch: z.string(),
+  nextAction: z.string(),
+});
+
+type ExplainSignalResponse = z.infer<typeof ExplainSignalSchema>;
 
 function cacheKey(payload: ExplainSignalRequest): string {
   const hash = createHash("sha256").update(JSON.stringify(payload)).digest("hex");
@@ -45,8 +56,55 @@ function buildFallback(payload: ExplainSignalRequest): ExplainSignalResponse {
   };
 }
 
-async function generateExplanation(payload: ExplainSignalRequest): Promise<ExplainSignalResponse> {
-  const prompt = `You are Lyra, a clear and concise market intelligence assistant.
+
+export async function POST(req: NextRequest) {
+  let payload: ExplainSignalRequest | null = null;
+
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return apiError("Unauthorized", 401);
+    }
+
+    const rateLimitResponse = await rateLimitGeneral(userId, userId);
+    if (rateLimitResponse) return rateLimitResponse;
+
+    try {
+      const body = await req.json();
+      const validation = ExplainSignalInputSchema.safeParse(body);
+      if (!validation.success) {
+        return apiError("Invalid request", 400, validation.error.flatten());
+      }
+      payload = validation.data;
+    } catch {
+      return apiError("Request body must be valid JSON", 400);
+    }
+
+    // Guardrail: prompt injection scan on user-provided text fields
+    const userText = [payload.title, payload.definition, ...payload.drivers, payload.context, payload.limitations].join(" ");
+    const injectionCheck = checkPromptInjection(userText);
+    if (!injectionCheck.isValid) {
+      logger.warn({ userId }, "Prompt injection detected in explain-signal");
+      return apiError(injectionCheck.reason ?? "Invalid input", 400);
+    }
+
+    // PII scrubbing on user-provided text fields
+    payload = {
+      ...payload,
+      title: scrubPIIString(payload.title),
+      definition: scrubPIIString(payload.definition),
+      drivers: payload.drivers.map((d: string) => scrubPIIString(d)),
+      context: scrubPIIString(payload.context),
+      limitations: scrubPIIString(payload.limitations),
+    };
+
+    const key = cacheKey(payload);
+    const cached = await getCache<ExplainSignalResponse>(key);
+    if (cached) {
+      return NextResponse.json({ success: true, explanation: cached });
+    }
+
+    const prompt = `You are Lyra, a clear and concise market intelligence assistant.
 Explain this signal to a user in plain English.
 
 SIGNAL:
@@ -66,52 +124,26 @@ JSON SHAPE:
   "nextAction": "1 sentence"
 }`;
 
-  const result = await generateText({
-    model: getGpt54Model("lyra-nano"),
-    prompt,
-    maxOutputTokens: 220,
-  });
+    const { object: explanation, usage } = await generateObject({
+      model: getGpt54Model("lyra-nano"),
+      schema: ExplainSignalSchema,
+      prompt,
+    });
 
-  const cleaned = result.text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  const parsed = JSON.parse(cleaned) as Partial<ExplainSignalResponse>;
-
-  if (!parsed.summary || !parsed.whatItMeans || !parsed.whatToWatch || !parsed.nextAction) {
-    throw new Error("Invalid signal explanation format");
-  }
-
-  return {
-    summary: parsed.summary,
-    whatItMeans: parsed.whatItMeans,
-    whatToWatch: parsed.whatToWatch,
-    nextAction: parsed.nextAction,
-  };
-}
-
-export async function POST(req: NextRequest) {
-  let payload: ExplainSignalRequest | null = null;
-
-  try {
-    const { userId } = await auth();
-    if (!userId) {
-      return apiError("Unauthorized", 401);
-    }
-
+    // Cost tracking: feed actual LLM spend into daily cost alert
     try {
-      payload = (await req.json()) as ExplainSignalRequest;
-    } catch {
-      return apiError("Request body must be valid JSON", 400);
-    }
-    if (!payload?.title || typeof payload.score !== "number" || !payload.definition) {
-      return apiError("Invalid request", 400);
-    }
-
-    const key = cacheKey(payload);
-    const cached = await getCache<ExplainSignalResponse>(key);
-    if (cached) {
-      return NextResponse.json({ success: true, explanation: cached });
+      const deployment = resolveGptDeployment("lyra-nano");
+      const costBreakdown = calculateLLMCost({
+        model: deployment,
+        inputTokens: usage.inputTokens ?? 0,
+        outputTokens: usage.outputTokens ?? 0,
+        cachedInputTokens: usage.cachedInputTokens ?? 0,
+      });
+      alertIfDailyCostExceeded(costBreakdown.totalCost).catch((e) => logFireAndForgetError(e, "explain-signal-cost-alert"));
+    } catch (e) {
+      logFireAndForgetError(e, "explain-signal-cost-calc");
     }
 
-    const explanation = await generateExplanation(payload);
     await setCache(key, explanation, 24 * 60 * 60).catch((e) => logFireAndForgetError(e, "explain-signal-cache"));
 
     return NextResponse.json({ success: true, explanation });

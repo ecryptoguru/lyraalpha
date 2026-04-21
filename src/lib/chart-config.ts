@@ -1,11 +1,11 @@
 // Chart theme configuration for consistent visualization styling
 export const chartTheme = {
   colors: {
-    primary: "hsl(38 92% 50%)", // amber-500
+    primary: "hsl(193 100% 50%)", // cyan-500 #00D4FF
     success: "hsl(142 76% 36%)", // green-600
-    warning: "hsl(38 92% 50%)", // amber-500
+    warning: "hsl(51 100% 50%)", // gold #FFD700
     danger: "hsl(0 84% 60%)", // rose-500
-    info: "hsl(217 91% 60%)", // amber-500
+    info: "hsl(193 100% 50%)", // cyan-500 #00D4FF
     muted: "hsl(217 32% 17%)", // slate-700
   },
 
@@ -44,15 +44,15 @@ export const chartTheme = {
     STRONG_RISK_ON: "hsl(142 76% 36%)", // emerald-500
     RISK_ON: "hsl(142 71% 45%)", // green-500
     NEUTRAL: "hsl(215 16% 47%)", // slate-400
-    DEFENSIVE: "hsl(38 92% 50%)", // amber-400
+    DEFENSIVE: "hsl(51 100% 50%)", // gold #FFD700
     RISK_OFF: "hsl(0 84% 60%)", // rose-500
   },
 
   // Gradient definitions for area charts
   gradients: {
     primary: {
-      start: "hsl(38 92% 50% / 0.3)",
-      end: "hsl(38 92% 50% / 0.05)",
+      start: "hsl(193 100% 50% / 0.3)",
+      end: "hsl(193 100% 50% / 0.05)",
     },
     success: {
       start: "hsl(142 76% 36% / 0.3)",

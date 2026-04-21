@@ -34,17 +34,17 @@ const COMPONENT_LABELS: Record<string, string> = {
 };
 
 function getFragilityConfig(score: number) {
-  if (score <= 25) return { color: "#34d399", glow: "#34d39940", bar: "bg-emerald-400", text: "text-emerald-400", border: "border-emerald-400/30 bg-emerald-400/10", label: "Resilient" };
-  if (score <= 50) return { color: "#fbbf24", glow: "#fbbf2440", bar: "bg-amber-400",   text: "text-amber-400",   border: "border-amber-400/30 bg-amber-400/10",   label: "Moderate" };
-  if (score <= 75) return { color: "#fb923c", glow: "#fb923c40", bar: "bg-orange-400",  text: "text-orange-400",  border: "border-orange-400/30 bg-orange-400/10",  label: "Elevated" };
-  return                  { color: "#f87171", glow: "#f8717140", bar: "bg-red-400",     text: "text-red-400",     border: "border-red-400/30 bg-red-400/10",         label: "Critical" };
+  if (score <= 25) return { color: "#34d399", glow: "#34d39940", bar: "bg-success", text: "text-success", border: "border-success/30 bg-success/10", label: "Resilient" };
+  if (score <= 50) return { color: "#00d4ff", glow: "#00d4ff40", bar: "bg-cyan-400",   text: "text-cyan-400",   border: "border-cyan-400/30 bg-cyan-400/10",   label: "Moderate" };
+  if (score <= 75) return { color: "#FFD700", glow: "#FFD70040", bar: "bg-[#FFD700]",  text: "text-[#FFD700]",  border: "border-[#FFD700]/30 bg-[#FFD700]/10",  label: "Elevated" };
+  return                  { color: "#f87171", glow: "#f8717140", bar: "bg-danger",     text: "text-danger",     border: "border-danger/30 bg-danger/10",         label: "Critical" };
 }
 
 function getComponentConfig(score: number) {
-  if (score <= 25) return { bar: "bg-emerald-400", icon: <TrendingDown className="h-2.5 w-2.5 text-emerald-400" /> };
-  if (score <= 50) return { bar: "bg-amber-400",   icon: <Minus className="h-2.5 w-2.5 text-amber-400" /> };
-  if (score <= 75) return { bar: "bg-orange-400",  icon: <TrendingUp className="h-2.5 w-2.5 text-orange-400" /> };
-  return                  { bar: "bg-red-400",     icon: <TrendingUp className="h-2.5 w-2.5 text-red-400" /> };
+  if (score <= 25) return { bar: "bg-success", icon: <TrendingDown className="h-2.5 w-2.5 text-success" /> };
+  if (score <= 50) return { bar: "bg-cyan-400",   icon: <Minus className="h-2.5 w-2.5 text-cyan-400" /> };
+  if (score <= 75) return { bar: "bg-[#FFD700]",  icon: <TrendingUp className="h-2.5 w-2.5 text-[#FFD700]" /> };
+  return                  { bar: "bg-danger",     icon: <TrendingUp className="h-2.5 w-2.5 text-danger" /> };
 }
 
 function isFragilityComponents(v: unknown): v is FragilityData["fragilityComponents"] {
@@ -160,7 +160,7 @@ export function PortfolioFragilityCard({ snapshot, isLoading, plan }: PortfolioF
       <div className="relative rounded-3xl border border-white/8 bg-card/50 backdrop-blur-xl p-5 overflow-hidden min-h-[260px] shadow-[0_8px_32px_rgba(0,0,0,0.24)]">
         <div className="blur-sm pointer-events-none select-none opacity-30 space-y-4">
           <div className="flex items-center gap-2">
-            <Zap className="h-4 w-4 text-amber-400" />
+            <Zap className="h-4 w-4 text-warning" />
             <h3 className="text-sm font-bold">Portfolio Fragility</h3>
           </div>
           <div className="h-24 w-44 bg-muted/20 rounded-2xl mx-auto" />
@@ -171,8 +171,8 @@ export function PortfolioFragilityCard({ snapshot, isLoading, plan }: PortfolioF
           </div>
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-          <div className="h-11 w-11 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
-            <Zap className="h-5 w-5 text-amber-400" />
+          <div className="h-11 w-11 rounded-2xl bg-warning/10 border border-warning/20 flex items-center justify-center">
+            <Zap className="h-5 w-5 text-warning" />
           </div>
           <div className="text-center">
             <p className="text-sm font-bold text-foreground">Portfolio Fragility Engine</p>
@@ -180,7 +180,7 @@ export function PortfolioFragilityCard({ snapshot, isLoading, plan }: PortfolioF
               Structural instability analysis under regime deterioration
             </p>
           </div>
-          <span className="text-[10px] font-bold text-amber-400 border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 rounded-full">
+          <span className="text-[10px] font-bold text-warning border border-warning/30 bg-warning/10 px-3 py-1.5 rounded-full">
             Elite Only
           </span>
         </div>
@@ -208,7 +208,7 @@ export function PortfolioFragilityCard({ snapshot, isLoading, plan }: PortfolioF
   const components = Object.entries(fragility.fragilityComponents) as [string, number][];
 
   return (
-    <div className="rounded-3xl border border-white/8 bg-card/50 backdrop-blur-xl p-5 space-y-4 hover:border-amber-400/20 transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.24)]">
+    <div className="rounded-3xl border border-white/8 bg-card/50 backdrop-blur-xl p-5 space-y-4 hover:border-warning/20 transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.24)]">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -227,14 +227,14 @@ export function PortfolioFragilityCard({ snapshot, isLoading, plan }: PortfolioF
 
       {/* Top drivers */}
       {fragility.fragilityTopDrivers.length > 0 && (
-        <div className="flex items-start gap-2.5 rounded-2xl border border-amber-400/15 bg-amber-400/5 p-3">
-          <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-2.5 rounded-2xl border border-warning/15 bg-warning/5 p-3">
+          <AlertTriangle className="h-3.5 w-3.5 text-warning shrink-0 mt-0.5" />
           <div>
-            <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1.5">Top Risk Drivers</p>
+            <p className="text-[10px] font-bold text-warning uppercase tracking-wider mb-1.5">Top Risk Drivers</p>
             <ul className="space-y-1">
               {fragility.fragilityTopDrivers.map((d) => (
                 <li key={d} className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-                  <span className="h-1 w-1 rounded-full bg-amber-400/60 shrink-0" />
+                  <span className="h-1 w-1 rounded-full bg-warning/60 shrink-0" />
                   {d}
                 </li>
               ))}

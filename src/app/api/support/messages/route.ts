@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { getUserPlan } from "@/lib/middleware/plan-gate";
 import { createSupportMessage } from "@/lib/services/support.service";
+import { checkPromptInjection } from "@/lib/ai/guardrails";
+import { scrubPIIString } from "@/lib/ai/pii-scrub";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { apiError } from "@/lib/api-response";
@@ -31,9 +33,19 @@ export async function POST(req: NextRequest) {
       return apiError("Forbidden", 403);
     }
 
+    // Guardrail: scan user content for prompt injection before persisting to DB
+    const injectionCheck = checkPromptInjection(content);
+    if (!injectionCheck.isValid) {
+      logger.warn({ userId, reason: injectionCheck.reason }, "Prompt injection detected in support message");
+      return apiError(injectionCheck.reason ?? "Invalid input", 400);
+    }
+
+    // Scrub PII from content before DB write
+    const safeContent = scrubPIIString(content);
+
     const message = await createSupportMessage({
       conversationId,
-      content,
+      content: safeContent,
       senderId: userId,
       senderRole: "USER",
       allowedUserId: userId,

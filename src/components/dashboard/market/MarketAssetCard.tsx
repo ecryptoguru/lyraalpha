@@ -48,9 +48,9 @@ interface MetricCell {
 }
 
 function getScoreColor(score: number) {
-  if (score >= 70) return "text-emerald-400";
-  if (score >= 40) return "text-amber-400";
-  return "text-rose-400";
+  if (score >= 70) return "text-success";
+  if (score >= 40) return "text-cyan-400";
+  return "text-danger";
 };
 
 export function MarketAssetCard({
@@ -86,10 +86,10 @@ export function MarketAssetCard({
 
   const compatibilityBadgeClass = useMemo(() => {
     if (compatibilityScore == null || compatibilityScore <= 0) return null;
-    if (compatibilityScore >= 75) return "text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
-    if (compatibilityScore >= 60) return "text-sky-400 bg-sky-500/10 border-sky-500/20";
-    if (compatibilityScore >= 45) return "text-amber-400 bg-amber-500/10 border-amber-500/20";
-    return "text-rose-400 bg-rose-500/10 border-rose-500/20";
+    if (compatibilityScore >= 75) return "text-success bg-success-subtle border-success/20";
+    if (compatibilityScore >= 60) return "text-info bg-info-subtle border-info/20";
+    if (compatibilityScore >= 45) return "text-warning bg-warning-subtle border-warning/20";
+    return "text-danger bg-danger-subtle border-danger/20";
   }, [compatibilityScore]);
 
   const rangePosition = useMemo(() => {
@@ -105,7 +105,7 @@ export function MarketAssetCard({
     const raw = ((safePrice - fiftyTwoWeekLow) / (fiftyTwoWeekHigh - fiftyTwoWeekLow)) * 100;
     const percentage = Math.min(100, Math.max(0, raw));
     const barClass =
-      percentage > 70 ? "bg-emerald-500/40" : percentage > 30 ? "bg-sky-500/40" : "bg-rose-500/40";
+      percentage > 70 ? "bg-success/40" : percentage > 30 ? "bg-info/40" : "bg-danger/40";
 
     return { percentage, barClass };
   }, [fiftyTwoWeekHigh, fiftyTwoWeekLow, safePrice]);
@@ -182,12 +182,12 @@ export function MarketAssetCard({
       {/* Glow shadow based on performance */}
       <div className={cn(
         "absolute -inset-0.5 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-md",
-        isUp ? "bg-emerald-400/20" : "bg-rose-400/20"
+        isUp ? "bg-success/20" : "bg-danger/20"
       )} />
 
       <div className={cn(
         "relative bg-card/60 backdrop-blur-2xl border border-white/5 rounded-3xl p-4 md:p-5 transition-all duration-300 ease-out flex flex-col gap-4 md:gap-5 shadow-xl will-change-transform",
-        isUp ? "group-hover:border-emerald-400/40 group-hover:-translate-y-1 group-hover:bg-emerald-400/5" : "group-hover:border-rose-400/40 group-hover:-translate-y-1 group-hover:bg-rose-400/5"
+        isUp ? "group-hover:border-success/40 group-hover:-translate-y-1 group-hover:bg-success/5" : "group-hover:border-danger/40 group-hover:-translate-y-1 group-hover:bg-danger/5"
       )} suppressHydrationWarning>
         {/* Header: Symbol & Price */}
         <div className="flex items-start justify-between gap-3">
@@ -219,7 +219,7 @@ export function MarketAssetCard({
             <div
               className={cn(
                 "flex items-center justify-end gap-1 text-[10px] font-bold font-mono tabular-nums",
-                isUp ? "text-emerald-400" : "text-rose-400",
+                isUp ? "text-success" : "text-danger",
               )}
             >
               {isUp ? (
@@ -313,10 +313,10 @@ function SignalItem({
   color: string;
 }) {
   const getProgressBarColor = (colorClass: string) => {
-    if (colorClass.includes("emerald")) return "bg-emerald-400";
-    if (colorClass.includes("amber")) return "bg-amber-400";
-    if (colorClass.includes("rose")) return "bg-rose-400";
-    return "bg-slate-400";
+    if (colorClass.includes("emerald")) return "bg-success";
+    if (colorClass.includes("gold")) return "bg-[#FFD700]";
+    if (colorClass.includes("rose")) return "bg-danger";
+    return "bg-muted";
   };
 
   return (

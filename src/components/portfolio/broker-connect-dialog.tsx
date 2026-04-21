@@ -241,14 +241,14 @@ export function BrokerConnectDialog({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-zinc-950 border-zinc-800 text-white" showCloseButton={false}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto bg-foreground/5 border-foreground/20 text-white" showCloseButton={false}>
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {selectedBroker && (
                 <button
                   onClick={handleBack}
-                  className="text-zinc-400 hover:text-white text-sm mr-1"
+                  className="text-muted-foreground hover:text-white text-sm mr-1"
                 >
                   ← Back
                 </button>
@@ -257,11 +257,11 @@ export function BrokerConnectDialog({
                 {selectedBroker ? `Connect ${selectedBroker.label}` : "Connect Broker"}
               </DialogTitle>
             </div>
-            <button onClick={onClose} className="text-zinc-500 hover:text-white">
+            <button onClick={onClose} className="text-muted-foreground hover:text-white">
               <X className="h-4 w-4" />
             </button>
           </div>
-          <DialogDescription className="text-zinc-400 text-sm">
+          <DialogDescription className="text-muted-foreground text-sm">
             {selectedBroker
               ? selectedBroker.description
               : `Import current holdings into "${portfolioName}" from your broker account.`}
@@ -273,7 +273,7 @@ export function BrokerConnectDialog({
           <div className="space-y-4 mt-2">
             {inBrokers.length > 0 && (
               <div>
-                <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-2">
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
                   India
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -281,12 +281,12 @@ export function BrokerConnectDialog({
                     <button
                       key={b.provider}
                       onClick={() => handleSelect(b)}
-                      className="flex items-center justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left hover:border-zinc-600 hover:bg-zinc-800/80 transition-colors group"
+                      className="flex items-center justify-between gap-2 rounded-lg border border-foreground/20 bg-foreground/10 px-4 py-3 text-left hover:border-border hover:bg-foreground/80 transition-colors group"
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-white">{b.label}</span>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-zinc-600 group-hover:text-zinc-400 shrink-0" />
+                      <ChevronRight className="h-4 w-4 text-foreground group-hover:text-muted-foreground shrink-0" />
                     </button>
                   ))}
                 </div>
@@ -295,7 +295,7 @@ export function BrokerConnectDialog({
 
             {usBrokers.length > 0 && (
               <div>
-                <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-2">
+                <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
                   United States
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -303,17 +303,17 @@ export function BrokerConnectDialog({
                     <button
                       key={b.provider}
                       onClick={() => handleSelect(b)}
-                      className="flex items-center justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left hover:border-zinc-600 hover:bg-zinc-800/80 transition-colors group"
+                      className="flex items-center justify-between gap-2 rounded-lg border border-foreground/20 bg-foreground/10 px-4 py-3 text-left hover:border-border hover:bg-foreground/80 transition-colors group"
                     >
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-white">{b.label}</span>
                         {b.provider === "koinx" && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-blue-500/40 text-blue-400">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-info/40 text-info">
                             Link
                           </Badge>
                         )}
                       </div>
-                      <ChevronRight className="h-4 w-4 text-zinc-600 group-hover:text-zinc-400 shrink-0" />
+                      <ChevronRight className="h-4 w-4 text-foreground group-hover:text-muted-foreground shrink-0" />
                     </button>
                   ))}
                 </div>
@@ -331,7 +331,7 @@ export function BrokerConnectDialog({
               <div className="space-y-3">
                 {selectedBroker.fields.map((field) => (
                   <div key={field.key} className="space-y-1">
-                    <Label htmlFor={field.key} className="text-sm text-zinc-300">
+                    <Label htmlFor={field.key} className="text-sm text-muted-foreground">
                       {field.label}
                     </Label>
                     <Input
@@ -340,9 +340,9 @@ export function BrokerConnectDialog({
                       placeholder={field.placeholder}
                       value={credentials[field.key] || ""}
                       onChange={(e) => setCredentials({ ...credentials, [field.key]: e.target.value })}
-                      className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-500"
+                      className="bg-foreground/10 border-border text-white placeholder:text-muted-foreground"
                     />
-                    {field.hint && <p className="text-xs text-zinc-400">{field.hint}</p>}
+                    {field.hint && <p className="text-xs text-muted-foreground">{field.hint}</p>}
                   </div>
                 ))}
               </div>
@@ -350,7 +350,7 @@ export function BrokerConnectDialog({
               <>
                 {selectedBroker.fields.map((field) => (
                   <div key={field.key} className="space-y-1.5">
-                    <Label htmlFor={field.key} className="text-sm text-zinc-300">
+                    <Label htmlFor={field.key} className="text-sm text-muted-foreground">
                       {field.label}
                     </Label>
                     <Input
@@ -361,11 +361,11 @@ export function BrokerConnectDialog({
                       onChange={(e) =>
                         setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }))
                       }
-                      className="bg-zinc-900 border-zinc-700 text-white placeholder:text-zinc-600 focus:border-zinc-500"
+                      className="bg-foreground/10 border-border text-white placeholder:text-foreground focus:border-border"
                       autoComplete="off"
                     />
                     {field.hint && (
-                      <p className="text-[11px] text-zinc-500 leading-relaxed">{field.hint}</p>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">{field.hint}</p>
                     )}
                   </div>
                 ))}
@@ -376,9 +376,9 @@ export function BrokerConnectDialog({
                     id="replace-existing"
                     checked={replaceExisting}
                     onChange={(e) => setReplaceExisting(e.target.checked)}
-                    className="rounded border-zinc-600"
+                    className="rounded border-border"
                   />
-                  <Label htmlFor="replace-existing" className="text-sm text-zinc-400 cursor-pointer">
+                  <Label htmlFor="replace-existing" className="text-sm text-muted-foreground cursor-pointer">
                     Replace existing holdings on conflict
                   </Label>
                 </div>
@@ -387,7 +387,7 @@ export function BrokerConnectDialog({
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-white text-black hover:bg-zinc-100 font-medium"
+                    className="bg-white text-black hover:bg-muted/30 font-medium"
                   >
                     {isSubmitting ? (
                       <>
@@ -401,7 +401,7 @@ export function BrokerConnectDialog({
                     href={selectedBroker.docsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-zinc-500 hover:text-zinc-300 underline"
+                    className="text-xs text-muted-foreground hover:text-muted-foreground underline"
                   >
                     API docs ↗
                   </a>
@@ -414,25 +414,25 @@ export function BrokerConnectDialog({
         {/* ── Success screen ────────────────────────────────────────────────── */}
         {syncResult && (
           <div className="mt-4 space-y-4">
-            <div className="flex items-start gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
-              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 rounded-lg border border-success/20 bg-success/5 p-4">
+              <CheckCircle2 className="h-5 w-5 text-success shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-emerald-300">
+                <p className="text-sm font-medium text-success">
                   {selectedBroker?.label} connected
                 </p>
-                <p className="text-xs text-zinc-400 mt-0.5">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   {syncResult.holdingCount} holding{syncResult.holdingCount !== 1 ? "s" : ""} imported into &ldquo;{portfolioName}&rdquo;.
                 </p>
               </div>
             </div>
 
             {syncResult.warnings.length > 0 && (
-              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 space-y-1">
-                <div className="flex items-center gap-1.5 text-xs text-amber-400">
+              <div className="rounded-lg border border-warning/20 bg-warning/5 p-3 space-y-1">
+                <div className="flex items-center gap-1.5 text-xs text-warning">
                   <AlertCircle className="h-3.5 w-3.5" />
                   <span>{syncResult.warnings.length} warning{syncResult.warnings.length !== 1 ? "s" : ""}</span>
                 </div>
-                <ul className="text-[11px] text-zinc-400 space-y-0.5 list-disc list-inside">
+                <ul className="text-[11px] text-muted-foreground space-y-0.5 list-disc list-inside">
                   {syncResult.warnings.slice(0, 5).map((w, i) => (
                     <li key={i}>{w}</li>
                   ))}
@@ -444,10 +444,10 @@ export function BrokerConnectDialog({
             )}
 
             <div className="flex gap-2">
-              <Button onClick={onClose} className="bg-white text-black hover:bg-zinc-100">
+              <Button onClick={onClose} className="bg-white text-black hover:bg-muted/30">
                 Done
               </Button>
-              <Button variant="outline" onClick={handleBack} className="border-zinc-700 text-zinc-300">
+              <Button variant="outline" onClick={handleBack} className="border-border text-muted-foreground">
                 Connect Another
               </Button>
             </div>

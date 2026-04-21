@@ -35,7 +35,6 @@ function myraResponseCacheKey(query: string, plan: string, isPublic: boolean): s
     .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
     .filter((w) => w.length >= 2 && !MYRA_CACHE_STOP_WORDS.has(w))
-    .sort()
     .join(" ");
   const hash = createHash("sha256").update(normalized).digest("hex").slice(0, 16);
   return `myra:resp:${isPublic ? "pub" : plan.toLowerCase()}:${hash}`;

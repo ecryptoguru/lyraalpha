@@ -36,6 +36,7 @@ vi.mock("@/lib/redis", () => ({
     del: vi.fn().mockResolvedValue(1),
   },
   redisSetNX: vi.fn(async () => true),
+  redisSetNXStrict: vi.fn(async () => true),
 }));
 
 // ─── Mock monitoring ──────────────────────────────────────────────────────────
@@ -60,7 +61,7 @@ vi.mock("@/lib/logger/utils", () => ({
 import { getGlobalNotes, getSessionNotes, distillSessionNotes, consolidateMemory } from "../memory";
 import { prisma } from "@/lib/prisma";
 import { generateText } from "ai";
-import { setCache, redisSetNX } from "@/lib/redis";
+import { setCache, redisSetNXStrict } from "@/lib/redis";
 import { logMemoryEvent } from "@/lib/ai/monitoring";
 
 const mockPrisma = prisma as unknown as {
@@ -75,7 +76,7 @@ const mockPrisma = prisma as unknown as {
 
 const mockGenerateText = generateText as ReturnType<typeof vi.fn>;
 const mockSetCache = setCache as ReturnType<typeof vi.fn>;
-const mockRedisSetNX = redisSetNX as ReturnType<typeof vi.fn>;
+const mockRedisSetNX = redisSetNXStrict as ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
   vi.clearAllMocks();

@@ -46,6 +46,7 @@ export function SidebarDeferredExtras({
         <div className="overflow-hidden rounded-2xl border border-border/50 bg-card/70 shadow-lg backdrop-blur-2xl">
           <Link
             href="/dashboard/rewards?tab=credits"
+            aria-label={`${planLabel} plan, ${sidebarXP.credits} credits remaining, ${creditsProgressPercent > 100 ? '100+' : creditsProgressPercent.toFixed(0)}% used`}
             className="group/credits flex items-center justify-between border-b border-border/40 px-4 py-3 transition-colors duration-200 hover:bg-primary/5"
           >
             <div className="mr-3 min-w-0 flex-1">
@@ -75,34 +76,35 @@ export function SidebarDeferredExtras({
 
           <Link
             href="/dashboard/rewards?tab=xp"
-            className="group/xp hidden items-center justify-between px-4 py-3 transition-colors duration-200 hover:bg-amber-500/5 md:flex"
+            aria-label={`${sidebarXP.tierName}, level ${sidebarXP.level}, ${sidebarXP.xp} XP`}
+            className="group/xp hidden items-center justify-between px-4 py-3 transition-colors duration-200 hover:bg-[#FFD700]/5 md:flex"
           >
             <div className="mr-3 min-w-0 flex-1">
               <div className="mb-1.5 flex items-center gap-2">
-                <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-amber-500/20 bg-amber-500/10 text-[10px]">
+                <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded border border-[#FFD700]/20 bg-[#FFD700]/10 text-[10px]">
                   {mounted ? sidebarXP.tierEmoji : "🌱"}
                 </div>
-                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 transition-colors group-hover/xp:text-amber-500/80">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 transition-colors group-hover/xp:text-[#FFD700]/80">
                   {mounted ? sidebarXP.tierName : "Beginner"}
                 </span>
-                <span className="ml-auto text-[9px] font-bold tabular-nums text-amber-500/80">
+                <span className="ml-auto text-[9px] font-bold tabular-nums text-[#FFD700]/80">
                   Lv {mounted ? sidebarXP.level : 1}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold leading-tight text-amber-500 tabular-nums">
+                <span className="text-sm font-bold leading-tight text-[#FFD700] tabular-nums">
                   {mounted ? sidebarXP.xp.toLocaleString() : "--"}
                   <span className="ml-1 text-[9px] font-bold text-muted-foreground">XP</span>
                 </span>
               </div>
               <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted/50">
                 <div
-                  className="h-full rounded-full bg-amber-500/60 transition-all duration-700"
+                  className="h-full rounded-full bg-[#FFD700]/60 transition-all duration-700"
                   style={{ width: `${mounted ? sidebarXP.progressPercent : 0}%` }}
                 />
               </div>
             </div>
-            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/30 transition-all duration-200 group-hover/xp:translate-x-0.5 group-hover/xp:text-amber-500" />
+            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/30 transition-all duration-200 group-hover/xp:translate-x-0.5 group-hover/xp:text-[#FFD700]" />
           </Link>
         </div>
       </div>
@@ -123,7 +125,7 @@ export function SidebarDeferredExtras({
                 }}
                 className="flex w-full cursor-pointer items-center gap-3 rounded-2xl border border-border/75 bg-white/80 p-2 backdrop-blur-2xl transition-all duration-300 hover:border-border hover:bg-white hover:shadow-lg hover:shadow-black/10 dark:border-white/5 dark:bg-white/5 dark:hover:border-white/10 dark:hover:bg-white/10 dark:hover:shadow-black/20 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:border-none group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0"
               >
-                <div className="relative size-10 shrink-0 overflow-hidden rounded-2xl bg-linear-to-br from-slate-200 to-slate-300 p-[2px] transition-transform duration-300 group-hover/profile:scale-105 dark:from-neutral-800 dark:to-black">
+                <div className="relative size-10 shrink-0 overflow-hidden rounded-2xl bg-linear-to-br text-muted-foreground p-[2px] transition-transform duration-300 group-hover/profile:scale-105 dark:text-foreground dark:to-black">
                   <div className="absolute inset-0 bg-linear-to-br from-primary to-transparent opacity-20" />
                   <div className="relative z-10 flex h-full w-full items-center justify-center overflow-hidden rounded-[10px] bg-white dark:bg-black">
                     {user?.imageUrl ? (

@@ -62,26 +62,26 @@ function getEventIcon(type: string) {
 }
 
 function getEventColor(type: string, severity: string) {
-  if (severity === "HIGH") return "bg-rose-500 text-white shadow-[0_0_20px_rgba(244,63,94,0.3)]";
-  if (severity === "MEDIUM") return "bg-amber-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.3)]";
+  if (severity === "HIGH") return "bg-danger text-danger-foreground shadow-danger/30";
+  if (severity === "MEDIUM") return "bg-warning text-warning-foreground shadow-warning/30";
 
   switch (type) {
-    case "INSIDER": return "bg-amber-500 text-white shadow-[0_0_20px_rgba(139,92,246,0.3)]";
-    case "EARNINGS": return "bg-cyan-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.3)]";
-    case "ANALYST": return "bg-orange-500 text-white shadow-[0_0_20px_rgba(249,115,22,0.3)]";
-    default: return "bg-primary text-white shadow-[0_0_20px_rgba(var(--primary),0.3)]";
+    case "INSIDER": return "bg-warning text-warning-foreground shadow-warning/30";
+    case "EARNINGS": return "bg-info text-info-foreground shadow-info/30";
+    case "ANALYST": return "bg-warning text-warning-foreground shadow-warning/30";
+    default: return "bg-primary text-primary-foreground shadow-primary/30";
   }
 }
 
 function getProviderBadge(provider: string | undefined) {
   if (!provider) return null;
   const labels: Record<string, { label: string; color: string }> = {
-    finnhub: { label: "Finnhub", color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-    finnhub_crypto: { label: "Finnhub", color: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
-    cryptopanic: { label: "CryptoPanic", color: "bg-orange-500/10 text-orange-400 border-orange-500/20" },
-    newsdata: { label: "NewsData.io", color: "bg-sky-500/10 text-sky-400 border-sky-500/20" },
-    newsdata_crypto: { label: "NewsData.io", color: "bg-sky-500/10 text-sky-400 border-sky-500/20" },
-    india_rss: { label: "India RSS", color: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+    finnhub: { label: "Finnhub", color: "bg-warning/10 text-warning border-warning/20" },
+    finnhub_crypto: { label: "Finnhub", color: "bg-warning/10 text-warning border-warning/20" },
+    cryptopanic: { label: "CryptoPanic", color: "bg-warning/10 text-warning border-warning/20" },
+    newsdata: { label: "NewsData.io", color: "bg-info/10 text-info border-info/20" },
+    newsdata_crypto: { label: "NewsData.io", color: "bg-info/10 text-info border-info/20" },
+    india_rss: { label: "India RSS", color: "bg-success/10 text-success border-success/20" },
   };
   const info = labels[provider];
   if (!info) return null;
@@ -185,8 +185,8 @@ function TimelineRegionContent({ region }: { region: "US" | "IN" }) {
 
   if (error) {
     return (
-      <div className="mx-4 mt-10 rounded-3xl border border-rose-500/30 bg-rose-500/5 p-8 text-center">
-        <p className="text-xs font-bold uppercase tracking-widest text-rose-400">Feed unavailable</p>
+      <div className="mx-4 mt-10 rounded-3xl border border-danger/30 bg-danger/5 p-8 text-center">
+        <p className="text-xs font-bold uppercase tracking-widest text-danger">Feed unavailable</p>
         <p className="mt-3 text-sm text-muted-foreground">We could not load the intelligence stream for the selected filters.</p>
         <button
           type="button"
@@ -215,7 +215,7 @@ function TimelineRegionContent({ region }: { region: "US" | "IN" }) {
               {highImpactCount > 0 && (
                 <StatChip value={highImpactCount} label="High" variant="red" />
               )}
-              <StatChip value={renderableEvents.length} label="Events" variant="amber" />
+              <StatChip value={renderableEvents.length} label="Events" variant="gold" />
               {newsCount > 0 && <StatChip value={newsCount} label="News" />}
               {insiderCount > 0 && <StatChip value={insiderCount} label="Insider" variant="blue" />}
               {earningsCount > 0 && <StatChip value={earningsCount} label="Earnings" variant="green" />}
@@ -340,10 +340,10 @@ function TimelineRegionContent({ region }: { region: "US" | "IN" }) {
                           className={cn(
                             "px-2 py-0.5 rounded-2xl text-[9px] font-bold uppercase tracking-widest flex items-center gap-1",
                             sentiment === "POSITIVE"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              ? "bg-success/10 text-success border border-success/20"
                               : sentiment === "NEGATIVE"
-                                ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                                : "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+                                ? "bg-danger/10 text-danger border border-danger/20"
+                                : "bg-warning/10 text-warning border border-warning/20",
                           )}
                         >
                           {sentiment === "POSITIVE" ? "Bullish" : sentiment === "NEGATIVE" ? "Bearish" : "Neutral"}
@@ -355,8 +355,8 @@ function TimelineRegionContent({ region }: { region: "US" | "IN" }) {
                         <div className={cn(
                           "px-2 py-0.5 rounded-2xl text-[9px] font-bold uppercase tracking-widest border",
                           action === "BUY"
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                            : "bg-rose-500/10 text-rose-400 border-rose-500/20",
+                            ? "bg-success/10 text-success border-success/20"
+                            : "bg-danger/10 text-danger border-danger/20",
                         )}>
                           {action === "BUY" ? "Buy" : "Sell"}
                         </div>
@@ -367,8 +367,8 @@ function TimelineRegionContent({ region }: { region: "US" | "IN" }) {
                         <div className={cn(
                           "px-2 py-0.5 rounded-2xl text-[9px] font-bold uppercase tracking-widest border",
                           surprise > 0
-                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                            : "bg-rose-500/10 text-rose-400 border-rose-500/20",
+                            ? "bg-success/10 text-success border-success/20"
+                            : "bg-danger/10 text-danger border-danger/20",
                         )}>
                           {surprise > 0 ? "+" : ""}{surprise.toFixed(1)}% Surprise
                         </div>
@@ -376,7 +376,7 @@ function TimelineRegionContent({ region }: { region: "US" | "IN" }) {
 
                       {/* Upcoming earnings badge */}
                       {event.type === "EARNINGS" && isUpcoming && (
-                        <div className="px-2 py-0.5 rounded-2xl text-[9px] font-bold uppercase tracking-widest bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                        <div className="px-2 py-0.5 rounded-2xl text-[9px] font-bold uppercase tracking-widest bg-info/10 text-info border border-info/20">
                           Upcoming
                         </div>
                       )}

@@ -8,6 +8,7 @@ import { bm25SearchKnowledge } from "@/lib/support/ai-responder";
 import { checkPromptInjection, INJECTION_PATTERNS } from "@/lib/ai/guardrails";
 import { apiError } from "@/lib/api-response";
 import { createLogger } from "@/lib/logger";
+import { redisSetNXStrict } from "@/lib/redis";
 
 const logger = createLogger({ service: "voice-session" });
 
@@ -18,6 +19,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? "";
 const VOICE_MODEL = "gpt-realtime-mini";
 const VOICE_OUTPUT_VOICE = "marin";
 const VOICE_SESSION_FETCH_TIMEOUT_MS = 8_000;
+const VOICE_SESSION_CONCURRENCY_TTL = 300; // 5 min — max expected session duration
 
 const OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime";
 
@@ -35,6 +37,16 @@ export async function GET(request: Request) {
 
   const rateLimitResult = await rateLimitChat(userId, userPlan);
   if (rateLimitResult.response) return rateLimitResult.response;
+
+  // Per-user concurrency cap: only one active voice session at a time.
+  // Uses fail-closed lock (redisSetNXStrict) — if Redis is down, deny to prevent
+  // unbounded concurrent sessions (each costs ~$0.15/min in audio tokens).
+  const concurrencyKey = `voice:session:${userId}`;
+  const lockAcquired = await redisSetNXStrict(concurrencyKey, VOICE_SESSION_CONCURRENCY_TTL);
+  if (!lockAcquired) {
+    logger.warn({ userId }, "Voice session: concurrent session blocked");
+    return apiError("A voice session is already active. Please wait for it to end.", 429);
+  }
 
   // ── Parallel phase ─────────────────────────────────────────────────────────
   // Fire the OpenAI client_secrets call at the same time as the DB/KB queries.

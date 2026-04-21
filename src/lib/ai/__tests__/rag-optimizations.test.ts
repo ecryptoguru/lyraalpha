@@ -16,6 +16,8 @@ const mockSetCache = vi.fn();
 vi.mock("@/lib/redis", () => ({
   getCache: (...args: any[]) => mockGetCache(...args),
   setCache: (...args: any[]) => mockSetCache(...args),
+  redisSetNXStrict: vi.fn().mockResolvedValue(true),
+  redis: { del: vi.fn().mockResolvedValue(undefined), pipeline: vi.fn(() => ({ hincrby: vi.fn(), hincrbyfloat: vi.fn(), expire: vi.fn(), exec: vi.fn().mockResolvedValue([]) })) },
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -44,6 +46,15 @@ vi.mock("@/lib/ai/chunker", () => ({
 
 vi.mock("@/lib/ai/search", () => ({
   searchWeb: vi.fn().mockResolvedValue({ content: "", sources: [] }),
+}));
+
+vi.mock("@/lib/ai/alerting", () => ({
+  recordRagResult: vi.fn().mockResolvedValue(undefined),
+  recordRagGrounding: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("@/lib/fire-and-forget", () => ({
+  logFireAndForgetError: vi.fn(),
 }));
 
 vi.mock("@/lib/logger", () => ({

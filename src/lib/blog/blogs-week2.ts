@@ -12,9 +12,17 @@ export const week2Posts = [
     author: "LyraAlpha Research",
     category: "AI & Technology",
     featured: false,
-    metaDescription: "The hype around AI for crypto research is loud. Here is an honest breakdown of what AI genuinely improves in crypto research — and what it cannot do.",
+    metaDescription: "The hype around AI for crypto research is loud. Here is an honest breakdown of what AI genuinely improves in crypto research — and where it falls short. Use it wisely.",
     keywords: ["AI crypto research", "crypto research", "market intelligence AI", "LLM crypto", "AI tools crypto"],
-    heroImageUrl: "/blog/ai-crypto-research-hero.jpg",
+    internalLinks: [
+      { text: "LyraAlpha AI", url: "/lyra" },
+      { text: "market intelligence", url: "/lyra" },
+      { text: "research automation", url: "/lyra" },
+      { text: "market intelligence tools", url: "/blog/how-lyraalpha-daily-briefing-helps-you-see-the-crypto-market-faster" },
+      { text: "AI crypto tools", url: "/blog/best-ai-tools-for-crypto-research-a-2026-buyers-guide" },
+      { text: "AI copilot comparison", url: "/blog/ai-market-copilots-vs-human-research-where-each-wins" },
+    ],
+    heroImageUrl: "/blog/what-ai-can-actually-do-for-crypto-market-research-hero.webp",
     content: `
 # What AI Can Actually Do for Crypto Market Research
 
@@ -147,9 +155,17 @@ LyraAlpha's architecture is designed to prevent hallucination by design. Lyra ne
     author: "LyraAlpha Research",
     category: "Portfolio Intelligence",
     featured: false,
-    metaDescription: "A portfolio of 10 crypto tokens is not necessarily diversified. Here is the difference between diversification and resilience — and how to build a portfolio that actually holds up under pressure.",
+    metaDescription: "A portfolio of 10 crypto tokens is not necessarily diversified. Here is the difference between diversification and resilience — and how to build a portfolio that holds up under pressure.",
     keywords: ["crypto diversification", "portfolio risk", "crypto portfolio", "risk management", "portfolio resilience"],
-    heroImageUrl: "/blog/crypto-diversification-hero.jpg",
+    internalLinks: [
+      { text: "portfolio analysis", url: "/lyra" },
+      { text: "risk management", url: "/lyra" },
+      { text: "portfolio diversification", url: "/lyra" },
+      { text: "portfolio fragility", url: "/blog/how-to-spot-portfolio-fragility-before-it-becomes-a-drawdown" },
+      { text: "concentration risk", url: "/blog/what-portfolio-concentration-risk-looks-like-in-practice" },
+      { text: "regime alignment", url: "/blog/how-to-use-regime-alignment-to-make-better-portfolio-decisions" },
+    ],
+    heroImageUrl: "/blog/why-diversification-alone-does-not-eliminate-crypto-portfolio-risk-hero.webp",
     content: `
 # Why Diversification Alone Does Not Eliminate Crypto Portfolio Risk
 
@@ -275,7 +291,7 @@ LyraAlpha's Portfolio Intelligence workspace computes fragility, regime alignmen
 
   {
     slug: "how-to-read-momentum-volatility-and-trend-together",
-    title: "How to Read Momentum, Volatility, and Trend Together — and Why Each Matters",
+    title: "How to Read Momentum, Volatility, and Trend Together",
     description:
       "Momentum, volatility, and trend scores tell different stories. Reading them together is how you get from 'the price is going up' to 'this is a high-quality signal worth acting on.' Here's how.",
     date: "2026-04-30",
@@ -283,9 +299,17 @@ LyraAlpha's Portfolio Intelligence workspace computes fragility, regime alignmen
     author: "LyraAlpha Research",
     category: "Market Intelligence",
     featured: false,
-    metaDescription: "Momentum, volatility, and trend scores each tell you something different. Reading them together is how you separate a high-quality signal from noise. Here's the practical framework.",
+    metaDescription: "Momentum, volatility, and trend scores each tell you something different. Reading them together is how you separate a quality signal from noise. Here's the complete framework.",
     keywords: ["crypto momentum", "crypto volatility", "trend analysis", "crypto indicators", "technical analysis crypto"],
-    heroImageUrl: "/blog/momentum-volatility-trend-hero.jpg",
+    internalLinks: [
+      { text: "market regime analysis", url: "/lyra" },
+      { text: "momentum indicators", url: "/lyra" },
+      { text: "trend analysis", url: "/lyra" },
+      { text: "market regime fundamentals", url: "/blog/what-is-market-regime-analysis-and-why-it-matters-for-crypto-investors" },
+      { text: "sector movers analysis", url: "/blog/why-same-sector-movers-matter-more-than-random-price-action" },
+      { text: "portfolio health scoring", url: "/blog/why-diversification-alone-does-not-eliminate-crypto-portfolio-risk" },
+    ],
+    heroImageUrl: "/blog/how-to-read-momentum-volatility-and-trend-together-hero.webp",
     content: `
 # How to Read Momentum, Volatility, and Trend Together — and Why Each Matters
 
@@ -397,7 +421,7 @@ LyraAlpha computes Trend, Momentum, Volatility, Liquidity, Trust, and Sentiment 
 
   {
     slug: "how-lyraalpha-daily-briefing-helps-you-see-the-crypto-market-faster",
-    title: "How LyraAlpha's Daily Briefing Helps You See the Crypto Market Faster",
+    title: "How LyraAlpha's Daily Briefing Helps You See the Market Faster",
     description:
       "Reading 50 tabs to understand the crypto market is a habit, not a strategy. Here is what a genuinely useful daily crypto briefing actually contains — and how LyraAlpha delivers it.",
     date: "2026-05-01",
@@ -405,9 +429,17 @@ LyraAlpha computes Trend, Momentum, Volatility, Liquidity, Trust, and Sentiment 
     author: "LyraAlpha Research",
     category: "Market Intelligence",
     featured: false,
-    metaDescription: "Reading 50 tabs to understand the crypto market is a habit, not a strategy. Here is what a genuinely useful daily crypto briefing actually contains.",
+metaDescription: "Reading 50 tabs to understand the crypto market is a habit, not a strategy. Here is what a useful daily crypto briefing contains — and how LyraAlpha delivers it.",
     keywords: ["daily crypto briefing", "crypto market intelligence", "crypto analysis", "LyraAlpha briefing", "crypto workflow"],
-    heroImageUrl: "/blog/daily-briefing-hero.jpg",
+    internalLinks: [
+      { text: "daily briefing", url: "/lyra" },
+      { text: "market intelligence", url: "/lyra" },
+      { text: "LyraAlpha dashboard", url: "/dashboard" },
+      { text: "regime tracking workflow", url: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day" },
+      { text: "intelligence workflow", url: "/blog/how-to-build-a-better-financial-intelligence-workflow" },
+      { text: "daily investing routine", url: "/blog/how-to-build-an-investing-workflow-around-daily-crypto-market-briefings" },
+    ],
+    heroImageUrl: "/blog/how-lyraalpha-daily-briefing-helps-you-see-the-crypto-market-faster-hero.webp",
     content: `
 # How LyraAlpha's Daily Briefing Helps You See the Crypto Market Faster
 

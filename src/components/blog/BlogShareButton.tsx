@@ -23,7 +23,7 @@ export function BlogShareButton({ post }: Props) {
     <ShareInsightButton
       share={shareObject}
       label="Share"
-      className="border-white/10 bg-white/3 text-white/45 hover:border-amber-400/20 hover:text-amber-300"
+      className="border-white/10 bg-white/3 text-white/45 hover:border-warning/20 hover:text-warning"
     />
   );
 }

@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { createClientLogger } from "@/lib/logger/client";
+
+const logger = createClientLogger("session-tracking");
 
 interface UseSessionTrackingOptions {
   /** Interval in ms for heartbeat (default: 30000 = 30s) */
@@ -191,7 +194,7 @@ export function useSessionTracking(options: UseSessionTrackingOptions = {}) {
     }
 
     pendingPageViewPathRef.current = null;
-    trackEvent("page_view", { path: pathname }).catch((e) => console.warn("Page view tracking failed:", e));
+    trackEvent("page_view", { path: pathname }).catch((e) => logger.warn("Page view tracking failed", { error: e }));
   }, [pathname, shouldTrackPath, userId, sessionState.sessionId]);
 
   useEffect(() => {
@@ -200,7 +203,7 @@ export function useSessionTracking(options: UseSessionTrackingOptions = {}) {
 
     currentPathRef.current = pendingPath;
     pendingPageViewPathRef.current = null;
-    trackEvent("page_view", { path: pendingPath }).catch((e) => console.warn("Pending page view tracking failed:", e));
+    trackEvent("page_view", { path: pendingPath }).catch((e) => logger.warn("Pending page view tracking failed", { error: e }));
   }, [sessionState.sessionId]);
 
   // End session on unmount - use ref to avoid stale closure
@@ -208,7 +211,7 @@ export function useSessionTracking(options: UseSessionTrackingOptions = {}) {
     return () => {
       // Use ref value to avoid calling setState on unmounted component
       if (sessionIdRef.current) {
-        endSession().catch((e) => console.warn("Session end failed:", e));
+        endSession().catch((e) => logger.warn("Session end failed", { error: e }));
       }
     };
     // Empty deps - intentionally runs once on mount to set up cleanup

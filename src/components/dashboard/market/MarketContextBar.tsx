@@ -20,11 +20,11 @@ function getStatusColor(level: string) {
   const neutral  = ["NEUTRAL","NORMAL","MIXED","ADEQUATE","BALANCED"];
   const warning  = ["DEFENSIVE","ELEVATED","WEAK","THIN","CAUTIOUS"];
   const critical = ["RISK_OFF","STRESS","NARROW","FRAGILE","RISK_AVERSION"];
-  if (positive.includes(level)) return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
-  if (neutral.includes(level))  return "text-slate-400 bg-slate-400/10 border-slate-400/20";
-  if (warning.includes(level))  return "text-amber-400 bg-amber-400/10 border-amber-400/20";
-  if (critical.includes(level)) return "text-rose-400 bg-rose-400/10 border-rose-400/20";
-  return "text-slate-400 bg-slate-400/10 border-slate-400/20";
+  if (positive.includes(level)) return "text-success bg-success/10 border-success/20";
+  if (neutral.includes(level))  return "text-muted-foreground bg-muted/10 border-border/20";
+  if (warning.includes(level))  return "text-warning bg-warning/10 border-warning/20";
+  if (critical.includes(level)) return "text-danger bg-danger/10 border-danger/20";
+  return "text-muted-foreground bg-muted/10 border-border/20";
 }
 
 function fmt(label: string) {

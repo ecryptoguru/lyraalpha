@@ -41,15 +41,15 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 const accentColors: Record<string, string> = {
-  "AI & Technology": "border-teal-400/20 bg-teal-400/6 text-teal-300",
-  "Market Intelligence": "border-amber-400/20 bg-amber-400/6 text-amber-300",
+  "AI & Technology": "border-info/20 bg-info/6 text-info",
+  "Market Intelligence": "border-warning/20 bg-warning/6 text-warning",
   Markets: "border-white/15 bg-white/5 text-white/60",
-  "Portfolio Intelligence": "border-blue-400/20 bg-blue-400/6 text-blue-300",
-  "Crypto Discovery": "border-green-400/20 bg-green-400/6 text-green-300",
-  "Crypto Analysis": "border-purple-400/20 bg-purple-400/6 text-purple-300",
-  "AI & DeFAI": "border-cyan-400/20 bg-cyan-400/6 text-cyan-300",
-  "Investing Guides": "border-rose-400/20 bg-rose-400/6 text-rose-300",
-  "Asset Intelligence": "border-indigo-400/20 bg-indigo-400/6 text-indigo-300",
+  "Portfolio Intelligence": "border-info/20 bg-info/6 text-info/60",
+  "Crypto Discovery": "border-success/20 bg-success/6 text-success",
+  "Crypto Analysis": "border-primary/20 bg-primary/6 text-primary/60",
+  "AI & DeFAI": "border-info/20 bg-info/6 text-info",
+  "Investing Guides": "border-danger/20 bg-danger/6 text-danger",
+  "Asset Intelligence": "border-primary/20 bg-primary/6 text-primary/60",
 };
 
 export default async function BlogPage() {
@@ -61,7 +61,7 @@ export default async function BlogPage() {
   const [featured, ...rest] = sorted;
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#040816] font-sans text-white selection:bg-amber-300/30" suppressHydrationWarning>
+    <div className="flex min-h-screen flex-col bg-[#040816] font-sans text-white selection:bg-warning2559" suppressHydrationWarning>
       <Navbar />
 
       <main className="flex-1">
@@ -71,12 +71,12 @@ export default async function BlogPage() {
           <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-size-[80px_80px] opacity-[0.04]" />
 
           <div className="container relative mx-auto max-w-7xl px-0">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-amber-400/70">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-warning/70">
               LyraAlpha AI · Journal
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-extralight leading-tight tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
               Intelligence,{" "}
-              <span className="text-amber-400">written down.</span>
+              <span className="text-warning">written down.</span>
             </h1>
             <p className="mt-6 max-w-2xl font-mono text-sm leading-8 text-white/45 sm:text-base">
               Deep dives on deterministic analysis, AI-grounded financial
@@ -91,7 +91,7 @@ export default async function BlogPage() {
           <div className="container mx-auto max-w-7xl px-0">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.36em] text-amber-400/70">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.36em] text-warning/70">
                   Browse by Topic
                 </p>
                 <h2 className="mt-2 text-xl font-light tracking-tight text-white">
@@ -138,7 +138,7 @@ export default async function BlogPage() {
                             {section.name}
                           </h3>
                           {isFeatured && (
-                            <span className="shrink-0 rounded-full bg-amber-400/15 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-amber-400">
+                            <span className="shrink-0 rounded-full bg-warning/15 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-warning">
                               Top
                             </span>
                           )}
@@ -170,9 +170,9 @@ export default async function BlogPage() {
             {featured && (
               <Link
                 href={`/blog/${featured.slug}`}
-                className="group relative mb-10 block overflow-hidden rounded-3xl border border-white/8 bg-white/[0.022] p-7 transition-all duration-300 hover:-translate-y-1 hover:border-amber-400/20 hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)] sm:p-10"
+                className="group relative mb-10 block overflow-hidden rounded-3xl border border-white/8 bg-white/[0.022] p-7 transition-all duration-300 hover:-translate-y-1 hover:border-warning/20 hover:shadow-[0_20px_60px_rgba(0,0,0,0.3)] sm:p-10"
               >
-                <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-amber-400/4 to-transparent" />
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-warning/4 to-transparent" />
                 <div className="relative">
                   <div className="flex flex-wrap items-center gap-3">
                     <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.28em] ${accentColors[featured.category] ?? "border-white/15 bg-white/5 text-white/55"}`}>
@@ -182,7 +182,7 @@ export default async function BlogPage() {
                       Featured
                     </span>
                   </div>
-                  <h2 className="mt-5 max-w-3xl text-2xl font-light leading-snug tracking-[-0.03em] text-white transition-colors group-hover:text-amber-100 sm:text-3xl lg:text-4xl">
+                  <h2 className="mt-5 max-w-3xl text-2xl font-light leading-snug tracking-[-0.03em] text-white transition-colors group-hover:text-primary/60 sm:text-3xl lg:text-4xl">
                     {featured.title}
                   </h2>
                   <p className="mt-4 max-w-2xl text-sm leading-7 text-white/45 sm:text-base">
@@ -196,7 +196,7 @@ export default async function BlogPage() {
                     <span className="font-mono text-[10px]">
                       {formatDate(featured.date)}
                     </span>
-                    <span className="ml-auto flex items-center gap-1.5 font-mono text-[11px] font-bold text-amber-400 transition-all group-hover:gap-2.5">
+                    <span className="ml-auto flex items-center gap-1.5 font-mono text-[11px] font-bold text-warning transition-all group-hover:gap-2.5">
                       Read article
                       <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                     </span>
@@ -218,7 +218,7 @@ export default async function BlogPage() {
                       <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.28em] ${accentColors[post.category] ?? "border-white/15 bg-white/5 text-white/55"}`}>
                         {post.category}
                       </span>
-                      <h2 className="mt-4 text-base font-semibold leading-snug tracking-tight text-white transition-colors group-hover:text-amber-100 sm:text-lg">
+                      <h2 className="mt-4 text-base font-semibold leading-snug tracking-tight text-white transition-colors group-hover:text-primary/60 sm:text-lg">
                         {post.title}
                       </h2>
                       <p className="mt-3 text-sm leading-6 text-white/42">
@@ -233,7 +233,7 @@ export default async function BlogPage() {
                       <span className="font-mono text-[10px]">
                         {formatDate(post.date)}
                       </span>
-                      <ArrowRight className="ml-auto h-3.5 w-3.5 text-amber-400/50 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-amber-400" />
+                      <ArrowRight className="ml-auto h-3.5 w-3.5 text-warning/50 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-warning" />
                     </div>
                   </Link>
                 ))}

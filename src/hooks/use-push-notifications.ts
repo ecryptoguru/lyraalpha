@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createClientLogger } from "@/lib/logger/client";
+
+const logger = createClientLogger("push-notifications");
 
 interface UsePushNotificationsReturn {
   isSupported: boolean;
@@ -41,7 +44,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         reg.pushManager.getSubscription().then((sub) => {
           setIsSubscribed(!!sub);
         });
-      }).catch((e) => console.warn("Push subscription check failed:", e));
+      }).catch((e) => logger.warn("Push subscription check failed", { error: e }));
     }
   }, []);
 
@@ -71,7 +74,7 @@ export function usePushNotifications(): UsePushNotificationsReturn {
         return true;
       }
 
-      await sub.unsubscribe().catch((e) => console.warn("Push unsubscribe cleanup failed:", e));
+      await sub.unsubscribe().catch((e) => logger.warn("Push unsubscribe cleanup failed", { error: e }));
       return false;
     } catch {
       return false;

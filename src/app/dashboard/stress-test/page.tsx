@@ -33,7 +33,8 @@ import { AssetSearchInput } from "@/components/dashboard/asset-search-input";
 import { useRegion } from "@/lib/context/RegionContext";
 import dynamic from "next/dynamic";
 import { parseLyraMessage } from "@/lib/lyra-utils";
-import { getScenario, STRESS_SCENARIO_IDS, type StressScenarioId } from "@/lib/stress-scenarios";
+import { getScenario, STRESS_SCENARIO_IDS, type StressScenarioId, type StressResult } from "@/lib/stress-scenarios";
+import { fmt, buildChartData, getStressTestErrorMessage, formatScenarioPeriod } from "@/lib/stress-scenarios/stress-test-utils";
 import { calculateMultiAssetAnalysisCredits } from "@/lib/credits/cost";
 import { AnalysisLoadingState } from "@/components/lyra/analysis-loading-state";
 import { ShareInsightButton } from "@/components/dashboard/share-insight-button";
@@ -45,119 +46,96 @@ const AnswerWithSources = dynamic(
   () => import("@/components/lyra/answer-with-sources").then((m) => m.AnswerWithSources),
   { ssr: false },
 );
+// Recharts <Line stroke> requires a parseable CSS color string — CSS custom properties
+// (var(--color-*)) are not supported. These hex values mirror the design system palette.
 const SCENARIO_COLORS = [
-  "#22d3ee", "#f59e0b", "#f43f5e", "#a3e635", "#818cf8", "#fb923c", "#34d399", "#e879f9",
+  "#22d3ee", // Signal Cyan
+  "#818cf8", // Electric Indigo
+  "#f43f5e", // Rose (danger)
+  "#a3e635", // Lime
+  "#c4b5fd", // Neural Purple
+  "#fb923c", // Orange (warning)
+  "#34d399", // Emerald (success)
+  "#e879f9", // Fuchsia
 ];
 const MAX_STRESS_TEST_ASSETS = 3;
 const MAX_STRESS_TEST_ASSETS_MESSAGE = "Shock Simulator supports up to 3 assets. Remove one to continue.";
+const DEFAULT_SCENARIO_ID = STRESS_SCENARIO_IDS[0]!;
 
 const SCENARIO_UI_CHROME: Record<StressScenarioId, { color: string; icon: React.ReactNode }> = {
   "gfc-2008": {
-    color: "text-red-400 border-red-400/30 bg-red-400/5",
+    color: "text-danger border-danger/30 bg-danger/5",
     icon: <Shield className="h-4 w-4" />,
   },
   "covid-2020": {
-    color: "text-rose-400 border-rose-400/30 bg-rose-400/5",
+    color: "text-info border-info/30 bg-info/5",
     icon: <AlertTriangle className="h-4 w-4" />,
   },
   "rate-shock-2022": {
-    color: "text-amber-400 border-amber-400/30 bg-amber-400/5",
+    color: "text-warning border-warning/30 bg-warning/5",
     icon: <TrendingDown className="h-4 w-4" />,
   },
   recession: {
-    color: "text-sky-400 border-sky-400/30 bg-sky-400/5",
+    color: "text-foreground border-foreground/15 bg-foreground/5",
     icon: <Landmark className="h-4 w-4" />,
   },
   "interest-rate-shock": {
-    color: "text-orange-400 border-orange-400/30 bg-orange-400/5",
+    color: "text-warning border-warning/20 bg-warning/3",
     icon: <TrendingDown className="h-4 w-4" />,
   },
   "tech-bubble-crash": {
-    color: "text-cyan-400 border-cyan-400/30 bg-cyan-400/5",
+    color: "text-info border-info/30 bg-info/5",
     icon: <Cpu className="h-4 w-4" />,
   },
   "oil-spike": {
-    color: "text-orange-300 border-orange-300/30 bg-orange-300/5",
+    color: "text-warning border-warning/30 bg-warning/5",
     icon: <Flame className="h-4 w-4" />,
   },
 };
 
-function formatScenarioPeriod(period: { start: string; end: string }) {
-  const formatter = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" });
-  return `${formatter.format(new Date(period.start))} – ${formatter.format(new Date(period.end))}`;
-}
-
-const SCENARIOS = STRESS_SCENARIO_IDS.map((id) => {
-  const us = getScenario(id, "US");
-  const inRegion = getScenario(id, "IN");
-
-  if (!us || !inRegion) {
-    throw new Error(`Missing scenario metadata for ${id}`);
+const SCENARIOS = STRESS_SCENARIO_IDS.flatMap((id) => {
+  let us: ReturnType<typeof getScenario>;
+  let inRegion: ReturnType<typeof getScenario>;
+  try {
+    us = getScenario(id, "US");
+    inRegion = getScenario(id, "IN");
+  } catch (err) {
+    if (typeof window !== "undefined") console.error(`Failed to load scenario metadata for ${id}:`, err);
+    return [];
   }
 
-  return {
+  if (!us || !inRegion) {
+    if (typeof window !== "undefined") console.error(`Missing scenario metadata for ${id}`);
+    return [];
+  }
+
+  return [{
     id,
     name: us.name.replace(/\s+\(India\)$/, ""),
     description: us.narrative?.headline ?? us.description,
-    color: SCENARIO_UI_CHROME[id].color,
-    icon: SCENARIO_UI_CHROME[id].icon,
+    color: SCENARIO_UI_CHROME[id]?.color ?? "text-muted-foreground border-white/10 bg-white/3",
+    icon: SCENARIO_UI_CHROME[id]?.icon ?? <Shield className="h-4 w-4" />,
     us: { period: formatScenarioPeriod(us.period), severity: us.severity ?? "Moderate" },
     in: { period: formatScenarioPeriod(inRegion.period), severity: inRegion.severity ?? "Moderate" },
-  };
+  }];
 });
 
-interface DayPoint { day: number; drawdown: number; }
-
-interface StressResult {
-  symbol: string;
-  name: string;
-  type: string;
-  region: string;
-  scenarioId: string;
-  method: "DIRECT" | "PROXY" | "ERROR";
-  drawdown: number | null;
-  periodReturn: number | null;
-  maxDrawdown: number | null;
-  dailyPath: DayPoint[];
-  proxyUsed: string | null;
-  proxyLabel?: string | null;
-  beta: number | null;
-  confidence: number;
-  factors: {
-    equity: number; rates: number; gold: number;
-    usd: number; oil: number; credit: number;
-  } | null;
-  dataPoints?: number;
-  scenarioPeriod?: { start: string; end: string };
-  scenarioSeverity?: "Extreme" | "Severe" | "Moderate" | null;
-  driverSummary?: string | null;
-  transmissionMechanism?: string | null;
-  pressurePoints?: string[];
-  resilienceThemes?: string[];
-  dominantDrivers?: string[];
-  rationale?: string | null;
-  explanationMethod?: string | null;
-  error?: string;
-}
-
-const fmt = (v: number | null, suffix = "%") =>
-  v == null ? "—" : `${v > 0 ? "+" : ""}${(v * 100).toFixed(1)}${suffix}`;
 
 const MethodBadge = ({ method, proxy }: { method: string; proxy?: string | null }) => {
   if (method === "DIRECT")
     return (
-      <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+      <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-success/10 text-success border border-success/20">
         Direct
       </span>
     );
   if (method === "PROXY")
     return (
-      <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20" title={`Proxy: ${proxy}`}>
+      <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-warning/10 text-warning border border-warning/20" title={`Proxy: ${proxy}`}>
         Proxy {proxy ? `· ${getFriendlySymbol(proxy)}` : ""}
       </span>
     );
   return (
-    <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/20">
+    <span className="px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider bg-danger/10 text-danger border border-danger/20">
       No data
     </span>
   );
@@ -165,7 +143,7 @@ const MethodBadge = ({ method, proxy }: { method: string; proxy?: string | null 
 
 const ConfidenceMeter = ({ confidence }: { confidence: number }) => {
   const pct = Math.round(confidence * 100);
-  const color = pct >= 80 ? "bg-emerald-400" : pct >= 50 ? "bg-amber-400" : "bg-rose-400";
+  const color = pct >= 80 ? "bg-success" : pct >= 50 ? "bg-warning" : "bg-danger";
   return (
     <div className="flex items-center gap-1.5" title={`Confidence: ${pct}%`}>
       <div className="w-16 h-1.5 bg-muted/20 rounded-full overflow-hidden">
@@ -198,9 +176,9 @@ const ScenarioNarrativeCard = React.memo(function ScenarioNarrativeCard({ result
         {result.scenarioSeverity && (
           <span className={cn(
             "text-[8px] font-black uppercase px-1.5 py-0.5 rounded",
-            result.scenarioSeverity === "Extreme" ? "bg-red-500/10 text-red-400" :
-            result.scenarioSeverity === "Severe" ? "bg-rose-500/10 text-rose-400" :
-            "bg-amber-500/10 text-amber-400",
+            result.scenarioSeverity === "Extreme" ? "bg-danger/15 text-danger border border-danger/20" :
+            result.scenarioSeverity === "Severe" ? "bg-danger/10 text-danger" :
+            "bg-warning/10 text-warning",
           )}>
             {result.scenarioSeverity}
           </span>
@@ -214,7 +192,7 @@ const ScenarioNarrativeCard = React.memo(function ScenarioNarrativeCard({ result
           <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">Dominant Drivers</p>
           <div className="flex flex-wrap gap-1.5">
             {(result.dominantDrivers ?? []).map((driver) => (
-              <span key={driver} className="rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2 py-1 text-[10px] font-bold text-cyan-300">
+              <span key={driver} className="rounded-full border border-info/20 bg-info/10 px-2 py-1 text-[10px] font-bold text-info">
                 {driver}
               </span>
             ))}
@@ -224,7 +202,7 @@ const ScenarioNarrativeCard = React.memo(function ScenarioNarrativeCard({ result
           <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">Pressure Points</p>
           <div className="flex flex-wrap gap-1.5">
             {(result.pressurePoints ?? []).map((point) => (
-              <span key={point} className="rounded-full border border-rose-500/20 bg-rose-500/10 px-2 py-1 text-[10px] font-bold text-rose-300">
+              <span key={point} className="rounded-full border border-danger/20 bg-danger/10 px-2 py-1 text-[10px] font-bold text-danger">
                 {point}
               </span>
             ))}
@@ -234,7 +212,7 @@ const ScenarioNarrativeCard = React.memo(function ScenarioNarrativeCard({ result
           <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">Resilience Themes</p>
           <div className="flex flex-wrap gap-1.5">
             {(result.resilienceThemes ?? []).map((theme) => (
-              <span key={theme} className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-bold text-emerald-300">
+              <span key={theme} className="rounded-full border border-success/20 bg-success/10 px-2 py-1 text-[10px] font-bold text-success">
                 {theme}
               </span>
             ))}
@@ -269,11 +247,11 @@ const AssetReplayCard = React.memo(function AssetReplayCard({ result }: { result
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-3xl border border-white/10 bg-card/40 px-3 py-2">
           <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">Max Drawdown</p>
-          <p className="mt-1 text-sm font-black text-rose-400">{fmt(result.maxDrawdown)}</p>
+          <p className="mt-1 text-sm font-black text-danger">{fmt(result.maxDrawdown)}</p>
         </div>
         <div className="rounded-3xl border border-white/10 bg-card/40 px-3 py-2">
           <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/50">Period Return</p>
-          <p className={cn("mt-1 text-sm font-black", (result.periodReturn ?? 0) < 0 ? "text-rose-400" : "text-emerald-400")}>
+          <p className={cn("mt-1 text-sm font-black", (result.periodReturn ?? 0) < 0 ? "text-danger" : "text-success")}>
             {fmt(result.periodReturn)}
           </p>
         </div>
@@ -294,71 +272,6 @@ const AssetReplayCard = React.memo(function AssetReplayCard({ result }: { result
   );
 });
 
-// Normalise paths from multiple assets to the same day axis for a unified chart
-function buildChartData(results: StressResult[]) {
-  const allDays = Array.from(new Set(results.flatMap((r) => r.dailyPath.map((p) => p.day)))).sort((a, b) => a - b);
-
-  const nearestPoints = new Map<string, Map<number, number>>();
-
-  for (const result of results) {
-    const lookup = new Map<number, number>();
-    let pointer = 0;
-
-    for (const day of allDays) {
-      while (
-        pointer < result.dailyPath.length - 1
-        && Math.abs(result.dailyPath[pointer + 1].day - day) <= Math.abs(result.dailyPath[pointer].day - day)
-      ) {
-        pointer += 1;
-      }
-
-      lookup.set(day, parseFloat((result.dailyPath[pointer].drawdown * 100).toFixed(2)));
-    }
-
-    nearestPoints.set(result.symbol, lookup);
-  }
-
-  return allDays.map((day) => {
-    const entry: Record<string, number | string> = { day };
-
-    for (const result of results) {
-      const lookup = nearestPoints.get(result.symbol);
-      const value = lookup?.get(day);
-      if (value != null) {
-        entry[result.symbol] = value;
-      }
-    }
-
-    return entry;
-  });
-}
-
-async function getStressTestErrorMessage(res: Response) {
-  const fallback = "Stress test failed. Please try again.";
-
-  let payload: { error?: string; message?: string } | null = null;
-  try {
-    payload = await res.clone().json();
-  } catch {
-    payload = null;
-  }
-
-  if (res.status === 402) {
-    return payload?.message ?? "You do not have enough credits to run this stress test.";
-  }
-
-  if (res.status === 403) {
-    return payload?.error === "Elite plan required"
-      ? "Stress Test is available on Elite and Enterprise plans."
-      : payload?.message ?? payload?.error ?? fallback;
-  }
-
-  if (res.status === 400) {
-    return payload?.message ?? payload?.error ?? "Please check your symbols and scenario selection.";
-  }
-
-  return payload?.message ?? payload?.error ?? fallback;
-}
 
 // Custom animated tooltip
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number; color: string }>; label?: number }) {
@@ -370,10 +283,10 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
         <div key={p.name} className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
-            <span className="font-bold">{p.name}</span>
+            <span className="font-bold">{getFriendlySymbol(p.name)}</span>
           </div>
-          <span className={cn("font-black tabular-nums", p.value < 0 ? "text-rose-400" : "text-emerald-400")}>
-            {p.value > 0 ? "+" : ""}{p.value.toFixed(1)}%
+          <span className={cn("font-black tabular-nums", Math.abs(p.value) < 0.05 ? "text-muted-foreground" : p.value < 0 ? "text-danger" : "text-success")}>
+            {Math.abs(p.value) < 0.05 ? "0.0" : `${p.value > 0 ? "+" : ""}${p.value.toFixed(1)}`}%
           </span>
         </div>
       ))}
@@ -383,12 +296,12 @@ function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: 
 
 function FactorDrivers({ factors }: { factors: NonNullable<StressResult["factors"]> }) {
   const entries = [
-    { label: "Equity", value: factors.equity, color: "bg-amber-400" },
-    { label: "Long Bonds", value: factors.rates, color: "bg-amber-400" },
-    { label: "Gold", value: factors.gold, color: "bg-yellow-400" },
-    { label: "USD", value: factors.usd, color: "bg-cyan-400" },
-    { label: "Oil", value: factors.oil, color: "bg-orange-400" },
-    { label: "Credit", value: factors.credit, color: "bg-rose-400" },
+    { label: "Equity", value: factors.equity },
+    { label: "Long Bonds", value: factors.rates },
+    { label: "Gold", value: factors.gold },
+    { label: "USD", value: factors.usd },
+    { label: "Oil", value: factors.oil },
+    { label: "Credit", value: factors.credit },
   ];
   return (
     <div className="space-y-1.5">
@@ -396,9 +309,9 @@ function FactorDrivers({ factors }: { factors: NonNullable<StressResult["factors
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
         {entries.map((e) => (
           <div key={e.label} className="flex items-center gap-2">
-            <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", e.color)} />
+            <div className={cn("w-1.5 h-1.5 rounded-full shrink-0", e.value < 0 ? "bg-danger" : e.value > 0 ? "bg-success" : "bg-muted-foreground/40")} />
             <span className="text-[9px] text-muted-foreground/70 w-16 shrink-0">{e.label}</span>
-            <span className={cn("text-[9px] font-black tabular-nums ml-auto", e.value < 0 ? "text-rose-400" : "text-emerald-400")}>
+            <span className={cn("text-[9px] font-black tabular-nums ml-auto", e.value < 0 ? "text-danger" : e.value > 0 ? "text-success" : "text-muted-foreground")}>
               {fmt(e.value)}
             </span>
           </div>
@@ -408,6 +321,74 @@ function FactorDrivers({ factors }: { factors: NonNullable<StressResult["factors
   );
 }
 
+const AssetBreakdownRow = React.memo(function AssetBreakdownRow({
+  r, index, isSelected, onSelectSymbol,
+}: {
+  r: StressResult; index: number; isSelected: boolean; onSelectSymbol: (symbol: string) => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "space-y-1.5 pb-3 border-b border-border/20 last:border-0 last:pb-0 rounded-xl transition-colors",
+        isSelected ? "bg-primary/5" : "",
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: SCENARIO_COLORS[index % SCENARIO_COLORS.length] }} />
+        <Link
+          href={`/dashboard/assets/${r.symbol}`}
+          className="text-[10px] font-black w-24 truncate hover:text-primary transition-colors"
+        >
+          {getFriendlySymbol(r.symbol)}
+        </Link>
+        <MethodBadge method={r.method} proxy={r.proxyUsed} />
+        <div className="ml-auto flex items-center gap-2">
+          <ConfidenceMeter confidence={r.confidence} />
+          {r.beta != null && (
+            <span className="text-[8px] text-muted-foreground/40">β {r.beta.toFixed(2)}</span>
+          )}
+          <button
+            type="button"
+            onClick={() => onSelectSymbol(r.symbol)}
+            className={cn(
+              "rounded-full border px-2 py-1 text-[8px] font-black uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
+              isSelected
+                ? "border-primary/40 bg-primary/10 text-primary"
+                : "border-white/10 bg-card/40 text-muted-foreground/70 hover:border-border/60",
+            )}
+            aria-pressed={isSelected}
+            aria-label={`Show replay details for ${getFriendlySymbol(r.symbol)}`}
+          >
+            Details
+          </button>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 pl-4">
+        <div className="flex-1 h-2 bg-muted/20 rounded-full overflow-hidden">
+          <div
+            className={cn(
+              "h-full rounded-full transition-all duration-700",
+              (r.maxDrawdown ?? 0) < -0.30 ? "bg-danger" :
+              (r.maxDrawdown ?? 0) < -0.15 ? "bg-danger/70" :
+              (r.maxDrawdown ?? 0) < 0 ? "bg-warning" : "bg-success",
+            )}
+            style={{ width: `${Math.max(2, Math.min(Math.abs((r.maxDrawdown ?? 0) * 100), 100))}%` }}
+          />
+        </div>
+        <span className={cn(
+          "text-[10px] font-black w-14 text-right tabular-nums",
+          (r.maxDrawdown ?? 0) < 0 ? "text-danger" : "text-success",
+        )}>
+          {fmt(r.maxDrawdown)}
+        </span>
+        <span className="text-[9px] font-bold w-16 text-right tabular-nums text-muted-foreground/50">
+          {fmt(r.periodReturn)} return
+        </span>
+      </div>
+    </div>
+  );
+});
+
 export default function StressTestPage() {
   const { plan } = usePlan();
   const isElite = plan === "ELITE" || plan === "ENTERPRISE";
@@ -415,7 +396,7 @@ export default function StressTestPage() {
   const { region: activeRegion } = useRegion();
   const searchParams = useSearchParams();
   const [symbols, setSymbols] = useState<string[]>([]);
-  const [selectedScenario, setSelectedScenario] = useState(SCENARIOS[0].id);
+  const [selectedScenario, setSelectedScenario] = useState(DEFAULT_SCENARIO_ID);
   const [selectedAssetSymbol, setSelectedAssetSymbol] = useState<string | null>(null);
   const [results, setResults] = useState<StressResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -423,20 +404,27 @@ export default function StressTestPage() {
   const [lyraAnalysis, setLyraAnalysis] = useState<string | null>(null);
   const [lyraLoading, setLyraLoading] = useState(false);
   const [lyraElapsedSeconds, setLyraElapsedSeconds] = useState(0);
-  const [lyraLoadStartTime, setLyraLoadStartTime] = useState<number | null>(null);
+  const lyraLoadStartTimeRef = useRef<number>(0);
   const [chartAnimated, setChartAnimated] = useState(false);
   const chartTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lyraRef = useRef<HTMLDivElement>(null);
+  const lyraAbortRef = useRef<AbortController | null>(null);
   const restoredQueryKeyRef = useRef<string | null>(null);
   const pendingRestoreRunRef = useRef(false);
+  const validResultsRef = useRef<StressResult[]>([]);
+  const symbolsRef = useRef<string[]>([]);
 
   // Clear results when universal region changes
   useEffect(() => {
+    lyraAbortRef.current?.abort();
     setResults([]);
     setErrorMessage(null);
     setLyraAnalysis(null);
     setSymbols([]);
     setSelectedAssetSymbol(null);
+    setSelectedScenario(DEFAULT_SCENARIO_ID);
+    validResultsRef.current = [];
+    symbolsRef.current = [];
   }, [activeRegion]);
 
   const restoredScenario = useMemo(() => {
@@ -444,7 +432,7 @@ export default function StressTestPage() {
     if (rawScenario && SCENARIOS.some((scenario) => scenario.id === rawScenario)) {
       return rawScenario as StressScenarioId;
     }
-    return SCENARIOS[0].id;
+    return SCENARIOS[0]?.id ?? DEFAULT_SCENARIO_ID;
   }, [searchParams]);
 
   const restoredSymbols = useMemo(() => {
@@ -472,6 +460,7 @@ export default function StressTestPage() {
     restoredQueryKeyRef.current = restoredQueryKey;
     setSelectedScenario(restoredScenario);
     setSymbols(restoredSymbols);
+    symbolsRef.current = restoredSymbols;
     setResults([]);
     setErrorMessage(restoredSymbols.length > MAX_STRESS_TEST_ASSETS ? MAX_STRESS_TEST_ASSETS_MESSAGE : null);
     setLyraAnalysis(null);
@@ -481,28 +470,49 @@ export default function StressTestPage() {
 
   const addSymbol = useCallback((sym: string) => {
     const upper = sym.trim().toUpperCase();
-    if (!upper || symbols.includes(upper)) return;
-    if (symbols.length >= MAX_STRESS_TEST_ASSETS) {
-      setErrorMessage(MAX_STRESS_TEST_ASSETS_MESSAGE);
-      return;
-    }
-    setErrorMessage(null);
-    setSymbols((prev) => [...prev, upper]);
-  }, [symbols]);
+    if (!upper) return;
+    let outcome: "added" | "duplicate" | "at_capacity" = "added";
+    setSymbols((prev) => {
+      if (prev.includes(upper)) { outcome = "duplicate"; return prev; }
+      if (prev.length >= MAX_STRESS_TEST_ASSETS) { outcome = "at_capacity"; return prev; }
+      outcome = "added";
+      symbolsRef.current = [...prev, upper];
+      return [...prev, upper];
+    });
+    // setErrorMessage must be in a separate microtask to avoid React 18 bailout
+    // when setSymbols returns the same reference (duplicate/at_capacity)
+    queueMicrotask(() => {
+      if (outcome === "at_capacity") {
+        setErrorMessage(MAX_STRESS_TEST_ASSETS_MESSAGE);
+      } else if (outcome === "duplicate") {
+        setErrorMessage(`${getFriendlySymbol(upper)} is already in the list.`);
+        setTimeout(() => setErrorMessage((prev) => prev?.includes("already in the list") ? null : prev), 3000);
+      } else {
+        setErrorMessage(null);
+      }
+    });
+  }, []);
+
+  const handleSelectAsset = useCallback((symbol: string) => {
+    setSelectedAssetSymbol(symbol);
+  }, []);
 
   const removeSymbol = useCallback((sym: string) => {
     setSymbols((prev) => {
       const next = prev.filter((s) => s !== sym);
-      if (next.length <= MAX_STRESS_TEST_ASSETS) setErrorMessage(null);
+      symbolsRef.current = next;
       return next;
     });
     setResults((prev) => prev.filter((r) => r.symbol !== sym));
+    setSelectedAssetSymbol((prev) => prev === sym ? null : prev);
+    setErrorMessage(null);
   }, []);
 
-  const validResults = useMemo(
-    () => results.filter((r) => r.method !== "ERROR" && r.maxDrawdown != null && r.dailyPath.length > 0),
-    [results],
-  );
+  const validResults = useMemo(() => {
+    const vr = results.filter((r) => r.method !== "ERROR" && r.maxDrawdown != null && r.dailyPath.length > 0);
+    validResultsRef.current = vr;
+    return vr;
+  }, [results]);
   const errorResults = useMemo(
     () => results.filter((r) => r.method === "ERROR" || r.error),
     [results],
@@ -511,32 +521,18 @@ export default function StressTestPage() {
     () => [...validResults].sort((a, b) => (a.maxDrawdown ?? 0) - (b.maxDrawdown ?? 0)),
     [validResults],
   );
-  const proxyCount = useMemo(
-    () => validResults.filter((r) => r.method === "PROXY").length,
-    [validResults],
-  );
-  const directCount = useMemo(
-    () => validResults.filter((r) => r.method === "DIRECT").length,
-    [validResults],
-  );
-  const avgDrawdown = useMemo(
-    () => (validResults.length > 0
-      ? validResults.reduce((sum, r) => sum + (r.maxDrawdown ?? 0), 0) / validResults.length
-      : null),
-    [validResults],
-  );
-  const worstAsset = useMemo(
-    () => (validResults.length > 0
-      ? validResults.reduce((w, r) => (r.maxDrawdown ?? 0) < (w.maxDrawdown ?? 0) ? r : w)
-      : null),
-    [validResults],
-  );
-  const bestAsset = useMemo(
-    () => (validResults.length > 0
-      ? validResults.reduce((b, r) => (r.maxDrawdown ?? 0) > (b.maxDrawdown ?? 0) ? r : b)
-      : null),
-    [validResults],
-  );
+  const { proxyCount, directCount, avgDrawdown, worstAsset, bestAsset } = useMemo(() => {
+    if (validResults.length === 0) return { proxyCount: 0, directCount: 0, avgDrawdown: null as number | null, worstAsset: null as StressResult | null, bestAsset: null as StressResult | null };
+    let proxy = 0, direct = 0, sum = 0, worst = validResults[0], best = validResults[0];
+    for (const r of validResults) {
+      if (r.method === "PROXY") proxy++;
+      if (r.method === "DIRECT") direct++;
+      sum += r.maxDrawdown ?? 0;
+      if ((r.maxDrawdown ?? 0) < (worst.maxDrawdown ?? 0)) worst = r;
+      if ((r.maxDrawdown ?? 0) > (best.maxDrawdown ?? 0)) best = r;
+    }
+    return { proxyCount: proxy, directCount: direct, avgDrawdown: sum / validResults.length, worstAsset: worst, bestAsset: best };
+  }, [validResults]);
   const selectedAsset = useMemo(
     () => sortedValidResults.find((result) => result.symbol === selectedAssetSymbol) ?? worstAsset ?? sortedValidResults[0] ?? null,
     [selectedAssetSymbol, sortedValidResults, worstAsset],
@@ -553,7 +549,7 @@ export default function StressTestPage() {
     () => (activeRegion === "IN" ? scenarioDef?.in : scenarioDef?.us),
     [activeRegion, scenarioDef],
   );
-  const shockShare = validResults.length > 0 && worstAsset && bestAsset && scenarioDef
+  const shockShare = useMemo(() => validResults.length > 0 && worstAsset && bestAsset && scenarioDef
     ? buildShockShareObject({
         title: `${scenarioDef.name} stress test flagged ${getFriendlySymbol(worstAsset.symbol)} as the weakest link`,
         takeaway: `${getFriendlySymbol(worstAsset.symbol)} absorbed the deepest hit at ${fmt(worstAsset.maxDrawdown ?? null)} max drawdown, while ${getFriendlySymbol(bestAsset.symbol)} held up best.`,
@@ -561,7 +557,12 @@ export default function StressTestPage() {
         scoreValue: scenarioDef.name,
         href: `/dashboard/stress-test?scenario=${selectedScenario}&symbols=${validResults.map((result) => result.symbol).join(",")}`,
       })
-    : null;
+    : null, [validResults, worstAsset, bestAsset, scenarioDef, selectedScenario]);
+
+  const parsedLyraAnalysis = useMemo(
+    () => lyraAnalysis ? parseLyraMessage(lyraAnalysis) : null,
+    [lyraAnalysis],
+  );
 
   useEffect(() => {
     if (selectedAssetSymbol && sortedValidResults.some((result) => result.symbol === selectedAssetSymbol)) {
@@ -571,18 +572,23 @@ export default function StressTestPage() {
     setSelectedAssetSymbol(worstAsset?.symbol ?? sortedValidResults[0]?.symbol ?? null);
   }, [selectedAssetSymbol, sortedValidResults, worstAsset]);
 
-  // Added customValidResults parameter to allow triggering with latest data despite closure
-  const askLyraForHedges = useCallback(async (customValidResults?: StressResult[]) => {
-    const resultsToUse = customValidResults || validResults;
+  const askLyraForHedges = useCallback(async (freshResults?: StressResult[]) => {
+    const resultsToUse = freshResults ?? validResultsRef.current;
     if (resultsToUse.length === 0) return;
+
+    // Abort any in-flight Lyra stream before starting a new one
+    lyraAbortRef.current?.abort();
+    const controller = new AbortController();
+    lyraAbortRef.current = controller;
+
     setLyraLoading(true);
-    setLyraLoadStartTime(Date.now());
+    lyraLoadStartTimeRef.current = Date.now();
     setLyraAnalysis("");
 
     // Auto-scroll down when Lyra analysis begins
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       lyraRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 100);
+    });
     const resultSummary = resultsToUse
       .map((r) => `${r.symbol}: ${fmt(r.maxDrawdown)} max drawdown, ${fmt(r.periodReturn)} period return`)
       .join("; ");
@@ -598,13 +604,14 @@ export default function StressTestPage() {
           contextData: { symbol: "GLOBAL", assetType: "GLOBAL", assetName: "Shock Simulator", scores: {}, chatMode: "stress-test" },
           symbol: "GLOBAL",
         }),
+        signal: controller.signal,
       });
       if (!response.ok) throw new Error("Lyra error");
       const creditsRemaining = response.headers.get("X-Credits-Remaining");
       if (creditsRemaining !== null) {
         const nextCredits = Number(creditsRemaining);
         if (Number.isFinite(nextCredits)) {
-          await setAuthoritativeCreditBalance(nextCredits);
+          void setAuthoritativeCreditBalance(nextCredits);
           void revalidateCreditViews();
         }
       }
@@ -615,32 +622,38 @@ export default function StressTestPage() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+        if (controller.signal.aborted) return;
         text += decoder.decode(value, { stream: true });
         setLyraAnalysis(text);
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      console.error("[askLyraForHedges]", err);
       setLyraAnalysis("Lyra is unavailable. Please try again.");
     } finally {
-      setLyraLoading(false);
+      if (lyraAbortRef.current === controller) {
+        setLyraLoading(false);
+      }
     }
-  }, [validResults, scenarioDef, activeRegion, scenarioInfo]);
+  }, [scenarioDef, activeRegion, scenarioInfo]);
 
   useEffect(() => {
-    if (!lyraLoading || !lyraLoadStartTime) {
+    if (!lyraLoading || !lyraLoadStartTimeRef.current) {
       setLyraElapsedSeconds(0);
       return;
     }
 
     const interval = setInterval(() => {
-      setLyraElapsedSeconds(Math.floor((Date.now() - lyraLoadStartTime) / 1000));
+      setLyraElapsedSeconds(Math.floor((Date.now() - lyraLoadStartTimeRef.current) / 1000));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lyraLoading, lyraLoadStartTime]);
+  }, [lyraLoading]);
 
   const runStressTest = useCallback(async () => {
-    if (symbols.length === 0) return;
-    if (symbols.length > MAX_STRESS_TEST_ASSETS) {
+    const currentSymbols = symbolsRef.current;
+    if (currentSymbols.length === 0) return;
+    if (currentSymbols.length > MAX_STRESS_TEST_ASSETS) {
       setErrorMessage(MAX_STRESS_TEST_ASSETS_MESSAGE);
       return;
     }
@@ -650,28 +663,28 @@ export default function StressTestPage() {
     setLyraAnalysis(null);
     setChartAnimated(false);
 
-    const creditCost = calculateMultiAssetAnalysisCredits(symbols.length);
-    await applyOptimisticCreditDelta(-creditCost);
+    const creditCost = calculateMultiAssetAnalysisCredits(currentSymbols.length);
+    void applyOptimisticCreditDelta(-creditCost);
     try {
       const res = await fetch("/api/stocks/stress-test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          symbols,
+          symbols: currentSymbols,
           scenarioId: selectedScenario,
           region: activeRegion,
         }),
       });
       if (!res.ok) {
-        const [errMsg, payload] = await Promise.all([
-          getStressTestErrorMessage(res),
-          res.clone().json().catch(() => null) as Promise<{ remaining?: number } | null>,
-        ]);
+        let payload: { error?: string; message?: string; remaining?: number } | null = null;
+        try { payload = await res.json(); } catch { payload = null; }
+        const errMsg = getStressTestErrorMessage(res.status, payload);
+        // Prefer authoritative balance from server if available; otherwise refund optimistically
         const remaining = typeof payload?.remaining === "number" ? payload.remaining : null;
         if (remaining !== null) {
-          await setAuthoritativeCreditBalance(remaining);
+          void setAuthoritativeCreditBalance(remaining);
         } else {
-          await applyOptimisticCreditDelta(creditCost);
+          void applyOptimisticCreditDelta(creditCost);
         }
         throw new Error(errMsg);
       }
@@ -691,14 +704,14 @@ export default function StressTestPage() {
 
       // Trigger chart animation after a short delay
       if (chartTimer.current) clearTimeout(chartTimer.current);
-      chartTimer.current = setTimeout(() => setChartAnimated(true), 200);
+      chartTimer.current = setTimeout(() => { setChartAnimated(true); chartTimer.current = null; }, 200);
     } catch (error) {
       void revalidateCreditViews();
       setErrorMessage(error instanceof Error ? error.message : "Stress test failed. Please try again.");
     } finally {
       setLoading(false);
     }
-  }, [symbols, selectedScenario, activeRegion, askLyraForHedges]);
+  }, [selectedScenario, activeRegion, askLyraForHedges]);
 
   useEffect(() => {
     if (!pendingRestoreRunRef.current || loading || symbols.length === 0) return;
@@ -728,7 +741,7 @@ export default function StressTestPage() {
               <StatChip value="Select" label="Scenario" variant="muted" />
             )}
             {symbols.length > 0 && (
-              <StatChip value={symbols.length} label="Assets" variant="amber" />
+              <StatChip value={symbols.length} label="Assets" variant="gold" />
             )}
           </>
         }
@@ -741,7 +754,7 @@ export default function StressTestPage() {
           plan={plan}
           teaser="Run Shock Simulator across historical crash scenarios with up to 3 assets, see projected drawdowns and use credit pricing of 5 for the first asset plus 3 for each additional asset."
         >
-          <div />
+          {null}
         </EliteGate>
       ) : (
         <>
@@ -749,15 +762,16 @@ export default function StressTestPage() {
           {/* Scenario Selection */}
           <div className="bg-card/60 backdrop-blur-2xl border border-white/10 shadow-xl rounded-3xl p-5 space-y-4">
             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Select Scenario</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3" role="radiogroup" aria-label="Stress scenario">
               {SCENARIOS.map((s) => {
                 const info = activeRegion === "IN" ? s.in : s.us;
                 return (
                   <button
                     key={s.id}
                     type="button"
+                    role="radio"
+                    aria-checked={selectedScenario === s.id}
                     onClick={() => setSelectedScenario(s.id)}
-                    aria-pressed={selectedScenario === s.id}
                     aria-label={`${s.name} scenario for ${activeRegion === "IN" ? "India" : "US"} market`}
                     className={cn(
                       "text-left p-4 rounded-3xl border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
@@ -775,9 +789,9 @@ export default function StressTestPage() {
                       <p className="text-[8px] font-bold text-muted-foreground/40 font-mono">{info.period}</p>
                       <span className={cn(
                         "text-[8px] font-black uppercase px-1.5 py-0.5 rounded",
-                        info.severity === "Extreme" ? "bg-red-500/10 text-red-400" :
-                        info.severity === "Severe" ? "bg-rose-500/10 text-rose-400" :
-                        "bg-amber-500/10 text-amber-400",
+                        info.severity === "Extreme" ? "bg-danger/15 text-danger" :
+                        info.severity === "Severe" ? "bg-danger/10 text-danger/80" :
+                        "bg-warning/10 text-warning",
                       )}>
                         {info.severity}
                       </span>
@@ -800,7 +814,7 @@ export default function StressTestPage() {
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-primary/30 bg-primary/8 text-xs font-bold text-primary"
                 >
                   {sym}
-                  <button onClick={() => removeSymbol(sym)} className="opacity-60 hover:opacity-100">
+                  <button type="button" onClick={() => removeSymbol(sym)} className="opacity-60 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-sm" aria-label={`Remove ${sym}`}>
                     <X className="h-3 w-3" />
                   </button>
                 </div>
@@ -816,19 +830,33 @@ export default function StressTestPage() {
               )}
             </div>
             <button
+              type="button"
               onClick={runStressTest}
               disabled={symbols.length === 0 || symbols.length > MAX_STRESS_TEST_ASSETS || loading}
-              className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary text-black text-xs font-black uppercase tracking-wider hover:bg-primary/90 transition-colors disabled:opacity-40"
+              className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-wider hover:bg-primary/90 transition-colors disabled:opacity-40"
             >
               {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Shield className="h-3.5 w-3.5" />}
               {loading ? "Running..." : "Run Stress Test"}
             </button>
             {errorMessage && (
-              <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 px-3 py-2 text-xs font-semibold text-rose-400">
+              <div className="rounded-2xl border border-danger/20 bg-danger/5 px-3 py-2 text-xs font-semibold text-danger">
                 {errorMessage}
               </div>
             )}
           </div>
+
+          {/* Loading skeleton */}
+          {loading && validResults.length === 0 && (
+            <div className="space-y-5 animate-pulse" aria-busy="true" aria-label="Loading stress test results">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <div className="bg-card/40 border border-white/5 rounded-3xl p-4 h-20" />
+                <div className="bg-card/40 border border-white/5 rounded-3xl p-4 h-20" />
+                <div className="bg-card/40 border border-white/5 rounded-3xl p-4 h-20" />
+              </div>
+              <div className="bg-card/40 border border-white/5 rounded-3xl p-5 h-52" />
+              <div className="bg-card/40 border border-white/5 rounded-3xl p-5 h-32" />
+            </div>
+          )}
 
           {/* Results */}
           {validResults.length > 0 && (
@@ -849,7 +877,7 @@ export default function StressTestPage() {
                   <span>{directCount} direct · {proxyCount} proxy replay</span>
                 </div>
                 {proxyCount > 0 && (
-                  <span className="text-[9px] text-amber-400/80 font-bold">
+                  <span className="text-[9px] text-warning/80 font-bold">
                     Proxy replay uses BTC / ETH / SOL historical drawdown paths scaled by asset beta
                   </span>
                 )}
@@ -859,23 +887,24 @@ export default function StressTestPage() {
               <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 <div className="bg-card/60 backdrop-blur-2xl border border-white/10 shadow-xl rounded-3xl p-3 sm:p-4 text-center">
                   <p className="text-[7px] sm:text-[8px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1">Avg Max Drawdown</p>
-                  <p className={cn("text-lg sm:text-2xl font-black", (avgDrawdown ?? 0) < -0.20 ? "text-rose-400" : "text-amber-400")}>
+                  <p className={cn("text-lg sm:text-2xl font-black", (avgDrawdown ?? 0) < -0.20 ? "text-danger" : "text-warning")}>
                     {avgDrawdown != null ? `${(avgDrawdown * 100).toFixed(1)}%` : "—"}
                   </p>
                 </div>
-                <div className="bg-card/60 backdrop-blur-2xl border shadow-xl rounded-3xl p-4 border-rose-500/20 text-center">
+                <div className="bg-card/60 backdrop-blur-2xl border shadow-xl rounded-3xl p-4 border-danger/20 text-center">
                   <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1">Worst Hit</p>
-                  <p className="text-sm font-black text-rose-400">{worstAsset ? getFriendlySymbol(worstAsset.symbol) : ""}</p>
-                  <p className="text-lg font-black text-rose-400">{fmt(worstAsset?.maxDrawdown ?? null)}</p>
+                  <p className="text-sm font-black text-danger">{worstAsset ? getFriendlySymbol(worstAsset.symbol) : ""}</p>
+                  <p className="text-lg font-black text-danger">{fmt(worstAsset?.maxDrawdown ?? null)}</p>
                 </div>
                 <div className="bg-card/60 backdrop-blur-2xl border border-white/10 shadow-xl rounded-3xl p-4 text-center">
                   <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/60 mb-1">Most Resilient</p>
-                  <p className="text-sm font-black text-emerald-400">{bestAsset ? getFriendlySymbol(bestAsset.symbol) : ""}</p>
-                  <p className="text-lg font-black text-emerald-400">{fmt(bestAsset?.maxDrawdown ?? null)}</p>
+                  <p className="text-sm font-black text-success">{bestAsset ? getFriendlySymbol(bestAsset.symbol) : ""}</p>
+                  <p className="text-lg font-black text-success">{fmt(bestAsset?.maxDrawdown ?? null)}</p>
                 </div>
               </div>
 
-              <ScenarioNarrativeCard result={validResults[0]} />
+              {/* All assets share the same scenario, so narrative/factors are identical for any result — use [0] */}
+              {validResults[0] && <ScenarioNarrativeCard result={validResults[0]} />}
 
               {/* Animated Drawdown Chart */}
               <div className="bg-card/60 backdrop-blur-2xl border border-white/10 shadow-xl rounded-3xl p-5 space-y-3">
@@ -888,19 +917,19 @@ export default function StressTestPage() {
                     <LineChart data={chartData} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                       <XAxis
                         dataKey="day"
-                        tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))", opacity: 0.5 }}
+                        tick={{ fontSize: 8, fill: "var(--muted-foreground)", opacity: 0.5 }}
                         tickLine={false}
                         axisLine={false}
-                        label={{ value: "Trading Days", position: "insideBottom", fontSize: 8, fill: "hsl(var(--muted-foreground))", dy: 6 }}
+                        label={{ value: "Trading Days", position: "insideBottom", fontSize: 8, fill: "var(--muted-foreground)", dy: 6 }}
                       />
                       <YAxis
                         tickFormatter={(v) => `${v}%`}
-                        tick={{ fontSize: 8, fill: "hsl(var(--muted-foreground))", opacity: 0.5 }}
+                        tick={{ fontSize: 8, fill: "var(--muted-foreground)", opacity: 0.5 }}
                         tickLine={false}
                         axisLine={false}
                         width={42}
                       />
-                      <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" strokeOpacity={0.4} />
+                      <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="3 3" strokeOpacity={0.4} />
                       <Tooltip content={<ChartTooltip />} />
                       <Legend
                         iconType="circle"
@@ -931,74 +960,19 @@ export default function StressTestPage() {
                 <h3 className="text-sm font-black uppercase tracking-wider">Asset Breakdown</h3>
                 {sortedValidResults
                   .map((r, i) => (
-                    <div
+                    <AssetBreakdownRow
                       key={r.symbol}
-                      className={cn(
-                        "space-y-1.5 pb-3 border-b border-border/20 last:border-0 last:pb-0 rounded-xl transition-colors",
-                        selectedAsset?.symbol === r.symbol ? "bg-primary/5" : "",
-                      )}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full shrink-0" style={{ background: SCENARIO_COLORS[i % SCENARIO_COLORS.length] }} />
-                        <Link
-                          href={`/dashboard/assets/${r.symbol}`}
-                          className="text-[10px] font-black w-24 truncate hover:text-primary transition-colors"
-                        >
-                          {getFriendlySymbol(r.symbol)}
-                        </Link>
-                        <MethodBadge method={r.method} proxy={r.proxyUsed} />
-                        <div className="ml-auto flex items-center gap-2">
-                          <ConfidenceMeter confidence={r.confidence} />
-                          {r.beta != null && (
-                            <span className="text-[8px] text-muted-foreground/40">β {r.beta.toFixed(2)}</span>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => setSelectedAssetSymbol(r.symbol)}
-                            className={cn(
-                              "rounded-full border px-2 py-1 text-[8px] font-black uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
-                              selectedAsset?.symbol === r.symbol
-                                ? "border-primary/40 bg-primary/10 text-primary"
-                                : "border-white/10 bg-card/40 text-muted-foreground/70 hover:border-border/60",
-                            )}
-                            aria-pressed={selectedAsset?.symbol === r.symbol}
-                            aria-label={`Show replay details for ${getFriendlySymbol(r.symbol)}`}
-                          >
-                            Details
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 pl-4">
-                        <div className="flex-1 h-2 bg-muted/20 rounded-full overflow-hidden">
-                          <div
-                            className={cn(
-                              "h-full rounded-full transition-all duration-700",
-                              (r.maxDrawdown ?? 0) < -0.30 ? "bg-red-500" :
-                              (r.maxDrawdown ?? 0) < -0.15 ? "bg-rose-400" :
-                              (r.maxDrawdown ?? 0) < 0 ? "bg-amber-400" : "bg-emerald-400",
-                            )}
-                            style={{ width: `${Math.min(Math.abs((r.maxDrawdown ?? 0) * 100), 100)}%` }}
-                          />
-                        </div>
-                        <span className={cn(
-                          "text-[10px] font-black w-14 text-right tabular-nums",
-                          (r.maxDrawdown ?? 0) < 0 ? "text-rose-400" : "text-emerald-400",
-                        )}>
-                          {fmt(r.maxDrawdown)}
-                        </span>
-                        <span className={cn(
-                          "text-[9px] font-bold w-14 text-right tabular-nums text-muted-foreground/50",
-                        )}>
-                          {fmt(r.periodReturn)} ret
-                        </span>
-                      </div>
-                    </div>
+                      r={r}
+                      index={i}
+                      isSelected={selectedAsset?.symbol === r.symbol}
+                      onSelectSymbol={handleSelectAsset}
+                    />
                   ))}
               </div>
 
               <AssetReplayCard result={selectedAsset} />
 
-              {/* Scenario factor drivers */}
+              {/* Scenario factor drivers — same for all assets in a single-scenario run */}
               {validResults[0]?.factors && (
                 <div className="bg-card/60 backdrop-blur-2xl border border-white/10 shadow-xl rounded-3xl p-5">
                   <FactorDrivers factors={validResults[0].factors} />
@@ -1007,11 +981,11 @@ export default function StressTestPage() {
 
               {/* Error rows */}
               {errorResults.length > 0 && (
-                <div className="bg-card/60 backdrop-blur-2xl border shadow-xl rounded-3xl p-4 border-rose-500/20 space-y-2">
-                  <p className="text-[9px] font-black uppercase tracking-wider text-rose-400">Assets with no data</p>
+                <div className="bg-card/60 backdrop-blur-2xl border shadow-xl rounded-3xl p-4 border-danger/20 space-y-2">
+                  <p className="text-[9px] font-black uppercase tracking-wider text-danger">Assets with no data</p>
                   {errorResults.map((r) => (
                     <div key={r.symbol} className="flex items-center gap-2 text-[10px] text-muted-foreground/60">
-                      <span className="font-black text-rose-400/70">{getFriendlySymbol(r.symbol)}</span>
+                      <span className="font-black text-danger/70">{getFriendlySymbol(r.symbol)}</span>
                       <span className="truncate">{r.error}</span>
                     </div>
                   ))}
@@ -1026,21 +1000,18 @@ export default function StressTestPage() {
                     <h3 className="text-sm font-black uppercase tracking-wider">Lyra hedge ideas</h3>
                   </div>
                 </div>
-                {lyraAnalysis && (() => {
-                  const { text, sources } = parseLyraMessage(lyraAnalysis);
-                  return (
+                {parsedLyraAnalysis && (
                     <div className="rounded-2xl border border-primary/20 bg-card/60 overflow-hidden text-sm text-foreground/90">
                       <AnswerWithSources
-                        content={text}
-                        sources={sources}
+                        content={parsedLyraAnalysis.text}
+                        sources={parsedLyraAnalysis.sources}
                         relatedQuestions={[]}
                         onRelatedQuestionClick={() => {}}
                         className="bg-transparent border-none shadow-none w-full min-w-0 p-4"
                         showSources={true}
                       />
                     </div>
-                  );
-                })()}
+                )}
                 {!lyraAnalysis && lyraLoading && (
                   <AnalysisLoadingState
                     elapsedSeconds={lyraElapsedSeconds}
@@ -1062,14 +1033,14 @@ export default function StressTestPage() {
 
           {/* No data at all state */}
           {validResults.length === 0 && errorResults.length > 0 && !loading && (
-            <div className="bg-card/60 backdrop-blur-2xl border shadow-xl rounded-2xl p-5 border-rose-500/20 space-y-3">
+            <div className="bg-card/60 backdrop-blur-2xl border shadow-xl rounded-2xl p-5 border-danger/20 space-y-3">
               <h3 className="text-sm font-black uppercase tracking-wider">No data available</h3>
               <p className="text-xs text-muted-foreground/70">
                 None of the selected assets could be found in the database for region <strong>{activeRegion}</strong>.
               </p>
               {errorResults.map((r) => (
                 <div key={r.symbol} className="flex items-center gap-2 text-[10px] text-muted-foreground/60">
-                  <span className="font-black text-rose-400/70">{getFriendlySymbol(r.symbol)}</span>
+                  <span className="font-black text-danger/70">{getFriendlySymbol(r.symbol)}</span>
                   <span className="truncate">{r.error}</span>
                 </div>
               ))}
@@ -1079,9 +1050,9 @@ export default function StressTestPage() {
           {symbols.length === 0 && !loading && results.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 gap-4 text-muted-foreground">
               <Shield className="h-12 w-12 opacity-20" />
-              <p className="text-sm font-bold">Add assets and select a scenario to begin</p>
+              <p className="text-sm font-bold">Add assets to begin the shock simulation</p>
               <p className="text-xs opacity-50 text-center max-w-xs">
-                Each scenario uses historically accurate BTC / ETH drawdown paths replayed through your asset&apos;s beta
+                A scenario is pre-selected — just search and add up to 3 crypto assets to see how they perform under historical stress
               </p>
             </div>
           )}

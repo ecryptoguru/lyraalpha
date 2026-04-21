@@ -54,8 +54,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const accentColors: Record<string, string> = {
-  "AI & Technology": "border-teal-400/20 bg-teal-400/6 text-teal-300",
-  "Market Intelligence": "border-amber-400/20 bg-amber-400/6 text-amber-300",
+  "AI & Technology": "border-info/20 bg-info/6 text-info",
+  "Market Intelligence": "border-warning/20 bg-warning/6 text-warning",
   Markets: "border-white/15 bg-white/5 text-white/60",
 };
 
@@ -69,7 +69,7 @@ export default async function CategoryPage({ params }: Props) {
   const allCategories = await getAllCategories();
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#040816] font-sans text-white selection:bg-amber-300/30">
+    <div className="flex min-h-screen flex-col bg-[#040816] font-sans text-white selection:bg-warning2497">
       <Navbar />
 
       <main className="flex-1">
@@ -79,13 +79,13 @@ export default async function CategoryPage({ params }: Props) {
           <div className="container relative mx-auto max-w-7xl px-0">
             <Link
               href="/blog"
-              className="group mb-8 inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/35 transition-colors hover:text-amber-400"
+              className="group mb-8 inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/35 transition-colors hover:text-warning"
             >
               <ArrowLeft className="h-3 w-3 transition-transform duration-200 group-hover:-translate-x-0.5" />
               All articles
             </Link>
 
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-amber-400/70">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.42em] text-warning/70">
               LyraAlpha AI · Category
             </p>
             <h1 className="mt-4 max-w-3xl text-4xl font-extralight leading-tight tracking-[-0.04em] text-white sm:text-5xl lg:text-6xl">
@@ -123,7 +123,7 @@ export default async function CategoryPage({ params }: Props) {
                     <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.28em] ${accentColors[post.category] ?? "border-white/15 bg-white/5 text-white/55"}`}>
                       {post.category}
                     </span>
-                    <h2 className="mt-4 text-base font-semibold leading-snug tracking-tight text-white transition-colors group-hover:text-amber-100 sm:text-lg">
+                    <h2 className="mt-4 text-base font-semibold leading-snug tracking-tight text-white transition-colors group-hover:text-primary/60 sm:text-lg">
                       {post.title}
                     </h2>
                     <p className="mt-3 text-sm leading-6 text-white/42">
@@ -138,7 +138,7 @@ export default async function CategoryPage({ params }: Props) {
                     <span className="font-mono text-[10px]">
                       {formatDate(post.date)}
                     </span>
-                    <ArrowRight className="ml-auto h-3.5 w-3.5 text-amber-400/50 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-amber-400" />
+                    <ArrowRight className="ml-auto h-3.5 w-3.5 text-warning/50 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-warning" />
                   </div>
                 </Link>
               ))}

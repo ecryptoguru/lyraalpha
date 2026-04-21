@@ -196,12 +196,12 @@ export default function AdminSupportPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "OPEN":
-        return <Circle className="w-3 h-3 fill-yellow-500 text-yellow-500" />;
+        return <Circle className="w-3 h-3 fill-warning text-warning" />;
       case "PENDING":
-        return <Circle className="w-3 h-3 fill-orange-500 text-orange-500" />;
+        return <Circle className="w-3 h-3 fill-warning text-warning" />;
       case "RESOLVED":
       case "CLOSED":
-        return <CheckCircle className="w-3 h-3 text-green-500" />;
+        return <CheckCircle className="w-3 h-3 text-success" />;
       default:
         return null;
     }
@@ -292,7 +292,7 @@ export default function AdminSupportPage() {
                 {selected.status !== "RESOLVED" && selected.status !== "CLOSED" && (
                   <button
                     onClick={resolveConversation}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-green-500/10 text-green-600 rounded-xl hover:bg-green-500/20 transition-colors"
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-success/10 text-success rounded-xl hover:bg-success/20 transition-colors"
                   >
                     <CheckCircle className="w-4 h-4" />
                     Mark Resolved

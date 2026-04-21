@@ -92,18 +92,18 @@ const PERF_LABELS: Record<string, string> = {
 
 const COLORS = [
   "text-primary border-primary/30 bg-primary/5",
-  "text-sky-400 border-sky-400/30 bg-sky-400/5",
-  "text-emerald-500 dark:text-emerald-400 border-emerald-500 dark:border-emerald-400/30 bg-emerald-500 dark:bg-emerald-400/5",
-  "text-amber-400 border-amber-400/30 bg-amber-400/5",
-  "text-rose-500 dark:text-rose-400 border-rose-500 dark:border-rose-400/30 bg-rose-500 dark:bg-rose-400/5",
+  "text-info border-info/30 bg-info/5",
+  "text-success dark:text-success border-success dark:border-success/30 bg-success dark:bg-success/5",
+  "text-warning border-warning/30 bg-warning/5",
+  "text-danger dark:text-danger border-danger dark:border-danger/30 bg-danger dark:bg-danger/5",
 ];
 
 const BAR_COLORS = [
   "bg-primary",
-  "bg-sky-400",
-  "bg-emerald-500 dark:bg-emerald-400",
-  "bg-amber-400",
-  "bg-rose-500 dark:bg-rose-400",
+  "bg-info",
+  "bg-success dark:bg-success",
+  "bg-warning",
+  "bg-danger dark:bg-danger",
 ];
 
 const MAX_COMPARE_ASSETS = 3;
@@ -413,7 +413,7 @@ export default function ComparePage() {
               <button
                 onClick={() => runCompare(inputSymbols)}
                 disabled={inputSymbols.length < 2 || inputSymbols.length > MAX_COMPARE_ASSETS || loading}
-                className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary text-black text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors disabled:opacity-40"
+                className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider hover:bg-primary/90 transition-colors disabled:opacity-40"
               >
                 {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <GitCompare className="h-3.5 w-3.5" />}
                 {loading ? "Analyzing..." : "Compare"}
@@ -436,7 +436,7 @@ export default function ComparePage() {
               </div>
             </div>
             {errorMessage ? (
-              <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 px-3 py-2 text-xs font-semibold text-rose-400">
+              <div className="rounded-2xl border border-danger/20 bg-danger/5 px-3 py-2 text-xs font-semibold text-danger">
                 {errorMessage}
               </div>
             ) : null}
@@ -472,7 +472,7 @@ export default function ComparePage() {
                       <div className="flex items-center gap-1.5 mt-2">
                         <span className="text-sm font-bold">{formatPrice(r.price, getCurrencyConfig(r.currency || "USD"))}</span>
                         {r.changePercent != null && (
-                          <span className={cn("text-[10px] font-bold flex items-center gap-0.5", r.changePercent >= 0 ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400")}>
+                          <span className={cn("text-[10px] font-bold flex items-center gap-0.5", r.changePercent >= 0 ? "text-success dark:text-success" : "text-danger dark:text-danger")}>
                             {r.changePercent >= 0 ? <TrendingUp className="h-2.5 w-2.5" /> : <TrendingDown className="h-2.5 w-2.5" />}
                             {r.changePercent >= 0 ? "+" : ""}{r.changePercent.toFixed(2)}%
                           </span>
@@ -575,7 +575,7 @@ export default function ComparePage() {
               {/* Performance Comparison */}
               <div className="rounded-4xl border border-white/10 bg-card/70 p-6 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl lg:p-8 space-y-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
+                  <TrendingUp className="h-5 w-5 text-success dark:text-success" />
                   <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">Performance Returns</h3>
                 </div>
                 <div className="relative overflow-x-auto rounded-3xl border border-white/10 bg-background/30">
@@ -600,15 +600,15 @@ export default function ComparePage() {
                             const isBest = v != null && allVals.length > 1 && v === Math.max(...allVals);
                             return (
                               <td key={r.symbol} className={cn("py-3 px-3 relative text-right font-bold tabular-nums transition-colors duration-300", 
-                                v == null ? "text-muted-foreground/50 dark:text-muted-foreground/30" : v >= 0 ? "text-emerald-500 dark:text-emerald-400" : "text-rose-500 dark:text-rose-400",
-                                isBest && "bg-emerald-500/5 backdrop-blur-md"
+                                v == null ? "text-muted-foreground/50 dark:text-muted-foreground/30" : v >= 0 ? "text-success dark:text-success" : "text-danger dark:text-danger",
+                                isBest && "bg-success/5 backdrop-blur-md"
                               )}>
                                 {isBest && (
-                                  <div className="absolute inset-0 border border-emerald-500/20 shadow-[inset_0_0_15px_rgba(52,211,153,0.1)] rounded-md m-0.5 pointer-events-none" />
+                                  <div className="absolute inset-0 border border-success/20 shadow-[inset_0_0_15px_rgba(52,211,153,0.1)] rounded-md m-0.5 pointer-events-none" />
                                 )}
                                 <span className="relative z-10 flex justify-end items-center gap-1">
                                   {v != null ? `${v >= 0 ? "+" : ""}${v.toFixed(1)}%` : "—"}
-                                  {isBest && <Crown className="h-3 w-3 text-emerald-500 dark:text-emerald-400 ml-1 opacity-70 drop-shadow-[0_0_3px_rgba(52,211,153,0.8)]" />}
+                                  {isBest && <Crown className="h-3 w-3 text-success dark:text-success ml-1 opacity-70 drop-shadow-[0_0_3px_rgba(52,211,153,0.8)]" />}
                                 </span>
                               </td>
                             );
@@ -705,7 +705,7 @@ export default function ComparePage() {
                         <button
                           onClick={askLyra}
                           disabled={!lyraQuery.trim() || lyraLoading}
-                          className="absolute right-1.5 top-1.5 bottom-1.5 w-9 flex items-center justify-center rounded-xl bg-primary text-black hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:hover:bg-primary"
+                          className="absolute right-1.5 top-1.5 bottom-1.5 w-9 flex items-center justify-center rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:hover:bg-primary"
                         >
                           {lyraLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                         </button>

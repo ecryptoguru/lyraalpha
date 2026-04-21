@@ -42,31 +42,31 @@ function classify(avg: number | null): {
   if (avg == null) {
     return {
       label: "Awaiting Data",
-      color: "text-slate-400",
-      bg: "bg-slate-400/10 border-slate-400/20",
+      color: "text-muted-foreground",
+      bg: "bg-muted/10 border-muted/20",
     };
   }
 
   if (avg >= 0.65) {
     return {
       label: "Macro-Driven",
-      color: "text-rose-400",
-      bg: "bg-rose-400/10 border-rose-400/20",
+      color: "text-danger",
+      bg: "bg-danger-subtle border-danger/20",
     };
   }
 
   if (avg >= 0.45) {
     return {
       label: "Transitioning",
-      color: "text-amber-400",
-      bg: "bg-amber-400/10 border-amber-400/20",
+      color: "text-warning",
+      bg: "bg-warning-subtle border-warning/20",
     };
   }
 
   return {
     label: "Sector-Specific",
-    color: "text-emerald-400",
-    bg: "bg-emerald-400/10 border-emerald-400/20",
+    color: "text-success",
+    bg: "bg-success-subtle border-success/20",
   };
 }
 
@@ -144,12 +144,12 @@ export function CorrelationStressCard({ className }: { className?: string }) {
             className={cn(
               "h-full rounded-full transition-all duration-700",
               avg == null
-                ? "bg-slate-400/60"
+                ? "bg-muted/60"
                 : avg >= 0.65
-                  ? "bg-rose-400/80"
+                  ? "bg-danger/80"
                   : avg >= 0.45
-                    ? "bg-amber-400/80"
-                    : "bg-emerald-400/80",
+                    ? "bg-warning/80"
+                    : "bg-success/80",
             )}
             style={{ width: barWidth(pct) }}
           />

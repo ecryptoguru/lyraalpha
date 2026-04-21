@@ -1,8 +1,6 @@
 // Week 5 Blog Posts — 4 high-quality SEO articles, 1200-1500 words each
 // Category: Portfolio Intelligence, Market Intelligence, AI & Technology
 
-import type { BlogPost } from "./posts";
-
 const _week5Posts = [
   {
     slug: "what-portfolio-concentration-risk-looks-like-in-practice",
@@ -24,7 +22,15 @@ const _week5Posts = [
       "single asset risk",
       "sector concentration",
     ],
-    heroImageUrl: "/blog/concentration-risk-hero.jpg",
+    internalLinks: [
+      { text: "portfolio risk", url: "/lyra" },
+      { text: "concentration risk", url: "/lyra" },
+      { text: "portfolio analysis", url: "/lyra" },
+      { text: "portfolio fragility detection", url: "/blog/how-to-spot-portfolio-fragility-before-it-becomes-a-drawdown" },
+      { text: "drawdown risk", url: "/blog/the-hidden-cost-of-ignoring-drawdown-risk" },
+      { text: "diversification assessment", url: "/blog/why-diversification-alone-does-not-eliminate-crypto-portfolio-risk" },
+    ],
+    heroImageUrl: "/blog/what-portfolio-concentration-risk-looks-like-in-practice-hero.webp",
     content: `
 # What Portfolio Concentration Risk Looks Like in Practice
 
@@ -177,7 +183,15 @@ Yes, through dilution rather than selling. If you receive a large airdrop or an 
       "crypto market signals",
       "decision making crypto",
     ],
-    heroImageUrl: "/blog/market-signals-decisions-hero.jpg",
+    internalLinks: [
+      { text: "market signals", url: "/lyra" },
+      { text: "investment decisions", url: "/lyra" },
+      { text: "signal processing", url: "/lyra" },
+      { text: "market briefing analysis", url: "/blog/how-lyraalpha-daily-briefing-helps-you-see-the-crypto-market-faster" },
+      { text: "regime shift signals", url: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day" },
+      { text: "sector relative performance", url: "/blog/why-same-sector-movers-matter-more-than-random-price-action" },
+    ],
+    heroImageUrl: "/blog/how-to-turn-market-signals-into-better-investment-decisions-hero.webp",
     content: `
 # How to Turn Market Signals Into Better Investment Decisions
 
@@ -340,7 +354,15 @@ Use the relevance filter: only evaluate signals that relate to your current hold
       "intelligent alerts investing",
       "AI transparency investing",
     ],
-    heroImageUrl: "/blog/explainable-intelligence-hero.jpg",
+    internalLinks: [
+      { text: "explainable AI", url: "/lyra" },
+      { text: "fintech intelligence", url: "/lyra" },
+      { text: "smart alerts", url: "/lyra" },
+      { text: "AI briefing structure", url: "/blog/the-anatomy-of-a-useful-ai-briefing-for-investors" },
+      { text: "AI copilot comparison", url: "/blog/ai-market-copilots-vs-human-research-where-each-wins" },
+      { text: "market intelligence tools", url: "/blog/best-ai-tools-for-crypto-research-a-2026-buyers-guide" },
+    ],
+    heroImageUrl: "/blog/why-fintech-users-need-explainable-intelligence-not-just-alerts-hero.webp",
     content: `
 # Why Fintech Users Need Explainable Intelligence, Not Just Alerts
 
@@ -474,7 +496,15 @@ Test it on a specific scenario where you know the answer. Ask the product why it
       "key metrics crypto investing",
       "dashboard portfolio management",
     ],
-    heroImageUrl: "/blog/investment-dashboard-metrics-hero.jpg",
+    internalLinks: [
+      { text: "investment dashboard", url: "/dashboard" },
+      { text: "portfolio metrics", url: "/lyra" },
+      { text: "dashboard setup", url: "/dashboard" },
+      { text: "portfolio monitoring", url: "/blog/how-to-spot-portfolio-fragility-before-it-becomes-a-drawdown" },
+      { text: "portfolio concentration", url: "/blog/what-portfolio-concentration-risk-looks-like-in-practice" },
+      { text: "market signals framework", url: "/blog/how-to-turn-market-signals-into-better-investment-decisions" },
+    ],
+    heroImageUrl: "/blog/the-most-important-metrics-for-a-smarter-investment-dashboard-hero.webp",
     content: `
 # The Most Important Metrics for a Smarter Investment Dashboard
 
@@ -627,6 +657,4 @@ Projections and forecasts are seductive but typically unreliable in crypto, wher
   },
 ];
 
-export const week5Posts: Omit<BlogPost, "readingTime">[] = _week5Posts.map((p) => ({
-  ...p,
-}));
+export const week5Posts = _week5Posts;

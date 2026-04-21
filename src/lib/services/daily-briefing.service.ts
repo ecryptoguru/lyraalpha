@@ -15,14 +15,16 @@ import { prisma } from "@/lib/prisma";
 import { getCache, setCache } from "@/lib/redis";
 import { getGpt54Model } from "@/lib/ai/service";
 import { buildHumanizerGuidance } from "@/lib/ai/prompts/humanizer";
-import { generateText } from "ai";
+import { generateObject } from "ai";
+import { z } from "zod";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
-import { safeJsonParse } from "@/lib/utils/json";
 import { cleanAssetText, getFriendlyAssetName } from "@/lib/format-utils";
 import { applyCostCeiling } from "@/lib/ai/cost-ceiling";
-import { logValidationResult, validateOutput } from "@/lib/ai/output-validation";
-import { recordLatencyViolation } from "@/lib/ai/alerting";
+import { recordLatencyViolation, recordCronLlmCall } from "@/lib/ai/alerting";
+import { safeJsonParse } from "@/lib/utils/json";
+import { calculateLLMCost, estimateTokensFromText } from "@/lib/ai/cost-calculator";
+import { resolveGptDeployment } from "@/lib/ai/orchestration";
 
 const logger = createLogger({ service: "daily-briefing" });
 
@@ -480,10 +482,26 @@ Rules:
 
     // Track latency for the LLM call
     const llmStart = Date.now();
-    const result = await generateText({
-      model: getGpt54Model("lyra-nano"),
-      prompt: ceilingResult.truncatedContext,
+    const briefingSchema = z.object({
+      marketOverview: z.string(),
+      keyInsights: z.array(z.string()).max(3),
+      risksToWatch: z.array(z.string()).max(2),
+      discoveryHighlight: z.string().nullable(),
+      regimeSentence: z.string(),
     });
+
+    let parsed: z.infer<typeof briefingSchema>;
+    try {
+      ({ object: parsed } = await generateObject({
+        model: getGpt54Model("lyra-nano"),
+        schema: briefingSchema,
+        prompt: ceilingResult.truncatedContext,
+      }));
+    } catch (llmError) {
+      const llmLatencyMs = Date.now() - llmStart;
+      recordCronLlmCall({ job: `daily-briefing-${region}`, costUsd: 0, latencyMs: llmLatencyMs, success: false }).catch(() => {});
+      throw llmError;
+    }
     const llmLatencyMs = Date.now() - llmStart;
 
     // Latency budget: daily briefing is a cron job, budget is 30 seconds
@@ -498,33 +516,10 @@ Rules:
       );
     }
 
-    const cleaned = result.text
-      .replace(/```json\n?/g, "")
-      .replace(/```\n?/g, "")
-      .trim();
-
-    // Validate output structure (non-blocking, logs warnings)
-    const validationResult = validateOutput(
-      cleaned,
-      "COMPLEX",
-      "ELITE",
-      false, // not educational
-      "standard",
-      "GLOBAL",
-    );
-    logValidationResult(validationResult);
-
-    const parsed = safeJsonParse<{
-      marketOverview: string;
-      keyInsights: string[];
-      risksToWatch: string[];
-      discoveryHighlight: string | null;
-      regimeSentence: string;
-    }>(cleaned);
-
-    if (!parsed) {
-      throw new Error("Failed to parse daily briefing response");
-    }
+    // P1: Wire cron LLM call into alerting (cost + failure coverage)
+    const deployment = resolveGptDeployment("lyra-nano");
+    const costBreakdown = calculateLLMCost({ model: deployment, inputTokens: estimateTokensFromText(ceilingResult.truncatedContext), outputTokens: estimateTokensFromText(JSON.stringify(parsed)) });
+    recordCronLlmCall({ job: `daily-briefing-${region}`, costUsd: costBreakdown.totalCost, latencyMs: llmLatencyMs, success: true }).catch(() => {});
 
     return {
       region,

@@ -142,7 +142,7 @@ function ModuleReaderContent() {
             +{metadata.xpReward} XP
           </span>
           {completed && (
-            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-500">
+            <span className="flex items-center gap-1 text-[10px] font-bold text-success dark:text-success">
               <CheckCircle2 className="h-3 w-3" />
               Completed
             </span>
@@ -162,13 +162,13 @@ function ModuleReaderContent() {
           <div key={i}>
             <h2 className="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
               {section.heading === "What It Does NOT Mean" && (
-                <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <XCircle className="h-4 w-4 text-danger dark:text-danger" />
               )}
               {section.heading === "Key Concept" && (
                 <BookOpen className="h-4 w-4 text-primary" />
               )}
               {section.heading === "What It Means" && (
-                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
+                <CheckCircle2 className="h-4 w-4 text-success dark:text-success" />
               )}
               {section.heading}
             </h2>
@@ -219,7 +219,7 @@ function ModuleReaderContent() {
           All Modules
         </Link>
         {metadata.badgeContribution && (
-          <div className="flex items-center gap-1.5 text-[10px] font-bold text-amber-700 dark:text-amber-500/70">
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-primary dark:text-warning/70">
             <Trophy className="h-3 w-3" />
             Contributes to: {metadata.badgeContribution}
           </div>
@@ -327,7 +327,7 @@ function QuickCheck({
         {score !== null && (
           <span className={cn(
             "text-xs font-bold px-2 py-0.5 rounded-full",
-            score >= 75 ? "text-emerald-500 bg-emerald-500/10" : "text-amber-500 bg-amber-500/10",
+            score >= 75 ? "text-success bg-success/10" : "text-warning bg-warning/10",
           )}>
             {score}%
           </span>
@@ -347,8 +347,8 @@ function QuickCheck({
                 "rounded-2xl p-4 border transition-all duration-300",
                 isRevealed
                   ? isCorrect
-                    ? "border-emerald-500/30 bg-emerald-500/5"
-                    : "border-red-500/30 bg-red-500/5"
+                    ? "border-success/30 bg-success/5"
+                    : "border-danger/30 bg-danger/5"
                   : "border-white/10 bg-card/70 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl",
               )}
             >
@@ -362,11 +362,11 @@ function QuickCheck({
                     "px-4 py-1.5 rounded-2xl text-xs font-bold transition-all",
                     isRevealed && userAnswer === true
                       ? isCorrect
-                        ? "bg-emerald-500 text-white"
-                        : "bg-red-500 text-white"
+                        ? "bg-success text-success-foreground"
+                        : "bg-danger text-danger-foreground"
                       : isRevealed
                         ? item.isTrue
-                          ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
+                          ? "bg-success/20 text-success border border-success/30"
                           : "bg-muted/20 text-muted-foreground"
                         : userAnswer === true
                           ? "bg-primary text-primary-foreground"
@@ -382,11 +382,11 @@ function QuickCheck({
                     "px-4 py-1.5 rounded-2xl text-xs font-bold transition-all",
                     isRevealed && userAnswer === false
                       ? isCorrect
-                        ? "bg-emerald-500 text-white"
-                        : "bg-red-500 text-white"
+                        ? "bg-success text-success-foreground"
+                        : "bg-danger text-danger-foreground"
                       : isRevealed
                         ? !item.isTrue
-                          ? "bg-emerald-500/20 text-emerald-500 border border-emerald-500/30"
+                          ? "bg-success/20 text-success border border-success/30"
                           : "bg-muted/20 text-muted-foreground"
                         : userAnswer === false
                           ? "bg-primary text-primary-foreground"
@@ -399,8 +399,8 @@ function QuickCheck({
                 {isRevealed && (
                   <span className="ml-auto">
                     {isCorrect
-                      ? <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                      : <XCircle className="h-4 w-4 text-red-500" />
+                      ? <CheckCircle2 className="h-4 w-4 text-success" />
+                      : <XCircle className="h-4 w-4 text-danger" />
                     }
                   </span>
                 )}
@@ -409,7 +409,7 @@ function QuickCheck({
               {isRevealed && item.explanation && (
                 <p className={cn(
                   "text-xs mt-3 leading-relaxed",
-                  isCorrect ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+                  isCorrect ? "text-success dark:text-success" : "text-danger dark:text-danger",
                 )}>
                   {item.explanation}
                 </p>
@@ -432,7 +432,7 @@ function QuickCheck({
 
       {submitted && (
         <div className="mt-6 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm font-semibold text-emerald-500">
+          <div className="flex items-center gap-2 text-sm font-semibold text-success">
             <CheckCircle2 className="h-4 w-4" />
             Module Completed
             {(score !== null || previousScore !== null) && (

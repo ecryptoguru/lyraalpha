@@ -20,7 +20,7 @@ export function NavbarLinks() {
             key={href}
             href={href}
             aria-current={isActive ? "page" : undefined}
-            className="hidden rounded-full border border-slate-200 bg-white/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 transition-colors hover:text-slate-900 dark:border-white/8 dark:bg-white/3 dark:text-white/45 dark:hover:text-white lg:inline-flex"
+            className="hidden rounded-full border border-border/50 bg-white/80 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground transition-colors hover:text-foreground dark:border-white/8 dark:bg-white/3 dark:text-white/45 dark:hover:text-white lg:inline-flex"
           >
             {label}
           </Link>

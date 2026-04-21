@@ -114,7 +114,7 @@ function SourceCard({
         <span>{lastSync}</span>
       </div>
       {staleCount > 0 && (
-        <div className="flex items-center gap-1 text-[10px] text-amber-400">
+        <div className="flex items-center gap-1 text-[10px] text-warning">
           <AlertTriangle className="h-3 w-3" />
           {staleCount} stale
         </div>

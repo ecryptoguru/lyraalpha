@@ -1,28 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "crypto";
-import { generateText } from "ai";
+import { generateObject } from "ai";
+import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DailyBriefingService } from "@/lib/services/daily-briefing.service";
 import { getGpt54Model } from "@/lib/ai/service";
+import { resolveGptDeployment } from "@/lib/ai/orchestration";
+import { calculateLLMCost } from "@/lib/ai/cost-calculator";
+import { alertIfDailyCostExceeded } from "@/lib/ai/alerting";
 import { buildHumanizerGuidance } from "@/lib/ai/prompts/humanizer";
 import { createLogger } from "@/lib/logger";
 import { sanitizeError } from "@/lib/logger/utils";
 import { logFireAndForgetError } from "@/lib/fire-and-forget";
 import { getCache, setCache } from "@/lib/redis";
 import { apiError } from "@/lib/api-response";
+import { rateLimitGeneral } from "@/lib/rate-limit";
 
 const logger = createLogger({ service: "portfolio-decision-memo" });
 
 export const dynamic = "force-dynamic";
 
-interface DecisionMemoResponse {
-  headline: string;
-  summary: string;
-  focus: string;
-  nextAction: string;
-  bullets: string[];
-}
+const DecisionMemoSchema = z.object({
+  headline: z.string(),
+  summary: z.string(),
+  focus: z.string(),
+  nextAction: z.string(),
+  bullets: z.array(z.string()).max(3),
+});
+
+type DecisionMemoResponse = z.infer<typeof DecisionMemoSchema>;
 
 function cacheKey(portfolioId: string, fingerprint: string): string {
   return `portfolio:decision-memo:${portfolioId}:${fingerprint}`;
@@ -50,75 +57,6 @@ function buildFallback(input: {
   };
 }
 
-async function generateMemo(input: {
-  portfolioName: string;
-  region: string;
-  regimeLabel: string;
-  summary: string;
-  holdings: Array<{ symbol: string; name: string; type: string; changePercent: number | null; compatibilityScore: number | null; }>; 
-  dailyBriefing: Awaited<ReturnType<typeof DailyBriefingService.getBriefing>>;
-}): Promise<DecisionMemoResponse> {
-  const prompt = `You are Lyra, a concise institutional portfolio analyst.
-Write a decision memo for the user's portfolio.
-
-${buildHumanizerGuidance("portfolio decision memo")}
-
-PORTFOLIO:
-${JSON.stringify({
-  portfolioName: input.portfolioName,
-  region: input.region,
-  regimeLabel: input.regimeLabel,
-  summary: input.summary,
-  holdings: input.holdings,
-}, null, 2)}
-
-MARKET BRIEF:
-${input.dailyBriefing ? JSON.stringify({
-  marketOverview: input.dailyBriefing.marketOverview,
-  keyInsights: input.dailyBriefing.keyInsights,
-  risksToWatch: input.dailyBriefing.risksToWatch,
-  regimeLabel: input.dailyBriefing.regimeLabel,
-  regimeSentence: input.dailyBriefing.regimeSentence,
-}, null, 2) : "No daily briefing available."}
-
-INSTRUCTIONS:
-- Return ONLY valid JSON.
-- Keep it short, direct and useful.
-- Focus on portfolio posture, biggest risk, and the next practical decision.
-- Do not give financial advice or price predictions.
-- Write in plain English so a non-expert can understand it on the first read.
-- Avoid sounding like a generic market report.
-
-JSON SHAPE:
-{
-  "headline": "short title",
-  "summary": "1-2 short sentences in plain English",
-  "focus": "one short sentence",
-  "nextAction": "one short sentence",
-  "bullets": ["bullet 1", "bullet 2", "bullet 3"]
-}`;
-
-  const result = await generateText({
-    model: getGpt54Model("lyra-mini"),
-    prompt,
-    maxOutputTokens: 280,
-  });
-
-  const cleaned = result.text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-  const parsed = JSON.parse(cleaned) as Partial<DecisionMemoResponse>;
-
-  if (!parsed.headline || !parsed.summary || !parsed.focus || !parsed.nextAction) {
-    throw new Error("Invalid portfolio decision memo format");
-  }
-
-  return {
-    headline: parsed.headline,
-    summary: parsed.summary,
-    focus: parsed.focus,
-    nextAction: parsed.nextAction,
-    bullets: Array.isArray(parsed.bullets) ? parsed.bullets.slice(0, 3).filter((item): item is string => typeof item === "string") : [],
-  };
-}
 
 export async function GET(
   _req: NextRequest,
@@ -136,6 +74,9 @@ export async function GET(
     if (!userId) {
       return apiError("Unauthorized", 401);
     }
+
+    const rateLimitResponse = await rateLimitGeneral(userId, userId);
+    if (rateLimitResponse) return rateLimitResponse;
 
     const { id } = await params;
     const portfolio = await prisma.portfolio.findFirst({
@@ -200,14 +141,65 @@ export async function GET(
       return NextResponse.json({ success: true, memo: cached });
     }
 
-    const memo = await generateMemo({
-      portfolioName: portfolio.name,
-      region,
-      regimeLabel: latestSnapshot?.regime ? String(latestSnapshot.regime) : region,
-      summary: fallbackInput.summary,
-      holdings,
-      dailyBriefing,
+    const prompt = `You are Lyra, a concise institutional portfolio analyst.
+Write a decision memo for the user's portfolio.
+
+${buildHumanizerGuidance("portfolio decision memo")}
+
+PORTFOLIO:
+${JSON.stringify({
+  portfolioName: portfolio.name,
+  region,
+  regimeLabel: latestSnapshot?.regime ? String(latestSnapshot.regime) : region,
+  summary: fallbackInput.summary,
+  holdings,
+}, null, 2)}
+
+MARKET BRIEF:
+${dailyBriefing ? JSON.stringify({
+  marketOverview: dailyBriefing.marketOverview,
+  keyInsights: dailyBriefing.keyInsights,
+  risksToWatch: dailyBriefing.risksToWatch,
+  regimeLabel: dailyBriefing.regimeLabel,
+  regimeSentence: dailyBriefing.regimeSentence,
+}, null, 2) : "No daily briefing available."}
+
+INSTRUCTIONS:
+- Return ONLY valid JSON.
+- Keep it short, direct and useful.
+- Focus on portfolio posture, biggest risk, and the next practical decision.
+- Do not give financial advice or price predictions.
+- Write in plain English so a non-expert can understand it on the first read.
+- Avoid sounding like a generic market report.
+
+JSON SHAPE:
+{
+  "headline": "short title",
+  "summary": "1-2 short sentences in plain English",
+  "focus": "one short sentence",
+  "nextAction": "one short sentence",
+  "bullets": ["bullet 1", "bullet 2", "bullet 3"]
+}`;
+
+    const { object: memo, usage } = await generateObject({
+      model: getGpt54Model("lyra-mini"),
+      schema: DecisionMemoSchema,
+      prompt,
     });
+
+    // Cost tracking: feed actual LLM spend into daily cost alert
+    try {
+      const deployment = resolveGptDeployment("lyra-mini");
+      const costBreakdown = calculateLLMCost({
+        model: deployment,
+        inputTokens: usage.inputTokens ?? 0,
+        outputTokens: usage.outputTokens ?? 0,
+        cachedInputTokens: usage.cachedInputTokens ?? 0,
+      });
+      alertIfDailyCostExceeded(costBreakdown.totalCost).catch((e) => logFireAndForgetError(e, "decision-memo-cost-alert"));
+    } catch (e) {
+      logFireAndForgetError(e, "decision-memo-cost-calc");
+    }
 
     await setCache(key, memo, 6 * 60 * 60).catch((e) => logFireAndForgetError(e, "decision-memo-cache"));
     return NextResponse.json({ success: true, memo });

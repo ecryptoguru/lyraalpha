@@ -72,3 +72,15 @@ export function useAdminWaitlist() {
 export function useAdminCryptoData() {
   return useSWR("/api/admin/crypto-data", fetcher, ADMIN_SWR_CONFIG);
 }
+
+// Near-real-time runtime ops snapshot (daily cost burn, fallback mitigation,
+// cron LLM hourly window). Refreshes faster than other admin widgets.
+const ADMIN_OPS_SWR_CONFIG = {
+  revalidateOnFocus: false,
+  refreshInterval: 15_000,
+  dedupingInterval: 5_000,
+};
+
+export function useAdminAIOps() {
+  return useSWR("/api/admin/ai-ops", fetcher, ADMIN_OPS_SWR_CONFIG);
+}

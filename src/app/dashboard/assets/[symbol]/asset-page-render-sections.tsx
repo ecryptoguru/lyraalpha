@@ -44,7 +44,7 @@ export function AssetCryptoProfileSection({
   return (
     <div className="space-y-4 pt-4">
       <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+        <span className="w-2 h-2 rounded-full bg-success" />
         Crypto Profile & Ecosystem
       </h3>
       <div className="bg-card/60 backdrop-blur-2xl border border-border/30 dark:border-white/5 shadow-xl p-5 rounded-3xl space-y-6">
@@ -65,7 +65,7 @@ export function AssetCryptoProfileSection({
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Categories</p>
                 <div className="flex flex-wrap gap-1.5">
                   {cgMeta.categories.slice(0, 6).map((category) => (
-                    <span key={category} className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-500 uppercase tracking-wider">
+                    <span key={category} className="px-2.5 py-1 rounded-full bg-success/10 border border-success/20 text-[10px] font-bold text-success uppercase tracking-wider">
                       {category}
                     </span>
                   ))}
@@ -163,7 +163,7 @@ export function AssetCryptoDiagnosticsSection({
   return (
     <div className="space-y-4 pt-4">
       <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+        <span className="w-2 h-2 rounded-full bg-success" />
         Crypto Diagnostics
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -214,10 +214,10 @@ export function AssetCryptoDiagnosticsSection({
                     className={cn(
                       "text-[10px] font-bold px-2 py-0.5 rounded-full border",
                       (liquidity.score ?? 0) >= 70
-                        ? "text-red-400 border-red-500/30 bg-red-500/10"
+                        ? "text-danger border-danger/30 bg-danger/10"
                         : (liquidity.score ?? 0) >= 45
-                          ? "text-amber-400 border-amber-500/30 bg-amber-500/10"
-                          : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+                          ? "text-warning border-warning/30 bg-warning/10"
+                          : "text-success border-success/30 bg-success/10",
                     )}
                   >
                     {(liquidity.score ?? 0).toFixed(0)}/100
@@ -286,8 +286,8 @@ function SentimentBar({
   tone: "positive" | "negative";
   value: number;
 }) {
-  const textClass = tone === "positive" ? "text-emerald-500" : "text-red-500";
-  const barClass = tone === "positive" ? "bg-emerald-500" : "bg-red-500";
+  const textClass = tone === "positive" ? "text-success" : "text-danger";
+  const barClass = tone === "positive" ? "bg-success" : "bg-danger";
 
   return (
     <div>

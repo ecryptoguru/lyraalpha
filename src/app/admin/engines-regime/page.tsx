@@ -159,7 +159,7 @@ function EnginesTab({ data }: { data: Awaited<ReturnType<typeof useAdminEngines>
                   <td className="py-2 text-right text-foreground">{row.withScores}</td>
                   <td className="py-2 text-right text-foreground">{row.withSignalStrength}</td>
                   <td className="py-2 text-right">
-                    <span className={`font-bold ${row.total > 0 && row.withScores / row.total > 0.8 ? "text-emerald-400" : "text-amber-400"}`}>
+                    <span className={`font-bold ${row.total > 0 && row.withScores / row.total > 0.8 ? "text-success" : "text-warning"}`}>
                       {row.total > 0 ? Math.round((row.withScores / row.total) * 100) : 0}%
                     </span>
                   </td>

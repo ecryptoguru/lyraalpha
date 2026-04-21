@@ -74,7 +74,7 @@ function WatchlistRow({ item }: { item: WatchlistItem }) {
               <div
                 className={cn(
                   "flex items-center justify-end gap-1 text-[10px] font-bold font-mono tabular-nums",
-                  isUp ? "text-emerald-400" : "text-rose-400",
+                  isUp ? "text-success" : "text-danger",
                 )}
               >
                 {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
@@ -131,7 +131,7 @@ export default function WatchlistPage() {
             eyebrow="Starred assets"
             chips={
               <>
-                <StatChip value={items.length} label="Starred" variant={items.length > 0 ? "amber" : "muted"} />
+                <StatChip value={items.length} label="Starred" variant={items.length > 0 ? "gold" : "muted"} />
                 <StatChip value={region} label="Market" variant="muted" />
               </>
             }

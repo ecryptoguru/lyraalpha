@@ -82,11 +82,11 @@ describe("POST /api/webhooks/stripe", () => {
     mockLogBillingAudit.mockResolvedValue(undefined);
   });
 
-  it("returns 500 when STRIPE_WEBHOOK_SECRET is not set", async () => {
-    delete process.env.STRIPE_WEBHOOK_SECRET;
+  it("returns 400 when webhook verification returns undefined (missing/bad secret)", async () => {
+    mockVerify.mockReturnValue(undefined);
     const { POST } = await import("./route");
     const res = await POST(makeRequest({}));
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(400);
   });
 
   it("returns 400 when signature verification fails", async () => {

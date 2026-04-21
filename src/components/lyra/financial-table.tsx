@@ -9,7 +9,7 @@ interface FinancialTableProps {
 
 export function FinancialTable({ title, data }: FinancialTableProps) {
   return (
-    <Card className="my-6 border-primary/10 bg-white/80 dark:bg-slate-950/30">
+    <Card className="my-6 border-primary/10 bg-white/80 dark:bg-foreground/30">
       <div className="px-4 py-3 border-b border-primary/10">
         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
           {title}

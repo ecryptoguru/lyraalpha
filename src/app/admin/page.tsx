@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useAdminOverview } from "@/hooks/use-admin";
+import { useAdminOverview, useAdminAIOps } from "@/hooks/use-admin";
 import {
   Users,
   CreditCard,
@@ -26,10 +26,10 @@ const PlanDistributionChart = dynamic(
 );
 
 const PLAN_COLORS: Record<string, string> = {
-  STARTER: "text-slate-400",
-  PRO: "text-amber-400",
-  ELITE: "text-amber-400",
-  ENTERPRISE: "text-amber-400",
+  STARTER: "text-muted-foreground",
+  PRO: "text-warning",
+  ELITE: "text-warning",
+  ENTERPRISE: "text-warning",
 };
 
 function KPICard({
@@ -62,7 +62,7 @@ function KPICard({
         <div className="flex items-center gap-2">
           {trend && (
             <span className={`flex items-center gap-0.5 text-[10px] font-bold ${
-              trendUp === true ? "text-emerald-400" : trendUp === false ? "text-red-400" : "text-muted-foreground"
+              trendUp === true ? "text-success" : trendUp === false ? "text-danger" : "text-muted-foreground"
             }`}>
               {trendUp === true ? <ArrowUpRight className="h-2.5 w-2.5" /> : trendUp === false ? <ArrowDownRight className="h-2.5 w-2.5" /> : <Minus className="h-2.5 w-2.5" />}
               {trend}
@@ -86,8 +86,24 @@ function StatRow({ label, value, valueClass }: { label: string; value: string | 
   );
 }
 
+interface AIOpsOverviewSnapshot {
+  dailyCost?: { cumulativeCostUsd?: number; thresholdUsd?: number; pctOfThreshold?: number };
+  fallbackMitigation?: { active?: boolean };
+}
+
 export default function AdminOverviewPage() {
   const { data, error, isLoading } = useAdminOverview();
+  const { data: opsDataRaw } = useAdminAIOps();
+  const ops = (opsDataRaw ?? null) as AIOpsOverviewSnapshot | null;
+  const spendPct = ops?.dailyCost?.pctOfThreshold ?? null;
+  const spendAccent =
+    spendPct === null
+      ? "text-muted-foreground/60"
+      : spendPct >= 100
+      ? "text-danger"
+      : spendPct >= 75
+      ? "text-warning"
+      : "text-success";
 
   if (isLoading) {
     return (
@@ -140,7 +156,7 @@ export default function AdminOverviewPage() {
         </div>
         <div className={`text-[10px] font-bold px-2 py-1 rounded-full border ${
           data.currentRegime
-            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+            ? "border-success/30 bg-success/10 text-success"
             : "border-white/5 text-muted-foreground"
         }`}>
           {data.currentRegime ?? "No Regime Data"}
@@ -156,7 +172,7 @@ export default function AdminOverviewPage() {
             value={`$${mrr.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
             icon={DollarSign}
             subtitle="Monthly recurring"
-            accent="text-emerald-400"
+            accent="text-success"
           />
           <KPICard
             label="ARR"
@@ -219,7 +235,20 @@ export default function AdminOverviewPage() {
             label="AI Requests Today"
             value={data.aiRequestsToday?.toLocaleString() ?? 0}
             icon={Zap}
-            accent="text-amber-400"
+            accent="text-warning"
+          />
+          <KPICard
+            label="AI Spend Today"
+            value={ops ? `$${(ops.dailyCost?.cumulativeCostUsd ?? 0).toFixed(2)}` : "—"}
+            icon={DollarSign}
+            accent={spendAccent}
+            subtitle={
+              ops
+                ? `${spendPct ?? 0}% of $${ops.dailyCost?.thresholdUsd ?? 0} budget`
+                : "Cumulative LLM spend"
+            }
+            trend={ops?.fallbackMitigation?.active ? "Mitigation active" : undefined}
+            trendUp={ops?.fallbackMitigation?.active ? false : null}
           />
           <KPICard
             label="AI Requests (7d)"
@@ -231,6 +260,8 @@ export default function AdminOverviewPage() {
             value={data.totalAIRequests?.toLocaleString() ?? 0}
             icon={Database}
           />
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mt-2 sm:mt-3">
           <KPICard
             label="Crypto Assets Tracked"
             value={data.totalAssets?.toLocaleString() ?? 0}
@@ -298,13 +329,13 @@ export default function AdminOverviewPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-0">
           <div>
             <StatRow label="Total Users" value={totalUsers.toLocaleString()} />
-            <StatRow label="Paid Subscriptions" value={paidSubscriptions} valueClass="text-emerald-400" />
+            <StatRow label="Paid Subscriptions" value={paidSubscriptions} valueClass="text-success" />
             <StatRow label="Free Users" value={((data.planDistribution?.["STARTER"] as number) ?? 0).toLocaleString()} />
             <StatRow label="Active Subscriptions" value={data.activeSubscriptions ?? 0} />
           </div>
           <div>
-            <StatRow label="MRR" value={`$${mrr.toFixed(0)}`} valueClass="text-emerald-400" />
-            <StatRow label="ARR" value={`$${arr.toFixed(0)}`} valueClass="text-emerald-400" />
+            <StatRow label="MRR" value={`$${mrr.toFixed(0)}`} valueClass="text-success" />
+            <StatRow label="ARR" value={`$${arr.toFixed(0)}`} valueClass="text-success" />
             <StatRow label="Free→Paid Conversion" value={`${conversionRate}%`} />
             <StatRow label="AI Requests / User" value={aiPerUser} />
           </div>

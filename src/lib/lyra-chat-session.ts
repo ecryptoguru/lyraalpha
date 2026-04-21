@@ -2,6 +2,9 @@
 
 import { applyOptimisticCreditDelta, revalidateCreditViews, setAuthoritativeCreditBalance } from "@/lib/credits/client";
 import { parseLyraMessage, type Source } from "@/lib/lyra-utils";
+import { createClientLogger } from "@/lib/logger/client";
+
+const logger = createClientLogger("lyra-chat");
 
 // ─── Error surface ───────────────────────────────────────────────────────────
 // The previous `catch {}` silently replaced every failure with a generic
@@ -482,9 +485,8 @@ class LyraChatSessionController {
         message = "Lyra ran into a problem answering that. Please try again.";
       }
 
-      // Log the underlying error so it shows up in the browser console for
-      // debugging. The user sees the human-readable message above.
-      console.error("[Lyra] chat request failed", error);
+      // Log the underlying error for debugging. The user sees the human-readable message above.
+      logger.error("Chat request failed", { error });
 
       // Drop the empty assistant placeholder if one was added before the failure.
       const cleanedMessages = this.snapshot.messages.filter(

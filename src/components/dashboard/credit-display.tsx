@@ -32,11 +32,11 @@ export function CreditDisplay({ userId }: CreditDisplayProps) {
 
   return (
     <div className="flex items-center gap-1 sm:gap-1.5">
-      <Coins className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0", isLow ? "text-red-400" : "text-amber-500")} />
+      <Coins className={cn("w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0", isLow ? "text-red-400" : "text-cyan-400")} />
       <span
         className={cn(
           "text-xs sm:text-sm font-semibold tabular-nums",
-          isLow ? "text-red-400" : "text-muted-foreground",
+          isLow ? "text-red-400" : "text-cyan-400",
         )}
       >
         {credits.toLocaleString()}

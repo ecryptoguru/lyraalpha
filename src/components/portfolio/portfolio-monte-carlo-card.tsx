@@ -31,19 +31,19 @@ const MODE_DESCRIPTIONS: Record<SimulationMode, string> = {
 };
 
 const REGIME_COLORS: Record<string, string> = {
-  STRONG_RISK_ON: "bg-emerald-500",
-  RISK_ON:        "bg-green-400",
-  NEUTRAL:        "bg-amber-400",
-  DEFENSIVE:      "bg-amber-500",
-  RISK_OFF:       "bg-red-500",
+  STRONG_RISK_ON: "bg-success",
+  RISK_ON:        "bg-success",
+  NEUTRAL:        "bg-cyan-400",
+  DEFENSIVE:      "bg-[#FFD700]",
+  RISK_OFF:       "bg-danger",
 };
 
 const REGIME_TEXT: Record<string, string> = {
-  STRONG_RISK_ON: "text-emerald-400",
-  RISK_ON:        "text-green-400",
-  NEUTRAL:        "text-amber-400",
-  DEFENSIVE:      "text-amber-500",
-  RISK_OFF:       "text-red-400",
+  STRONG_RISK_ON: "text-success",
+  RISK_ON:        "text-success",
+  NEUTRAL:        "text-cyan-400",
+  DEFENSIVE:      "text-[#FFD700]",
+  RISK_OFF:       "text-danger",
 };
 
 function formatPct(value: number): string {
@@ -78,7 +78,7 @@ function ReturnDistribution({ result }: { result: MCSimulationResult }) {
       <div className="relative h-12 rounded-2xl bg-muted/15 border border-white/5 overflow-hidden">
         {/* IQR band */}
         <motion.div
-          className="absolute top-0 bottom-0 bg-amber-400/10 border-l border-r border-amber-400/20"
+          className="absolute top-0 bottom-0 bg-warning/10 border-l border-r border-warning/20"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
@@ -86,7 +86,7 @@ function ReturnDistribution({ result }: { result: MCSimulationResult }) {
         />
         {/* VaR line */}
         <motion.div
-          className="absolute top-2 bottom-2 w-0.5 bg-red-400 rounded-full"
+          className="absolute top-2 bottom-2 w-0.5 bg-danger rounded-full"
           initial={{ scaleY: 0 }}
           animate={{ scaleY: 1 }}
           transition={{ delay: 0.5, duration: 0.4 }}
@@ -94,7 +94,7 @@ function ReturnDistribution({ result }: { result: MCSimulationResult }) {
         />
         {/* Median line */}
         <motion.div
-          className="absolute top-1 bottom-1 w-0.5 bg-amber-400 rounded-full"
+          className="absolute top-1 bottom-1 w-0.5 bg-warning rounded-full"
           initial={{ scaleY: 0 }}
           animate={{ scaleY: 1 }}
           transition={{ delay: 0.6, duration: 0.4 }}
@@ -108,9 +108,9 @@ function ReturnDistribution({ result }: { result: MCSimulationResult }) {
           />
         )}
         {/* Labels */}
-        <div className="absolute bottom-1 left-1.5 text-[8px] font-bold text-red-400">VaR</div>
+        <div className="absolute bottom-1 left-1.5 text-[8px] font-bold text-danger">VaR</div>
         <div
-          className="absolute bottom-1 text-[8px] font-bold text-amber-400 -translate-x-1/2"
+          className="absolute bottom-1 text-[8px] font-bold text-warning -translate-x-1/2"
           style={{ left: `${medX}%` }}
         >
           Med
@@ -234,7 +234,7 @@ export function PortfolioMonteCarloCard({ portfolioId, plan, onResult }: Portfol
       <div className="relative rounded-3xl border border-white/8 bg-card/50 backdrop-blur-xl p-5 overflow-hidden min-h-[220px] shadow-[0_8px_32px_rgba(0,0,0,0.24)]">
         <div className="blur-sm pointer-events-none select-none opacity-25 space-y-3">
           <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-amber-400" />
+            <Activity className="h-4 w-4 text-warning" />
             <h3 className="text-sm font-bold">Monte Carlo Simulation</h3>
           </div>
           <div className="h-12 bg-muted/20 rounded-2xl" />
@@ -243,8 +243,8 @@ export function PortfolioMonteCarloCard({ portfolioId, plan, onResult }: Portfol
           </div>
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-          <div className="h-11 w-11 rounded-2xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
-            <Activity className="h-5 w-5 text-amber-400" />
+          <div className="h-11 w-11 rounded-2xl bg-warning/10 border border-warning/20 flex items-center justify-center">
+            <Activity className="h-5 w-5 text-warning" />
           </div>
           <div className="text-center">
             <p className="text-sm font-bold text-foreground">Monte Carlo Simulation</p>
@@ -252,7 +252,7 @@ export function PortfolioMonteCarloCard({ portfolioId, plan, onResult }: Portfol
               RS-MGBM regime-aware path simulation
             </p>
           </div>
-          <span className="text-[10px] font-bold text-amber-400 border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 rounded-full">
+          <span className="text-[10px] font-bold text-warning border border-warning/30 bg-warning/10 px-3 py-1.5 rounded-full">
             Pro+ Required
           </span>
         </div>
@@ -261,12 +261,12 @@ export function PortfolioMonteCarloCard({ portfolioId, plan, onResult }: Portfol
   }
 
   return (
-    <div className="rounded-3xl border border-white/8 bg-card/50 backdrop-blur-xl p-5 space-y-4 hover:border-amber-400/20 transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.24)]">
+    <div className="rounded-3xl border border-white/8 bg-card/50 backdrop-blur-xl p-5 space-y-4 hover:border-warning/20 transition-all duration-500 shadow-[0_8px_32px_rgba(0,0,0,0.24)]">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-xl bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
-            <Activity className="h-3.5 w-3.5 text-amber-400" />
+          <div className="h-7 w-7 rounded-xl bg-warning/10 border border-warning/20 flex items-center justify-center">
+            <Activity className="h-3.5 w-3.5 text-warning" />
           </div>
           <h3 className="text-sm font-bold text-foreground">Monte Carlo</h3>
         </div>
@@ -345,7 +345,7 @@ export function PortfolioMonteCarloCard({ portfolioId, plan, onResult }: Portfol
 
       {/* Error */}
       {error && (
-        <div className="rounded-xl bg-red-500/10 border border-red-500/20 px-3 py-2 text-xs text-red-400">
+        <div className="rounded-xl bg-danger/10 border border-danger/20 px-3 py-2 text-xs text-danger">
           {error}
         </div>
       )}
@@ -354,9 +354,9 @@ export function PortfolioMonteCarloCard({ portfolioId, plan, onResult }: Portfol
       {isRunning && (
         <div className="flex flex-col items-center justify-center gap-3 py-8">
           <div className="relative h-10 w-10">
-            <div className="absolute inset-0 rounded-full border-2 border-amber-400/20 animate-ping" />
+            <div className="absolute inset-0 rounded-full border-2 border-warning/20 animate-ping" />
             <div className="absolute inset-0 flex items-center justify-center">
-              <Loader2 className="h-5 w-5 text-amber-400 animate-spin" />
+              <Loader2 className="h-5 w-5 text-warning animate-spin" />
             </div>
           </div>
           <p className="text-xs text-muted-foreground">Simulating {isElite ? "5,000" : "2,000"} paths…</p>
@@ -382,25 +382,25 @@ export function PortfolioMonteCarloCard({ portfolioId, plan, onResult }: Portfol
                 sub: `${result.horizon}d horizon`,
                 positive: result.expectedReturn >= 0,
                 icon: result.expectedReturn >= 0
-                  ? <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-                  : <TrendingDown className="h-3.5 w-3.5 text-red-400" />,
-                color: result.expectedReturn >= 0 ? "text-emerald-400" : "text-red-400",
+                  ? <TrendingUp className="h-3.5 w-3.5 text-success" />
+                  : <TrendingDown className="h-3.5 w-3.5 text-danger" />,
+                color: result.expectedReturn >= 0 ? "text-success" : "text-danger",
               },
               {
                 label: "ES 5%",
                 value: formatPct(result.es5),
                 sub: "Expected shortfall",
                 positive: false,
-                icon: <TrendingDown className="h-3.5 w-3.5 text-red-400" />,
-                color: "text-red-400",
+                icon: <TrendingDown className="h-3.5 w-3.5 text-danger" />,
+                color: "text-danger",
               },
               {
                 label: "Max Drawdown",
                 value: `-${result.maxDrawdownMean != null ? (result.maxDrawdownMean * 100).toFixed(1) : "0.0"}%`,
                 sub: "Mean across paths",
                 positive: false,
-                icon: <TrendingDown className="h-3.5 w-3.5 text-amber-400" />,
-                color: "text-amber-400",
+                icon: <TrendingDown className="h-3.5 w-3.5 text-warning" />,
+                color: "text-warning",
               },
               {
                 label: "Fragility",
@@ -408,8 +408,8 @@ export function PortfolioMonteCarloCard({ portfolioId, plan, onResult }: Portfol
                 sub: "Mean score",
                 positive: (result.fragilityMean ?? 0) <= 40,
                 icon: <Activity className="h-3.5 w-3.5 text-muted-foreground" />,
-                color: (result.fragilityMean ?? 0) <= 25 ? "text-emerald-400" :
-                       (result.fragilityMean ?? 0) <= 50 ? "text-amber-400" : "text-red-400",
+                color: (result.fragilityMean ?? 0) <= 25 ? "text-success" :
+                       (result.fragilityMean ?? 0) <= 50 ? "text-warning" : "text-danger",
               },
             ].map((m) => (
               <div key={m.label} className="rounded-2xl bg-muted/15 border border-white/5 p-3 space-y-1.5">

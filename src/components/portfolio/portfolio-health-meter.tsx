@@ -32,24 +32,24 @@ const DIMENSION_TOOLTIPS: Record<string, string> = {
 
 function getBandConfig(band: string) {
   switch (band) {
-    case "Strong":   return { color: "#34d399", glow: "#34d39940", label: "Strong",   bg: "bg-emerald-400/10 border-emerald-400/30 text-emerald-400" };
-    case "Balanced": return { color: "#fbbf24", glow: "#fbbf2440", label: "Balanced", bg: "bg-amber-400/10 border-amber-400/30 text-amber-400" };
-    case "Fragile":  return { color: "#fb923c", glow: "#fb923c40", label: "Fragile",  bg: "bg-orange-400/10 border-orange-400/30 text-orange-400" };
-    default:         return { color: "#f87171", glow: "#f8717140", label: "Weak",     bg: "bg-red-400/10 border-red-400/30 text-red-400" };
+    case "Strong":   return { color: "#34d399", glow: "#34d39940", label: "Strong",   bg: "bg-success/10 border-success/30 text-success" };
+    case "Balanced": return { color: "#00d4ff", glow: "#00d4ff40", label: "Balanced", bg: "bg-cyan-400/10 border-cyan-400/30 text-cyan-400" };
+    case "Fragile":  return { color: "#FFD700", glow: "#FFD70040", label: "Fragile",  bg: "bg-[#FFD700]/10 border-[#FFD700]/30 text-[#FFD700]" };
+    default:         return { color: "#f87171", glow: "#f8717140", label: "Weak",     bg: "bg-danger/10 border-danger/30 text-danger" };
   }
 }
 
 function getDimBarColor(score: number) {
-  if (score >= 70) return { bar: "bg-emerald-400", glow: "shadow-[0_0_8px_#34d39960]" };
-  if (score >= 50) return { bar: "bg-amber-400",   glow: "shadow-[0_0_8px_#fbbf2460]" };
-  if (score >= 35) return { bar: "bg-orange-400",  glow: "shadow-[0_0_8px_#fb923c60]" };
-  return                   { bar: "bg-red-400",    glow: "shadow-[0_0_8px_#f8717160]" };
+  if (score >= 70) return { bar: "bg-success", glow: "shadow-[0_0_8px_#34d39960]" };
+  if (score >= 50) return { bar: "bg-cyan-400",   glow: "shadow-[0_0_8px_#00d4ff60]" };
+  if (score >= 35) return { bar: "bg-[#FFD700]",  glow: "shadow-[0_0_8px_#FFD70060]" };
+  return                   { bar: "bg-danger",    glow: "shadow-[0_0_8px_#f8717160]" };
 }
 
 function getDimIcon(score: number) {
-  if (score >= 60) return <TrendingUp className="h-2.5 w-2.5 text-emerald-400" />;
-  if (score >= 40) return <Minus className="h-2.5 w-2.5 text-amber-400" />;
-  return <TrendingDown className="h-2.5 w-2.5 text-red-400" />;
+  if (score >= 60) return <TrendingUp className="h-2.5 w-2.5 text-success" />;
+  if (score >= 40) return <Minus className="h-2.5 w-2.5 text-cyan-400" />;
+  return <TrendingDown className="h-2.5 w-2.5 text-danger" />;
 }
 
 function ScoreArc({ score }: { score: number }) {

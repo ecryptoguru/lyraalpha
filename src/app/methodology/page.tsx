@@ -30,10 +30,10 @@ export default function MethodologyPage() {
       <Navbar />
       <main className="flex-1 px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-3xl">
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-amber-400/80">Methodology</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-warning/80">Methodology</p>
           <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">
             How LyraAlpha<br />
-            <span className="text-amber-400">avoids hallucinations.</span>
+            <span className="text-warning">avoids hallucinations.</span>
           </h1>
           <p className="mt-5 text-base text-white/55 leading-7">
             Most AI finance tools fail because they let a language model generate metrics from memory. LyraAlpha inverts this: compute first, interpret second. Every number shown was computed. Every insight references only computed numbers.
@@ -43,7 +43,7 @@ export default function MethodologyPage() {
             {sections.map((s, i) => (
               <div key={s.title} className="flex gap-6">
                 <div className="shrink-0 mt-1">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full border border-amber-400/20 bg-amber-400/8 text-[11px] font-black text-amber-400">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full border border-warning/20 bg-warning/8 text-[11px] font-black text-warning">
                     {i + 1}
                   </span>
                 </div>

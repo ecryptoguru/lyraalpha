@@ -76,32 +76,32 @@ const CATEGORY_CONFIG: Record<string, {
 }> = {
   fundamentals: {
     label: "Score Fundamentals", icon: Brain,
-    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    glow: "shadow-emerald-500/10",
+    color: "text-success bg-success/10 border-success/20",
+    glow: "shadow-success/10",
     badge: "🧠", tagline: "Understand what the scores actually mean",
   },
   crypto: {
     label: "Crypto Intelligence", icon: Bitcoin,
-    color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
-    glow: "shadow-amber-500/10",
+    color: "text-warning bg-warning/10 border-warning/20",
+    glow: "shadow-warning/10",
     badge: "⚡", tagline: "On-chain signals, not noise",
   },
   regime: {
     label: "Market Regimes", icon: TrendingUp,
-    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
-    glow: "shadow-emerald-500/10",
+    color: "text-success bg-success/10 border-success/20",
+    glow: "shadow-success/10",
     badge: "📡", tagline: "Read the environment before the trade",
   },
   discovery: {
     label: "Discovery Feed", icon: Compass,
-    color: "text-pink-400 bg-pink-500/10 border-pink-500/20",
-    glow: "shadow-pink-500/10",
+    color: "text-danger bg-danger/10 border-danger/20",
+    glow: "shadow-danger/10",
     badge: "🧭", tagline: "Turn discovery cards into insights",
   },
   advanced: {
     label: "Advanced — Elite", icon: Cpu,
-    color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20",
-    glow: "shadow-yellow-500/10",
+    color: "text-warning bg-warning/10 border-warning/20",
+    glow: "shadow-warning/10",
     badge: "🔬", tagline: "Cross-asset patterns and regime-level analysis",
   },
   signals: {
@@ -112,8 +112,8 @@ const CATEGORY_CONFIG: Record<string, {
   },
   portfolio: {
     label: "Portfolio Intelligence", icon: ShieldCheck,
-    color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
-    glow: "shadow-indigo-500/10",
+    color: "text-primary bg-primary/10 border-primary/20",
+    glow: "shadow-primary/10",
     badge: "🛡️", tagline: "Build resilient, regime-aware portfolios",
   },
   platform: {
@@ -124,8 +124,8 @@ const CATEGORY_CONFIG: Record<string, {
   },
   intelligence: {
     label: "Market Intelligence", icon: BarChart3,
-    color: "text-rose-400 bg-rose-500/10 border-rose-500/20",
-    glow: "shadow-rose-500/10",
+    color: "text-danger bg-danger/10 border-danger/20",
+    glow: "shadow-danger/10",
     badge: "📰", tagline: "Narratives, catalysts, analyst signals and market structure",
   },
 };
@@ -204,11 +204,11 @@ function LearningHubContent() {
           eyebrow="Learn how to read the signals"
           chips={
             <>
-              <StatChip value={`${completedAccessibleModules}/${accessibleModules}`} label="Modules" variant="amber" />
+              <StatChip value={`${completedAccessibleModules}/${accessibleModules}`} label="Modules" variant="gold" />
               <StatChip value={`${overallPct}%`} label="Done" variant={overallPct === 100 ? "green" : "muted"} />
               <StatChip value={progress.totalXp.toLocaleString()} label="XP" variant="blue" />
               {progress.streak > 0 && (
-                <StatChip value={`${progress.streak}d`} label="Streak" variant="amber" />
+                <StatChip value={`${progress.streak}d`} label="Streak" variant="gold" />
               )}
             </>
           }
@@ -224,9 +224,9 @@ function LearningHubContent() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 animate-slide-up-fade animation-delay-200">
         {[
           { icon: <Zap className="h-4 w-4 text-primary" />, label: "XP Earned", value: progress.totalXp.toLocaleString(), sub: "lifetime", bg: "bg-primary/5 border-primary/10" },
-          { icon: <Flame className="h-4 w-4 text-orange-400" />, label: "Learning Streak", value: `${progress.streak}d`, sub: progress.streak >= 7 ? "🔥 on fire!" : "keep going", bg: "bg-orange-500/5 border-orange-500/10" },
-          { icon: <Trophy className="h-4 w-4 text-amber-400" />, label: "Badges Earned", value: `${earnedBadges.length}/${earnedBadges.length + availableBadges.length}`, sub: earnedBadges.length === 0 ? "first one awaits" : "collected", bg: "bg-amber-500/5 border-amber-500/10" },
-          { icon: <BookOpen className="h-4 w-4 text-sky-400" />, label: "Modules Done", value: `${completedAccessibleModules}/${accessibleModules}`, sub: `${overallPct}% accessible progress`, bg: "bg-sky-500/5 border-sky-500/10" },
+          { icon: <Flame className="h-4 w-4 text-warning" />, label: "Learning Streak", value: `${progress.streak}d`, sub: progress.streak >= 7 ? "🔥 on fire!" : "keep going", bg: "bg-warning/5 border-warning/10" },
+          { icon: <Trophy className="h-4 w-4 text-warning" />, label: "Badges Earned", value: `${earnedBadges.length}/${earnedBadges.length + availableBadges.length}`, sub: earnedBadges.length === 0 ? "first one awaits" : "collected", bg: "bg-warning/5 border-warning/10" },
+          { icon: <BookOpen className="h-4 w-4 text-info" />, label: "Modules Done", value: `${completedAccessibleModules}/${accessibleModules}`, sub: `${overallPct}% accessible progress`, bg: "bg-info/5 border-info/10" },
         ].map((stat, i) => (
           <motion.div
             key={stat.label}
@@ -377,7 +377,7 @@ function ProgressHeader({ progress, isLoading }: { progress: ProgressData; isLoa
               <span className="text-2xl font-bold text-primary">{progress.level}</span>
             </div>
             {progress.streak >= 7 && (
-              <div className="absolute -top-1.5 -right-1.5 h-6 w-6 rounded-full bg-orange-500 flex items-center justify-center shadow-lg">
+              <div className="absolute -top-1.5 -right-1.5 h-6 w-6 rounded-full bg-warning flex items-center justify-center shadow-lg">
                 <Flame className="h-3.5 w-3.5 text-white" />
               </div>
             )}
@@ -420,7 +420,7 @@ function ProgressHeader({ progress, isLoading }: { progress: ProgressData; isLoa
             </span>
             {progress.streak > 0 && (
               <span className="flex items-center gap-1">
-                <Flame className="h-3 w-3 text-orange-400" />
+                <Flame className="h-3 w-3 text-warning" />
                 {progress.streak}-day streak
               </span>
             )}
@@ -455,7 +455,7 @@ function BadgeShowcase({ earned, available }: { earned: BadgeData[]; available: 
     <div className="rounded-4xl border border-white/10 bg-card/70 p-6 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-amber-400" />
+          <Trophy className="h-4 w-4 text-warning" />
           <span className="text-sm font-bold uppercase tracking-wider">Badges</span>
           <span className="text-[10px] text-muted-foreground/50 font-medium">· {earned.length} earned</span>
         </div>
@@ -525,7 +525,7 @@ function CategorySection({ category, animationDelay = 0 }: { category: CategoryG
             </div>
             <span className={cn(
               "text-[10px] font-bold uppercase tracking-widest shrink-0",
-              isComplete ? "text-emerald-400" : "text-muted-foreground/50"
+              isComplete ? "text-success" : "text-muted-foreground/50"
             )}>
               {isComplete ? "✓ Done" : `${category.completedCount}/${category.totalCount}`}
             </span>
@@ -533,7 +533,7 @@ function CategorySection({ category, animationDelay = 0 }: { category: CategoryG
           {/* Category progress bar */}
           <div className="h-1 w-full bg-muted/20 rounded-full overflow-hidden mt-2">
             <div
-              className={cn("h-full rounded-full transition-all duration-1000", isComplete ? "bg-emerald-500" : "bg-primary/50")}
+              className={cn("h-full rounded-full transition-all duration-1000", isComplete ? "bg-success" : "bg-primary/50")}
               style={{ width: `${percent}%` }}
             />
           </div>
@@ -563,7 +563,7 @@ function ModuleCard({ module: mod, categoryColor }: { module: ModuleData; catego
           {isCompleted && <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />}
           {isLocked && <Lock className="h-3 w-3 text-muted-foreground/40 shrink-0" />}
           {mod.isEliteOnly && !isLocked && (
-            <span className="text-[8px] font-bold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-md border border-amber-500/20 shrink-0">
+            <span className="text-[8px] font-bold uppercase tracking-widest text-warning bg-warning/10 px-1.5 py-0.5 rounded-md border border-warning/20 shrink-0">
               Elite
             </span>
           )}
@@ -597,7 +597,7 @@ function ModuleCard({ module: mod, categoryColor }: { module: ModuleData; catego
             +{mod.xpReward} XP
           </span>
           {mod.score !== null && (
-            <span className="text-[9px] font-bold text-emerald-400/70">
+            <span className="text-[9px] font-bold text-success/70">
               {mod.score}% score
             </span>
           )}

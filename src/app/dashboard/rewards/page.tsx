@@ -17,12 +17,12 @@ import { buildRewardShareObject } from "@/lib/intelligence-share";
 // ─── Static Data ─────────────────────────────────────────────────────────────
 
 const TIERS = [
-  { name: "Beginner",   emoji: "🌱", levels: "1–5",    xpRange: "0–500",        multiplier: "1.0x", color: "text-emerald-400", bg: "bg-emerald-500/5 border-emerald-500/10",  glow: "shadow-emerald-500/5",  icon: BookOpen },
-  { name: "Explorer",   emoji: "🔭", levels: "6–10",   xpRange: "500–2,000",    multiplier: "1.1x", color: "text-sky-400",     bg: "bg-sky-500/5 border-sky-500/10",          glow: "shadow-sky-500/5",      icon: Globe },
-  { name: "Analyst",    emoji: "⚡", levels: "11–15",  xpRange: "2,000–5,000",  multiplier: "1.25x",color: "text-yellow-400",  bg: "bg-yellow-500/5 border-yellow-500/10",    glow: "shadow-yellow-500/5",   icon: Zap },
-  { name: "Strategist", emoji: "🎯", levels: "16–20",  xpRange: "5,000–12,000", multiplier: "1.4x", color: "text-orange-400",  bg: "bg-orange-500/5 border-orange-500/10",    glow: "shadow-orange-500/5",   icon: Target },
-  { name: "Expert",     emoji: "🏆", levels: "21–25",  xpRange: "12,000–25,000",multiplier: "1.5x", color: "text-amber-400",   bg: "bg-amber-500/5 border-amber-500/10",      glow: "shadow-amber-500/5",    icon: Trophy },
-  { name: "Master",     emoji: "👑", levels: "26–30",  xpRange: "25,000–50,000",multiplier: "1.6x", color: "text-pink-400",  bg: "bg-pink-500/5 border-pink-500/10",    glow: "shadow-pink-500/5",   icon: Crown },
+  { name: "Beginner",   emoji: "🌱", levels: "1–5",    xpRange: "0–500",        multiplier: "1.0x", color: "text-success", bg: "bg-success/5 border-success/10",  glow: "shadow-success/5",  icon: BookOpen },
+  { name: "Explorer",   emoji: "🔭", levels: "6–10",   xpRange: "500–2,000",    multiplier: "1.1x", color: "text-info",     bg: "bg-info/5 border-info/10",          glow: "shadow-info/5",      icon: Globe },
+  { name: "Analyst",    emoji: "⚡", levels: "11–15",  xpRange: "2,000–5,000",  multiplier: "1.25x",color: "text-warning",  bg: "bg-warning/5 border-warning/10",    glow: "shadow-warning/5",   icon: Zap },
+  { name: "Strategist", emoji: "🎯", levels: "16–20",  xpRange: "5,000–12,000", multiplier: "1.4x", color: "text-warning",  bg: "bg-warning/5 border-warning/10",    glow: "shadow-warning/5",   icon: Target },
+  { name: "Expert",     emoji: "🏆", levels: "21–25",  xpRange: "12,000–25,000",multiplier: "1.5x", color: "text-warning",   bg: "bg-warning/5 border-warning/10",      glow: "shadow-warning/5",    icon: Trophy },
+  { name: "Master",     emoji: "👑", levels: "26–30",  xpRange: "25,000–50,000",multiplier: "1.6x", color: "text-danger",  bg: "bg-danger/5 border-danger/10",    glow: "shadow-danger/5",   icon: Crown },
 ];
 
 const XP_ACTIONS = [
@@ -40,12 +40,12 @@ const XP_ACTIONS = [
 ];
 
 const CAT_COLORS: Record<string, string> = {
-  engagement: "text-sky-300 bg-sky-500/10 border-sky-500/15",
-  analytics:  "text-cyan-300 bg-cyan-500/10 border-cyan-500/15",
-  learning:   "text-emerald-300 bg-emerald-500/10 border-emerald-500/15",
-  discovery:  "text-amber-300 bg-amber-500/10 border-amber-500/15",
-  streak:     "text-orange-300 bg-orange-500/10 border-orange-500/15",
-  purchase:   "text-rose-300 bg-rose-500/10 border-rose-500/15",
+  engagement: "text-info bg-info/10 border-info/15",
+  analytics:  "text-info bg-info/10 border-info/15",
+  learning:   "text-success bg-success/10 border-success/15",
+  discovery:  "text-warning bg-warning/10 border-warning/15",
+  streak:     "text-warning bg-warning/10 border-warning/15",
+  purchase:   "text-danger bg-danger/10 border-danger/15",
 };
 
 const REDEMPTIONS = [
@@ -56,9 +56,9 @@ const REDEMPTIONS = [
     xpCost: 500,
     credits: 50,
     plan: "PRO",
-    color: "from-sky-500/15 to-sky-500/5",
-    border: "border-sky-500/20",
-    glow: "hover:shadow-sky-500/10",
+    color: "from-info/15 to-info/5",
+    border: "border-info/20",
+    glow: "hover:shadow-info/10",
   },
   {
     type: "ELITE_TRIAL_7D_WITH_CREDITS",
@@ -77,24 +77,24 @@ const QUICK_EXAMPLES = [
   {
     title: "New user, first week",
     result: "~435 XP",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/5 border-emerald-500/15",
+    color: "text-success",
+    bg: "bg-success/5 border-success/15",
     steps: ["Login 7 days → 7 × 5 = 35 XP", "Ask Lyra 10×/day × 7 days → 350 XP", "2 modules → 50 XP"],
     note: "Almost Explorer tier already!",
   },
   {
     title: "Level 12 Analyst — multiplier in action",
     result: "+25% on all XP",
-    color: "text-yellow-400",
-    bg: "bg-yellow-500/5 border-yellow-500/15",
+    color: "text-warning",
+    bg: "bg-warning/5 border-warning/15",
     steps: ["Base 5 XP × 1.25 = 6 XP per Lyra Q", "Base 25 XP × 1.25 = 31 XP per module", "Applies to every single action you take"],
     note: "Your tier multiplier compounds over time.",
   },
   {
     title: "Redeeming a PRO Credit Bundle at 500 XP",
     result: "~14 active days",
-    color: "text-sky-400",
-    bg: "bg-sky-500/5 border-sky-500/15",
+    color: "text-info",
+    bg: "bg-info/5 border-info/15",
     steps: ["Login 14 days → 70 XP", "Lyra 10q/day × 14 days → 350 XP", "4 modules → 100 XP = 520 XP"],
     note: "Reach it in under 2 weeks of normal use.",
   },
@@ -246,7 +246,7 @@ function RewardsPageInner() {
                 <span className="text-xl font-bold text-primary">{userLevel}</span>
               </div>
               {streak >= 7 && (
-                <div className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-orange-500 flex items-center justify-center shadow-lg">
+                <div className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-warning flex items-center justify-center shadow-lg">
                   <Flame className="h-3 w-3 text-white" />
                 </div>
               )}
@@ -287,7 +287,7 @@ function RewardsPageInner() {
               </span>
               {streak > 0 && (
                 <span className="flex items-center gap-1">
-                  <Flame className="h-3 w-3 text-orange-400" />
+                  <Flame className="h-3 w-3 text-warning" />
                   {streak}-day streak
                 </span>
               )}
@@ -302,10 +302,10 @@ function RewardsPageInner() {
       <div className="animate-slide-up-fade animation-delay-300">
         <div className="flex gap-2 rounded-3xl border border-white/10 bg-card/70 p-1.5 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.52)] backdrop-blur-xl">
           {([
-            { key: "credits" as const,  label: "Credits",     icon: CreditCard,  activeColor: "bg-primary text-black shadow-lg shadow-primary/30 border-primary/50" },
-            { key: "referral" as const,  label: "Referral",    icon: Users,       activeColor: "bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 border-cyan-500/50" },
-            { key: "xp" as const,       label: "XP System",   icon: Zap,         activeColor: "bg-amber-500 text-black shadow-lg shadow-amber-500/30 border-amber-500/50" },
-            { key: "tiers" as const,    label: "Tier Badges",  icon: Trophy,      activeColor: "bg-sky-500 text-white shadow-lg shadow-sky-500/30 border-sky-500/50" },
+            { key: "credits" as const,  label: "Credits",     icon: CreditCard,  activeColor: "bg-primary text-primary-foreground shadow-lg shadow-primary/30 border-primary/50" },
+            { key: "referral" as const,  label: "Referral",    icon: Users,       activeColor: "bg-info text-info-foreground shadow-lg shadow-info/30 border-info/50" },
+            { key: "xp" as const,       label: "XP System",   icon: Zap,         activeColor: "bg-warning text-warning-foreground shadow-lg shadow-warning/30 border-warning/50" },
+            { key: "tiers" as const,    label: "Tier Badges",  icon: Trophy,      activeColor: "bg-info text-info-foreground shadow-lg shadow-info/30 border-info/50" },
           ]).map(tab => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.key;
@@ -383,9 +383,9 @@ function RewardsPageInner() {
                     <div className="flex items-start justify-between gap-3 mb-4">
                       <div>
                         <p className="font-bold text-sm uppercase tracking-wider">{r.label}</p>
-                        <p className={cn("text-xs font-bold mt-0.5", r.type.includes("ELITE") ? "text-primary" : "text-sky-400")}>{r.sub}</p>
+                        <p className={cn("text-xs font-bold mt-0.5", r.type.includes("ELITE") ? "text-primary" : "text-info")}>{r.sub}</p>
                       </div>
-                      {redeemed && <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />}
+                      {redeemed && <CheckCircle2 className="h-5 w-5 text-success shrink-0" />}
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
@@ -398,7 +398,7 @@ function RewardsPageInner() {
                         className={cn(
                           "flex items-center gap-1.5 px-4 py-2 rounded-2xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200",
                           canAfford
-                            ? "bg-primary text-black hover:bg-primary/90 shadow-lg shadow-primary/20"
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20"
                             : "bg-muted/30 text-muted-foreground cursor-not-allowed",
                         )}
                       >
@@ -408,7 +408,7 @@ function RewardsPageInner() {
                       </button>
                     </div>
                     {redeemed && (
-                      <p className="mt-3 text-[10px] font-medium text-emerald-400/90">
+                      <p className="mt-3 text-[10px] font-medium text-success/90">
                         You have redeemed this bundle before.
                       </p>
                     )}
@@ -421,7 +421,7 @@ function RewardsPageInner() {
           {/* Quick Examples */}
           <div className="overflow-hidden rounded-4xl border border-white/10 bg-card/70 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl">
             <div className="flex items-center gap-2 px-6 py-4 border-b border-white/5">
-              <Flame className="h-4 w-4 text-orange-400" />
+              <Flame className="h-4 w-4 text-warning" />
               <span className="text-xs font-bold uppercase tracking-widest">Real examples</span>
             </div>
             <div className="grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/5">
@@ -471,7 +471,7 @@ function RewardsPageInner() {
                 className={cn(
                   "rounded-4xl border border-white/10 bg-card/70 p-5 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl transition-all duration-300",
                   tier.bg, tier.glow,
-                  isCurrent && "ring-1 ring-primary/30 shadow-[0_0_20px_rgba(251,191,36,0.1)]",
+                  isCurrent && "ring-1 ring-primary/30 shadow-primary/10",
                 )}
               >
                 <div className="flex items-center gap-4">
@@ -539,20 +539,20 @@ function RewardsPageInner() {
                 color: "text-primary",
               },
               {
-                icon: <TrendingUp className="h-4 w-4 text-emerald-400" />,
+                icon: <TrendingUp className="h-4 w-4 text-success" />,
                 label: "Total Earned",
                 value: isLoading ? "—" : totalCreditsEarned.toLocaleString(),
                 sub: "all-time credits received",
-                bg: "bg-emerald-500/5 border-emerald-500/10",
-                color: "text-emerald-400",
+                bg: "bg-success/5 border-success/10",
+                color: "text-success",
               },
               {
-                icon: <Zap className="h-4 w-4 text-amber-400" />,
+                icon: <Zap className="h-4 w-4 text-warning" />,
                 label: "XP Bundles Unlocked",
                 value: isLoading ? "—" : redeemedTypes.size.toLocaleString(),
                 sub: "bundle types redeemed",
-                bg: "bg-amber-500/5 border-amber-500/10",
-                color: "text-amber-400",
+                bg: "bg-warning/5 border-warning/10",
+                color: "text-warning",
               },
             ].map((stat, i) => (
               <motion.div
@@ -604,7 +604,7 @@ function RewardsPageInner() {
           {/* XP → Credits Conversion */}
           <div className="overflow-hidden rounded-4xl border border-white/10 bg-card/70 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl">
             <div className="flex items-center gap-2 px-6 py-4 border-b border-white/5">
-              <Zap className="h-4 w-4 text-amber-400" />
+              <Zap className="h-4 w-4 text-warning" />
               <span className="text-xs font-bold uppercase tracking-widest">XP → Credits Conversion</span>
             </div>
             <div className="p-6 space-y-5">
@@ -616,8 +616,8 @@ function RewardsPageInner() {
                   {
                     xp: 500, credits: 50, plan: "PRO",
                     ratio: "1 XP = 0.10 credits",
-                    color: "text-sky-400", bg: "bg-sky-500/5 border-sky-500/15",
-                    badge: "bg-sky-500/15 text-sky-300 border-sky-500/20",
+                    color: "text-info", bg: "bg-info/5 border-info/15",
+                    badge: "bg-info/15 text-info border-info/20",
                   },
                   {
                     xp: 1000, credits: 125, plan: "ELITE",
@@ -640,9 +640,9 @@ function RewardsPageInner() {
                     </div>
                     <p className="text-xs text-muted-foreground">Credits land instantly. No limit on how many times you redeem.</p>
                     <div className="text-[10px] text-muted-foreground/50">
-                      You currently have <span className={cn("font-bold", userXP >= row.xp ? "text-emerald-400" : row.color)}>{userXP.toLocaleString()} XP</span>
+                      You currently have <span className={cn("font-bold", userXP >= row.xp ? "text-success" : row.color)}>{userXP.toLocaleString()} XP</span>
                       {userXP >= row.xp
-                        ? <span className="text-emerald-400 font-bold ml-1">✓ Eligible</span>
+                        ? <span className="text-success font-bold ml-1">✓ Eligible</span>
                         : <span className="ml-1">— need {(row.xp - userXP).toLocaleString()} more XP</span>}
                     </div>
                   </div>
@@ -654,27 +654,27 @@ function RewardsPageInner() {
           {/* Ways to Earn Credits */}
           <div className="overflow-hidden rounded-4xl border border-white/10 bg-card/70 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl">
             <div className="flex items-center gap-2 px-6 py-4 border-b border-white/5">
-              <Gift className="h-4 w-4 text-emerald-400" />
+              <Gift className="h-4 w-4 text-success" />
               <span className="text-xs font-bold uppercase tracking-widest">Ways to Get Credits</span>
             </div>
             <div className="divide-y divide-white/5">
               {[
-                { way: "New account signup",                    credits: "+50 free",                           color: "text-emerald-400", cat: "signup" },
-                { way: "Monthly PRO plan",                      credits: "+500 / month",                        color: "text-sky-400",     cat: "plan" },
+                { way: "New account signup",                    credits: "+50 free",                           color: "text-success", cat: "signup" },
+                { way: "Monthly PRO plan",                      credits: "+500 / month",                        color: "text-info",     cat: "plan" },
                 { way: "Monthly ELITE plan",                    credits: "+1,500 / month",                      color: "text-primary",     cat: "plan" },
-                { way: "Refer a paid user",                     credits: "+75 on their activation",             color: "text-cyan-400", cat: "referral" },
-                { way: "Sign up via referral link",             credits: "+50 on Paid (PRO or ELITE) sub",      color: "text-cyan-400", cat: "referral" },
-                { way: "Redeem 500 XP (PRO)",                  credits: "+50 (repeatable bundle)",             color: "text-amber-400",  cat: "xp" },
-                { way: "Redeem 1,000 XP (ELITE)",              credits: "+125 (repeatable bundle)",            color: "text-amber-400",  cat: "xp" },
+                { way: "Refer a paid user",                     credits: "+75 on their activation",             color: "text-info", cat: "referral" },
+                { way: "Sign up via referral link",             credits: "+50 on Paid (PRO or ELITE) sub",      color: "text-info", cat: "referral" },
+                { way: "Redeem 500 XP (PRO)",                  credits: "+50 (repeatable bundle)",             color: "text-warning",  cat: "xp" },
+                { way: "Redeem 1,000 XP (ELITE)",              credits: "+125 (repeatable bundle)",            color: "text-warning",  cat: "xp" },
               ].map(row => (
                 <div key={row.way} className="flex items-center justify-between px-6 py-3.5 hover:bg-white/2 transition-colors">
                   <div className="flex items-center gap-2">
                     <span className={cn(
                       "text-[9px] font-bold px-2 py-0.5 rounded-full border capitalize tracking-wider",
-                      row.cat === "plan" ? "text-sky-300 bg-sky-500/10 border-sky-500/15" :
-                      row.cat === "referral" ? "text-cyan-300 bg-cyan-500/10 border-cyan-500/15" :
-                      row.cat === "xp" ? "text-amber-300 bg-amber-500/10 border-amber-500/15" :
-                      "text-emerald-300 bg-emerald-500/10 border-emerald-500/15"
+                      row.cat === "plan" ? "text-info bg-info/10 border-info/15" :
+                      row.cat === "referral" ? "text-info bg-info/10 border-info/15" :
+                      row.cat === "xp" ? "text-warning bg-warning/10 border-warning/15" :
+                      "text-success bg-success/10 border-success/15"
                     )}>{row.cat}</span>
                     <span className="text-sm text-foreground/80 font-medium">{row.way}</span>
                   </div>
@@ -695,13 +695,13 @@ function RewardsPageInner() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl p-5 bg-cyan-500/5 border border-cyan-500/15"
+              className="rounded-2xl p-5 bg-info/5 border border-info/15"
             >
               <div className="flex items-center gap-2 mb-3">
-                <Users className="h-4 w-4 text-cyan-400" />
+                <Users className="h-4 w-4 text-info" />
                 <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Total Referral Credits</span>
               </div>
-              <div className="text-3xl font-bold text-cyan-400">
+              <div className="text-3xl font-bold text-info">
                 {isLoading ? "—" : referralCreditsEarned.toLocaleString()}
               </div>
               <div className="text-[10px] text-muted-foreground/50 mt-1">from referrals</div>
@@ -710,13 +710,13 @@ function RewardsPageInner() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.07 }}
-              className="rounded-2xl p-5 bg-sky-500/5 border border-sky-500/15"
+              className="rounded-2xl p-5 bg-info/5 border border-info/15"
             >
               <div className="flex items-center gap-2 mb-3">
-                <CreditCard className="h-4 w-4 text-sky-400" />
+                <CreditCard className="h-4 w-4 text-info" />
                 <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Current Credit Balance</span>
               </div>
-              <div className="text-3xl font-bold text-sky-400">
+              <div className="text-3xl font-bold text-info">
                 {isLoading ? "—" : userCredits.toLocaleString()}
               </div>
               <div className="text-[10px] text-muted-foreground/50 mt-1">ready to spend</div>
@@ -726,7 +726,7 @@ function RewardsPageInner() {
           {/* Main referral card */}
           <div className="overflow-hidden rounded-4xl border border-white/10 bg-card/70 shadow-[0_24px_80px_-36px_rgba(2,6,23,0.72)] backdrop-blur-xl">
             <div className="flex items-center gap-2 px-6 py-4 border-b border-white/5">
-              <Users className="h-4 w-4 text-cyan-400" />
+              <Users className="h-4 w-4 text-info" />
               <span className="text-xs font-bold uppercase tracking-widest">Referral System</span>
             </div>
             <div className="p-6 space-y-5">
@@ -746,10 +746,10 @@ function RewardsPageInner() {
               <div className="space-y-2">
                 <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-muted-foreground">How it works</p>
                 {[
-                  { n: "1", title: "Share your referral link", desc: "Go to Profile Settings to grab your link. Only active PRO and ELITE subscribers get one.", color: "bg-cyan-500/15 text-cyan-300 border-cyan-500/20" },
-                  { n: "2", title: "Someone signs up through your link", desc: "They create an account. Nothing happens yet — the trigger is their first paid plan.", color: "bg-sky-500/15 text-sky-300 border-sky-500/20" },
-                  { n: "3", title: "They activate PRO or ELITE", desc: "They get +50 credits added to their balance when their plan starts.", color: "bg-amber-500/15 text-amber-300 border-amber-500/20" },
-                  { n: "4", title: "You get +75 credits", desc: "Credited to you automatically at the same moment. No manual step needed.", color: "bg-emerald-500/15 text-emerald-300 border-emerald-500/20" },
+                  { n: "1", title: "Share your referral link", desc: "Go to Profile Settings to grab your link. Only active PRO and ELITE subscribers get one.", color: "bg-info/15 text-info border-info/20" },
+                  { n: "2", title: "Someone signs up through your link", desc: "They create an account. Nothing happens yet — the trigger is their first paid plan.", color: "bg-info/15 text-info border-info/20" },
+                  { n: "3", title: "They activate PRO or ELITE", desc: "They get +50 credits added to their balance when their plan starts.", color: "bg-warning/15 text-warning border-warning/20" },
+                  { n: "4", title: "You get +75 credits", desc: "Credited to you automatically at the same moment. No manual step needed.", color: "bg-success/15 text-success border-success/20" },
                 ].map((s, i) => (
                   <motion.div
                     key={s.n}
@@ -777,8 +777,8 @@ function RewardsPageInner() {
                     <span className="text-right">Credit Reward</span>
                   </div>
                   {[
-                    { who: "You (paid PRO/ELITE)",  when: "When they activate PRO or ELITE",  credits: "+75 credits",  color: "text-cyan-400" },
-                    { who: "New user (referee)",     when: "On activating a paid plan",         credits: "+50 credits",  color: "text-sky-400"    },
+                    { who: "You (paid PRO/ELITE)",  when: "When they activate PRO or ELITE",  credits: "+75 credits",  color: "text-info" },
+                    { who: "New user (referee)",     when: "On activating a paid plan",         credits: "+50 credits",  color: "text-info"    },
                   ].map(r => (
                     <div key={r.who} className="grid grid-cols-3 text-xs px-5 py-3.5 border-t border-white/5 hover:bg-white/2 transition-colors">
                       <span className="text-foreground/70 font-medium">{r.who}</span>

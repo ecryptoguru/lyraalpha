@@ -3,6 +3,27 @@ import { week1Posts } from "./blogs-week1";
 import { week2Posts } from "./blogs-week2";
 import { week3Posts } from "./blogs-week3";
 import { week4Posts } from "./blogs-week4";
+import { week5Posts } from "./blogs-week5";
+import { week6Posts } from "./blogs-week6";
+import { week7Posts } from "./blogs-week7";
+import { week8Posts } from "./blogs-week8";
+import { week9Posts } from "./blogs-week9";
+import { week10Posts } from "./blogs-week10";
+import { week11Posts } from "./blogs-week11";
+import { week12Posts } from "./blogs-week12";
+import { week13Posts } from "./blogs-week13";
+import { week14Posts } from "./blogs-week14";
+import { week15Posts } from "./blogs-week15";
+import { week16Posts } from "./blogs-week16";
+import { week17Posts } from "./blogs-week17";
+import { week18Posts } from "./blogs-week18";
+import { week19Posts } from "./blogs-week19";
+import { week20Posts } from "./blogs-week20";
+import { week21Posts } from "./blogs-week21";
+import { week22Posts } from "./blogs-week22";
+import { week23Posts } from "./blogs-week23";
+import { week24Posts } from "./blogs-week24";
+import { week25Posts } from "./blogs-week25";
 
 // Static blog-post content set. Split out from posts.ts to keep the
 // runtime API surface small (~300 LOC) and make the content data easy to diff.
@@ -19,7 +40,7 @@ export const _staticPosts: Omit<BlogPost, "readingTime">[] = [
     featured: true,
     metaDescription: "Learn why generic AI tools hallucinate crypto metrics and how deterministic computation with AI interpretation creates reliable, auditable crypto analysis.",
     keywords: ["AI hallucination", "crypto AI", "on-chain metrics", "deterministic analysis", "LLM crypto"],
-    heroImageUrl: "/blog/ai-hallucination-hero.jpg",
+    heroImageUrl: "/blog/why-crypto-ai-tools-hallucinate-and-how-to-fix-it-hero.webp",
     content: `
 # Why Crypto AI Tools Hallucinate On-Chain Metrics — And How to Fix It
 
@@ -423,7 +444,7 @@ In April 2026, with AI models more capable than ever, the key differentiator isn
     featured: true,
     metaDescription: "Master crypto market regime analysis. Learn how risk-on, risk-off, and fragility regimes change everything about asset behavior and investment decisions.",
     keywords: ["market regime", "crypto cycles", "risk-on", "risk-off", "market analysis"],
-    heroImageUrl: "/blog/market-regimes-hero.jpg",
+    heroImageUrl: "/blog/crypto-market-regimes-how-to-read-the-cycle-before-it-reads-you-hero.webp",
     content: `
 # Crypto Market Regimes: How to Read the Cycle Before It Reads You
 
@@ -898,7 +919,7 @@ LyraAlpha builds regime analysis into every assessment, at every level, before g
     featured: true,
     metaDescription: "Master Bitcoin on-chain analysis. Learn how hash rate, NVT ratio, exchange flows, and SOPR work—and how to use them for better investment decisions.",
     keywords: ["Bitcoin on-chain", "hash rate", "NVT ratio", "SOPR", "exchange flows", "crypto metrics"],
-    heroImageUrl: "/blog/bitcoin-onchain-hero.jpg",
+    heroImageUrl: "/blog/bitcoin-on-chain-signals-what-they-actually-measure-hero.webp",
     content: `
 # Bitcoin On-Chain Signals: What They Actually Measure and Why They Matter
 
@@ -1451,4 +1472,67 @@ The investors who master on-chain analysis gain insight into market dynamics tha
 
   // ─── Week 4 Blog Posts ───────────────────────────────────────────────────────
   ...week4Posts,
+
+  // ─── Week 5 Blog Posts ───────────────────────────────────────────────────────
+  ...week5Posts,
+
+  // ─── Week 6 Blog Posts ───────────────────────────────────────────────────────
+  ...week6Posts,
+
+  // ─── Week 7 Blog Posts ───────────────────────────────────────────────────────
+  ...week7Posts,
+
+  // ─── Week 8 Blog Posts ───────────────────────────────────────────────────────
+  ...week8Posts,
+
+  // ─── Week 9 Blog Posts ───────────────────────────────────────────────────────
+  ...week9Posts,
+
+  // ─── Week 10 Blog Posts ───────────────────────────────────────────────────────
+  ...week10Posts,
+
+  // ─── Week 11 Blog Posts ───────────────────────────────────────────────────────
+  ...week11Posts,
+
+  // ─── Week 12 Blog Posts ───────────────────────────────────────────────────────
+  ...week12Posts,
+
+  // ─── Week 13 Blog Posts ───────────────────────────────────────────────────────
+  ...week13Posts,
+
+  // ─── Week 14 Blog Posts ───────────────────────────────────────────────────────
+  ...week14Posts,
+
+  // ─── Week 15 Blog Posts ───────────────────────────────────────────────────────
+  ...week15Posts,
+
+  // ─── Week 16 Blog Posts ───────────────────────────────────────────────────────
+  ...week16Posts,
+
+  // ─── Week 17 Blog Posts ───────────────────────────────────────────────────────
+  ...week17Posts,
+
+  // ─── Week 18 Blog Posts ───────────────────────────────────────────────────────
+  ...week18Posts,
+
+  // ─── Week 19 Blog Posts ───────────────────────────────────────────────────────
+  ...week19Posts,
+
+  // ─── Week 20 Blog Posts ───────────────────────────────────────────────────────
+  ...week20Posts,
+
+  // ─── Week 21 Blog Posts ───────────────────────────────────────────────────────
+  ...week21Posts,
+
+  // ─── Week 22 Blog Posts ───────────────────────────────────────────────────────
+  ...week22Posts,
+
+  // ─── Week 23 Blog Posts ───────────────────────────────────────────────────────
+  ...week23Posts,
+
+  // ─── Week 24 Blog Posts ───────────────────────────────────────────────────────
+  ...week24Posts,
+
+  // ─── Week 25 Blog Posts ───────────────────────────────────────────────────────
+  ...week25Posts,
 ];

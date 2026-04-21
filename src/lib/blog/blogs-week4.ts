@@ -1,8 +1,6 @@
 // Week 4 Blog Posts — 4 high-quality SEO articles, 1200-1500 words each
 // Category: AI & Technology, Market Intelligence, Portfolio Intelligence
 
-import type { BlogPost } from "./posts";
-
 const _week4Posts = [
   {
     slug: "best-ai-tools-for-crypto-research-a-2026-buyers-guide",
@@ -24,7 +22,15 @@ const _week4Posts = [
       "on-chain AI analysis",
       "crypto research software",
     ],
-    heroImageUrl: "/blog/ai-crypto-tools-hero.jpg",
+    internalLinks: [
+      { text: "AI research tools", url: "/lyra" },
+      { text: "crypto research", url: "/lyra" },
+      { text: "AI tools comparison", url: "/lyra" },
+      { text: "AI crypto research capabilities", url: "/blog/what-ai-can-actually-do-for-crypto-market-research" },
+      { text: "market intelligence copilots", url: "/blog/ai-market-copilots-vs-human-research-where-each-wins" },
+      { text: "AI briefing design", url: "/blog/the-anatomy-of-a-useful-ai-briefing-for-investors" },
+    ],
+    heroImageUrl: "/blog/best-ai-tools-for-crypto-research-a-2026-buyers-guide-hero.webp",
     content: `
 # Best AI Tools for Crypto Research: A 2026 Buyer's Guide
 
@@ -178,7 +184,7 @@ LyraAlpha is designed as a comprehensive daily intelligence layer that combines 
   },
   {
     slug: "how-to-build-an-investing-workflow-around-daily-crypto-market-briefings",
-    title: "How to Build an Investing Workflow Around Daily Crypto Market Briefings",
+    title: "How to Build a Crypto Daily Briefing Workflow",
     description:
       "Daily briefings are only useful if they change what you do. Here is how to build a practical 15-minute daily workflow that turns LyraAlpha's market briefing into actual investment decisions.",
     date: "2026-04-21",
@@ -196,7 +202,15 @@ LyraAlpha is designed as a comprehensive daily intelligence layer that combines 
       "daily market intelligence",
       "portfolio management routine",
     ],
-    heroImageUrl: "/blog/daily-briefing-workflow-hero.jpg",
+    internalLinks: [
+      { text: "daily briefing", url: "/dashboard" },
+      { text: "investing workflow", url: "/lyra" },
+      { text: "market intelligence", url: "/lyra" },
+      { text: "financial intelligence workflow", url: "/blog/how-to-build-a-better-financial-intelligence-workflow" },
+      { text: "market briefing structure", url: "/blog/the-anatomy-of-a-useful-ai-briefing-for-investors" },
+      { text: "regime tracking", url: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day" },
+    ],
+    heroImageUrl: "/blog/how-to-build-an-investing-workflow-around-daily-crypto-market-briefings-hero.webp",
     content: `
 # How to Build an Investing Workflow Around Daily Crypto Market Briefings
 
@@ -327,7 +341,7 @@ Morning, before market open, is optimal for US-based investors. You get the brie
   },
   {
     slug: "why-same-sector-movers-matter-more-than-random-price-action",
-    title: "Why Same-Sector Movers Matter More Than Random Price Action",
+    title: "Why Same-Sector Movers Matter More Than Random Noise",
     description:
       "A token in your portfolio moved 5%. Should you care? The answer depends entirely on whether the rest of the sector moved the same amount. Isolated price action is noise. Coordinated sector movement is signal.",
     date: "2026-04-21",
@@ -345,7 +359,15 @@ Morning, before market open, is optimal for US-based investors. You get the brie
       "crypto market intelligence",
       "portfolio signal noise",
     ],
-    heroImageUrl: "/blog/sector-movers-hero.jpg",
+    internalLinks: [
+      { text: "sector analysis", url: "/lyra" },
+      { text: "market intelligence", url: "/lyra" },
+      { text: "crypto movers", url: "/lyra" },
+      { text: "market signals framework", url: "/blog/how-to-turn-market-signals-into-better-investment-decisions" },
+      { text: "momentum and trend analysis", url: "/blog/how-to-read-momentum-volatility-and-trend-together" },
+      { text: "regime analysis", url: "/blog/what-is-market-regime-analysis-and-why-it-matters-for-crypto-investors" },
+    ],
+    heroImageUrl: "/blog/why-same-sector-movers-matter-more-than-random-price-action-hero.webp",
     content: `
 # Why Same-Sector Movers Matter More Than Random Price Action
 
@@ -478,7 +500,15 @@ Quarterly rebalancing based on sector performance is appropriate for most invest
       "LyraAlpha use cases",
       "crypto research efficiency",
     ],
-    heroImageUrl: "/blog/active-investor-use-cases-hero.jpg",
+    internalLinks: [
+      { text: "LyraAlpha for investors", url: "/lyra" },
+      { text: "active investing", url: "/lyra" },
+      { text: "time-saving tools", url: "/lyra" },
+      { text: "daily briefing workflow", url: "/blog/how-to-build-an-investing-workflow-around-daily-crypto-market-briefings" },
+      { text: "financial intelligence workflow", url: "/blog/how-to-build-a-better-financial-intelligence-workflow" },
+      { text: "AI copilot use cases", url: "/blog/ai-market-copilots-vs-human-research-where-each-wins" },
+    ],
+    heroImageUrl: "/blog/lyraalpha-for-active-investors-use-cases-that-save-time-hero.webp",
     content: `
 # LyraAlpha for Active Investors: Use Cases That Actually Save Time
 
@@ -591,6 +621,4 @@ LyraAlpha serves both. For day traders, the real-time regime alerts, cross-chain
   },
 ];
 
-export const week4Posts: Omit<BlogPost, "readingTime">[] = _week4Posts.map((p) => ({
-  ...p,
-}));
+export const week4Posts = _week4Posts;

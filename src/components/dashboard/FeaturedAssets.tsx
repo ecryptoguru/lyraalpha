@@ -44,7 +44,7 @@ export function FeaturedAssets({ assets, title = "Premium Mutual Funds (Delayed 
                   {currency}
                   {asset.price.toLocaleString()}
                 </div>
-                <div className="text-[10px] bg-green-500/10 text-green-500 px-1.5 py-0.5 rounded border border-green-500/20">
+                <div className="text-[10px] bg-success/10 text-success px-1.5 py-0.5 rounded border border-success/20">
                   DELAYED
                 </div>
               </div>

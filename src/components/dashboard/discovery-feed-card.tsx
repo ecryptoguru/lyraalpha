@@ -58,61 +58,61 @@ const ARCHETYPE_CONFIG: Record<string, { label: string; tooltip: string; icon: t
     label: "Score Changing Fast",
     tooltip: "A key signal just flipped direction — worth investigating",
     icon: Activity,
-    color: "text-amber-400",
-    bg: "bg-amber-400/10",
-    border: "border-amber-400/20",
-    accentBg: "bg-amber-400",
-    accentFrom: "from-amber-400",
-  },
-  peer_divergence: {
-    label: "Moving Differently from Peers",
-    tooltip: "This asset is behaving unlike others in its sector",
-    icon: BarChart3,
-    color: "text-amber-400",
-    bg: "bg-amber-400/10",
-    border: "border-amber-400/20",
-    accentBg: "bg-amber-400",
-    accentFrom: "from-amber-400",
-  },
-  regime_sensitive: {
-    label: "Sensitive to Market Conditions",
-    tooltip: "This asset reacts strongly to the current market environment",
-    icon: Layers,
     color: "text-cyan-400",
     bg: "bg-cyan-400/10",
     border: "border-cyan-400/20",
     accentBg: "bg-cyan-400",
     accentFrom: "from-cyan-400",
   },
+  peer_divergence: {
+    label: "Moving Differently from Peers",
+    tooltip: "This asset is behaving unlike others in its sector",
+    icon: BarChart3,
+    color: "text-[#FFD700]",
+    bg: "bg-[#FFD700]/10",
+    border: "border-[#FFD700]/20",
+    accentBg: "bg-[#FFD700]",
+    accentFrom: "from-[#FFD700]",
+  },
+  regime_sensitive: {
+    label: "Sensitive to Market Conditions",
+    tooltip: "This asset reacts strongly to the current market environment",
+    icon: Layers,
+    color: "text-info",
+    bg: "bg-info/10",
+    border: "border-info/20",
+    accentBg: "bg-info",
+    accentFrom: "from-info",
+  },
   sentiment_shift: {
     label: "Buying/Selling Pressure Shift",
     tooltip: "Unusual buying or selling activity detected recently",
     icon: Zap,
-    color: "text-emerald-400",
-    bg: "bg-emerald-400/10",
-    border: "border-emerald-400/20",
-    accentBg: "bg-emerald-400",
-    accentFrom: "from-emerald-400",
+    color: "text-success",
+    bg: "bg-success/10",
+    border: "border-success/20",
+    accentBg: "bg-success",
+    accentFrom: "from-success",
   },
   structural_anomaly: {
     label: "Unusual Market Structure",
     tooltip: "Something structurally unusual is happening with this asset",
     icon: AlertTriangle,
-    color: "text-rose-400",
-    bg: "bg-rose-400/10",
-    border: "border-rose-400/20",
-    accentBg: "bg-rose-400",
-    accentFrom: "from-rose-400",
+    color: "text-danger",
+    bg: "bg-danger/10",
+    border: "border-danger/20",
+    accentBg: "bg-danger",
+    accentFrom: "from-danger",
   },
   cross_asset_pattern: {
     label: "Cross-Market Pattern",
     tooltip: "A pattern connecting this asset to broader market moves",
     icon: Layers,
-    color: "text-amber-400",
-    bg: "bg-amber-400/10",
-    border: "border-amber-400/20",
-    accentBg: "bg-amber-400",
-    accentFrom: "from-amber-400",
+    color: "text-cyan-400",
+    bg: "bg-cyan-400/10",
+    border: "border-cyan-400/20",
+    accentBg: "bg-cyan-400",
+    accentFrom: "from-cyan-400",
   },
 };
 
@@ -121,7 +121,7 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  CRYPTO: "text-orange-400 bg-orange-400/10 border-orange-400/20",
+  CRYPTO: "text-cyan-400 bg-cyan-400/10 border-cyan-400/20",
 };
 
 const SCORE_LABELS: Record<string, string> = {
@@ -134,15 +134,15 @@ const SCORE_LABELS: Record<string, string> = {
 };
 
 function getScoreColor(value: number): string {
-  if (value >= 70) return "text-emerald-400";
-  if (value >= 40) return "text-amber-400";
-  return "text-rose-400";
+  if (value >= 70) return "text-success";
+  if (value >= 40) return "text-cyan-400";
+  return "text-danger";
 }
 
 function getDRSColor(drs: number): string {
-  if (drs >= 70) return "text-emerald-400";
-  if (drs >= 40) return "text-amber-400";
-  if (drs >= 20) return "text-orange-400";
+  if (drs >= 70) return "text-success";
+  if (drs >= 40) return "text-cyan-400";
+  if (drs >= 20) return "text-[#FFD700]";
   return "text-muted-foreground";
 }
 
@@ -330,7 +330,7 @@ export function DiscoveryFeedCard({ item }: { item: DiscoveryFeedItem }) {
   return (
     <div
       data-testid="discovery-feed-card"
-      className="group relative rounded-2xl border border-white/5 bg-background/50 dark:bg-card/60 backdrop-blur-2xl shadow-xl overflow-hidden hover:border-primary/40 transition-all duration-500 hover:shadow-[0_0_30px_rgba(251,191,36,0.1)]"
+      className="group relative rounded-2xl border border-white/5 bg-background/50 dark:bg-card/60 backdrop-blur-2xl shadow-xl overflow-hidden hover:border-primary/40 transition-all duration-500 hover:shadow-[0_0_30px_rgba(0,212,255,0.1)]"
     >
       {/* Top accent line */}
       <div className={cn("absolute top-0 left-0 w-full h-1 opacity-60 bg-linear-to-r from-transparent via-primary/50 to-transparent", archConfig.accentFrom)} />
@@ -360,7 +360,7 @@ export function DiscoveryFeedCard({ item }: { item: DiscoveryFeedItem }) {
               <div className="flex items-center gap-1.5 px-1.5 py-0.5">
                 <div className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary shadow-[0_0_8px_rgba(251,191,36,0.8)]"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary shadow-[0_0_8px_rgba(0,212,255,0.8)]"></span>
                 </div>
                 <span className="text-[7px] font-bold text-primary uppercase tracking-widest">Fresh</span>
               </div>
@@ -443,7 +443,7 @@ export function DiscoveryFeedCard({ item }: { item: DiscoveryFeedItem }) {
               </span>
             )}
             {item.changePercent != null && (
-              <div className={cn("flex items-center gap-0.5 text-[10px] font-bold", isPositive ? "text-emerald-400" : "text-rose-400")}>
+              <div className={cn("flex items-center gap-0.5 text-[10px] font-bold", isPositive ? "text-success" : "text-danger")}>
                 <ChangeIcon className="h-2.5 w-2.5" />
                 {isPositive ? "+" : ""}{item.changePercent.toFixed(2)}%
               </div>
@@ -492,23 +492,23 @@ function LearnWhySection({ archetype }: { archetype: string }) {
     <div className="mt-1 pt-3 border-t border-border/20 space-y-3 animate-slide-up-fade">
       <div className="space-y-2">
         <div className="flex items-start gap-2">
-          <Lightbulb className="h-3 w-3 text-amber-400 mt-0.5 shrink-0" />
+          <Lightbulb className="h-3 w-3 text-cyan-400 mt-0.5 shrink-0" />
           <div>
-            <span className="text-[9px] font-bold text-amber-400 uppercase tracking-wider">Why This Surfaced</span>
+            <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-wider">Why This Surfaced</span>
             <p className="text-[11px] text-muted-foreground dark:text-muted-foreground/80 leading-relaxed mt-0.5">{ctx.whySurfaced}</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <Activity className="h-3 w-3 text-amber-400 mt-0.5 shrink-0" />
+          <Activity className="h-3 w-3 text-cyan-400 mt-0.5 shrink-0" />
           <div>
-            <span className="text-[9px] font-bold text-amber-400 uppercase tracking-wider">What Changed</span>
+            <span className="text-[9px] font-bold text-cyan-400 uppercase tracking-wider">What Changed</span>
             <p className="text-[11px] text-muted-foreground dark:text-muted-foreground/80 leading-relaxed mt-0.5">{ctx.whatChanged}</p>
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <ShieldAlert className="h-3 w-3 text-rose-400 mt-0.5 shrink-0" />
+          <ShieldAlert className="h-3 w-3 text-danger mt-0.5 shrink-0" />
           <div>
-            <span className="text-[9px] font-bold text-rose-400 uppercase tracking-wider">What This Does NOT Mean</span>
+            <span className="text-[9px] font-bold text-danger uppercase tracking-wider">What This Does NOT Mean</span>
             <p className="text-[11px] text-muted-foreground dark:text-muted-foreground/80 leading-relaxed mt-0.5">{ctx.whatItDoesNotMean}</p>
           </div>
         </div>

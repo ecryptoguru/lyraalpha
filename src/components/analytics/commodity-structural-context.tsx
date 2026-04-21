@@ -27,9 +27,9 @@ const CLUSTER_ICONS: Record<string, typeof Info> = {
 };
 
 const GEO_COLORS: Record<string, string> = {
-  high: "text-red-500 bg-red-500/10 border-red-500/20",
-  moderate: "text-amber-500 bg-amber-500/10 border-amber-500/20",
-  low: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
+  high: "text-danger bg-danger/10 border-danger/20",
+  moderate: "text-warning bg-warning/10 border-warning/20",
+  low: "text-success bg-success/10 border-success/20",
 };
 
 const STORAGE_LABELS: Record<string, string> = {
@@ -52,10 +52,10 @@ export function CommodityStructuralContext({ context, className }: CommodityStru
         <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Structural Context</h3>
         <span className={cn(
           "text-[8px] font-bold uppercase px-1.5 py-0.5 rounded border ml-auto",
-          context.cluster === "precious" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-          context.cluster === "energy" ? "bg-red-500/10 text-red-500 border-red-500/20" :
-          context.cluster === "agricultural" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-          "bg-amber-500/10 text-amber-500 border-amber-500/20",
+          context.cluster === "precious" ? "bg-warning/10 text-warning border-warning/20" :
+          context.cluster === "energy" ? "bg-danger/10 text-danger border-danger/20" :
+          context.cluster === "agricultural" ? "bg-success/10 text-success border-success/20" :
+          "bg-warning/10 text-warning border-warning/20",
         )}>
           {context.cluster}
         </span>
@@ -92,14 +92,14 @@ export function CommodityStructuralContext({ context, className }: CommodityStru
 
         {/* Inflation Hedge */}
         {context.inflationHedge && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-amber-500/20 text-[8px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-warning/20 text-[8px] font-bold uppercase tracking-wider text-warning bg-warning/10">
             Inflation Hedge
           </span>
         )}
 
         {/* Safe Haven */}
         {context.safeHavenCandidate && (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-emerald-500/20 text-[8px] font-bold uppercase tracking-wider text-emerald-500 bg-emerald-500/10">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-success/20 text-[8px] font-bold uppercase tracking-wider text-success bg-success/10">
             Safe Haven
           </span>
         )}

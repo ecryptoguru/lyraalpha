@@ -8,10 +8,10 @@ export default function CareersPage() {
       <Navbar />
       <main className="flex-1 px-4 py-24 sm:px-6">
         <div className="mx-auto max-w-3xl">
-          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-amber-400/80">Careers</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-warning/80">Careers</p>
           <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">
             Join LyraAlpha.<br />
-            <span className="text-amber-400">Build the future of finance intelligence.</span>
+            <span className="text-warning">Build the future of finance intelligence.</span>
           </h1>
           <p className="mt-6 text-base text-white/55 leading-7">
             We are a small, focused team building the intelligence layer for serious investors. We move fast, care deeply about correctness, and believe financial AI should be grounded — not hallucinated.
@@ -24,7 +24,7 @@ export default function CareersPage() {
             </p>
             <Link
               href="/contact"
-              className="mt-6 inline-flex items-center rounded-full border border-amber-400/30 bg-amber-400/10 px-5 py-2.5 text-sm font-bold text-amber-300 transition-colors hover:bg-amber-400/20"
+              className="mt-6 inline-flex items-center rounded-full border border-warning/30 bg-warning/10 px-5 py-2.5 text-sm font-bold text-warning transition-colors hover:bg-warning/20"
             >
               Get in touch
             </Link>

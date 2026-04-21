@@ -12,18 +12,18 @@ interface CryptoStructuralRiskCardProps {
 }
 
 const LEVEL_COLORS: Record<string, string> = {
-  low: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
-  moderate: "text-amber-500 bg-amber-500/10 border-amber-500/20",
-  high: "text-red-500 bg-red-500/10 border-red-500/20",
-  critical: "text-red-600 bg-red-600/10 border-red-600/20",
+  low: "text-success bg-success/10 border-success/20",
+  moderate: "text-warning bg-warning/10 border-warning/20",
+  high: "text-danger bg-danger/10 border-danger/20",
+  critical: "text-danger bg-danger/10 border-danger/20",
 };
 
 const TRUST_COLORS: Record<string, string> = {
-  "very-high": "text-emerald-500 bg-emerald-500/10 border-emerald-500/20",
-  high: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-  moderate: "text-amber-500 bg-amber-500/10 border-amber-500/20",
-  low: "text-red-500 bg-red-500/10 border-red-500/20",
-  "very-low": "text-red-600 bg-red-600/10 border-red-600/20",
+  "very-high": "text-success bg-success/10 border-success/20",
+  high: "text-success bg-success/10 border-success/20",
+  moderate: "text-warning bg-warning/10 border-warning/20",
+  low: "text-danger bg-danger/10 border-danger/20",
+  "very-low": "text-danger bg-danger/10 border-danger/20",
 };
 
 function RiskRow({ label, level, description, icon: Icon }: { label: string; level: string; description: string; icon: typeof Shield }) {
@@ -55,8 +55,8 @@ export function CryptoStructuralRiskCard({ structuralRisk, enhancedTrust, holder
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-xl bg-red-500/10 flex items-center justify-center">
-            <Shield className="w-3.5 h-3.5 text-red-500" />
+          <div className="w-6 h-6 rounded-xl bg-danger/10 flex items-center justify-center">
+            <Shield className="w-3.5 h-3.5 text-danger" />
           </div>
           <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">Risk & Trust</h3>
         </div>
@@ -79,11 +79,11 @@ export function CryptoStructuralRiskCard({ structuralRisk, enhancedTrust, holder
       <div className="pt-2 border-t border-border/20 space-y-1.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-3 h-3 text-emerald-500" />
+            <ShieldCheck className="w-3 h-3 text-success" />
             <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Enhanced Trust Score</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className={cn("text-sm font-bold", enhancedTrust.score >= 60 ? "text-emerald-500" : enhancedTrust.score >= 35 ? "text-amber-500" : "text-red-500")}>
+            <span className={cn("text-sm font-bold", enhancedTrust.score >= 60 ? "text-success" : enhancedTrust.score >= 35 ? "text-warning" : "text-danger")}>
               {enhancedTrust.score}
             </span>
             <span className={cn(
@@ -100,7 +100,7 @@ export function CryptoStructuralRiskCard({ structuralRisk, enhancedTrust, holder
       <div className="pt-2 border-t border-border/20 space-y-1.5">
         <div className="flex items-center justify-between">
           <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Holder Stability</span>
-          <span className={cn("text-sm font-bold", hs.score >= 60 ? "text-emerald-500" : hs.score >= 35 ? "text-amber-500" : "text-red-500")}>
+          <span className={cn("text-sm font-bold", hs.score >= 60 ? "text-success" : hs.score >= 35 ? "text-warning" : "text-danger")}>
             {hs.score}/100
           </span>
         </div>
@@ -115,7 +115,7 @@ export function CryptoStructuralRiskCard({ structuralRisk, enhancedTrust, holder
               <span className="text-[8px] text-muted-foreground uppercase">{label}</span>
               <span className={cn(
                 "text-[9px] font-bold",
-                value >= 60 ? "text-emerald-500" : value >= 35 ? "text-amber-500" : "text-red-500",
+                value >= 60 ? "text-success" : value >= 35 ? "text-warning" : "text-danger",
               )}>
                 {value}
               </span>

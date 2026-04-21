@@ -74,3 +74,32 @@ export interface ScenarioDefinition {
   factors: ScenarioFactors;
   assetTypeAdjustments?: Partial<Record<SupportedStressAssetType, ScenarioAssetAdjustmentRule>>;
 }
+
+export interface StressResult {
+  symbol: string;
+  name: string;
+  type: string;
+  region: string;
+  scenarioId: string;
+  method: "DIRECT" | "PROXY" | "ERROR";
+  drawdown: number | null;
+  periodReturn: number | null;
+  maxDrawdown: number | null;
+  dailyPath: ScenarioDayPoint[];
+  proxyUsed: string | null;
+  proxyLabel?: string | null;
+  beta: number | null;
+  confidence: number;
+  factors: ScenarioFactors | null;
+  dataPoints?: number;
+  scenarioPeriod?: { start: string; end: string };
+  scenarioSeverity?: StressScenarioSeverity | null;
+  driverSummary?: string | null;
+  transmissionMechanism?: string | null;
+  pressurePoints?: string[];
+  resilienceThemes?: string[];
+  dominantDrivers?: string[];
+  rationale?: string | null;
+  explanationMethod?: string | null;
+  error?: string;
+}

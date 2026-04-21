@@ -159,7 +159,7 @@ export function DailyBriefingCard({ region }: DailyBriefingCardProps) {
             {/* Key Insights */}
             <div className="space-y-2">
               <div className="flex items-center gap-1.5">
-                <Lightbulb className="h-3 w-3 text-amber-400" />
+                <Lightbulb className="h-3 w-3 text-warning" />
                 <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                   Key Insights
                 </span>
@@ -168,7 +168,7 @@ export function DailyBriefingCard({ region }: DailyBriefingCardProps) {
                 {briefing.keyInsights.map((insight, i) => (
                   <li
                     key={i}
-                    className="text-[11px] text-foreground/70 leading-relaxed pl-3 border-l border-amber-400/20"
+                    className="text-[11px] text-foreground/70 leading-relaxed pl-3 border-l border-warning/20"
                   >
                     {insight}
                   </li>
@@ -179,7 +179,7 @@ export function DailyBriefingCard({ region }: DailyBriefingCardProps) {
             {/* Risks to Watch */}
             <div className="space-y-2">
               <div className="flex items-center gap-1.5">
-                <AlertTriangle className="h-3 w-3 text-rose-400" />
+                <AlertTriangle className="h-3 w-3 text-danger" />
                 <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                   Risks to Watch
                 </span>
@@ -188,7 +188,7 @@ export function DailyBriefingCard({ region }: DailyBriefingCardProps) {
                 {briefing.risksToWatch.map((risk, i) => (
                   <li
                     key={i}
-                    className="text-[11px] text-foreground/70 leading-relaxed pl-3 border-l border-rose-400/20"
+                    className="text-[11px] text-foreground/70 leading-relaxed pl-3 border-l border-danger/20"
                   >
                     {risk}
                   </li>
@@ -202,19 +202,19 @@ export function DailyBriefingCard({ region }: DailyBriefingCardProps) {
             <div className="grid grid-cols-2 gap-3">
               {briefing.topMovers.gainers.length > 0 && (
                 <div className="space-y-1.5">
-                  <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                  <span className="text-[9px] font-bold text-success uppercase tracking-widest flex items-center gap-1">
                     <TrendingUp className="h-2.5 w-2.5" /> Gainers
                   </span>
                   {briefing.topMovers.gainers.map((g) => (
                     <Link
                       key={g.symbol}
                       href={`/dashboard/assets/${g.symbol}`}
-                      className="flex items-center justify-between py-2 px-2 rounded-2xl hover:bg-emerald-500/5 transition-colors group min-h-[38px]"
+                      className="flex items-center justify-between py-2 px-2 rounded-2xl hover:bg-success/5 transition-colors group min-h-[38px]"
                     >
-                      <span className="text-[10px] font-bold text-foreground/70 group-hover:text-emerald-400 transition-colors truncate">
+                      <span className="text-[10px] font-bold text-foreground/70 group-hover:text-success transition-colors truncate">
                         {getFriendlySymbol(g.symbol, undefined, g.name)}
                       </span>
-                      <span className="text-[10px] font-bold text-emerald-400">
+                      <span className="text-[10px] font-bold text-success">
                         +{g.change.toFixed(1)}%
                       </span>
                     </Link>
@@ -223,19 +223,19 @@ export function DailyBriefingCard({ region }: DailyBriefingCardProps) {
               )}
               {briefing.topMovers.losers.length > 0 && (
                 <div className="space-y-1.5">
-                  <span className="text-[9px] font-bold text-rose-400 uppercase tracking-widest flex items-center gap-1">
+                  <span className="text-[9px] font-bold text-danger uppercase tracking-widest flex items-center gap-1">
                     <TrendingDown className="h-2.5 w-2.5" /> Losers
                   </span>
                   {briefing.topMovers.losers.map((l) => (
                     <Link
                       key={l.symbol}
                       href={`/dashboard/assets/${l.symbol}`}
-                      className="flex items-center justify-between py-2 px-2 rounded-2xl hover:bg-rose-500/5 transition-colors group min-h-[38px]"
+                      className="flex items-center justify-between py-2 px-2 rounded-2xl hover:bg-danger/5 transition-colors group min-h-[38px]"
                     >
-                      <span className="text-[10px] font-bold text-foreground/70 group-hover:text-rose-400 transition-colors truncate">
+                      <span className="text-[10px] font-bold text-foreground/70 group-hover:text-danger transition-colors truncate">
                         {getFriendlySymbol(l.symbol, undefined, l.name)}
                       </span>
-                      <span className="text-[10px] font-bold text-rose-400">
+                      <span className="text-[10px] font-bold text-danger">
                         {l.change.toFixed(1)}%
                       </span>
                     </Link>

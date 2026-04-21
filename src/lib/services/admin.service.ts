@@ -73,6 +73,22 @@ export interface RevenueStats {
     userId: string | null;
   }[];
   userGrowthByMonth: { month: string; count: number }[];
+  refunds: {
+    // Last 30d charge.refunded events — BillingAuditLog.newState = 'REFUNDED'.
+    // Stripe webhook now claws back credits via CreditTransaction.ADJUSTMENT
+    // (see refund-clawback referenceId).
+    count30d: number;
+    totalAmountMinorUnits: number;
+    creditsClawedBack30d: number;
+    recent: {
+      id: string;
+      timestamp: Date;
+      userId: string;
+      amount: number | null;
+      currency: string | null;
+      stripeObjectId: string | null;
+    }[];
+  };
 }
 
 export interface AICostStats {
@@ -284,6 +300,158 @@ export interface RegimeStats {
   } | null;
 }
 
+// ─── AI Ops (runtime operational state from Redis) ──────────────────────────
+
+export interface AIOpsStats {
+  dailyCost: {
+    date: string;
+    cumulativeCostUsd: number;
+    thresholdUsd: number;
+    pctOfThreshold: number;
+  };
+  fallbackMitigation: {
+    active: boolean;
+    ttlSeconds: number | null;
+  };
+  fallbackByDeployment: {
+    windowMinutes: number;
+    rows: { deployment: string; total: number; fallbacks: number; fallbackRatePct: number }[];
+  };
+  cronLlm: {
+    windowHours: number;
+    rows: { job: string; calls: number; failures: number; failureRatePct: number; avgLatencyMs: number; totalCostUsd: number }[];
+  };
+  webSearchCircuit: {
+    consecutiveFailures: number;
+    tripped: boolean;
+  } | null;
+}
+
+export async function getAIOpsStats(): Promise<AIOpsStats> {
+  const { THRESHOLDS } = await import("@/lib/ai/alerting");
+  const today = new Date().toISOString().slice(0, 10);
+  const dailyCostKey = `ai:daily_cost:${today}`;
+  const mitigationKey = "ai:fallback:mitigation_active";
+
+  // 1-hour cron LLM window (same key as recordCronLlmCall)
+  const cronWindowBucket = Math.floor(Date.now() / (60 * 60 * 1000));
+  const cronWindowKey = `ai:cron:window:${cronWindowBucket}`;
+
+  // 15-minute per-deployment fallback window (same key as recordFallbackResult)
+  const fallbackBucket = Math.floor(Date.now() / (15 * 60 * 1000));
+  const fallbackDeploymentKey = `ai:fallback:deployment:${fallbackBucket}`;
+
+  // Web-search circuit breaker counter (see search.ts)
+  const webSearchFailuresKey = "ai:websearch:consecutive_failures";
+
+  let dailyCostRaw: string | number | null = null;
+  let mitigationRaw: string | number | null = null;
+  let mitigationTtl: number | null = null;
+  let cronHash: Record<string, string> | null = null;
+  let fallbackHash: Record<string, string> | null = null;
+  let webSearchFailuresRaw: string | number | null = null;
+
+  try {
+    [dailyCostRaw, mitigationRaw, cronHash, fallbackHash, webSearchFailuresRaw] = await Promise.all([
+      redis.get(dailyCostKey).catch(() => null) as Promise<string | number | null>,
+      redis.get(mitigationKey).catch(() => null) as Promise<string | number | null>,
+      redis.hgetall(cronWindowKey).catch(() => null) as Promise<Record<string, string> | null>,
+      redis.hgetall(fallbackDeploymentKey).catch(() => null) as Promise<Record<string, string> | null>,
+      redis.get(webSearchFailuresKey).catch(() => null) as Promise<string | number | null>,
+    ]);
+    if (mitigationRaw) {
+      // `ttl` isn't exposed on the shared RedisLike surface but is supported by
+      // both the Upstash REST client and the ioredis-compatible adapter.
+      // Cast narrowly so the ops dashboard can surface remaining mitigation time.
+      const ttlCapable = redis as unknown as { ttl?: (key: string) => Promise<number | null> };
+      if (typeof ttlCapable.ttl === "function") {
+        mitigationTtl = await ttlCapable.ttl(mitigationKey).catch(() => null);
+      }
+    }
+  } catch {
+    // Redis unavailable — return zeroed ops snapshot
+  }
+
+  const cumulativeCostUsd = Number(dailyCostRaw ?? 0) || 0;
+  const thresholdUsd = THRESHOLDS.dailyCostUsd;
+  const pctOfThreshold = thresholdUsd > 0
+    ? Number(((cumulativeCostUsd / thresholdUsd) * 100).toFixed(1))
+    : 0;
+
+  // Parse cron LLM window: fields are `${job}:calls`, `${job}:cost`, `${job}:latency_ms`, `${job}:failures`
+  const cronJobs: Record<string, { calls: number; failures: number; latencyMs: number; costUsd: number }> = {};
+  for (const [field, rawValue] of Object.entries(cronHash ?? {})) {
+    const lastColon = field.lastIndexOf(":");
+    if (lastColon < 0) continue;
+    const job = field.slice(0, lastColon);
+    const metric = field.slice(lastColon + 1);
+    const value = Number(rawValue) || 0;
+    if (!cronJobs[job]) cronJobs[job] = { calls: 0, failures: 0, latencyMs: 0, costUsd: 0 };
+    if (metric === "calls") cronJobs[job].calls = value;
+    else if (metric === "failures") cronJobs[job].failures = value;
+    else if (metric === "latency_ms") cronJobs[job].latencyMs = value;
+    else if (metric === "cost") cronJobs[job].costUsd = value;
+  }
+  const cronRows = Object.entries(cronJobs)
+    .map(([job, m]) => ({
+      job,
+      calls: m.calls,
+      failures: m.failures,
+      failureRatePct: m.calls > 0 ? Number(((m.failures / m.calls) * 100).toFixed(1)) : 0,
+      avgLatencyMs: m.calls > 0 ? Math.round(m.latencyMs / m.calls) : 0,
+      totalCostUsd: Number(m.costUsd.toFixed(4)),
+    }))
+    .sort((a, b) => b.calls - a.calls);
+
+  // Parse per-deployment fallback hash: fields are `${deployment}:total` / `${deployment}:fallback`
+  const deploymentAcc: Record<string, { total: number; fallbacks: number }> = {};
+  for (const [field, rawValue] of Object.entries(fallbackHash ?? {})) {
+    const lastColon = field.lastIndexOf(":");
+    if (lastColon < 0) continue;
+    const deployment = field.slice(0, lastColon);
+    const metric = field.slice(lastColon + 1);
+    const value = Number(rawValue) || 0;
+    if (!deploymentAcc[deployment]) deploymentAcc[deployment] = { total: 0, fallbacks: 0 };
+    if (metric === "total") deploymentAcc[deployment].total = value;
+    else if (metric === "fallback") deploymentAcc[deployment].fallbacks = value;
+  }
+  const deploymentRows = Object.entries(deploymentAcc)
+    .map(([deployment, m]) => ({
+      deployment,
+      total: m.total,
+      fallbacks: m.fallbacks,
+      fallbackRatePct: m.total > 0 ? Number(((m.fallbacks / m.total) * 100).toFixed(1)) : 0,
+    }))
+    .sort((a, b) => b.total - a.total);
+
+  const webSearchFailures = Number(webSearchFailuresRaw ?? 0) || 0;
+
+  return {
+    dailyCost: {
+      date: today,
+      cumulativeCostUsd: Number(cumulativeCostUsd.toFixed(4)),
+      thresholdUsd,
+      pctOfThreshold,
+    },
+    fallbackMitigation: {
+      active: Boolean(mitigationRaw),
+      ttlSeconds: mitigationTtl !== null && mitigationTtl > 0 ? mitigationTtl : null,
+    },
+    fallbackByDeployment: {
+      windowMinutes: 15,
+      rows: deploymentRows,
+    },
+    cronLlm: {
+      windowHours: 1,
+      rows: cronRows,
+    },
+    webSearchCircuit: {
+      consecutiveFailures: webSearchFailures,
+      tripped: webSearchFailures >= 3,
+    },
+  };
+}
+
 export interface InfraStats {
   cacheStats: { hits: number; misses: number; hitRate: number } | null;
   redisInfo: Record<string, string> | null;
@@ -398,9 +566,16 @@ export async function getOverviewStats(): Promise<OverviewStats> {
 
 export async function getRevenueStats(): Promise<RevenueStats> {
   const revenueStatuses = ["ACTIVE", "TRIALING", "PAST_DUE"] as const;
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-  const [subscriptionPlanCounts, subscriptionsByStatus, recentPaymentEvents, usersByMonth] =
-    await Promise.all([
+  const [
+    subscriptionPlanCounts,
+    subscriptionsByStatus,
+    recentPaymentEvents,
+    usersByMonth,
+    refundLogs30d,
+    creditClawbacks30d,
+  ] = await Promise.all([
       prisma.subscription.groupBy({
         by: ["plan"],
         where: { status: { in: [...revenueStatuses] } },
@@ -425,6 +600,28 @@ export async function getRevenueStats(): Promise<RevenueStats> {
         ORDER BY month DESC
         LIMIT 12
       `),
+      // Last 30d of charge.refunded events (BillingAuditLog rows with newState=REFUNDED).
+      prisma.billingAuditLog.findMany({
+        where: { newState: "REFUNDED", timestamp: { gte: thirtyDaysAgo } },
+        orderBy: { timestamp: "desc" },
+        take: 20,
+        select: {
+          id: true,
+          timestamp: true,
+          userId: true,
+          amount: true,
+          currency: true,
+          stripeObjectId: true,
+        },
+      }),
+      // Credits clawed back: CreditTransaction rows created by the refund-clawback
+      // referenceId (see stripe webhook charge.refunded handler).
+      prisma.$queryRaw<Array<{ total: bigint }>>(Prisma.sql`
+        SELECT COALESCE(SUM(ABS("amount")), 0)::bigint AS "total"
+        FROM "CreditTransaction"
+        WHERE "referenceId" LIKE 'refund-clawback:%'
+          AND "createdAt" >= ${thirtyDaysAgo}
+      `),
     ]);
 
   const planDistribution = subscriptionPlanCounts.map((row) => ({
@@ -445,6 +642,12 @@ export async function getRevenueStats(): Promise<RevenueStats> {
     count: Number(row.count),
   }));
 
+  const refundsTotalAmount = refundLogs30d.reduce(
+    (sum, row) => sum + (typeof row.amount === "number" ? row.amount : 0),
+    0,
+  );
+  const creditsClawedBack30d = Number(creditClawbacks30d[0]?.total ?? 0);
+
   return {
     mrr,
     arr: mrr * 12,
@@ -452,6 +655,19 @@ export async function getRevenueStats(): Promise<RevenueStats> {
     subscriptionsByStatus: statusMap,
     recentPaymentEvents,
     userGrowthByMonth,
+    refunds: {
+      count30d: refundLogs30d.length,
+      totalAmountMinorUnits: refundsTotalAmount,
+      creditsClawedBack30d,
+      recent: refundLogs30d.slice(0, 10).map((row) => ({
+        id: row.id,
+        timestamp: row.timestamp,
+        userId: row.userId,
+        amount: row.amount,
+        currency: row.currency,
+        stripeObjectId: row.stripeObjectId,
+      })),
+    },
   };
 }
 

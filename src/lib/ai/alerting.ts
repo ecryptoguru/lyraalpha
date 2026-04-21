@@ -12,8 +12,8 @@ const THRESHOLDS = {
   dailyCostUsd: Number(process.env.AI_ALERT_DAILY_COST_USD ?? 50),
   // RAG zero-result rate: alert when % of requests returning 0 RAG chunks exceeds threshold (15-min window)
   ragZeroResultRatePct: Number(process.env.AI_ALERT_RAG_ZERO_RESULT_PCT ?? 10),
-  // Web search: alert after this many consecutive failures (set to 2, circuit breaker at 3)
-  webSearchConsecutiveFailures: Number(process.env.AI_ALERT_WEB_SEARCH_FAILURES ?? 2),
+  // Web search: alert after this many consecutive failures (aligned with circuit breaker at 3)
+  webSearchConsecutiveFailures: Number(process.env.AI_ALERT_WEB_SEARCH_FAILURES ?? 3),
   // Output validation: alert when % of responses failing section checks exceeds threshold (15-min window)
   outputValidationFailureRatePct: Number(process.env.AI_ALERT_VALIDATION_FAILURE_PCT ?? 30),
   // Fallback rate: alert when % of requests using nano fallback exceeds threshold
@@ -353,6 +353,124 @@ export async function alertIfCostEstimationDrift(
     threshold: THRESHOLDS.costEstimationDriftPct,
     detail: `Token-estimator average error is ${avgErrorPct.toFixed(1)}% over ${sampleCount} samples (tier: ${tier}). The char→token ratio is likely out of sync with the tokenizer — cost ceilings may be mis-sizing contexts.`,
   });
+}
+
+/** OBS-1i: RAG low-grounding sliding-window alert.
+ *  Tracks the rate of low-grounding RAG results (avg similarity < 0.45) over a 15-min window.
+ *  When the rate exceeds the threshold, fires a webhook alert — sustained low grounding
+ *  means the knowledge base is stale, embeddings are drifting, or queries are out-of-domain.
+ */
+const RAG_LOW_GROUNDING_THRESHOLD_PCT = Number(process.env.AI_ALERT_RAG_LOW_GROUNDING_PCT ?? 30);
+
+export async function recordRagGrounding(avgSimilarity: number, tier: string): Promise<void> {
+  const windowKey = `ai:rag_grounding:window:${Math.floor(Date.now() / (15 * 60 * 1000))}`;
+  try {
+    const pipeline = redis.pipeline();
+    pipeline.hincrby(windowKey, "total", 1);
+    if (avgSimilarity < 0.45) pipeline.hincrby(windowKey, "low", 1);
+    pipeline.expire(windowKey, 20 * 60);
+    const results = await pipeline.exec();
+
+    // Upstash pipeline.exec() returns [error, value][] tuples.
+    // Safely extract the numeric values regardless of client implementation.
+    const total = Array.isArray(results?.[0]) ? (results[0][1] as number) ?? 0 : (results?.[0] as number) ?? 0;
+    const low = Array.isArray(results?.[1]) ? (results[1][1] as number) ?? 0 : (results?.[1] as number) ?? 0;
+    if (total < 10) return;
+
+    const lowRatePct = (low / total) * 100;
+    if (lowRatePct >= RAG_LOW_GROUNDING_THRESHOLD_PCT) {
+      logger.warn(
+        { event: "ai_alert_rag_low_grounding", lowRatePct: lowRatePct.toFixed(1), total, threshold: RAG_LOW_GROUNDING_THRESHOLD_PCT, tier },
+        "AI alert: RAG low-grounding rate elevated — knowledge base may be stale or out-of-domain",
+      );
+      await sendWebhookAlert({
+        alert: "rag_low_grounding_rate",
+        severity: "warn",
+        value: Math.round(lowRatePct),
+        threshold: RAG_LOW_GROUNDING_THRESHOLD_PCT,
+        detail: `${low}/${total} RAG results (${lowRatePct.toFixed(1)}%) had avg similarity < 0.45 in last 15 min (tier: ${tier}). Knowledge base may be stale or queries out-of-domain.`,
+      });
+    }
+  } catch {
+    // Redis failure — never block
+  }
+}
+
+/** OBS-1h: Cron LLM call observability.
+ *  Records cost, latency, and failure for cron-driven LLM calls (daily briefing,
+ *  trending questions, personal briefing, etc.) that previously had no alerting coverage.
+ *  Uses a 1-hour sliding window to detect sustained issues in cron pipelines.
+ */
+export async function recordCronLlmCall(args: {
+  job: string;
+  costUsd: number;
+  latencyMs: number;
+  success: boolean;
+}): Promise<void> {
+  const { job, costUsd, latencyMs, success } = args;
+  const windowBucket = Math.floor(Date.now() / (60 * 60 * 1000)); // 1h window
+  const windowKey = `ai:cron:window:${windowBucket}`;
+
+  try {
+    const pipeline = redis.pipeline();
+    pipeline.hincrby(windowKey, `${job}:calls`, 1);
+    pipeline.hincrbyfloat(windowKey, `${job}:cost`, costUsd);
+    pipeline.hincrby(windowKey, `${job}:latency_ms`, latencyMs);
+    if (!success) pipeline.hincrby(windowKey, `${job}:failures`, 1);
+    pipeline.expire(windowKey, 2 * 60 * 60); // 2h TTL
+    await pipeline.exec();
+  } catch {
+    // Redis failure — never block
+  }
+
+  // Per-call alerts: individual cron failure or extreme latency.
+  // Dedup per job with a 1h Redis key so transient Azure hiccups don't spam.
+  const CRON_ALERT_DEDUP_TTL = 3600; // 1h
+  const CRON_LATENCY_THRESHOLD_MS = 60_000;
+
+  if (!success) {
+    logger.warn(
+      { event: "ai_alert_cron_failure", job, latencyMs },
+      `AI alert: cron LLM call failed for ${job}`,
+    );
+    // Dedup: only send webhook alert if we haven't alerted for this job in the last hour
+    const dedupKey = `ai:cron:alerted:failure:${job}`;
+    const alreadyAlerted = await redis.set(dedupKey, "1", { ex: CRON_ALERT_DEDUP_TTL, nx: true }).catch(() => null);
+    if (alreadyAlerted === "OK") {
+      sendWebhookAlert({
+        alert: `cron_llm_failure_${job}`,
+        severity: "warn",
+        value: latencyMs,
+        threshold: 0,
+        detail: `Cron job \"${job}\" LLM call failed after ${latencyMs}ms.`,
+      }).catch(() => {});
+    }
+  }
+
+  // Alert on extreme latency (> 60s for cron jobs)
+  if (success && latencyMs > CRON_LATENCY_THRESHOLD_MS) {
+    logger.warn(
+      { event: "ai_alert_cron_latency", job, latencyMs, threshold: CRON_LATENCY_THRESHOLD_MS },
+      `AI alert: cron LLM call slow for ${job}`,
+    );
+    // Dedup: only send webhook alert if we haven't alerted for this job in the last hour
+    const dedupKey = `ai:cron:alerted:latency:${job}`;
+    const alreadyAlerted = await redis.set(dedupKey, "1", { ex: CRON_ALERT_DEDUP_TTL, nx: true }).catch(() => null);
+    if (alreadyAlerted === "OK") {
+      sendWebhookAlert({
+        alert: `cron_llm_latency_${job}`,
+        severity: "warn",
+        value: latencyMs,
+        threshold: CRON_LATENCY_THRESHOLD_MS,
+        detail: `Cron job \"${job}\" took ${latencyMs}ms (threshold: ${CRON_LATENCY_THRESHOLD_MS}ms).`,
+      }).catch(() => {});
+    }
+  }
+
+  // Accumulate cost into the daily cost counter (same as interactive requests)
+  if (costUsd > 0) {
+    await alertIfDailyCostExceeded(costUsd).catch(() => {});
+  }
 }
 
 export { THRESHOLDS };

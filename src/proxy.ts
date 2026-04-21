@@ -42,6 +42,29 @@ const ALLOWED_ORIGINS = new Set(
   ]
 );
 
+// Wildcard subdomain patterns for preview deploys
+const ALLOWED_ORIGIN_PATTERNS = [
+  /\.vercel\.app$/,
+  /\.lyraalpha\.com$/,
+  /\.lyraalpha\.ai$/,
+];
+
+/**
+ * Check if origin matches allowed patterns (exact or wildcard subdomain)
+ */
+function isAllowedOrigin(origin: string): boolean {
+  // Exact match first
+  if (ALLOWED_ORIGINS.has(origin)) return true;
+  
+  // Check wildcard subdomain patterns
+  try {
+    const hostname = new URL(origin).hostname;
+    return ALLOWED_ORIGIN_PATTERNS.some(pattern => pattern.test(hostname));
+  } catch {
+    return false;
+  }
+}
+
 function getNormalizedLocalDevUrl(req: NextRequest): URL | null {
   if (process.env.NODE_ENV === "production" || !configuredAppUrl) {
     return null;
@@ -71,7 +94,7 @@ function getCorsHeaders(origin: string | null) {
     "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
     "Access-Control-Max-Age": "86400",
   };
-  if (origin && ALLOWED_ORIGINS.has(origin)) {
+  if (origin && isAllowedOrigin(origin)) {
     headers["Access-Control-Allow-Origin"] = origin;
     headers["Access-Control-Allow-Credentials"] = "true";
   }

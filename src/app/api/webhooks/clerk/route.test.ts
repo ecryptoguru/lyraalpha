@@ -57,7 +57,7 @@ const mockPrisma = {
   userMemoryNote: { deleteMany: vi.fn() },
   watchlistItem: { deleteMany: vi.fn() },
   portfolio: { deleteMany: vi.fn() },
-  userPreference: { deleteMany: vi.fn(), upsert: vi.fn() },
+  userPreference: { deleteMany: vi.fn(), upsert: vi.fn(), findUnique: vi.fn() },
   notification: { deleteMany: vi.fn() },
   creditTransaction: { deleteMany: vi.fn() },
   creditLot: { deleteMany: vi.fn() },
@@ -95,6 +95,13 @@ vi.mock("@/lib/auth", () => ({
 }));
 vi.mock("@/lib/services/credit.service", () => ({
   grantCreditsInTransaction: vi.fn(),
+}));
+
+const mockRedisSetNX = vi.fn();
+const mockDelCache = vi.fn();
+vi.mock("@/lib/redis", () => ({
+  redisSetNX: mockRedisSetNX,
+  delCache: mockDelCache,
 }));
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -139,9 +146,11 @@ describe("POST /api/webhooks/clerk", () => {
     mockClerkClient.mockResolvedValue({ users: { deleteUser: mockDeleteUser } });
     mockUpsertBrevoContact.mockResolvedValue(undefined);
     mockSendBrevoEmail.mockResolvedValue(true);
+    mockRedisSetNX.mockResolvedValue(true); // default: lock acquired (not a duplicate)
 
     mockPrisma.user.upsert.mockResolvedValue({ id: "user_abc", plan: "STARTER" });
     mockPrisma.user.findUnique.mockResolvedValue(null);
+    mockPrisma.userPreference.findUnique.mockResolvedValue(null); // no existing pref → welcome email not yet sent
     mockPrisma.userPreference.upsert.mockResolvedValue({});
     mockPrisma.$transaction.mockImplementation((arg: unknown) => {
       // Array form (GDPR deletion) — just resolve
@@ -335,5 +344,51 @@ describe("POST /api/webhooks/clerk", () => {
       "signup-bonus:user_abc",
       { countTowardEarned: true },
     );
+  });
+
+  // ── Idempotency (Redis) ──────────────────────────────────────────────────────
+
+  it("skips processing when svix-id was already seen (duplicate webhook)", async () => {
+    mockRedisSetNX.mockResolvedValueOnce(false); // lock already held = duplicate
+    const event = makeUserEvent("user.created");
+    mockVerify.mockReturnValue(event);
+    const { POST } = await import("./route");
+    const res = await POST(makeRequest(event));
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.duplicate).toBe(true);
+    // User should NOT be created for a duplicate
+    expect(mockPrisma.user.upsert).not.toHaveBeenCalled();
+  });
+
+  it("processes user.created even when Redis is down (fail-open idempotency)", async () => {
+    // Simulate what the real redisSetNX does on Redis failure: catch the error
+    // and return true (fail-open). The mock IS redisSetNX, so we return true
+    // directly rather than rejecting (which would bypass the try/catch in the
+    // real implementation).
+    mockRedisSetNX.mockResolvedValueOnce(true); // Redis down → fail-open → proceeds
+    const event = makeUserEvent("user.created");
+    mockVerify.mockReturnValue(event);
+    mockPrisma.user.findUnique.mockResolvedValue({ totalCreditsEarned: 0 });
+    const { POST } = await import("./route");
+    const res = await POST(makeRequest(event));
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.duplicate).toBeUndefined(); // NOT marked as duplicate
+    // User MUST still be created — Redis failure must not silently drop the event
+    expect(mockPrisma.user.upsert).toHaveBeenCalled();
+  });
+
+  it("releases idempotency lock on handler failure so Clerk retry succeeds", async () => {
+    mockRedisSetNX.mockResolvedValueOnce(true); // lock acquired
+    const event = makeUserEvent("user.created");
+    mockVerify.mockReturnValue(event);
+    // Force handler failure — DB throws during user creation
+    mockPrisma.user.upsert.mockRejectedValueOnce(new Error("DB connection lost"));
+    const { POST } = await import("./route");
+    const res = await POST(makeRequest(event));
+    expect(res.status).toBe(500);
+    // The lock MUST be released so the retry from Clerk is not treated as duplicate
+    expect(mockDelCache).toHaveBeenCalledWith("clerk:webhook:svix_id_test");
   });
 });

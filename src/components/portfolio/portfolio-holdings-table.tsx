@@ -17,7 +17,7 @@ interface PortfolioHoldingsTableProps {
 }
 
 const ASSET_TYPE_COLORS: Record<string, string> = {
-  CRYPTO:      "text-sky-400 bg-sky-400/10 border-sky-400/20",
+  CRYPTO:      "text-info bg-info/10 border-info/20",
 };
 
 const DSE_KEYS = ["avgTrendScore", "avgMomentumScore", "avgVolatilityScore", "avgLiquidityScore", "avgTrustScore", "avgSentimentScore"] as const;
@@ -37,10 +37,10 @@ function formatCurrency(value: number, locale: string): string {
 function DseScorePip({ score, label }: { score: number | null; label: string }) {
   const { bg, text } =
     score === null           ? { bg: "bg-muted/20",          text: "text-muted-foreground/40" } :
-    score >= 70              ? { bg: "bg-emerald-400/15",     text: "text-emerald-400" } :
-    score >= 50              ? { bg: "bg-amber-400/15",       text: "text-amber-400" } :
-    score >= 35              ? { bg: "bg-orange-400/15",      text: "text-orange-400" } :
-                               { bg: "bg-red-400/15",         text: "text-red-400" };
+    score >= 70              ? { bg: "bg-success/15",     text: "text-success" } :
+    score >= 50              ? { bg: "bg-warning/15",       text: "text-warning" } :
+    score >= 35              ? { bg: "bg-warning/15",      text: "text-warning" } :
+                               { bg: "bg-danger/15",         text: "text-danger" };
 
   return (
     <div className={cn("flex flex-col items-center rounded-lg px-1.5 py-1 min-w-[34px]", bg)}>
@@ -55,10 +55,10 @@ function DseScorePip({ score, label }: { score: number | null; label: string }) 
 function WeightBar({ weight, maxWeight }: { weight: number; maxWeight: number }) {
   const pct = maxWeight > 0 ? (weight / maxWeight) * 100 : 0;
   const color =
-    weight > 30 ? "bg-red-400" :
-    weight > 20 ? "bg-orange-400" :
-    weight > 10 ? "bg-amber-400" :
-    "bg-emerald-400";
+    weight > 30 ? "bg-danger" :
+    weight > 20 ? "bg-warning" :
+    weight > 10 ? "bg-warning" :
+    "bg-success";
 
   return (
     <div className="flex items-center gap-1.5">
@@ -158,10 +158,10 @@ function HoldingRow({
         className={cn(
           "border-b border-white/5 transition-colors group",
           editing ? "bg-primary/5" : "cursor-pointer",
-          !editing && pnlPct !== null && pnlPct >= 10  ? "bg-emerald-500/6 hover:bg-emerald-500/10" :
-          !editing && pnlPct !== null && pnlPct >= 2   ? "bg-emerald-500/3 hover:bg-emerald-500/6" :
-          !editing && pnlPct !== null && pnlPct <= -10 ? "bg-red-500/7 hover:bg-red-500/11" :
-          !editing && pnlPct !== null && pnlPct <= -2  ? "bg-red-500/3 hover:bg-red-500/7" :
+          !editing && pnlPct !== null && pnlPct >= 10  ? "bg-success/6 hover:bg-success/10" :
+          !editing && pnlPct !== null && pnlPct >= 2   ? "bg-success/3 hover:bg-success/6" :
+          !editing && pnlPct !== null && pnlPct <= -10 ? "bg-danger/7 hover:bg-danger/11" :
+          !editing && pnlPct !== null && pnlPct <= -2  ? "bg-danger/3 hover:bg-danger/7" :
           !editing ? "hover:bg-white/2" : "",
         )}
         initial={{ opacity: 0, y: 8 }}
@@ -230,7 +230,7 @@ function HoldingRow({
               {changePercent !== null && (
                 <p className={cn(
                   "text-[10px] font-bold tabular-nums flex items-center justify-end gap-0.5",
-                  changePercent > 0 ? "text-emerald-400" : changePercent < 0 ? "text-red-400" : "text-muted-foreground"
+                  changePercent > 0 ? "text-success" : changePercent < 0 ? "text-danger" : "text-muted-foreground"
                 )}>
                   {changePercent > 0 ? <TrendingUp className="h-2.5 w-2.5" /> :
                    changePercent < 0 ? <TrendingDown className="h-2.5 w-2.5" /> :
@@ -254,7 +254,7 @@ function HoldingRow({
               {pnl !== null && pnlPct !== null && (
                 <p className={cn(
                   "text-[10px] font-bold tabular-nums",
-                  pnlIsPositive ? "text-emerald-400" : pnlIsNegative ? "text-red-400" : "text-muted-foreground"
+                  pnlIsPositive ? "text-success" : pnlIsNegative ? "text-danger" : "text-muted-foreground"
                 )}>
                   {pnlIsPositive ? "+" : ""}{currencySymbol}{formatCurrency(Math.abs(pnl), locale)}
                   {" "}({pnlIsPositive ? "+" : ""}{pnlPct.toFixed(1)}%)
@@ -278,13 +278,13 @@ function HoldingRow({
               <>
                 <button
                   type="button" onClick={saveEdit} disabled={saving}
-                  className="h-7 w-7 rounded-xl flex items-center justify-center text-emerald-400 hover:bg-emerald-400/10 transition-colors disabled:opacity-40"
+                  className="h-7 w-7 rounded-xl flex items-center justify-center text-success hover:bg-success/10 transition-colors disabled:opacity-40"
                 >
-                  {saving ? <span className="h-3 w-3 border-2 border-emerald-400/40 border-t-emerald-400 rounded-full animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                  {saving ? <span className="h-3 w-3 border-2 border-success/40 border-t-emerald-400 rounded-full animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                 </button>
                 <button
                   type="button" onClick={cancelEdit}
-                  className="h-7 w-7 rounded-xl flex items-center justify-center text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                  className="h-7 w-7 rounded-xl flex items-center justify-center text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors"
                 >
                   <XIcon className="h-3.5 w-3.5" />
                 </button>
@@ -303,7 +303,7 @@ function HoldingRow({
                   type="button"
                   onClick={(e) => { e.stopPropagation(); handleRemove(); }}
                   disabled={removing}
-                  className="h-7 w-7 rounded-xl flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-red-400 hover:bg-red-400/10 transition-all disabled:opacity-40"
+                  className="h-7 w-7 rounded-xl flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-danger hover:bg-danger/10 transition-all disabled:opacity-40"
                 >
                   {removing
                     ? <span className="h-3 w-3 border-2 border-muted/40 border-t-red-400 rounded-full animate-spin" />

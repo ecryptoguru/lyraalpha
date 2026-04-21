@@ -20,13 +20,13 @@ function toneClasses(tone: DashboardInsightFeedItem["tone"]) {
   switch (tone) {
     case "positive":
       return {
-        panel: "border-emerald-500/20 bg-emerald-500/5",
-        badge: "text-emerald-400",
+        panel: "border-success/20 bg-success/5",
+        badge: "text-success",
       };
     case "warning":
       return {
-        panel: "border-amber-500/20 bg-amber-500/5",
-        badge: "text-amber-400",
+        panel: "border-warning/20 bg-warning/5",
+        badge: "text-warning",
       };
     default:
       return {

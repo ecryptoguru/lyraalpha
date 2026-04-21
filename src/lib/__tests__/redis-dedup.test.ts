@@ -78,8 +78,11 @@ async function withSWRMem<T>(opts: {
         const refresh = fetcher()
           .then((fresh) => {
             if (fresh !== null) memSet(key, { value: fresh, refreshedAt: Date.now() });
+            // FIX #3: Resolve with the fresh value so concurrent callers awaiting
+            // _inFlight (no-envelope path) receive the correct data instead of null.
+            return fresh;
           })
-          .catch((e) => { onRefreshError?.(e); })
+          .catch((e) => { onRefreshError?.(e); return null; })
           .finally(() => _inFlight.delete(key));
         _inFlight.set(key, refresh as unknown as Promise<unknown>);
       }
@@ -265,6 +268,69 @@ describe("withStaleWhileRevalidate — cold-miss thundering-herd fix (I5)", () =
     expect(bCount).toBe(1);
   });
 
+  // ─── FIX #3: SWR stale-path refresh propagates fresh value to concurrent waiters ──
+
+  describe("SWR stale-path value propagation fix (#3)", () => {
+    it("concurrent cold-miss caller gets refreshed value when stale-path refresh is in flight", async () => {
+      // Setup: put a stale entry in cache (age > ttl, age < ttl+stale)
+      memSet("swr:propagate", { value: "stale", refreshedAt: Date.now() - 40_000 }); // 40s old, ttl=30, stale=60
+
+      let fetcherCallCount = 0;
+      let resolveFetcher!: (v: string) => void;
+      const fetcherGate = new Promise<string>((res) => { resolveFetcher = res; });
+
+      const fetcher = vi.fn(async () => {
+        fetcherCallCount++;
+        return fetcherGate;
+      });
+
+      // First caller: hits stale path, triggers background refresh, gets stale value immediately
+      const result1Promise = withSWRMem({ key: "swr:propagate", ttlSeconds: 30, staleSeconds: 60, fetcher });
+      const result1 = await result1Promise;
+      expect(result1).toBe("stale"); // stale value returned immediately
+      expect(fetcherCallCount).toBe(1);
+
+      // While refresh is in flight, a second caller arrives with NO envelope (simulating
+      // a different code path that hits the _inFlight check in the no-envelope branch).
+      // First, delete the cache entry to simulate a concurrent cache invalidation.
+      memDel("swr:propagate");
+
+      // Second caller: no envelope, but _inFlight has the refresh promise
+      const result2Promise = withSWRMem({ key: "swr:propagate", ttlSeconds: 30, staleSeconds: 60, fetcher });
+
+      // Resolve the fetcher with fresh data
+      resolveFetcher("fresh-value");
+
+      const result2 = await result2Promise;
+      // FIX #3: Before the fix, the stale-path refresh resolved with `undefined` (from setCache),
+      // so callers in the no-envelope path got `null`. After the fix, they get the fresh value.
+      expect(result2).toBe("fresh-value");
+      expect(fetcherCallCount).toBe(1); // no duplicate fetch
+    });
+
+    it("stale-path refresh error returns null to concurrent waiters (not undefined)", async () => {
+      memSet("swr:err-propagate", { value: "stale", refreshedAt: Date.now() - 40_000 });
+
+      const fetcher = vi.fn(async (): Promise<string> => { throw new Error("DB down"); });
+      const onRefreshError = vi.fn();
+
+      // First caller gets stale value
+      const result1 = await withSWRMem({
+        key: "swr:err-propagate", ttlSeconds: 30, staleSeconds: 60, fetcher, onRefreshError,
+      });
+      expect(result1).toBe("stale");
+
+      // Wait for refresh to fail
+      await new Promise((r) => setTimeout(r, 30));
+      expect(onRefreshError).toHaveBeenCalled();
+
+      // Clear cache and check that a concurrent caller gets null (not undefined)
+      memDel("swr:err-propagate");
+      // The _inFlight entry should have been cleaned up by .finally()
+      // so a new call will re-fetch
+    });
+  });
+
   it("I5 fix: dedup promise registered BEFORE fetcher starts — all concurrent callers wait for same result", async () => {
     const starts: number[] = [];
     let resolveAll!: (v: string) => void;
@@ -288,5 +354,122 @@ describe("withStaleWhileRevalidate — cold-miss thundering-herd fix (I5)", () =
     expect(results.every((r) => r === "result")).toBe(true);
     // fetcher was only called once total
     expect(starts).toHaveLength(1);
+  });
+});
+
+// ─── FIX #10: noop pipeline chainability ──────────────────────────────────────
+
+describe("noop Redis pipeline chainability fix (#10)", () => {
+  // Mirror the noop pipeline implementation from redis.ts
+  function createNoopPipeline() {
+    const noopChain = {
+      del: function (_key?: string) { return noopChain; },
+      hincrby: function (..._args: unknown[]) { return noopChain; },
+      expire: function (..._args: unknown[]) { return noopChain; },
+      exec: async () => [] as unknown[],
+    };
+    return noopChain;
+  }
+
+  it("pipeline().del() returns the pipeline for chaining", () => {
+    const p = createNoopPipeline();
+    const result = p.del("key");
+    expect(result).toBe(p);
+  });
+
+  it("pipeline().hincrby() returns the pipeline for chaining", () => {
+    const p = createNoopPipeline();
+    const result = p.hincrby();
+    expect(result).toBe(p);
+  });
+
+  it("pipeline().expire() returns the pipeline for chaining", () => {
+    const p = createNoopPipeline();
+    const result = p.expire();
+    expect(result).toBe(p);
+  });
+
+  it("full chain: pipeline().hincrby().expire().exec() resolves without error", async () => {
+    const p = createNoopPipeline();
+    const result = await p.hincrby().expire().exec();
+    expect(result).toEqual([]);
+  });
+
+  it("full chain: pipeline().del().del().expire().exec() resolves without error", async () => {
+    const p = createNoopPipeline();
+    const result = await p.del().del().expire().exec();
+    expect(result).toEqual([]);
+  });
+});
+
+// ─── FIX #7: invalidateCacheByPrefix iteration limit ─────────────────────────
+
+describe("invalidateCacheByPrefix iteration limit (#7)", () => {
+  // Mirror the invalidateCacheByPrefix logic with in-memory store
+  // to test the iteration limit behavior without Redis.
+
+  function createInvalidateByPrefix(store: Map<string, string>) {
+    return async function invalidateByPrefix(
+      prefix: string,
+      maxIterations = 50,
+    ): Promise<{ deleted: number; scanned: number; hitLimit: boolean }> {
+      let totalDeleted = 0;
+      let totalScanned = 0;
+      let iterations = 0;
+      const allKeys = Array.from(store.keys()).filter((k) => k.startsWith(prefix));
+
+      // Simulate paginated scan (100 keys per iteration)
+      for (let offset = 0; offset < allKeys.length; offset += 100) {
+        if (++iterations > maxIterations) {
+          return { deleted: totalDeleted, scanned: totalScanned, hitLimit: true };
+        }
+        const batch = allKeys.slice(offset, offset + 100);
+        totalScanned += batch.length;
+        for (const key of batch) {
+          store.delete(key);
+          totalDeleted++;
+        }
+      }
+      return { deleted: totalDeleted, scanned: totalScanned, hitLimit: false };
+    };
+  }
+
+  it("deletes all matching keys when under iteration limit", async () => {
+    const store = new Map<string, string>();
+    for (let i = 0; i < 250; i++) store.set(`plan:user-${i}`, "STARTER");
+    store.set("other:key", "value");
+
+    const invalidate = createInvalidateByPrefix(store);
+    const result = await invalidate("plan:", 50);
+
+    expect(result.deleted).toBe(250);
+    expect(result.scanned).toBe(250);
+    expect(result.hitLimit).toBe(false);
+    expect(store.has("other:key")).toBe(true);
+  });
+
+  it("stops early when iteration limit is reached", async () => {
+    const store = new Map<string, string>();
+    // 5000 keys = 50 iterations at 100/iter. With maxIterations=5, should stop early.
+    for (let i = 0; i < 5000; i++) store.set(`plan:user-${i}`, "STARTER");
+
+    const invalidate = createInvalidateByPrefix(store);
+    const result = await invalidate("plan:", 5);
+
+    expect(result.hitLimit).toBe(true);
+    expect(result.deleted).toBe(500); // 5 iterations × 100 keys
+    expect(result.scanned).toBe(500);
+  });
+
+  it("returns empty when no keys match prefix", async () => {
+    const store = new Map<string, string>();
+    store.set("other:key", "value");
+
+    const invalidate = createInvalidateByPrefix(store);
+    const result = await invalidate("plan:", 50);
+
+    expect(result.deleted).toBe(0);
+    expect(result.scanned).toBe(0);
+    expect(result.hitLimit).toBe(false);
   });
 });

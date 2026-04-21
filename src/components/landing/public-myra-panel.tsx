@@ -60,7 +60,7 @@ function TypingDots() {
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
-          className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-white/45"
+          className="h-1.5 w-1.5 rounded-full bg-muted dark:bg-white/45"
           animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1, 0.8] }}
           transition={{
             duration: 1.1,
@@ -78,7 +78,7 @@ function TypingDots() {
 function StreamingCursor() {
   return (
     <motion.span
-      className="inline-block w-[2px] h-[14px] bg-amber-500 dark:bg-amber-300 ml-0.5 align-middle"
+      className="inline-block w-[2px] h-[14px] bg-warning dark:bg-warning2347 ml-0.5 align-middle"
       animate={{ opacity: [1, 0] }}
       transition={{ duration: 0.53, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
     />
@@ -324,8 +324,8 @@ export function PublicMyraPanel({
 
   const showQuickReplies = messages.length === 0;
   const hasHistory = messages.length > 0;
-  const cardClass = "relative overflow-hidden rounded-4xl border border-slate-200/80 bg-white/96 shadow-[0_30px_90px_rgba(15,23,42,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#07111f]/96 dark:shadow-[0_30px_90px_rgba(0,0,0,0.48)]";
-  const launcherClassName = "group relative flex h-16 w-16 items-center justify-center rounded-full border border-amber-300/40 bg-white text-amber-500 shadow-[0_16px_48px_rgba(245,158,11,0.16)] transition-all duration-300 hover:-translate-y-1 hover:border-amber-300/60 hover:bg-amber-50 dark:border-amber-300/30 dark:bg-[#0b1322] dark:text-amber-200 dark:shadow-[0_16px_48px_rgba(0,0,0,0.42)] dark:hover:border-amber-300/45 dark:hover:bg-[#0f182b]";
+  const cardClass = "relative overflow-hidden rounded-4xl border border-border/80 bg-white/96 shadow-[0_30px_90px_rgba(15,23,42,0.16)] backdrop-blur-2xl dark:border-white/10 dark:bg-[#07111f]/96 dark:shadow-[0_30px_90px_rgba(0,0,0,0.48)]";
+  const launcherClassName = "group relative flex h-16 w-16 items-center justify-center rounded-full border border-warning/40 bg-white text-warning shadow-[0_16px_48px_rgba(245,158,11,0.16)] transition-all duration-300 hover:-translate-y-1 hover:border-warning/60 hover:bg-primary/5 dark:border-warning/30 dark:bg-[#0b1322] dark:text-primary/60 dark:shadow-[0_16px_48px_rgba(0,0,0,0.42)] dark:hover:border-warning/45 dark:hover:bg-[#0f182b]";
 
   // ─── Minimized bubble ───
   if (isMinimized) {
@@ -342,7 +342,7 @@ export function PublicMyraPanel({
       >
         <span className="absolute inset-1 rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.24),rgba(245,158,11,0.02)_68%,transparent)] blur-md transition-opacity duration-300 group-hover:opacity-100 dark:bg-[radial-gradient(circle,rgba(251,191,36,0.22),rgba(251,191,36,0.02)_68%,transparent)]" />
         <MessageCircle className="relative z-10 h-7 w-7" />
-        <span className="absolute inset-0 rounded-full border border-amber-300/18" />
+        <span className="absolute inset-0 rounded-full border border-warning/18" />
       </motion.button>
     );
   }
@@ -359,23 +359,23 @@ export function PublicMyraPanel({
       role="dialog"
       aria-label="Myra AI chat"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.65),transparent_22%,transparent_78%,rgba(245,158,11,0.08))] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_22%,transparent_78%,rgba(245,158,11,0.06))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.65),transparent_22%,transparent_78%,rgba(129,140,248,0.08))] dark:bg-[linear-gradient(180deg,rgba(255,255,255,0.04),transparent_22%,transparent_78%,rgba(129,140,248,0.06))]" />
 
       {/* Header */}
-      <div className="relative flex shrink-0 items-center justify-between border-b border-slate-200/80 px-5 py-4 dark:border-white/8">
+      <div className="relative flex shrink-0 items-center justify-between border-b border-border/80 px-5 py-4 dark:border-white/8">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-11 w-11 items-center justify-center rounded-full border border-amber-300/30 bg-amber-50 text-amber-500 shadow-inner dark:border-amber-300/18 dark:bg-amber-300/8 dark:text-amber-200">
+          <div className="relative flex h-11 w-11 items-center justify-center rounded-full border border-warning/30 bg-primary/5 text-warning shadow-inner dark:border-warning/18 dark:bg-warning13147 dark:text-primary/60">
             <Sparkles className="h-5 w-5" />
-            <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white bg-emerald-400 dark:border-[#07111f]" />
+            <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-white bg-success dark:border-[#07111f]" />
           </div>
           <div>
             <div className="mb-1 flex items-center gap-2">
-              <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white">Myra</span>
-              <span className="rounded-full border border-amber-300/30 bg-amber-50 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.28em] text-amber-600 dark:border-amber-300/18 dark:bg-amber-300/8 dark:text-amber-100/75">
+              <span className="text-base font-bold tracking-tight text-foreground dark:text-white">Myra</span>
+              <span className="rounded-full border border-warning/30 bg-primary/5 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.28em] text-primary dark:border-warning/18 dark:bg-warning13751 dark:text-primary/75">
                 AI
               </span>
             </div>
-            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-slate-500 dark:text-white/38">Online · no sign-up needed</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.28em] text-muted-foreground dark:text-white/38">Online · no sign-up needed</span>
           </div>
         </div>
         <div className="flex items-center gap-1">
@@ -383,7 +383,7 @@ export function PublicMyraPanel({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onMinimize}
-            className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer dark:text-white/48 dark:hover:bg-white/6 dark:hover:text-white/75"
+            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground cursor-pointer dark:text-white/48 dark:hover:bg-white/6 dark:hover:text-white/75"
             aria-label="Minimise"
           >
             <Minus className="h-4 w-4" />
@@ -392,7 +392,7 @@ export function PublicMyraPanel({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="rounded-full p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 cursor-pointer dark:text-white/48 dark:hover:bg-white/6 dark:hover:text-white/75"
+            className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground cursor-pointer dark:text-white/48 dark:hover:bg-white/6 dark:hover:text-white/75"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
@@ -401,10 +401,10 @@ export function PublicMyraPanel({
       </div>
 
       {/* Status bar */}
-      <div className="relative shrink-0 border-b border-amber-200/70 bg-amber-50/80 px-5 py-3 dark:border-white/8 dark:bg-amber-300/6">
-        <span className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 dark:text-white/56">
+      <div className="relative shrink-0 border-b border-primary/70 bg-primary/80 px-5 py-3 dark:border-white/8 dark:bg-warning15136">
+        <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground dark:text-white/56">
           Ask about Beta access, ELITE plan or
-          <Link href="/sign-up" className="font-bold text-amber-600 transition-colors hover:text-amber-500 dark:text-amber-100 dark:hover:text-white">
+          <Link href="/sign-up" className="font-bold text-primary transition-colors hover:text-warning dark:text-primary/60 dark:hover:text-white">
             sign up free →
           </Link>
         </span>
@@ -417,9 +417,9 @@ export function PublicMyraPanel({
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mb-2 rounded-[1.35rem] border border-slate-200/80 bg-slate-50/90 px-3 py-2 text-center dark:border-white/8 dark:bg-white/3"
+            className="mb-2 rounded-[1.35rem] border border-border/80 bg-muted/90 px-3 py-2 text-center dark:border-white/8 dark:bg-white/3"
           >
-            <p className="text-xs text-slate-500 dark:text-white/46">
+            <p className="text-xs text-muted-foreground dark:text-white/46">
               Welcome back! Myra remembers your conversation.
             </p>
           </motion.div>
@@ -437,17 +437,17 @@ export function PublicMyraPanel({
             >
               <div className="space-y-3 text-center">
                 <motion.div
-                  className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full border border-amber-300/30 bg-amber-50 text-amber-500 shadow-[0_10px_30px_rgba(245,158,11,0.12)] dark:border-amber-300/18 dark:bg-amber-300/8 dark:text-amber-200 dark:shadow-[0_10px_30px_rgba(245,158,11,0.08)]"
+                  className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full border border-warning/30 bg-primary/5 text-warning shadow-[0_10px_30px_rgba(245,158,11,0.12)] dark:border-warning/18 dark:bg-warning16909 dark:text-primary/60 dark:shadow-[0_10px_30px_rgba(129,140,248,0.08)]"
                   animate={{ scale: [1, 1.06, 1] }}
                   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
                 >
                   <Sparkles className="h-8 w-8" />
                 </motion.div>
-                <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">Hi! I am Myra.</p>
-                <p className="px-4 text-sm font-medium leading-relaxed text-slate-500 dark:text-white/52">
+                <p className="text-lg font-bold tracking-tight text-foreground dark:text-white">Hi! I am Myra.</p>
+                <p className="px-4 text-sm font-medium leading-relaxed text-muted-foreground dark:text-white/52">
                   I&apos;m Lyra&apos;s companion for platform support. I can explain how the Beta works, what ELITE access includes, which assets are covered and how LyraAlpha works.
                 </p>
-                <p className="pt-1 text-sm font-medium text-amber-600 dark:text-amber-300">
+                <p className="pt-1 text-sm font-medium text-primary dark:text-warning">
                   How may I help you today?
                 </p>
               </div>
@@ -460,7 +460,7 @@ export function PublicMyraPanel({
                     whileHover={{ scale: 1.02, transition: { duration: 0.12 } }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => sendMessage(qr)}
-                    className="rounded-[1.35rem] border border-slate-200/80 bg-white/90 p-3 text-left text-sm text-slate-600 transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300/40 hover:bg-amber-50 hover:text-slate-900 cursor-pointer dark:border-white/8 dark:bg-white/2.5 dark:text-white/72 dark:hover:border-amber-300/18 dark:hover:bg-amber-300/[0.07] dark:hover:text-white"
+                    className="rounded-[1.35rem] border border-border/80 bg-white/90 p-3 text-left text-sm text-foreground transition-all duration-300 hover:-translate-y-0.5 hover:border-warning/40 hover:bg-primary/5 hover:text-foreground cursor-pointer dark:border-white/8 dark:bg-white/2.5 dark:text-white/72 dark:hover:border-warning/18 dark:hover:bg-warning18682/[0.07] dark:hover:text-white"
                   >
                     {qr}
                   </motion.button>
@@ -483,18 +483,18 @@ export function PublicMyraPanel({
               <div
                 className={`max-w-[84%] rounded-[1.35rem] px-3.5 py-3 text-sm ${
                   msg.role === "user"
-                    ? "rounded-br-sm border border-amber-300/40 bg-amber-50 text-slate-900 dark:border-amber-300/24 dark:bg-amber-300/12 dark:text-white"
-                    : "rounded-bl-sm border border-slate-200/80 bg-white/92 text-slate-700 dark:border-white/8 dark:bg-white/3 dark:text-white/82"
+                    ? "rounded-br-sm border border-warning/40 bg-primary/5 text-foreground dark:border-warning/24 dark:bg-warning19533 dark:text-white"
+                    : "rounded-bl-sm border border-border/80 bg-white/92 text-foreground dark:border-white/8 dark:bg-white/3 dark:text-white/82"
                 }`}
               >
                 {msg.role === "assistant" && (
-                  <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/70">
+                  <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-primary dark:text-primary/70">
                     <Sparkles className="w-2.5 h-2.5" />
                     Myra
                   </span>
                 )}
                 <p className="leading-relaxed">{renderContent(msg.content)}</p>
-                <span className="mt-1 block text-[10px] text-slate-400 dark:text-white/28">
+                <span className="mt-1 block text-[10px] text-muted-foreground dark:text-white/28">
                   {formatTime(msg.createdAt)}
                 </span>
               </div>
@@ -511,8 +511,8 @@ export function PublicMyraPanel({
             animate="visible"
             className="flex justify-start"
           >
-            <div className="max-w-[84%] rounded-[1.35rem] rounded-bl-sm border border-slate-200/80 bg-white/92 px-3.5 py-3 text-sm text-slate-700 dark:border-white/8 dark:bg-white/3 dark:text-white/82">
-              <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-amber-600 dark:text-amber-200/70">
+            <div className="max-w-[84%] rounded-[1.35rem] rounded-bl-sm border border-border/80 bg-white/92 px-3.5 py-3 text-sm text-foreground dark:border-white/8 dark:bg-white/3 dark:text-white/82">
+              <span className="mb-1 flex items-center gap-1 text-[10px] font-medium uppercase tracking-[0.22em] text-primary dark:text-primary/70">
                 <Sparkles className="w-2.5 h-2.5" />
                 Myra
               </span>
@@ -534,9 +534,9 @@ export function PublicMyraPanel({
               exit={{ opacity: 0, scale: 0.92, transition: { duration: 0.12 } }}
               className="flex justify-start"
             >
-              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-slate-200/80 bg-white/92 px-3 py-2.5 dark:border-white/8 dark:bg-white/3">
-                <Sparkles className="h-3 w-3 text-amber-600 dark:text-amber-200/70" />
-                <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400 dark:text-white/42">Myra is typing</span>
+              <div className="flex items-center gap-2 rounded-[1.35rem] rounded-bl-sm border border-border/80 bg-white/92 px-3 py-2.5 dark:border-white/8 dark:bg-white/3">
+                <Sparkles className="h-3 w-3 text-primary dark:text-primary/70" />
+                <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground dark:text-white/42">Myra is typing</span>
                 <TypingDots />
               </div>
             </motion.div>
@@ -547,16 +547,16 @@ export function PublicMyraPanel({
       </div>
 
       {/* Input */}
-      <div className="relative shrink-0 border-t border-slate-200/80 bg-slate-50/90 p-3 dark:border-white/8 dark:bg-black/18">
+      <div className="relative shrink-0 border-t border-border/80 bg-muted/90 p-3 dark:border-white/8 dark:bg-black/18">
         {sendError && (
-          <div className="mb-2 flex items-center gap-2 rounded-xl bg-red-500/10 px-3 py-2">
-            <p className="flex-1 text-xs font-medium text-red-500 dark:text-red-400">
+          <div className="mb-2 flex items-center gap-2 rounded-xl bg-danger/10 px-3 py-2">
+            <p className="flex-1 text-xs font-medium text-danger dark:text-danger">
               {sendError}
             </p>
             {lastFailedInput && (
               <button
                 onClick={handleRetry}
-                className="inline-flex items-center gap-1 rounded-lg bg-red-500/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-red-600 transition-colors hover:bg-red-500/25 dark:text-red-300 dark:hover:bg-red-400/20"
+                className="inline-flex items-center gap-1 rounded-lg bg-danger/15 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-danger transition-colors hover:bg-danger/25 dark:text-danger dark:hover:bg-danger/20"
               >
                 <RotateCcw className="h-2.5 w-2.5" />
                 Retry
@@ -578,22 +578,22 @@ export function PublicMyraPanel({
             }}
             placeholder="Ask about Beta access, ELITE plan or coverage..."
             disabled={sending}
-            className="flex-1 rounded-full border border-slate-200/80 bg-white px-4 py-3 text-sm text-slate-900 transition-all placeholder:text-slate-400 focus:border-amber-300/50 focus:outline-none focus:ring-1 focus:ring-amber-300/18 disabled:opacity-60 disabled:cursor-not-allowed dark:border-white/10 dark:bg-white/3 dark:text-white dark:placeholder:text-white/28 dark:focus:border-amber-300/28"
+            className="flex-1 rounded-full border border-border/80 bg-white px-4 py-3 text-sm text-foreground transition-all placeholder:text-muted-foreground focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/18 disabled:opacity-60 disabled:cursor-not-allowed dark:border-white/10 dark:bg-white/3 dark:text-white dark:placeholder:text-white/28 dark:focus:border-warning/28"
           />
           <motion.button
             whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => sendMessage()}
             disabled={!input.trim() || sending}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-400 text-slate-950 shadow-[0_10px_30px_rgba(245,158,11,0.22)] transition-all hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-warning text-foreground shadow-[0_10px_30px_rgba(245,158,11,0.22)] transition-all hover:bg-warning24557 disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
             aria-label="Send message"
           >
             <Send className="h-4 w-4" />
           </motion.button>
         </div>
         <div className="mt-2 flex items-center justify-center">
-          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/90 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-slate-400 dark:border-white/8 dark:bg-white/3 dark:text-white/46">
-            <Sparkles className="h-2.5 w-2.5 text-amber-600 dark:text-amber-200/70" />
+          <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-white/90 px-3 py-1 text-[10px] uppercase tracking-[0.24em] text-muted-foreground dark:border-white/8 dark:bg-white/3 dark:text-white/46">
+            <Sparkles className="h-2.5 w-2.5 text-primary dark:text-primary/70" />
             Beta users get free ELITE access with 300 credits
           </span>
         </div>

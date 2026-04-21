@@ -18,15 +18,15 @@ interface FactorAlignmentChartProps {
 
 const fitConfig = {
   STRONG: {
-    color: "text-green-600 bg-green-50 border-green-200",
+    color: "text-success bg-success/5 border-success/20",
     label: "Strong Fit",
   },
   MODERATE: {
-    color: "text-amber-600 bg-amber-50 border-amber-200",
+    color: "text-primary bg-primary/5 border-primary/20",
     label: "Moderate Fit",
   },
   WEAK: {
-    color: "text-orange-600 bg-orange-50 border-orange-200",
+    color: "text-warning bg-warning/5 border-warning/20",
     label: "Weak Fit",
   },
 };
@@ -59,11 +59,11 @@ export function FactorAlignmentChart({
   ];
 
   return (
-    <div className={cn("rounded-xl border bg-white p-4", className)}>
+    <div className={cn("rounded-xl border bg-card p-4", className)}>
       <div className="flex items-center justify-between mb-4">
-        <h4 className="text-sm font-medium text-gray-700">Factor Alignment</h4>
+        <h4 className="text-sm font-medium text-foreground">Factor Alignment</h4>
         <div className="flex items-center gap-2">
-          <span className="text-2xl font-bold text-amber-600">{score}</span>
+          <span className="text-2xl font-bold text-primary">{score}</span>
           <span
             className={cn(
               "text-xs font-medium px-2 py-1 rounded-full border",
@@ -85,21 +85,21 @@ export function FactorAlignmentChart({
                 <span
                   className={cn(
                     "text-xs font-medium",
-                    isDominant ? "text-amber-700" : "text-gray-600",
+                    isDominant ? "text-primary" : "text-muted-foreground",
                   )}
                 >
                   {factor.name}
-                  {isDominant && <span className="ml-1 text-amber-500">★</span>}
+                  {isDominant && <span className="ml-1 text-warning">★</span>}
                 </span>
-                <span className="text-xs font-semibold text-gray-700">
+                <span className="text-xs font-semibold text-foreground">
                   {factor.value.toFixed(0)}
                 </span>
               </div>
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
                 <div
                   className={cn(
                     "h-full rounded-full transition-all",
-                    isDominant ? "bg-amber-500" : "bg-gray-400",
+                    isDominant ? "bg-warning" : "bg-muted-foreground/40",
                   )}
                   style={{ width: `${factor.value}%` }}
                 />
@@ -111,7 +111,7 @@ export function FactorAlignmentChart({
 
       {/* Explanation */}
       <div className="pt-3 border-t">
-        <p className="text-xs text-gray-600 leading-relaxed">{explanation}</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">{explanation}</p>
       </div>
     </div>
   );

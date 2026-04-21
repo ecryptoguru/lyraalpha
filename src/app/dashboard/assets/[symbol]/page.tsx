@@ -499,8 +499,8 @@ export default function AssetPage({
                 className={cn(
                   "flex items-center gap-1 font-bold text-xs px-2.5 py-1 rounded-full border",
                   isUp
-                    ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
-                    : "text-rose-500 bg-rose-500/10 border-rose-500/20",
+                    ? "text-success bg-success/10 border-success/20"
+                    : "text-danger bg-danger/10 border-danger/20",
                 )}
               >
                 {isUp ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
@@ -629,7 +629,7 @@ export default function AssetPage({
               title: `Ask Lyra about ${friendlySymbol}`,
               description: "Open Lyra when you want the setup translated into plain English, scenario logic or a cleaner action frame.",
               href: `/dashboard/lyra?q=${encodeURIComponent(`Explain ${friendlySymbol} in plain English`)}`,
-              accent: "amber",
+              accent: "gold",
             },
             {
               eyebrow: "Narrative path",
@@ -664,11 +664,11 @@ export default function AssetPage({
           </div>
 
           <div className="mt-4 grid grid-cols-1 gap-3">
-            <div className="rounded-3xl border border-emerald-500/15 bg-emerald-500/5 p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-400">Top drivers</p>
+            <div className="rounded-3xl border border-success/15 bg-success/5 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-success">Top drivers</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {keyDrivers.length > 0 ? keyDrivers.map((driver) => (
-                  <span key={driver} className="inline-flex rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-400">
+                  <span key={driver} className="inline-flex rounded-full border border-success/20 bg-success/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-success">
                     {driver}
                   </span>
                 )) : (
@@ -679,11 +679,11 @@ export default function AssetPage({
               </div>
             </div>
 
-            <div className="rounded-3xl border border-rose-500/15 bg-rose-500/5 p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-rose-400">Top risks</p>
+            <div className="rounded-3xl border border-danger/15 bg-danger/5 p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-danger">Top risks</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {keyRisks.length > 0 ? keyRisks.map((risk) => (
-                  <span key={risk} className="inline-flex rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-rose-400">
+                  <span key={risk} className="inline-flex rounded-full border border-danger/20 bg-danger/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-danger">
                     {risk}
                   </span>
                 )) : (
@@ -932,7 +932,7 @@ export default function AssetPage({
             <div className="flex items-center gap-3 mb-6">
               <div className={cn(
                 "p-2 rounded-2xl border",
-                "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                "bg-success/10 border-success/20 text-success"
               )}>
                 <Zap className="h-5 w-5" />
               </div>
@@ -990,17 +990,17 @@ export default function AssetPage({
                 {(cgMeta?.ath || cgMeta?.atl) && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     {cgMeta?.ath != null && (
-                      <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/15 space-y-2">
+                      <div className="p-4 rounded-2xl bg-success/5 border border-success/15 space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">All-Time High</span>
+                          <span className="text-[10px] font-bold text-success uppercase tracking-widest">All-Time High</span>
                           {cgMeta.athDate && (
                             <span className="text-[9px] text-muted-foreground">{new Date(cgMeta.athDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
                           )}
                         </div>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-bold text-emerald-500">{formatPrice(cgMeta.ath, { symbol: currencySymbol, region: currencyRegion })}</span>
+                          <span className="text-2xl font-bold text-success">{formatPrice(cgMeta.ath, { symbol: currencySymbol, region: currencyRegion })}</span>
                           {cgMeta.athChangePercentage != null && (
-                            <span className={cn("text-sm font-bold", cgMeta.athChangePercentage < 0 ? "text-red-500" : "text-emerald-500")}>
+                            <span className={cn("text-sm font-bold", cgMeta.athChangePercentage < 0 ? "text-danger" : "text-success")}>
                               {cgMeta.athChangePercentage > 0 ? "+" : ""}{cgMeta.athChangePercentage.toFixed(1)}%
                             </span>
                           )}
@@ -1008,17 +1008,17 @@ export default function AssetPage({
                       </div>
                     )}
                     {cgMeta?.atl != null && (
-                      <div className="p-4 rounded-2xl bg-red-500/5 border border-red-500/15 space-y-2">
+                      <div className="p-4 rounded-2xl bg-danger/5 border border-danger/15 space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-red-500 uppercase tracking-widest">All-Time Low</span>
+                          <span className="text-[10px] font-bold text-danger uppercase tracking-widest">All-Time Low</span>
                           {cgMeta.atlDate && (
                             <span className="text-[9px] text-muted-foreground">{new Date(cgMeta.atlDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}</span>
                           )}
                         </div>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-bold text-red-500">{formatPrice(cgMeta.atl, { symbol: currencySymbol, region: currencyRegion })}</span>
+                          <span className="text-2xl font-bold text-danger">{formatPrice(cgMeta.atl, { symbol: currencySymbol, region: currencyRegion })}</span>
                           {cgMeta.atlChangePercentage != null && (
-                            <span className={cn("text-sm font-bold", cgMeta.atlChangePercentage > 0 ? "text-emerald-500" : "text-red-500")}>
+                            <span className={cn("text-sm font-bold", cgMeta.atlChangePercentage > 0 ? "text-success" : "text-danger")}>
                               {cgMeta.atlChangePercentage > 0 ? "+" : ""}{cgMeta.atlChangePercentage.toFixed(1)}%
                             </span>
                           )}
@@ -1042,7 +1042,7 @@ export default function AssetPage({
                       ].map(({ label, val }) => (
                         <div key={label} className="p-2.5 rounded-2xl bg-background/30 border border-border/30 dark:border-white/5 text-center">
                           <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-1">{label}</p>
-                          <p className={cn("text-sm font-bold", val != null && val > 0 ? "text-emerald-500" : val != null && val < 0 ? "text-red-500" : "text-muted-foreground")}>
+                          <p className={cn("text-sm font-bold", val != null && val > 0 ? "text-success" : val != null && val < 0 ? "text-danger" : "text-muted-foreground")}>
                             {val != null ? `${val > 0 ? "+" : ""}${val.toFixed(1)}%` : "—"}
                           </p>
                         </div>
@@ -1159,7 +1159,7 @@ export default function AssetPage({
           {hasMeaningfulPerformanceSection && performance && (
             <div className="space-y-4 pt-4">
               <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="w-2 h-2 rounded-full bg-success" />
                 Performance Metrics
               </h3>
               <PerformanceMatrix 
@@ -1206,9 +1206,9 @@ export default function AssetPage({
                 (impact) => (impact as EventImpact).recentEvents > 0,
               ) && (
                 <div className="backdrop-blur-2xl shadow-xl p-4 rounded-3xl border border-border/30 dark:border-white/5 bg-card/60 relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl -z-10 transition-colors group-hover:bg-amber-500/10" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-warning/5 blur-3xl -z-10 transition-colors group-hover:bg-warning/10" />
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="p-1.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500">
+                    <div className="p-1.5 rounded-2xl bg-warning/10 border border-warning/20 text-warning">
                       <Zap className="h-4 w-4" />
                     </div>
                     <h3 className="text-sm font-bold uppercase tracking-wide text-muted-foreground">
@@ -1228,7 +1228,7 @@ export default function AssetPage({
                         return (
                           <div
                             key={scoreType}
-                            className="bg-background/40 rounded-2xl p-2 border border-border/30 hover:border-amber-500/30 transition-colors"
+                            className="bg-background/40 rounded-2xl p-2 border border-border/30 hover:border-warning/30 transition-colors"
                           >
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
@@ -1261,9 +1261,9 @@ export default function AssetPage({
 
             {analytics?.correlationRegime && (
               <div className="bg-card/60 border border-border/30 dark:border-white/5 shadow-xl p-4 rounded-3xl backdrop-blur-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl -z-10 transition-colors group-hover:bg-amber-500/10" />
+                <div className="absolute top-0 right-0 w-32 h-32 bg-warning/5 blur-3xl -z-10 transition-colors group-hover:bg-warning/10" />
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="p-1.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500">
+                  <div className="p-1.5 rounded-2xl bg-warning/10 border border-warning/20 text-warning">
                     <Waves className="h-4 w-4" />
                   </div>
                   <Tooltip>
@@ -1307,9 +1307,9 @@ export default function AssetPage({
                       <TooltipTrigger asChild>
                         <span className={cn(
                           "text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-xl border cursor-help",
-                          analytics.correlationRegime.trend === "STABLE" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-                          analytics.correlationRegime.trend === "RISING" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
-                          "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                          analytics.correlationRegime.trend === "STABLE" ? "bg-success/10 text-success border-success/20" :
+                          analytics.correlationRegime.trend === "RISING" ? "bg-warning/10 text-warning border-warning/20" :
+                          "bg-warning/10 text-warning border-warning/20"
                         )}>
                           {analytics.correlationRegime?.trend || "STABLE"}
                         </span>
@@ -1345,7 +1345,7 @@ export default function AssetPage({
                       </div>
                       <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
                         <div 
-                          className="h-full bg-amber-500 rounded-full transition-all duration-1000"
+                          className="h-full bg-warning rounded-full transition-all duration-1000"
                           style={{ width: `${Math.abs((analytics.correlationRegime?.avgCorrelation || 0) * 100)}%` }}
                         />
                       </div>
@@ -1370,7 +1370,7 @@ export default function AssetPage({
                       </div>
                       <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
                         <div 
-                          className="h-full bg-cyan-500 rounded-full transition-all duration-1000"
+                          className="h-full bg-info rounded-full transition-all duration-1000"
                           style={{ width: `${(analytics.correlationRegime?.dispersion || 0) * 100}%` }}
                         />
                       </div>
@@ -1469,10 +1469,10 @@ function TechnicalMetric({
 const SCORE_BG_MAP: Record<string, string> = {
   "text-primary": "bg-primary",
   "text-foreground": "bg-foreground",
-  "text-emerald-400": "bg-emerald-400",
-  "text-amber-400": "bg-amber-400",
-  "text-rose-400": "bg-rose-400",
-  "text-cyan-400": "bg-cyan-400",
+  "text-success": "bg-success",
+  "text-warning": "bg-warning",
+  "text-danger": "bg-danger",
+  "text-info": "bg-info",
 };
 
 function ScoreTile({
@@ -1503,7 +1503,7 @@ function ScoreTile({
       <TooltipTrigger asChild>
         <div
           onClick={onClick}
-          className="bg-card/60 backdrop-blur-2xl border border-border/30 dark:border-white/5 shadow-xl p-4 rounded-2xl flex flex-col justify-between gap-3 cursor-pointer group hover:bg-card/80 hover:border-primary/20 hover:shadow-[0_0_20px_rgba(139,92,246,0.1)] transition-all relative overflow-hidden min-h-[120px] h-auto"
+          className="bg-card/60 backdrop-blur-2xl border border-border/30 dark:border-white/5 shadow-xl p-4 rounded-2xl flex flex-col justify-between gap-3 cursor-pointer group hover:bg-card/80 hover:border-primary/20 hover:shadow-primary/10 transition-all relative overflow-hidden min-h-[120px] h-auto"
         >
           {/* Subtle gradient glow on hover */}
           <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -1519,10 +1519,10 @@ function ScoreTile({
                     className={cn(
                       "h-1 w-1 rounded-full",
                       confidence === "high"
-                        ? "bg-emerald-400"
+                        ? "bg-success"
                         : confidence === "medium"
-                          ? "bg-amber-400"
-                          : "bg-rose-400",
+                          ? "bg-warning"
+                          : "bg-danger",
                     )}
                   />
                   <span className="text-[8px] font-bold uppercase tracking-tight opacity-40">
@@ -1552,9 +1552,9 @@ function ScoreTile({
                     className={cn(
                       "text-[10px] font-bold",
                       change === "up"
-                        ? "text-emerald-400"
+                        ? "text-success"
                         : change === "down"
-                          ? "text-rose-400"
+                          ? "text-danger"
                           : "text-muted-foreground",
                     )}
                   >

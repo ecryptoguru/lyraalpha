@@ -19,7 +19,7 @@ export function MarketContextPanel({ context }: MarketContextPanelProps) {
   const safeContext = context ?? null;
 
   const getStatusColor = (level: string | undefined) => {
-    if (!level) return "text-slate-400 bg-slate-400/10 border-slate-400/20";
+    if (!level) return "text-muted-foreground bg-muted/10 border-border/20";
 
     const positive = new Set([
       "STRONG_RISK_ON",
@@ -44,18 +44,18 @@ export function MarketContextPanel({ context }: MarketContextPanelProps) {
     ]);
 
     if (positive.has(level)) {
-      return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
+      return "text-success bg-success/10 border-success/20";
     }
     if (neutral.has(level)) {
-      return "text-slate-300 bg-slate-400/10 border-slate-400/20";
+      return "text-muted-foreground bg-muted/10 border-border/20";
     }
     if (warning.has(level)) {
-      return "text-amber-400 bg-amber-400/10 border-amber-400/20";
+      return "text-warning bg-warning/10 border-warning/20";
     }
     if (critical.has(level)) {
-      return "text-rose-400 bg-rose-400/10 border-rose-400/20";
+      return "text-danger bg-danger/10 border-danger/20";
     }
-    return "text-slate-400 bg-slate-400/10 border-slate-400/20";
+    return "text-muted-foreground bg-muted/10 border-border/20";
   };
 
   const formatLabel = (label: string | undefined) => label?.replace(/_/g, " ") || "Unknown";

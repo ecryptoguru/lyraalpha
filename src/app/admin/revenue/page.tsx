@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useAdminRevenue, useAdminCredits } from "@/hooks/use-admin";
-import { Loader2, ShieldAlert, DollarSign, TrendingUp, Users, CreditCard, Coins, AlertTriangle } from "lucide-react";
+import { Loader2, ShieldAlert, DollarSign, TrendingUp, Users, CreditCard, Coins, AlertTriangle, RotateCcw } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -98,7 +98,7 @@ export default function AdminRevenuePage() {
             label="MRR"
             value={`$${(data.mrr ?? 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
             icon={DollarSign}
-            accent="text-emerald-400"
+            accent="text-success"
             subtitle="Monthly recurring"
           />
           <MetricCard
@@ -130,7 +130,7 @@ export default function AdminRevenuePage() {
             label="Credits Purchased (30d)"
             value={Number(purchasedCredits).toLocaleString()}
             icon={Coins}
-            accent="text-amber-400"
+            accent="text-warning"
             subtitle="Credit units issued via purchase"
           />
           <MetricCard
@@ -143,18 +143,80 @@ export default function AdminRevenuePage() {
             label="30d Churn Rate"
             value={`${data.churnRate ?? 0}%`}
             icon={AlertTriangle}
-            accent={(data.churnRate ?? 0) > 5 ? "text-red-400" : "text-emerald-400"}
+            accent={(data.churnRate ?? 0) > 5 ? "text-danger" : "text-success"}
             subtitle="Cancellations / active subs"
           />
           <MetricCard
             label="Past Due"
             value={data.subscriptionsByStatus?.PAST_DUE ?? 0}
             icon={AlertTriangle}
-            accent={(data.subscriptionsByStatus?.PAST_DUE ?? 0) > 0 ? "text-amber-400" : "text-muted-foreground/60"}
+            accent={(data.subscriptionsByStatus?.PAST_DUE ?? 0) > 0 ? "text-warning" : "text-muted-foreground/60"}
             subtitle="Need payment recovery"
           />
         </div>
       </div>
+
+      {/* Refunds (30d) — Stripe charge.refunded events + credit clawback tracking */}
+      {data.refunds && (
+        <div>
+          <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Refunds & Clawback (30d)</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <MetricCard
+              label="Refund Events"
+              value={data.refunds.count30d}
+              icon={RotateCcw}
+              accent={data.refunds.count30d > 0 ? "text-warning" : "text-muted-foreground/60"}
+              subtitle="charge.refunded webhook events"
+            />
+            <MetricCard
+              label="Refunded Amount"
+              value={`$${(data.refunds.totalAmountMinorUnits / 100).toFixed(2)}`}
+              icon={DollarSign}
+              accent={data.refunds.totalAmountMinorUnits > 0 ? "text-warning" : "text-muted-foreground/60"}
+              subtitle="Gross Stripe amount refunded"
+            />
+            <MetricCard
+              label="Credits Clawed Back"
+              value={data.refunds.creditsClawedBack30d.toLocaleString()}
+              icon={Coins}
+              accent={data.refunds.creditsClawedBack30d > 0 ? "text-warning" : "text-muted-foreground/60"}
+              subtitle="Auto-deducted via refund-clawback"
+            />
+          </div>
+          {data.refunds.recent.length > 0 && (
+            <div className="rounded-2xl border border-white/5 bg-card/80 backdrop-blur-xl p-5 mt-3">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Recent Refunds</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-white/5">
+                      <th className="text-left py-2 text-muted-foreground font-semibold">Date</th>
+                      <th className="text-left py-2 text-muted-foreground font-semibold">User ID</th>
+                      <th className="text-right py-2 text-muted-foreground font-semibold">Amount</th>
+                      <th className="text-left py-2 text-muted-foreground font-semibold">Stripe Ref</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.refunds.recent.map((r: { id: string; timestamp: string; userId: string; amount: number | null; currency: string | null; stripeObjectId: string | null }) => (
+                      <tr key={r.id} className="border-b border-border/20 hover:bg-muted/10 transition-colors">
+                        <td className="py-2 text-muted-foreground whitespace-nowrap">{new Date(r.timestamp).toLocaleDateString()}</td>
+                        <td className="py-2 text-muted-foreground font-mono">{r.userId.slice(0, 12)}…</td>
+                        <td className="py-2 text-right font-mono text-warning">
+                          {r.amount != null ? `$${(r.amount / 100).toFixed(2)}` : "—"}
+                          {r.currency && <span className="text-[10px] text-muted-foreground ml-1">{r.currency.toUpperCase()}</span>}
+                        </td>
+                        <td className="py-2 text-muted-foreground font-mono text-[10px]">
+                          {r.stripeObjectId ? `${r.stripeObjectId.slice(0, 16)}…` : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -260,7 +322,7 @@ export default function AdminRevenuePage() {
                     <span style={{ color: PLAN_COLORS[row.plan] || "#64748b" }} className="font-bold">{row.plan}</span>
                   </td>
                   <td className="py-2.5 text-right font-mono text-foreground">{row.count.toLocaleString()}</td>
-                  <td className="py-2.5 text-right font-mono text-emerald-400">${row.revenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                  <td className="py-2.5 text-right font-mono text-success">${row.revenue.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
                   <td className="py-2.5 text-right font-mono text-muted-foreground">${(row.revenue * 12).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
                   <td className="py-2.5 text-right text-muted-foreground">
                     {(data.mrr ?? 0) > 0 ? `${((row.revenue / data.mrr) * 100).toFixed(1)}%` : "—"}
@@ -300,7 +362,7 @@ export default function AdminRevenuePage() {
                 <tr key={evt.id} className="border-b border-border/20 hover:bg-muted/10 transition-colors">
                   <td className="py-2 font-medium text-foreground">{evt.eventType}</td>
                   <td className="py-2">
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${evt.provider === "STRIPE" ? "bg-amber-500/10 text-amber-400" : "bg-emerald-500/10 text-emerald-400"}`}>
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${evt.provider === "STRIPE" ? "bg-warning/10 text-warning" : "bg-success/10 text-success"}`}>
                       {evt.provider}
                     </span>
                   </td>

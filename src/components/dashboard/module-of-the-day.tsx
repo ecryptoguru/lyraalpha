@@ -69,7 +69,7 @@ export function ModuleOfTheDay({
               <Clock className="h-3.5 w-3.5" />
               {modOfTheDay.estimatedTime}
             </div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-500">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-warning">
               <Star className="h-3.5 w-3.5" />
               +{modOfTheDay.xpReward} XP
             </div>
@@ -79,7 +79,7 @@ export function ModuleOfTheDay({
         <div className="shrink-0">
           <Link
             href={`/dashboard/learning/${modOfTheDay.slug}`}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-primary text-black font-bold text-sm hover:bg-primary/90 transition-transform hover:scale-105 active:scale-95"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-transform hover:scale-105 active:scale-95"
           >
             <PlayCircle className="h-4 w-4" />
             Start Learning

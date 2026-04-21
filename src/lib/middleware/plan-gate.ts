@@ -67,10 +67,6 @@ export function canAccessRegion(plan: PlanTier, region?: string | null): boolean
   return normalized === "US" || normalized === "IN";
 }
 
-/** Check if a feature is fully unlocked for the given plan */
-export function isFeatureUnlocked(plan: PlanTier): boolean {
-  return isElitePlan(plan);
-}
 
 /** Check if user has at least partial access to a feature */
 export function hasFeatureAccess(plan: PlanTier, feature: EliteFeature): boolean {
@@ -78,6 +74,9 @@ export function hasFeatureAccess(plan: PlanTier, feature: EliteFeature): boolean
 }
 
 // ─── User Plan Resolver (Direct DB) ─────────────────────────────────────────
+
+// Hoist env check to module level — env vars are immutable per Vercel deploy.
+const PLAN_CACHE_ENABLED = process.env.PLAN_CACHE_ENABLED === "true";
 
 /** Fetch user plan directly from DB. Returns STARTER as fallback. */
 export async function getUserPlan(userId: string): Promise<PlanTier> {
@@ -88,8 +87,6 @@ export async function getUserPlan(userId: string): Promise<PlanTier> {
       !process.env.VERCEL_ENV) {
     return normalizePlanTier(process.env.LYRA_AUDIT_PLAN);
   }
-
-  const PLAN_CACHE_ENABLED = process.env.PLAN_CACHE_ENABLED === "true";
   if (PLAN_CACHE_ENABLED) {
     const cacheKey = `plan:${userId}`;
     const cached = await withStaleWhileRevalidate<PlanTier>({
@@ -132,11 +129,11 @@ async function fetchUserPlanFromDb(userId: string): Promise<PlanTier> {
       return "STARTER";
     }
 
-    let plan = normalizePlanTier(user?.plan as string | null | undefined);
-    const hasActiveTrial = Boolean(user?.trialEndsAt && user.trialEndsAt > new Date());
-    const hasExpiredTrial = Boolean(user?.trialEndsAt && user.trialEndsAt < new Date());
-    const hasActivePaidSubscription = Boolean(user?.subscriptions?.length);
-    const isAdmin = isPrivilegedEmail(user?.email);
+    let plan = normalizePlanTier(user.plan as string | null | undefined);
+    const hasActiveTrial = Boolean(user.trialEndsAt && user.trialEndsAt > new Date());
+    const hasExpiredTrial = Boolean(user.trialEndsAt && user.trialEndsAt < new Date());
+    const hasActivePaidSubscription = Boolean(user.subscriptions?.length);
+    const isAdmin = isPrivilegedEmail(user.email);
 
     if (isAdmin) {
       return "ELITE";
@@ -145,7 +142,7 @@ async function fetchUserPlanFromDb(userId: string): Promise<PlanTier> {
     // Only downgrade if the user had an explicit time-limited trial that has now expired.
     // Permanently-granted plans (trialEndsAt = null, no subscription) are trusted as-is.
     if (hasExpiredTrial && plan !== "STARTER") {
-      ({ plan } = await expireTrialIfNeeded(userId, plan, user?.trialEndsAt ?? null));
+      ({ plan } = await expireTrialIfNeeded(userId, plan, user.trialEndsAt ?? null));
     }
 
     if (hasActiveTrial && plan === "STARTER") {
@@ -177,10 +174,11 @@ export async function expireTrialIfNeeded(
     return { plan: currentPlan, trialEndsAt };
   }
   try {
-    // Invalidate cache BEFORE the DB update to prevent stale ELITE reads
-    // during the window between DB write and cache invalidation
-    await delCache(`plan:${userId}`);
+    // DB update first, then cache invalidation — prevents a concurrent request from
+    // repopulating the cache with stale (pre-update) data during the gap between
+    // delCache and the DB write landing.
     await prisma.user.update({ where: { id: userId }, data: { plan: "STARTER", trialEndsAt: null } });
+    await delCache(`plan:${userId}`);
   } catch (err) {
     logger.warn({ userId, err }, "Failed to persist trial expiry downgrade");
   }
@@ -192,11 +190,10 @@ export async function expireTrialIfNeeded(
 export async function _clearPlanCacheForTest(): Promise<void> {
   if (process.env.PLAN_CACHE_ENABLED !== "true") return;
   try {
-    // Reset the memoized admin allowlist so tests get fresh env values
-    const { delCache } = await import("@/lib/redis");
-    // Delete all plan:* keys using a scan pattern
-    // For test teardown, we just invalidate the known key pattern
-    await delCache("plan:*");
+    // Use the proper scan-based invalidateCacheByPrefix — delCache("plan:*") won't
+    // work because delCache is a single-key delete, not a pattern delete.
+    const { invalidateCacheByPrefix } = await import("@/lib/redis");
+    await invalidateCacheByPrefix("plan");
   } catch {
     // Non-fatal — tests don't depend on cache being cleared
   }

@@ -35,13 +35,13 @@ export function SectorRegimeCard({
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1">
           <span className="text-sm text-muted-foreground">Regime Score</span>
-          <span className="text-2xl font-bold text-amber-600">
+          <span className="text-2xl font-bold text-primary">
             {regimeScore.toFixed(0)}
           </span>
         </div>
         <div className="h-2 bg-muted/60 rounded-full overflow-hidden">
           <div
-            className="h-full bg-amber-500 rounded-full transition-all"
+            className="h-full bg-warning rounded-full transition-all"
             style={{ width: `${regimeScore}%` }}
           />
         </div>
@@ -69,7 +69,7 @@ export function SectorRegimeCard({
           <p
             className={cn(
               "text-lg font-semibold",
-              relativeStrength > 0 ? "text-green-600" : "text-red-600",
+              relativeStrength > 0 ? "text-success" : "text-danger",
             )}
           >
             {relativeStrength > 0 ? "+" : ""}
@@ -81,16 +81,16 @@ export function SectorRegimeCard({
         <div className="p-3 rounded-xl bg-muted/30">
           <div className="flex items-center gap-2 mb-1">
             {rotationMomentum > 0 ? (
-              <TrendingUp className="h-4 w-4 text-green-500" />
+              <TrendingUp className="h-4 w-4 text-success" />
             ) : (
-              <TrendingDown className="h-4 w-4 text-red-500" />
+              <TrendingDown className="h-4 w-4 text-danger" />
             )}
             <span className="text-xs text-muted-foreground">Rotation</span>
           </div>
           <p
             className={cn(
               "text-lg font-semibold",
-              rotationMomentum > 0 ? "text-green-600" : "text-red-600",
+              rotationMomentum > 0 ? "text-success" : "text-danger",
             )}
           >
             {rotationMomentum > 0 ? "+" : ""}
@@ -103,7 +103,7 @@ export function SectorRegimeCard({
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs text-muted-foreground">Leadership</span>
           </div>
-          <p className="text-lg font-semibold text-cyan-600">
+          <p className="text-lg font-semibold text-info">
             {leadershipScore.toFixed(0)}
           </p>
         </div>

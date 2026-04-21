@@ -87,11 +87,11 @@ export function CreatePortfolioDialog({ region, onClose, onCreate }: CreatePortf
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="My Growth Portfolio"
-              className={cn("text-sm", nameError && "border-red-400/50")}
+              className={cn("text-sm", nameError && "border-danger/50")}
               maxLength={100}
               autoFocus
             />
-            {nameError && <p className="text-[11px] text-red-400">{nameError}</p>}
+            {nameError && <p className="text-[11px] text-danger">{nameError}</p>}
           </div>
 
           <div className="space-y-1.5">

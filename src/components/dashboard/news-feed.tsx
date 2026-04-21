@@ -25,7 +25,7 @@ export function NewsFeed({ events }: NewsFeedProps) {
        {/* Header */}
        <div className="p-4 border-b border-white/5 flex items-center justify-between bg-muted/20">
           <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] flex items-center gap-2">
-            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
             Intelligence Stream
           </h3>
           <Link
@@ -59,7 +59,7 @@ export function NewsFeed({ events }: NewsFeedProps) {
                   <div
                     className={cn(
                       "mt-0.5 w-6 h-6 rounded-xl flex items-center justify-center shrink-0 border border-white/5 bg-card z-10",
-                      event.type === "NEWS" ? "text-amber-400" : event.type === "RISK" ? "text-rose-400" : "text-emerald-400"
+                      event.type === "NEWS" ? "text-warning" : event.type === "RISK" ? "text-danger" : "text-success"
                     )}
                   >
                     {event.type === "NEWS" ? <Newspaper className="h-3 w-3" /> : event.type === "RISK" ? <ShieldAlert className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}

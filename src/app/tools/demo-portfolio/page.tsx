@@ -60,17 +60,17 @@ const US_DEMO_ALLOCATION = [
   { label: "Layer 1", percent: 68.6, color: "#3b82f6" },
   { label: "DeFi", percent: 17.0, color: "#38bdf8" },
   { label: "Exchange", percent: 6.2, color: "#22c55e" },
-  { label: "Payments", percent: 4.7, color: "#fbbf24" },
+  { label: "Payments", percent: 4.7, color: "#FFD700" },
   { label: "Meme", percent: 3.6, color: "#a78bfa" },
 ];
 
 const US_DEMO_HEALTH_DIMENSIONS = [
-  { label: "Diversification", score: 48, color: "#f97316", desc: "Low — 68.6% in L1 sector" },
+  { label: "Diversification", score: 48, color: "#F97316", desc: "Low — 68.6% in L1 sector" },
   { label: "Concentration", score: 42, color: "#ef4444", desc: "BTC alone at 51.8% of portfolio" },
-  { label: "Volatility Control", score: 55, color: "#fbbf24", desc: "Elevated — single-name dominance" },
-  { label: "Correlation Risk", score: 52, color: "#fbbf24", desc: "High L1-sector correlation" },
+  { label: "Volatility Control", score: 55, color: "#FFD700", desc: "Elevated — single-name dominance" },
+  { label: "Correlation Risk", score: 52, color: "#FFD700", desc: "High L1-sector correlation" },
   { label: "Quality & Trust", score: 81, color: "#22c55e", desc: "Strong fundamentals overall" },
-  { label: "Fragility Score", score: 58, color: "#fbbf24", desc: "Elevated tail risk from BTC concentration" },
+  { label: "Fragility Score", score: 58, color: "#FFD700", desc: "Elevated tail risk from BTC concentration" },
 ];
 
 const US_DEMO_MONTE_CARLO = {
@@ -108,10 +108,10 @@ const US_DEMO_EQUITY_CURVE = [
 ];
 
 const US_DEMO_AI_INSIGHTS = [
-  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "Concentration alert", body: "BTC-USD represents 51.8% of portfolio weight. A 20% drawdown in this single position would reduce total portfolio value by ~10.4%." },
-  { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Sector correlation risk", body: "BTC-USD, SOL-USD, ADA-USD, and AVAX-USD are in the same L1 cluster. A sector rotation could trigger correlated drawdowns across 68.6% of the portfolio." },
-  { icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", title: "Hedge quality is strong", body: "BNB-USD and XRP-USD provide meaningful negative correlation during risk-off regimes. This reduces fragility by an estimated 8 points vs an all-L1 portfolio." },
-  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Consider trimming BTC-USD to below 30% and rotating proceeds into DeFi or Payments to reduce concentration risk and improve the diversification score above 65." },
+  { icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10 border-warning/20", title: "Concentration alert", body: "BTC-USD represents 51.8% of portfolio weight. A 20% drawdown in this single position would reduce total portfolio value by ~10.4%." },
+  { icon: GitBranch, color: "text-danger", bg: "bg-danger/10 border-danger/20", title: "Sector correlation risk", body: "BTC-USD, SOL-USD, ADA-USD, and AVAX-USD are in the same L1 cluster. A sector rotation could trigger correlated drawdowns across 68.6% of the portfolio." },
+  { icon: Zap, color: "text-success", bg: "bg-success/10 border-success/20", title: "Hedge quality is strong", body: "BNB-USD and XRP-USD provide meaningful negative correlation during risk-off regimes. This reduces fragility by an estimated 8 points vs an all-L1 portfolio." },
+  { icon: Target, color: "text-info", bg: "bg-info/10 border-info/20", title: "Next action", body: "Consider trimming BTC-USD to below 30% and rotating proceeds into DeFi or Payments to reduce concentration risk and improve the diversification score above 65." },
 ];
 
 const US_DEMO_RISK_METRICS = [
@@ -126,8 +126,8 @@ const US_DEMO_RISK_METRICS = [
 const US_DEMO_FRAGILITY = [
   { label: "L1 Concentration", pct: 79, color: "#ef4444" },
   { label: "BTC Single-Name Weight", pct: 82, color: "#ef4444" },
-  { label: "Correlation Cluster Size", pct: 55, color: "#fbbf24" },
-  { label: "Volatility Regime Mismatch", pct: 46, color: "#fbbf24" },
+  { label: "Correlation Cluster Size", pct: 55, color: "#FFD700" },
+  { label: "Volatility Regime Mismatch", pct: 46, color: "#FFD700" },
 ];
 
 const US_DEMO_CORRELATIONS: [string, string, string][] = [
@@ -156,18 +156,18 @@ const IN_DEMO_HOLDINGS = [
 const IN_DEMO_ALLOCATION = [
   { label: "Layer 1", percent: 68.9, color: "#3b82f6" },
   { label: "DeFi", percent: 15.7, color: "#22c55e" },
-  { label: "Exchange", percent: 7.7, color: "#fbbf24" },
+  { label: "Exchange", percent: 7.7, color: "#FFD700" },
   { label: "Payments", percent: 5.4, color: "#f97316" },
   { label: "Layer 0", percent: 2.2, color: "#a78bfa" },
 ];
 
 const IN_DEMO_HEALTH_DIMENSIONS = [
-  { label: "Diversification", score: 52, color: "#fbbf24", desc: "Moderate — 5 sectors but 68.9% in L1" },
+  { label: "Diversification", score: 52, color: "#FFD700", desc: "Moderate — 5 sectors but 68.9% in L1" },
   { label: "Concentration", score: 44, color: "#ef4444", desc: "BTC alone at 48.2% of portfolio" },
-  { label: "Volatility Control", score: 62, color: "#fbbf24", desc: "Better than US — more names in mid-weight" },
-  { label: "Correlation Risk", score: 58, color: "#fbbf24", desc: "L1 names (BTC, SOL, ADA, AVAX) correlated" },
+  { label: "Volatility Control", score: 62, color: "#FFD700", desc: "Better than US — more names in mid-weight" },
+  { label: "Correlation Risk", score: 58, color: "#FFD700", desc: "L1 names (BTC, SOL, ADA, AVAX) correlated" },
   { label: "Quality & Trust", score: 84, color: "#22c55e", desc: "Blue-chip crypto core holdings" },
-  { label: "Fragility Score", score: 62, color: "#fbbf24", desc: "Moderate tail risk from BTC dominance" },
+  { label: "Fragility Score", score: 62, color: "#FFD700", desc: "Moderate tail risk from BTC dominance" },
 ];
 
 const IN_DEMO_MONTE_CARLO = {
@@ -205,10 +205,10 @@ const IN_DEMO_EQUITY_CURVE = [
 ];
 
 const IN_DEMO_AI_INSIGHTS = [
-  { icon: AlertTriangle, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20", title: "L1 sector clustering", body: "BTC-USD, SOL-USD, ADA-USD, and AVAX-USD represent 68.9% combined weight in the L1 sector. A single sector rotation could compress all four simultaneously." },
-  { icon: Zap, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", title: "Payments hedge working well", body: "XRP-USD provides meaningful negative correlation during risk-off events, reducing portfolio fragility by ~9 points." },
-  { icon: GitBranch, color: "text-rose-400", bg: "bg-rose-400/10 border-rose-400/20", title: "Exchange exposure is diversified", body: "BNB-USD spans exchange and DeFi narratives, reducing single-protocol failure risk while maintaining crypto core alignment." },
-  { icon: Target, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20", title: "Next action", body: "Trim BTC-USD below 35% and add a Layer 2 position (e.g. ARB-USD or OP-USD) to reduce L1 concentration and push the diversification score above 65." },
+  { icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10 border-warning/20", title: "L1 sector clustering", body: "BTC-USD, SOL-USD, ADA-USD, and AVAX-USD represent 68.9% combined weight in the L1 sector. A single sector rotation could compress all four simultaneously." },
+  { icon: Zap, color: "text-success", bg: "bg-success/10 border-success/20", title: "Payments hedge working well", body: "XRP-USD provides meaningful negative correlation during risk-off events, reducing portfolio fragility by ~9 points." },
+  { icon: GitBranch, color: "text-danger", bg: "bg-danger/10 border-danger/20", title: "Exchange exposure is diversified", body: "BNB-USD spans exchange and DeFi narratives, reducing single-protocol failure risk while maintaining crypto core alignment." },
+  { icon: Target, color: "text-info", bg: "bg-info/10 border-info/20", title: "Next action", body: "Trim BTC-USD below 35% and add a Layer 2 position (e.g. ARB-USD or OP-USD) to reduce L1 concentration and push the diversification score above 65." },
 ];
 
 const IN_DEMO_RISK_METRICS = [
@@ -222,8 +222,8 @@ const IN_DEMO_RISK_METRICS = [
 
 const IN_DEMO_FRAGILITY = [
   { label: "L1 Concentration", pct: 68, color: "#f97316" },
-  { label: "SOL-USD Single-Name Weight", pct: 52, color: "#fbbf24" },
-  { label: "L1 Narrative Exposure", pct: 44, color: "#fbbf24" },
+  { label: "SOL-USD Single-Name Weight", pct: 52, color: "#FFD700" },
+  { label: "L1 Narrative Exposure", pct: 44, color: "#FFD700" },
   { label: "Correlation Cluster Size", pct: 38, color: "#22c55e" },
 ];
 
@@ -264,9 +264,9 @@ function getDemoConfig(region: "US" | "IN") {
       fragilityScore: 71,
       fragilityDesc: "Low-moderate tail risk — L1 cluster is the primary fragility driver.",
       fragilitySummary: [
-        { label: "Sector Fragility", value: "High", detail: "68.9% in L1 cluster", color: "text-rose-400" },
-        { label: "Narrative Exposure", value: "High", detail: "L1 narrative at ~68.9% weight", color: "text-rose-400" },
-        { label: "Tail Risk", value: "Moderate", detail: "Max drawdown est. -19.4%", color: "text-amber-400" },
+        { label: "Sector Fragility", value: "High", detail: "68.9% in L1 cluster", color: "text-danger" },
+        { label: "Narrative Exposure", value: "High", detail: "L1 narrative at ~68.9% weight", color: "text-danger" },
+        { label: "Tail Risk", value: "Moderate", detail: "Max drawdown est. -19.4%", color: "text-warning" },
       ],
     };
   }
@@ -293,9 +293,9 @@ function getDemoConfig(region: "US" | "IN") {
     fragilityScore: 67,
     fragilityDesc: "Moderate tail risk — L1 sector concentration is the primary fragility driver.",
     fragilitySummary: [
-      { label: "Sector Fragility", value: "High", detail: "68.6% in Layer 1 cluster", color: "text-rose-400" },
-      { label: "Narrative Exposure", value: "High", detail: "L1 narrative at ~68.6% weight", color: "text-rose-400" },
-      { label: "Tail Risk", value: "Moderate", detail: "Max drawdown est. -23.1%", color: "text-amber-400" },
+      { label: "Sector Fragility", value: "High", detail: "68.6% in Layer 1 cluster", color: "text-danger" },
+      { label: "Narrative Exposure", value: "High", detail: "L1 narrative at ~68.6% weight", color: "text-danger" },
+      { label: "Tail Risk", value: "Moderate", detail: "Max drawdown est. -23.1%", color: "text-warning" },
     ],
   };
 }
@@ -306,7 +306,7 @@ function ScoreRing({ score, size = 88 }: { score: number; size?: number }) {
   const r = size * 0.37;
   const circ = 2 * Math.PI * r;
   const dash = (score / 100) * circ;
-  const color = score >= 75 ? "#22c55e" : score >= 55 ? "#fbbf24" : "#ef4444";
+  const color = score >= 75 ? "#22c55e" : score >= 55 ? "#FFD700" : "#ef4444";
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="currentColor" strokeWidth={size * 0.07} className="text-white/10" />
@@ -318,7 +318,7 @@ function ScoreRing({ score, size = 88 }: { score: number; size?: number }) {
 
 function DemoTag() {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-400/30 bg-amber-400/8 text-[10px] font-bold uppercase tracking-widest text-amber-300">
+    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-warning/30 bg-warning/8 text-[10px] font-bold uppercase tracking-widest text-warning">
       <Sparkles className="h-3 w-3" />
       Demo
     </span>
@@ -328,8 +328,8 @@ function DemoTag() {
 function SectionHeader({ icon: Icon, title, sub }: { icon: React.ComponentType<{ className?: string }>; title: string; sub?: string }) {
   return (
     <div className="flex items-center gap-2.5 mb-4">
-      <div className="p-1.5 rounded-lg bg-amber-400/8 border border-amber-400/20">
-        <Icon className="h-3.5 w-3.5 text-amber-300" />
+      <div className="p-1.5 rounded-lg bg-warning/8 border border-warning/20">
+        <Icon className="h-3.5 w-3.5 text-warning" />
       </div>
       <div>
         <h3 className="text-sm font-bold text-white/90">{title}</h3>
@@ -358,11 +358,11 @@ export default function DemoPortfolioPage() {
   const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 
   return (
-    <div className="min-h-dvh bg-[#040816] font-sans text-white/90 selection:bg-amber-300/30 overflow-x-hidden" suppressHydrationWarning>
+    <div className="min-h-dvh bg-[#040816] font-sans text-white/90 selection:bg-warning17627 overflow-x-hidden" suppressHydrationWarning>
       {/* Ambient glows */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(245,158,11,0.07),transparent_65%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_80%_60%,rgba(20,184,166,0.05),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_80%_60%,rgba(129,140,248,0.05),transparent_55%)]" />
         <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-size-[80px_80px]" />
       </div>
 
@@ -380,8 +380,8 @@ export default function DemoPortfolioPage() {
               Tools
             </Link>
             <div className="h-4 w-px bg-white/10" />
-            <div className="p-1.5 rounded-lg border border-amber-400/20 bg-amber-400/8">
-              <ShieldCheck className="h-4 w-4 text-amber-300" />
+            <div className="p-1.5 rounded-lg border border-warning/20 bg-warning/8">
+              <ShieldCheck className="h-4 w-4 text-warning" />
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-bold text-white">Portfolio Intelligence</span>
@@ -397,7 +397,7 @@ export default function DemoPortfolioPage() {
                   onClick={() => setRegion(r)}
                   className={cn(
                     "px-3 py-1 font-mono text-[11px] font-bold rounded-md transition-all duration-200",
-                    region === r ? "bg-amber-400 text-slate-950 shadow-sm" : "text-white/45 hover:text-white"
+                    region === r ? "bg-warning text-foreground shadow-sm" : "text-white/45 hover:text-white"
                   )}
                 >
                   {r}
@@ -407,7 +407,7 @@ export default function DemoPortfolioPage() {
             <span className="font-mono text-[11px] text-white/40 hidden sm:block">{cfg.portfolioLabel}</span>
             <Link
               href="/dashboard/portfolio"
-              className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400 px-4 py-1.5 font-mono text-[11px] font-bold text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all duration-300 hover:bg-amber-300"
+              className="inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning px-4 py-1.5 font-mono text-[11px] font-bold text-warning-foreground shadow-warning/20 transition-all duration-300 hover:bg-warning/90"
             >
               Build yours
               <ArrowRight className="h-3 w-3" />
@@ -425,10 +425,10 @@ export default function DemoPortfolioPage() {
           className="grid grid-cols-2 sm:grid-cols-4 gap-3"
         >
           {[
-            { label: "Portfolio Value", value: fmt(totalValue), sub: `+${fmt(totalPnl)} unrealised`, icon: TrendingUp, color: "text-emerald-400", accent: "border-emerald-500/20 bg-emerald-500/5" },
-            { label: "Total Return", value: `+${pnlPct.toFixed(1)}%`, sub: `${fmt(totalCost)} invested`, icon: ArrowUpRight, color: "text-emerald-400", accent: "border-emerald-500/20 bg-emerald-500/5" },
-            { label: "Day Change", value: `+${fmt(dayChange)}`, sub: "+0.71% today", icon: Activity, color: "text-blue-400", accent: "border-blue-500/20 bg-blue-500/5" },
-            { label: "Health Score", value: `${cfg.healthScore}/100`, sub: `${cfg.healthTone} · 6 dimensions`, icon: ShieldCheck, color: "text-amber-400", accent: "border-amber-500/20 bg-amber-500/5" },
+            { label: "Portfolio Value", value: fmt(totalValue), sub: `+${fmt(totalPnl)} unrealised`, icon: TrendingUp, color: "text-success", accent: "border-success/20 bg-success/5" },
+            { label: "Total Return", value: `+${pnlPct.toFixed(1)}%`, sub: `${fmt(totalCost)} invested`, icon: ArrowUpRight, color: "text-success", accent: "border-success/20 bg-success/5" },
+            { label: "Day Change", value: `+${fmt(dayChange)}`, sub: "+0.71% today", icon: Activity, color: "text-info", accent: "border-info/20 bg-info/5" },
+            { label: "Health Score", value: `${cfg.healthScore}/100`, sub: `${cfg.healthTone} · 6 dimensions`, icon: ShieldCheck, color: "text-warning", accent: "border-warning/20 bg-warning/5" },
           ].map(({ label, value, sub, icon: Icon, color, accent }) => (
             <div key={label} className={cn("rounded-2xl border p-4 backdrop-blur-xl", accent)}>
               <div className="flex items-center justify-between mb-2">
@@ -449,7 +449,7 @@ export default function DemoPortfolioPage() {
               onClick={() => setActiveTab(tab)}
               className={cn(
                 "px-4 py-1.5 text-xs font-bold rounded-lg capitalize transition-all duration-200",
-                activeTab === tab ? "bg-amber-400 text-slate-950 shadow-sm" : "text-white/45 hover:text-white/90 hover:bg-white/10"
+                activeTab === tab ? "bg-warning text-foreground shadow-sm" : "text-white/45 hover:text-white/90 hover:bg-white/10"
               )}
             >
               {tab}
@@ -476,7 +476,7 @@ export default function DemoPortfolioPage() {
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-amber-400">{cfg.healthTone}</p>
+                    <p className="text-sm font-bold text-warning">{cfg.healthTone}</p>
                     <p className="text-[11px] text-white/45 mt-1 leading-relaxed">{cfg.healthDesc}</p>
                   </div>
                 </div>
@@ -601,8 +601,8 @@ export default function DemoPortfolioPage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="flex items-center gap-4 mt-3">
-                  <div className="flex items-center gap-1.5"><div className="h-2 w-2 rounded-full bg-blue-500" /><span className="text-[10px] text-white/45">Portfolio</span></div>
-                  <div className="flex items-center gap-1.5"><div className="h-2 w-2 rounded-full bg-slate-400" /><span className="text-[10px] text-white/45">{cfg.benchmarkLabel}</span></div>
+                  <div className="flex items-center gap-1.5"><div className="h-2 w-2 rounded-full bg-info" /><span className="text-[10px] text-white/45">Portfolio</span></div>
+                  <div className="flex items-center gap-1.5"><div className="h-2 w-2 rounded-full bg-muted" /><span className="text-[10px] text-white/45">{cfg.benchmarkLabel}</span></div>
                 </div>
               </div>
             </div>
@@ -612,10 +612,10 @@ export default function DemoPortfolioPage() {
               <SectionHeader icon={Cpu} title="Monte Carlo Simulation" sub={`${cfg.monteCarlo.pathCount.toLocaleString()} paths · 1-year horizon`} />
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
                 {[
-                  { label: "Expected Return", value: `+${cfg.monteCarlo.expectedReturn}%`, color: "text-emerald-400" },
-                  { label: "VaR (95%)", value: `${cfg.monteCarlo.var95}%`, color: "text-amber-400" },
-                  { label: "CVaR (95%)", value: `${cfg.monteCarlo.cvar95}%`, color: "text-rose-400" },
-                  { label: "Sharpe Ratio", value: String(cfg.monteCarlo.sharpeRatio), color: "text-blue-400" },
+                  { label: "Expected Return", value: `+${cfg.monteCarlo.expectedReturn}%`, color: "text-success" },
+                  { label: "VaR (95%)", value: `${cfg.monteCarlo.var95}%`, color: "text-warning" },
+                  { label: "CVaR (95%)", value: `${cfg.monteCarlo.cvar95}%`, color: "text-danger" },
+                  { label: "Sharpe Ratio", value: String(cfg.monteCarlo.sharpeRatio), color: "text-info" },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="rounded-2xl bg-white/5 border border-white/5 p-3">
                     <p className="text-[9px] text-white/45 uppercase tracking-widest font-bold mb-1">{label}</p>
@@ -676,7 +676,7 @@ export default function DemoPortfolioPage() {
                         <tr key={h.symbol} className="border-b border-white/5 last:border-0 hover:bg-white/3 transition-colors">
                           <td className="py-3">
                             <div className="flex items-center gap-2.5">
-                              <div className="h-8 w-8 rounded-xl bg-amber-400/8 border border-amber-400/20 flex items-center justify-center text-[10px] font-bold text-amber-300 shrink-0">
+                              <div className="h-8 w-8 rounded-xl bg-warning/8 border border-warning/20 flex items-center justify-center text-[10px] font-bold text-warning shrink-0">
                                 {h.symbol.slice(0, 2)}
                               </div>
                               <div>
@@ -690,20 +690,20 @@ export default function DemoPortfolioPage() {
                           <td className="py-3 text-right font-medium text-white/90">{fmtSmall(h.price)}</td>
                           <td className="py-3 text-right font-bold text-white/90">{fmt(val)}</td>
                           <td className="py-3 text-right">
-                            <div className={cn("flex items-center justify-end gap-1 font-bold", isUp ? "text-emerald-400" : "text-rose-400")}>
+                            <div className={cn("flex items-center justify-end gap-1 font-bold", isUp ? "text-success" : "text-danger")}>
                               {isUp ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                               {pnlPctH >= 0 ? "+" : ""}{pnlPctH.toFixed(1)}%
                             </div>
                           </td>
                           <td className="py-3 text-right">
-                            <span className={cn("text-[10px] font-bold", dayUp ? "text-emerald-400" : "text-rose-400")}>
+                            <span className={cn("text-[10px] font-bold", dayUp ? "text-success" : "text-danger")}>
                               {dayUp ? "+" : ""}{h.changePercent.toFixed(2)}%
                             </span>
                           </td>
                           <td className="py-3 text-right">
                             <div className="flex items-center justify-end gap-1.5">
                               <div className="h-1.5 w-12 bg-white/8 rounded-full overflow-hidden">
-                                <div className="h-full bg-amber-400/60 rounded-full" style={{ width: `${h.weight}%` }} />
+                                <div className="h-full bg-warning/60 rounded-full" style={{ width: `${h.weight}%` }} />
                               </div>
                               <span className="text-white/45">{h.weight}%</span>
                             </div>
@@ -718,9 +718,9 @@ export default function DemoPortfolioPage() {
 
             {/* Top gainers / losers */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-5">
+              <div className="rounded-3xl border border-success/20 bg-success/5 p-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="h-4 w-4 text-emerald-400" />
+                  <TrendingUp className="h-4 w-4 text-success" />
                   <h3 className="text-sm font-bold text-white/90">Top Gainers</h3>
                 </div>
                 <div className="space-y-2">
@@ -733,15 +733,15 @@ export default function DemoPortfolioPage() {
                     return (
                       <div key={h.symbol} className="flex items-center justify-between">
                         <span className="text-xs font-bold text-white/90">{h.symbol}</span>
-                        <span className="text-xs font-bold text-emerald-400">+{p.toFixed(1)}%</span>
+                        <span className="text-xs font-bold text-success">+{p.toFixed(1)}%</span>
                       </div>
                     );
                   })}
                 </div>
               </div>
-              <div className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-5">
+              <div className="rounded-3xl border border-danger/20 bg-danger/5 p-5">
                 <div className="flex items-center gap-2 mb-4">
-                  <TrendingDown className="h-4 w-4 text-rose-400" />
+                  <TrendingDown className="h-4 w-4 text-danger" />
                   <h3 className="text-sm font-bold text-white/90">Underperformers</h3>
                 </div>
                 <div className="space-y-2">
@@ -754,7 +754,7 @@ export default function DemoPortfolioPage() {
                     return (
                       <div key={h.symbol} className="flex items-center justify-between">
                         <span className="text-xs font-bold text-white/90">{h.symbol}</span>
-                        <span className={cn("text-xs font-bold", p >= 0 ? "text-emerald-400" : "text-rose-400")}>{p >= 0 ? "+" : ""}{p.toFixed(1)}%</span>
+                        <span className={cn("text-xs font-bold", p >= 0 ? "text-success" : "text-danger")}>{p >= 0 ? "+" : ""}{p.toFixed(1)}%</span>
                       </div>
                     );
                   })}
@@ -780,16 +780,16 @@ export default function DemoPortfolioPage() {
             </div>
 
             {/* Fragility Analysis */}
-            <div className="rounded-3xl border border-amber-500/20 bg-amber-500/5 p-5">
+            <div className="rounded-3xl border border-warning/20 bg-warning/5 p-5">
               <div className="flex items-center gap-2 mb-4">
-                <Activity className="h-4 w-4 text-amber-400" />
+                <Activity className="h-4 w-4 text-warning" />
                 <h3 className="text-sm font-bold text-white/90">Fragility Analysis</h3>
-                <span className="ml-auto text-xs font-bold text-amber-400">Fragility: {cfg.fragilityScore} / 100</span>
+                <span className="ml-auto text-xs font-bold text-warning">Fragility: {cfg.fragilityScore} / 100</span>
               </div>
               <p className="text-[11px] text-white/45 mb-4">{cfg.fragilityDesc}</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                 {cfg.fragilitySummary.map(({ label, value, detail, color }) => (
-                  <div key={label} className="rounded-xl bg-amber-500/8 border border-amber-500/15 p-3">
+                  <div key={label} className="rounded-xl bg-warning/8 border border-warning/15 p-3">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-white/45 mb-1">{label}</p>
                     <p className={cn("text-sm font-bold", color)}>{value}</p>
                     <p className="text-[10px] text-white/45 mt-0.5">{detail}</p>
@@ -831,16 +831,16 @@ export default function DemoPortfolioPage() {
             </div>
 
             {/* Correlation warning */}
-            <div className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-5">
+            <div className="rounded-3xl border border-danger/20 bg-danger/5 p-5">
               <div className="flex items-center gap-2 mb-3">
-                <Info className="h-4 w-4 text-rose-400" />
+                <Info className="h-4 w-4 text-danger" />
                 <h3 className="text-sm font-bold text-white/90">Correlation Warning</h3>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {cfg.correlations.map(([a, b, corr]) => (
-                  <div key={`${a}-${b}`} className="rounded-xl bg-rose-500/8 border border-rose-500/15 p-3 text-center">
+                  <div key={`${a}-${b}`} className="rounded-xl bg-danger/8 border border-danger/15 p-3 text-center">
                     <p className="text-[9px] text-white/45 font-bold uppercase tracking-widest mb-1">{a} ↔ {b}</p>
-                    <p className="text-sm font-bold text-rose-400">ρ = {corr}</p>
+                    <p className="text-sm font-bold text-danger">ρ = {corr}</p>
                     <p className="text-[9px] text-white/45 mt-0.5">High correlation</p>
                   </div>
                 ))}
@@ -853,11 +853,11 @@ export default function DemoPortfolioPage() {
         {/* ── CTA ── */}
         <motion.div
           variants={fadeUp} initial="hidden" animate="show" transition={{ duration: 0.4, delay: 0.2 }}
-          className="rounded-3xl border border-amber-400/20 bg-amber-400/5 p-6 flex flex-col sm:flex-row items-center justify-between gap-4"
+          className="rounded-3xl border border-warning/20 bg-warning/5 p-6 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="h-4 w-4 text-amber-300" />
+              <Sparkles className="h-4 w-4 text-warning" />
               <p className="text-sm font-bold text-white/90">Build your real portfolio</p>
             </div>
             <p className="text-[11px] text-white/45 max-w-md">
@@ -868,7 +868,7 @@ export default function DemoPortfolioPage() {
             <Link href="/tools/ai-portfolio-analyzer" className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-5 py-2 font-mono text-xs font-bold text-white/60 transition-all duration-200 hover:border-white/25 hover:text-white/85">
               Learn more
             </Link>
-            <Link href={`/dashboard/portfolio?market=${region}`} className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400 px-5 py-2 font-mono text-xs font-bold text-slate-950 shadow-[0_0_30px_rgba(245,158,11,0.25)] transition-all duration-200 hover:bg-amber-300">
+            <Link href={`/dashboard/portfolio?market=${region}`} className="inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning px-5 py-2 font-mono text-xs font-bold text-foreground shadow-[0_0_30px_rgba(245,158,11,0.25)] transition-all duration-200 hover:bg-warning48318">
               Open Portfolio
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>

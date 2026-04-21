@@ -60,9 +60,9 @@ export function SameSectorMovers({ symbol }: { symbol: string }) {
           const currencyConfig = getCurrencyConfig(mover.currency ?? "USD");
           const compatClass =
             mover.compatibilityScore === null ? null :
-            mover.compatibilityScore >= 60 ? "text-emerald-400 bg-emerald-400/10" :
-            mover.compatibilityScore >= 40 ? "text-amber-400 bg-amber-400/10" :
-            "text-red-400 bg-red-400/10";
+            mover.compatibilityScore >= 60 ? "text-success bg-success/10" :
+            mover.compatibilityScore >= 40 ? "text-warning bg-warning/10" :
+            "text-danger bg-danger/10";
 
           return (
             <Link
@@ -95,7 +95,7 @@ export function SameSectorMovers({ symbol }: { symbol: string }) {
                 {mover.changePercent !== null && (
                   <div className={cn(
                     "flex items-center justify-end gap-1 text-[9px] font-bold font-mono tabular-nums",
-                    isUp ? "text-emerald-400" : "text-red-400",
+                    isUp ? "text-success" : "text-danger",
                   )}>
                     {isUp
                       ? <TrendingUp className="h-2.5 w-2.5" />

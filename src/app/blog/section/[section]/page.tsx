@@ -75,7 +75,7 @@ export default async function SectionPage({ params }: Props) {
   const colors = SECTION_COLORS[sectionData.color];
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#040816] font-sans text-white selection:bg-amber-300/30">
+    <div className="flex min-h-screen flex-col bg-[#040816] font-sans text-white selection:bg-warning2582">
       <Navbar />
 
       <main className="flex-1">
@@ -85,7 +85,7 @@ export default async function SectionPage({ params }: Props) {
           <div className="container relative mx-auto max-w-7xl px-0">
             <Link
               href="/blog"
-              className="group mb-8 inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/35 transition-colors hover:text-amber-400"
+              className="group mb-8 inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/35 transition-colors hover:text-warning"
             >
               <ArrowLeft className="h-3 w-3 transition-transform duration-200 group-hover:-translate-x-0.5" />
               All articles
@@ -133,7 +133,7 @@ export default async function SectionPage({ params }: Props) {
                       <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.28em] ${colors.border} ${colors.bg} ${colors.text}`}>
                         {post.category}
                       </span>
-                      <h2 className="mt-4 text-base font-semibold leading-snug tracking-tight text-white transition-colors group-hover:text-amber-100 sm:text-lg">
+                      <h2 className="mt-4 text-base font-semibold leading-snug tracking-tight text-white transition-colors group-hover:text-primary/60 sm:text-lg">
                         {post.title}
                       </h2>
                       <p className="mt-3 text-sm leading-6 text-white/42">
@@ -148,7 +148,7 @@ export default async function SectionPage({ params }: Props) {
                       <span className="font-mono text-[10px]">
                         {formatDate(post.date)}
                       </span>
-                      <ArrowRight className="ml-auto h-3.5 w-3.5 text-amber-400/50 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-amber-400" />
+                      <ArrowRight className="ml-auto h-3.5 w-3.5 text-warning/50 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-warning" />
                     </div>
                   </Link>
                 ))}
@@ -158,7 +158,7 @@ export default async function SectionPage({ params }: Props) {
                 <p className="text-white/55">No articles found in this section yet.</p>
                 <Link
                   href="/blog"
-                  className="mt-4 inline-flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300"
+                  className="mt-4 inline-flex items-center gap-2 text-sm text-warning hover:text-warning"
                 >
                   Browse all articles
                   <ArrowRight className="h-4 w-4" />

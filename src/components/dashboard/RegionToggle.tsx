@@ -73,7 +73,7 @@ export function RegionToggle() {
               className={cn(
                 "h-full min-h-[38px] cursor-pointer rounded-2xl gap-1 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-200 sm:gap-2",
                 region === "US"
-                  ? "border border-primary/70 bg-linear-to-b from-primary to-amber-500 text-primary-foreground ring-1 ring-primary/60 shadow-[0_0_0_1px_rgba(245,158,11,0.35),0_12px_32px_rgba(245,158,11,0.5)] scale-[1.03]"
+                  ? "border border-cyan-400/70 bg-linear-to-b from-cyan-500/80 to-cyan-400/60 text-cyan-950 ring-1 ring-cyan-400/60 shadow-[0_0_0_1px_rgba(0,212,255,0.35),0_12px_32px_rgba(0,212,255,0.45)] scale-[1.03]"
                   : "border border-transparent text-muted-foreground hover:border-primary/20 hover:bg-primary/10 hover:text-primary",
               )}
             >
@@ -85,7 +85,7 @@ export function RegionToggle() {
               className={cn(
                 "h-full min-h-[38px] cursor-pointer rounded-2xl gap-1 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-200 sm:gap-2",
                 region === "IN"
-                  ? "border border-primary/70 bg-linear-to-b from-primary to-amber-500 text-primary-foreground ring-1 ring-primary/60 shadow-[0_0_0_1px_rgba(245,158,11,0.35),0_12px_32px_rgba(245,158,11,0.5)] scale-[1.03]"
+                  ? "border border-cyan-400/70 bg-linear-to-b from-cyan-500/80 to-cyan-400/60 text-cyan-950 ring-1 ring-cyan-400/60 shadow-[0_0_0_1px_rgba(0,212,255,0.35),0_12px_32px_rgba(0,212,255,0.45)] scale-[1.03]"
                   : "border border-transparent text-muted-foreground hover:border-primary/20 hover:bg-primary/10 hover:text-primary",
               )}
             >

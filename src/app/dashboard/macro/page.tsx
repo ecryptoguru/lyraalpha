@@ -18,8 +18,8 @@ import { IN_SECTOR_SENSITIVITY } from "@/lib/macro/sector-sensitivity/in";
 import type { SectorImpact } from "@/lib/macro/types";
 
 const IMPACT_STYLES: Record<SectorImpact, { bg: string; text: string; label: string }> = {
-  tailwind: { bg: "border-emerald-500/25 bg-emerald-500/10", text: "text-emerald-400", label: "Tailwind" },
-  headwind: { bg: "border-rose-500/25    bg-rose-500/10",    text: "text-rose-400",    label: "Headwind" },
+  tailwind: { bg: "border-success/25 bg-success/10", text: "text-success", label: "Tailwind" },
+  headwind: { bg: "border-danger/25    bg-danger/10",    text: "text-danger",    label: "Headwind" },
   neutral:  { bg: "border-white/10       bg-card/60",        text: "text-muted-foreground", label: "Neutral"  },
 };
 
@@ -32,15 +32,15 @@ const LYRA_PROMPTS_CRYPTO = [
 ];
 
 const ON_CHAIN_METRICS = [
-  { label: "BTC Dominance", value: "54.2%", sub: "Market cap share", icon: Bitcoin, color: "amber" as const },
+  { label: "BTC Dominance", value: "54.2%", sub: "Market cap share", icon: Bitcoin, color: "gold" as const },
   { label: "Active Addresses", value: "1.4M", sub: "24h network activity", icon: Activity, color: "emerald" as const },
   { label: "DeFi TVL", value: "$92B", sub: "Total value locked", icon: BarChart3, color: "primary" as const },
   { label: "Whale Activity", value: "+18%", sub: "Large holder inflows", icon: TrendingUp, color: "emerald" as const },
 ] as const;
 
 const METRIC_COLORS = {
-  amber: { border: "border-amber-500/20", bg: "bg-amber-500/5", icon: "text-amber-400" },
-  emerald: { border: "border-emerald-500/20", bg: "bg-emerald-500/5", icon: "text-emerald-400" },
+  gold: { border: "border-[#FFD700]/20", bg: "bg-[#FFD700]/5", icon: "text-[#FFD700]" },
+  emerald: { border: "border-success/20", bg: "bg-success/5", icon: "text-success" },
   primary: { border: "border-primary/20", bg: "bg-primary/5", icon: "text-primary" },
 } as const;
 
@@ -66,7 +66,7 @@ export default async function MacroResearchPage() {
             chips={
               <>
                 <StatChip value={region} label="Market" variant="muted" />
-                <StatChip value="BTC" label="Dominance" variant="amber" />
+                <StatChip value="BTC" label="Dominance" variant="gold" />
                 <StatChip value="Fear & Greed" label="Sentiment" variant="green" />
                 <StatChip value={tailwinds} label="Bullish" variant="green" />
                 {headwinds > 0 && <StatChip value={headwinds} label="Bearish" variant="red" />}

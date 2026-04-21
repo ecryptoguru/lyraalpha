@@ -86,9 +86,9 @@ export function PortfolioDrawdownEstimate({ holdings }: PortfolioDrawdownEstimat
     drawdown >= 20 ? "medium" : "low";
 
   const severityColor =
-    severity === "high" ? "text-red-400 border-red-500/20 bg-red-500/8" :
-    severity === "medium" ? "text-amber-400 border-amber-500/20 bg-amber-500/8" :
-    "text-emerald-400 border-emerald-500/20 bg-emerald-500/8";
+    severity === "high" ? "text-danger border-danger/20 bg-danger/8" :
+    severity === "medium" ? "text-warning border-warning/20 bg-warning/8" :
+    "text-success border-success/20 bg-success/8";
 
   const confidenceLabel = confidence === "high" ? "high confidence" : confidence === "medium" ? "moderate confidence" : "low confidence";
 

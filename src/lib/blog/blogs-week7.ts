@@ -1,12 +1,10 @@
 // Week 7 Blog Posts — 4 high-quality SEO articles, 1200-1500 words each
 // Category: Portfolio Intelligence, AI & Technology, Market Intelligence
 
-import type { BlogPost } from "./posts";
-
 const _week7Posts = [
   {
     slug: "how-portfolio-drawdown-estimates-help-you-avoid-bad-timing",
-    title: "How Portfolio Drawdown Estimates Help You Avoid Bad Timing",
+    title: "How Portfolio Drawdown Estimates Help You Time Entries Better",
     description:
       "Most investors discover their portfolio's drawdown tolerance reactively — after a crash. Portfolio drawdown estimates model the damage before it happens, giving you the context to make better timing decisions before panic sets in.",
     date: "2026-05-12",
@@ -15,7 +13,14 @@ const _week7Posts = [
     category: "Portfolio Intelligence",
     featured: false,
     metaDescription:
-      "Portfolio drawdown estimates model your worst-case scenario before it happens. Learn how to use drawdown modeling to avoid panic selling at market bottoms and make better timing decisions.",
+      "Portfolio drawdown estimates model your worst-case scenario before it happens. Use drawdown modeling to avoid panic selling at market bottoms and make better decisions.",
+    internalLinks: [
+      { text: "portfolio health", url: "/lyra" },
+      { text: "drawdown analysis", url: "/lyra" },
+      { text: "timing risk", url: "/lyra" },
+      { text: "how to track regime shifts without reading 50 tabs a day", url: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day" },
+      { text: "what portfolio concentration risk looks like in practice", url: "/blog/what-portfolio-concentration-risk-looks-like-in-practice" },
+    ],
     keywords: [
       "portfolio drawdown estimates",
       "drawdown risk crypto",
@@ -24,7 +29,7 @@ const _week7Posts = [
       "crypto risk management",
       "portfolio risk estimation",
     ],
-    heroImageUrl: "/blog/drawdown-estimates-hero.jpg",
+    heroImageUrl: "/blog/how-portfolio-drawdown-estimates-help-you-avoid-bad-timing-hero.webp",
     content: `
 # How Portfolio Drawdown Estimates Help You Avoid Bad Timing
 
@@ -156,7 +161,14 @@ If the modeled drawdown in your severe scenario is above the level you can endur
     category: "AI & Technology",
     featured: false,
     metaDescription:
-      "AI search engines are replacing traditional SEO as the primary way users discover fintech products. Learn how AI citation works, why it changes fintech distribution, and how to optimize for AI-native discovery.",
+      "AI search engines are replacing traditional SEO as the primary way users discover fintech products. Learn how AI citation works and how to optimize for AI-native discovery.",
+    internalLinks: [
+      { text: "AI search", url: "/lyra" },
+      { text: "fintech SEO", url: "/lyra" },
+      { text: "product discovery", url: "/lyra" },
+      { text: "best AI tools for crypto research a 2026 buyers guide", url: "/blog/best-ai-tools-for-crypto-research-a-2026-buyers-guide" },
+      { text: "why crypto AI tools hallucinate and how to fix it", url: "/blog/why-crypto-ai-tools-hallucinate-and-how-to-fix-it" },
+    ],
     keywords: [
       "AI search fintech",
       "GEO fintech",
@@ -165,7 +177,7 @@ If the modeled drawdown in your severe scenario is above the level you can endur
       "AI search optimization",
       "generative engine optimization",
     ],
-    heroImageUrl: "/blog/ai-search-fintech-hero.jpg",
+    heroImageUrl: "/blog/why-ai-search-is-changing-how-fintech-products-get-discovered-hero.webp",
     content: `
 # Why AI Search Is Changing How Fintech Products Get Discovered
 
@@ -286,6 +298,13 @@ Comprehensive guides and explainers — content that directly answers specific q
     featured: false,
     metaDescription:
       "Most crypto market commentary is noise that explains the past without predicting the future. Learn the framework for distinguishing commentary that has genuine predictive value from commentary that just sounds authoritative.",
+    internalLinks: [
+      { text: "market signal", url: "/lyra" },
+      { text: "noise vs signal", url: "/lyra" },
+      { text: "market analysis", url: "/lyra" },
+      { text: "how to track regime shifts without reading 50 tabs a day", url: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day" },
+      { text: "lyraalpha vs traditional market research tools whats different", url: "/blog/lyraalpha-vs-traditional-market-research-tools-whats-different" },
+    ],
     keywords: [
       "market commentary noise vs signal",
       "crypto commentary quality",
@@ -294,7 +313,7 @@ Comprehensive guides and explainers — content that directly answers specific q
       "critical thinking crypto",
       "market commentary evaluation",
     ],
-    heroImageUrl: "/blog/signal-vs-noise-hero.jpg",
+    heroImageUrl: "/blog/the-difference-between-noise-and-signal-in-market-commentary-hero.webp",
     content: `
 # The Difference Between Noise and Signal in Market Commentary
 
@@ -432,7 +451,14 @@ By structuring every briefing around: (1) the regime read, which provides the co
     category: "Market Intelligence",
     featured: false,
     metaDescription:
-      "Most crypto investors set too many alerts and learn to ignore them. A properly designed alert system — with the right thresholds, the right tiers, and the right signal types — surfaces what matters without creating noise.",
+      "Most crypto investors set too many alerts and learn to ignore them. A properly designed alert system — with the right thresholds and tiers — surfaces what matters.",
+    internalLinks: [
+      { text: "watchlist alerts", url: "/lyra" },
+      { text: "alert management", url: "/lyra" },
+      { text: "portfolio monitoring", url: "/lyra" },
+      { text: "what watchlist drift means and why it matters", url: "/blog/what-watchlist-drift-means-and-why-it-matters" },
+      { text: "how to track regime shifts without reading 50 tabs a day", url: "/blog/how-to-track-regime-shifts-without-reading-50-tabs-a-day" },
+    ],
     keywords: [
       "watchlist alert fatigue",
       "crypto alerts management",
@@ -441,7 +467,7 @@ By structuring every briefing around: (1) the regime read, which provides the co
       "portfolio monitoring without noise",
       "crypto watchlist strategy",
     ],
-    heroImageUrl: "/blog/watchlist-alerts-hero.jpg",
+    heroImageUrl: "/blog/how-to-use-watchlist-alerts-without-getting-alert-fatigue-hero.webp",
     content: `
 # How to Use Watchlist Alerts Without Getting Alert Fatigue
 
@@ -597,6 +623,4 @@ For most investors, no. Most of the actions you would take based on an overnight
   },
 ];
 
-export const week7Posts: Omit<BlogPost, "readingTime">[] = _week7Posts.map((p) => ({
-  ...p,
-}));
+export const week7Posts = _week7Posts;

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Fira_Code } from "next/font/google";
+import { Inter, Fira_Code, Space_Grotesk } from "next/font/google";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster } from "sonner";
@@ -18,6 +18,12 @@ const inter = Inter({
 
 const firaCode = Fira_Code({
   variable: "--font-fira-code",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
   display: "swap",
 });
@@ -106,6 +112,22 @@ export default function RootLayout({
             `,
           }}
         />
+        <script
+          id="density-init"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var d = window.localStorage.getItem('lyraalpha-density');
+                  if (d === 'compact' || d === 'cozy') {
+                    document.documentElement.setAttribute('data-density', d);
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         {/* Hydration Mitigation Script: Runs before React to strip extension-injected attributes */}
         <script
           id="hydration-mitigation"
@@ -137,10 +159,17 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${firaCode.variable} font-sans antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${firaCode.variable} ${spaceGrotesk.variable} font-sans antialiased bg-background text-foreground`}
         suppressHydrationWarning
       >
         <AuthProvider>
+          {/* Skip link — WCAG AA: first focusable element, jumps to main content */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-9999 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-lg focus:outline-none"
+          >
+            Skip to main content
+          </a>
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
@@ -150,7 +179,22 @@ export default function RootLayout({
           >
             {children}
             <OfflineBanner />
-            <Toaster theme="system" position="bottom-right" richColors closeButton />
+            <Toaster
+              theme="system"
+              position="top-right"
+              richColors
+              closeButton
+              toastOptions={{
+                duration: 4000,
+                classNames: {
+                  toast: "font-sans text-sm",
+                  success: "!bg-success-subtle !text-success !border-success/20",
+                  error: "!bg-danger-subtle !text-danger !border-danger/20",
+                  warning: "!bg-warning-subtle !text-warning !border-warning/20",
+                  info: "!bg-info-subtle !text-info !border-info/20",
+                },
+              }}
+            />
           </ThemeProvider>
         </AuthProvider>
       </body>

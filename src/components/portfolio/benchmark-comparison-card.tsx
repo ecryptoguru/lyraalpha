@@ -71,14 +71,14 @@ function DiffBar({ portfolioReturn, bmReturn, label }: { portfolioReturn: number
     <div className="flex items-center gap-3 py-2.5 border-b border-white/5 last:border-0">
       <div className="w-20 shrink-0">
         <p className="text-[11px] font-bold text-foreground truncate">{label}</p>
-        <p className={cn("text-[10px] font-medium tabular-nums", bmReturn >= 0 ? "text-emerald-400" : "text-red-400")}>
+        <p className={cn("text-[10px] font-medium tabular-nums", bmReturn >= 0 ? "text-success" : "text-danger")}>
           {bmReturn >= 0 ? "+" : ""}{bmReturn.toFixed(2)}%
         </p>
       </div>
       <div className="flex-1 flex items-center gap-2 min-w-0">
         <div className="flex-1 h-2 rounded-full bg-muted/20 overflow-hidden relative">
           <motion.div
-            className={cn("absolute top-0 h-full rounded-full", isAhead ? "bg-emerald-400" : "bg-red-400")}
+            className={cn("absolute top-0 h-full rounded-full", isAhead ? "bg-success" : "bg-danger")}
             style={{ left: isAhead ? "50%" : undefined, right: isAhead ? undefined : "50%" }}
             initial={{ width: 0 }}
             animate={{ width: `${barWidth / 2}%` }}
@@ -90,18 +90,18 @@ function DiffBar({ portfolioReturn, bmReturn, label }: { portfolioReturn: number
         <div className={cn(
           "shrink-0 text-[10px] font-bold tabular-nums px-2 py-0.5 rounded-full border",
           isAhead
-            ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/25"
-            : "text-red-400 bg-red-400/10 border-red-400/25"
+            ? "text-success bg-success/10 border-success/25"
+            : "text-danger bg-danger/10 border-danger/25"
         )}>
           {isAhead ? "+" : ""}{diff.toFixed(1)}%
         </div>
       </div>
       <div className="shrink-0">
         {isAhead
-          ? <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+          ? <TrendingUp className="h-3.5 w-3.5 text-success" />
           : diff === 0
             ? <Minus className="h-3.5 w-3.5 text-muted-foreground" />
-            : <TrendingDown className="h-3.5 w-3.5 text-red-400" />
+            : <TrendingDown className="h-3.5 w-3.5 text-danger" />
         }
       </div>
       {void maxBar}
@@ -151,8 +151,8 @@ export function BenchmarkComparisonCard({ holdings, region = "US", refreshSignal
             <div className={cn(
               "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-bold tabular-nums",
               isPositive
-                ? "bg-emerald-400/10 border-emerald-400/25 text-emerald-400"
-                : "bg-red-400/10 border-red-400/25 text-red-400"
+                ? "bg-success/10 border-success/25 text-success"
+                : "bg-danger/10 border-danger/25 text-danger"
             )}>
               {isPositive ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
               {isPositive ? "+" : ""}{portfolioReturn.toFixed(1)}%

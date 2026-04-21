@@ -304,7 +304,7 @@ export function CsvImportDialog({ portfolioId, portfolioName, region, onAdd, onC
                   <button
                     type="button"
                     onClick={() => { setRows([]); setFileName(null); }}
-                    className="text-[11px] text-muted-foreground hover:text-red-400 transition-colors flex items-center gap-1"
+                    className="text-[11px] text-muted-foreground hover:text-danger transition-colors flex items-center gap-1"
                   >
                     <Trash2 className="h-3 w-3" />
                     Clear
@@ -345,39 +345,39 @@ export function CsvImportDialog({ portfolioId, portfolioName, region, onAdd, onC
                           key={i}
                           className={cn(
                             "border-b border-white/5 last:border-0",
-                            row.error ? "bg-red-500/5" : "hover:bg-muted/10",
+                            row.error ? "bg-danger/5" : "hover:bg-muted/10",
                           )}
                         >
                           <td className="px-3 py-2">
                             <div className="flex items-center gap-2">
                               {row.error ? (
-                                <AlertCircle className="h-3 w-3 text-red-400 shrink-0" />
+                                <AlertCircle className="h-3 w-3 text-danger shrink-0" />
                               ) : (
-                                <CheckCircle2 className="h-3 w-3 text-emerald-400 shrink-0" />
+                                <CheckCircle2 className="h-3 w-3 text-success shrink-0" />
                               )}
-                              <span className={cn("font-bold", row.error ? "text-red-400" : "text-foreground")}>
+                              <span className={cn("font-bold", row.error ? "text-danger" : "text-foreground")}>
                                 {row.symbol || row.rawSymbol || "—"}
                               </span>
                               {row.error && (
-                                <span className="text-[10px] text-red-400">{row.error}</span>
+                                <span className="text-[10px] text-danger">{row.error}</span>
                               )}
                             </div>
                           </td>
                           <td className="px-3 py-2 text-right text-muted-foreground tabular-nums">
                             {row.error?.includes("quantity") ? (
-                              <span className="text-red-400">{row.rawQty}</span>
+                              <span className="text-danger">{row.rawQty}</span>
                             ) : row.quantity.toLocaleString()}
                           </td>
                           <td className="px-3 py-2 text-right text-muted-foreground tabular-nums">
                             {row.error?.includes("price") ? (
-                              <span className="text-red-400">{row.rawPrice}</span>
+                              <span className="text-danger">{row.rawPrice}</span>
                             ) : `${currencySymbol}${row.avgPrice.toFixed(2)}`}
                           </td>
                           <td className="px-3 py-2 text-right">
                             <button
                               type="button"
                               onClick={() => removeRow(i)}
-                              className="h-5 w-5 rounded flex items-center justify-center text-muted-foreground/50 hover:text-red-400 transition-colors"
+                              className="h-5 w-5 rounded flex items-center justify-center text-muted-foreground/50 hover:text-danger transition-colors"
                             >
                               <X className="h-3 w-3" />
                             </button>
@@ -390,7 +390,7 @@ export function CsvImportDialog({ portfolioId, portfolioName, region, onAdd, onC
               )}
 
               {rows.some((r) => r.error) && (
-                <p className="text-[11px] text-amber-400">
+                <p className="text-[11px] text-warning">
                   {rows.filter((r) => r.error).length} row{rows.filter((r) => r.error).length !== 1 ? "s" : ""} with errors will be skipped.
                 </p>
               )}
@@ -407,18 +407,18 @@ export function CsvImportDialog({ portfolioId, portfolioName, region, onAdd, onC
                     key={i}
                     className={cn(
                       "flex items-center justify-between px-4 py-2.5 border-b border-white/5 last:border-0 text-xs",
-                      r.status === "imported" ? "bg-emerald-500/5" : "bg-red-500/5",
+                      r.status === "imported" ? "bg-success/5" : "bg-danger/5",
                     )}
                   >
                     <div className="flex items-center gap-2">
                       {r.status === "imported" ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-success" />
                       ) : (
-                        <AlertCircle className="h-3.5 w-3.5 text-red-400" />
+                        <AlertCircle className="h-3.5 w-3.5 text-danger" />
                       )}
                       <span className="font-bold text-foreground">{r.symbol}</span>
                     </div>
-                    <span className={cn("text-[10px]", r.status === "imported" ? "text-emerald-400" : "text-red-400")}>
+                    <span className={cn("text-[10px]", r.status === "imported" ? "text-success" : "text-danger")}>
                       {r.status === "imported" ? "Imported" : r.message ?? "Failed"}
                     </span>
                   </div>

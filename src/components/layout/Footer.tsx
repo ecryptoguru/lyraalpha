@@ -28,8 +28,8 @@ const footerLinks = {
 export function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-white/8 bg-[#030712] px-4 pb-8 pt-10 sm:px-6" suppressHydrationWarning>
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_22%,transparent_78%,rgba(245,158,11,0.06))]" />
-      <div className="pointer-events-none absolute left-1/2 top-0 h-px w-[min(72rem,92vw)] -translate-x-1/2 bg-[linear-gradient(90deg,transparent,rgba(245,158,11,0.35),transparent)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.03),transparent_22%,transparent_78%,rgba(0,212,255,0.08))]" />
+      <div className="pointer-events-none absolute left-1/2 top-0 h-px w-[min(72rem,92vw)] -translate-x-1/2 bg-[linear-gradient(90deg,transparent,rgba(0,212,255,0.45),transparent)]" />
 
       <div className="container relative mx-auto max-w-7xl px-0" suppressHydrationWarning>
         <div className="rounded-[2.5rem] border border-white/8 bg-white/2 p-6 shadow-[0_20px_68px_rgba(0,0,0,0.2)] sm:p-8">
@@ -39,7 +39,7 @@ export function Footer() {
 
             {/* Brand */}
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.36em] text-amber-200/65">
+              <p className="text-[10px] font-bold uppercase tracking-[0.36em] text-primary/65">
                 LyraAlpha AI
               </p>
               <h3 className="mt-3 text-xl font-bold tracking-[-0.05em] text-white sm:text-2xl">
@@ -49,11 +49,16 @@ export function Footer() {
                 Crypto intelligence for investors who want clearer reasoning, cleaner tools and more signal per decision.
               </p>
               <div className="mt-5 flex flex-wrap gap-2.5">
-                {[Twitter, Linkedin, Github].map((Icon, index) => (
+                {[
+                  { Icon: Twitter, label: "LyraAlpha on X" },
+                  { Icon: Linkedin, label: "LyraAlpha on LinkedIn" },
+                  { Icon: Github, label: "LyraAlpha on GitHub" },
+                ].map(({ Icon, label }) => (
                   <Link
-                    key={index}
+                    key={label}
                     href="#"
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/3 text-white/54 transition-all duration-300 hover:-translate-y-0.5 hover:border-amber-300/18 hover:bg-amber-300/8 hover:text-amber-100"
+                    aria-label={label}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/3 text-white/54 transition-all duration-300 hover:-translate-y-0.5 hover:border-cyan-400/30 hover:bg-cyan-500/10 hover:text-cyan-400"
                   >
                     <Icon className="h-3.5 w-3.5" />
                   </Link>
@@ -68,7 +73,7 @@ export function Footer() {
                 <ul className="mt-4 space-y-2">
                   {footerLinks.platform.map((item) => (
                     <li key={item.href}>
-                      <Link href={item.href} className="block py-1 text-sm text-white/58 transition-colors hover:text-amber-100">
+                      <Link href={item.href} className="block py-1 text-sm text-white/58 transition-colors hover:text-cyan-400">
                         {item.label}
                       </Link>
                     </li>
@@ -80,7 +85,7 @@ export function Footer() {
                 <ul className="mt-4 space-y-2">
                   {footerLinks.resources.map((item) => (
                     <li key={item.label}>
-                      <Link href={item.href} className="block py-1 text-sm text-white/58 transition-colors hover:text-amber-100">
+                      <Link href={item.href} className="block py-1 text-sm text-white/58 transition-colors hover:text-cyan-400">
                         {item.label}
                       </Link>
                     </li>
@@ -92,7 +97,7 @@ export function Footer() {
                 <ul className="mt-4 space-y-2">
                   {footerLinks.company.map((item) => (
                     <li key={item.href}>
-                      <Link href={item.href} className="block py-1 text-sm text-white/58 transition-colors hover:text-amber-100">
+                      <Link href={item.href} className="block py-1 text-sm text-white/58 transition-colors hover:text-cyan-400">
                         {item.label}
                       </Link>
                     </li>
@@ -102,8 +107,8 @@ export function Footer() {
             </div>
 
             {/* Newsletter */}
-            <div className="rounded-3xl border border-amber-300/16 bg-amber-300/6 p-5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-amber-100/70">
+            <div className="rounded-3xl border border-warning/16 bg-warning5105 p-5">
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/70">
                 Crypto intelligence list
               </p>
               <p className="mt-3 text-sm leading-6 text-white/58">

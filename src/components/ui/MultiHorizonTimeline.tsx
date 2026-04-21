@@ -45,25 +45,25 @@ function MultiHorizonTimelineComponent({
       label: "CURRENT",
       data: current,
       period: "Latest",
-      color: "text-emerald-400",
+      color: "text-success",
     },
     {
       label: "SHORT",
       data: shortTerm,
       period: "5-Day Avg",
-      color: "text-amber-400",
+      color: "text-warning",
     },
     {
       label: "MEDIUM",
       data: mediumTerm,
       period: "20-Day Avg",
-      color: "text-amber-400",
+      color: "text-warning",
     },
     {
       label: "LONG",
       data: longTerm,
       period: "60-Day Avg",
-      color: "text-slate-400",
+      color: "text-muted-foreground",
     },
   ];
 
@@ -150,8 +150,8 @@ function MultiHorizonTimelineComponent({
             className={cn(
               "px-3 py-1 rounded-full border flex items-center gap-1.5 animate-pulse",
               isHighProbability
-                ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
-                : "bg-amber-500/10 border-amber-500/20 text-amber-400",
+                ? "bg-danger/10 border-danger/20 text-danger"
+                : "bg-warning/10 border-warning/20 text-warning",
             )}
           >
             <AlertTriangle className="h-3 w-3" />
@@ -276,10 +276,10 @@ function MultiHorizonTimelineComponent({
               className={cn(
                 "text-sm font-bold tracking-tighter",
                 isHighProbability
-                  ? "text-rose-400"
+                  ? "text-danger"
                   : isTransitioning
-                    ? "text-amber-400"
-                    : "text-emerald-400",
+                    ? "text-warning"
+                    : "text-success",
               )}
             >
               {transitionProbability.toFixed(0)}%
@@ -292,10 +292,10 @@ function MultiHorizonTimelineComponent({
               className={cn(
                 "h-full rounded-full transition-all duration-1000",
                 isHighProbability
-                  ? "bg-rose-500"
+                  ? "bg-danger"
                   : isTransitioning
-                    ? "bg-amber-500"
-                    : "bg-emerald-500",
+                    ? "bg-warning"
+                    : "bg-success",
               )}
             />
           </div>

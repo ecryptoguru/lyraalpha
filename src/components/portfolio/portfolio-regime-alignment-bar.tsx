@@ -71,8 +71,8 @@ export function PortfolioRegimeAlignmentBar({ holdings }: PortfolioRegimeAlignme
     misalignedPct >= 40 ? "Regime Risk" : "Mixed Alignment";
 
   const dominantColor =
-    alignedPct >= 60 ? "text-emerald-400" :
-    misalignedPct >= 40 ? "text-red-400" : "text-amber-400";
+    alignedPct >= 60 ? "text-success" :
+    misalignedPct >= 40 ? "text-danger" : "text-warning";
 
   return (
     <TooltipProvider>
@@ -80,8 +80,8 @@ export function PortfolioRegimeAlignmentBar({ holdings }: PortfolioRegimeAlignme
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {misalignedPct >= 40
-              ? <ShieldAlert className="h-3.5 w-3.5 text-red-400 shrink-0" />
-              : <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+              ? <ShieldAlert className="h-3.5 w-3.5 text-danger shrink-0" />
+              : <ShieldCheck className="h-3.5 w-3.5 text-success shrink-0" />
             }
             <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
               Regime Alignment
@@ -102,7 +102,7 @@ export function PortfolioRegimeAlignmentBar({ holdings }: PortfolioRegimeAlignme
         <div className="h-2 w-full rounded-full overflow-hidden flex bg-muted/20">
           {alignedPct > 0 && (
             <motion.div
-              className="h-full bg-emerald-400 rounded-l-full"
+              className="h-full bg-success rounded-l-full"
               style={{ width: `${alignedPct}%` }}
               initial={{ width: 0 }}
               animate={{ width: `${alignedPct}%` }}
@@ -111,7 +111,7 @@ export function PortfolioRegimeAlignmentBar({ holdings }: PortfolioRegimeAlignme
           )}
           {neutralPct > 0 && (
             <motion.div
-              className="h-full bg-amber-400"
+              className="h-full bg-warning"
               style={{ width: `${neutralPct}%` }}
               initial={{ width: 0 }}
               animate={{ width: `${neutralPct}%` }}
@@ -120,7 +120,7 @@ export function PortfolioRegimeAlignmentBar({ holdings }: PortfolioRegimeAlignme
           )}
           {misalignedPct > 0 && (
             <motion.div
-              className="h-full bg-red-400 rounded-r-full"
+              className="h-full bg-danger rounded-r-full"
               style={{ width: `${misalignedPct}%` }}
               initial={{ width: 0 }}
               animate={{ width: `${misalignedPct}%` }}
@@ -132,22 +132,22 @@ export function PortfolioRegimeAlignmentBar({ holdings }: PortfolioRegimeAlignme
         {/* Legend row */}
         <div className="flex items-center gap-4 text-[10px] font-semibold">
           <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 shrink-0" />
-            <span className="text-emerald-400">{alignedPct}%</span>
+            <span className="h-2 w-2 rounded-full bg-success shrink-0" />
+            <span className="text-success">{alignedPct}%</span>
             <span className="text-muted-foreground/60">aligned</span>
             {alignedCount > 0 && <span className="text-muted-foreground/40">({alignedCount})</span>}
           </span>
           {neutralPct > 0 && (
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-amber-400 shrink-0" />
-              <span className="text-amber-400">{neutralPct}%</span>
+              <span className="h-2 w-2 rounded-full bg-warning shrink-0" />
+              <span className="text-warning">{neutralPct}%</span>
               <span className="text-muted-foreground/60">neutral</span>
             </span>
           )}
           {misalignedPct > 0 && (
             <span className="flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-red-400 shrink-0" />
-              <span className="text-red-400">{misalignedPct}%</span>
+              <span className="h-2 w-2 rounded-full bg-danger shrink-0" />
+              <span className="text-danger">{misalignedPct}%</span>
               <span className="text-muted-foreground/60">misaligned</span>
               {misalignedCount > 0 && <span className="text-muted-foreground/40">({misalignedCount})</span>}
             </span>

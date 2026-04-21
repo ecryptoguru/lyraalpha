@@ -159,6 +159,7 @@ vi.mock("@/lib/redis", () => ({
   setCache: vi.fn(async (key: string, value: unknown) => { redisCacheStore.set(key, value); }),
   delCache: vi.fn(async (key: string) => { redisCacheStore.delete(key); }),
   redisSetNX: vi.fn(async () => true),
+  redisSetNXStrict: vi.fn(async () => true),
 }));
 
 vi.mock("@/lib/logger", () => ({

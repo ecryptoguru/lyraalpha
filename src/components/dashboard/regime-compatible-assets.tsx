@@ -59,9 +59,9 @@ export const RegimeCompatibleAssets = memo(function RegimeCompatibleAssets({
   );
 
   const getCompatibilityColor = useCallback((score: number) => {
-    if (score >= COMPATIBILITY_THRESHOLD_HIGH) return "text-green-600";
-    if (score >= COMPATIBILITY_THRESHOLD_MODERATE) return "text-amber-600";
-    return "text-yellow-600";
+    if (score >= COMPATIBILITY_THRESHOLD_HIGH) return "text-success";
+    if (score >= COMPATIBILITY_THRESHOLD_MODERATE) return "text-primary";
+    return "text-warning";
   }, []);
 
   if (strongFitAssets.length === 0) {
