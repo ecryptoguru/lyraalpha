@@ -3,9 +3,10 @@
  * 
  * Run: npx tsx scripts/migrate-asset-metrics.ts
  */
-import { PrismaClient, Prisma } from "@prisma/client";
+import { directPrisma } from "../src/lib/prisma";
+import type { Prisma } from "@/generated/prisma/client";
 
-const prisma = new PrismaClient();
+const prisma = directPrisma;
 
 async function migrateAssetMetrics() {
   console.log("Starting AssetMetrics migration...");
