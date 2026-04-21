@@ -30,6 +30,7 @@ production state requires explicit confirmation — no silent writes.
 ### Data / coverage audits
 - **`audit-prompt-pipeline.ts`** — audits the AI prompt pipeline for regressions.
 - **`benchmark-top50.ts`** — runs Lyra output benchmark against top-50 queries.
+- **`check-blog-images.ts`** — finds blog posts missing hero images.
 - **`check-crypto-coverage.ts`** — reports crypto asset coverage gaps.
 - **`compare-audit-runs.ts`** — diffs two audit JSON artefacts.
 - **`count-crypto-assets.ts`** — quick stat dump.
@@ -46,11 +47,7 @@ production state requires explicit confirmation — no silent writes.
 - **`vacuum-database.ts`**
 
 ### Credit restoration (manual ops)
-- **`restore-credits.ts`**, **`restore-credits-direct.ts`**,
-  **`restore-credits-simple.js`**, **`restore-credits-now.ts`**,
-  **`restore-my-credits.ts`** — various credit-restore utilities written
-  for specific incidents. Prefer `restore-credits.ts` as the canonical
-  entry point; the others are kept for audit trail.
+- **`restore-credits.ts`** — restores credits for users affected by billing issues.
 
 ### User/plan management
 - **`sync-clerk-users.ts`** — reconciles Clerk → DB user rows.
