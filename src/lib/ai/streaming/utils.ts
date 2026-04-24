@@ -46,8 +46,14 @@ export function refundOnStreamError(
 }
 
 /**
- * Creates a single-chunk async generator for cache hits and trivial responses.
+ * Creates a streaming async generator for cache hits and trivial responses.
+ * Splits text into smaller chunks to simulate streaming even for cached responses.
  */
 export async function* singleChunkStream(text: string): AsyncGenerator<string> {
-  yield text;
+  const chunkSize = 10; // Send 10 characters at a time for cached responses
+  for (let i = 0; i < text.length; i += chunkSize) {
+    yield text.slice(i, i + chunkSize);
+    // Small delay to simulate streaming
+    await new Promise(resolve => setTimeout(resolve, 10));
+  }
 }

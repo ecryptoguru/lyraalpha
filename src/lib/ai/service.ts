@@ -5,7 +5,7 @@ import { AI_CONFIG, getSharedAISdkClient, getTierConfig, HISTORY_CAPS, getGpt54D
 import { resolveGptDeployment } from "./orchestration";
 import { getUserPlan, normalizePlanTier } from "@/lib/middleware/plan-gate";
 import { BUILD_LYRA_REFERENCE_EXAMPLE, BUILD_LYRA_STATIC_PROMPT, PROMPT_VERSION } from "./prompts/system";
-import { validateInput, validateConversationLength, SafetyViolationError, UsageLimitError } from "./guardrails";
+import { validateInput, validateConversationLength, SafetyViolationError, UsageLimitError, checkPromptInjection } from "./guardrails";
 import { scrubPII } from "./pii-scrub";
 import { LyraContext } from "@/lib/engines/types";
 // currentUser removed — user creation now handled by Clerk webhook (src/app/api/webhooks/clerk/route.ts)
@@ -411,12 +411,23 @@ export async function generateLyraStream(
       }
     }
   }
+  // Only validate the last user message for the 5000 character limit
+  // The conversation history can grow large, but new queries should be reasonable length
+  const lastUserMsg = safeMessages[safeMessages.length - 1];
+  if (lastUserMsg && lastUserMsg.role === "user" && typeof lastUserMsg.content === "string") {
+    const { isValid, reason } = validateInput(lastUserMsg.content);
+    if (!isValid) {
+      logger.warn({ reason, role: lastUserMsg.role }, "Guardrail violation on new query");
+      throw new SafetyViolationError(reason || "Safety Violation");
+    }
+  }
+  // Still check all messages for injection patterns (but not length limit)
   for (const msg of safeMessages) {
     const msgContent = typeof msg.content === "string" ? msg.content : "";
     if (!msgContent) continue;
-    const { isValid, reason } = validateInput(msgContent);
+    const { isValid, reason } = checkPromptInjection(msgContent);
     if (!isValid) {
-      logger.warn({ reason, role: msg.role }, "Guardrail violation in conversation history");
+      logger.warn({ reason, role: msg.role }, "Prompt injection detected in conversation history");
       throw new SafetyViolationError(reason || "Safety Violation");
     }
   }

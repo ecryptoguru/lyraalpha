@@ -108,7 +108,9 @@ export async function POST(req: NextRequest) {
         async start(controller) {
           try {
             for await (const delta of cachedStream) {
-              if (delta != null) controller.enqueue(encoder.encode(delta));
+              if (delta != null) {
+                controller.enqueue(encoder.encode(delta));
+              }
             }
           } catch (err) {
             controller.error(err);

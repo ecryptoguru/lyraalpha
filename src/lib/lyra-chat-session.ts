@@ -3,6 +3,7 @@
 import { applyOptimisticCreditDelta, revalidateCreditViews, setAuthoritativeCreditBalance } from "@/lib/credits/client";
 import { parseLyraMessage, type Source } from "@/lib/lyra-utils";
 import { createClientLogger } from "@/lib/logger/client";
+import { sanitizeError } from "@/lib/logger/utils";
 
 const logger = createClientLogger("lyra-chat");
 
@@ -424,7 +425,7 @@ class LyraChatSessionController {
       this.emit();
 
       let lastUpdateTime = 0;
-      const throttleMs = 48;
+      const throttleMs = 16; // Reduced from 48ms to 16ms (~60fps) for smoother streaming
 
       while (true) {
         const { done, value } = await reader.read();
@@ -486,7 +487,7 @@ class LyraChatSessionController {
       }
 
       // Log the underlying error for debugging. The user sees the human-readable message above.
-      logger.error("Chat request failed", { error });
+      logger.error("Chat request failed", { error: sanitizeError(error) });
 
       // Drop the empty assistant placeholder if one was added before the failure.
       const cleanedMessages = this.snapshot.messages.filter(
