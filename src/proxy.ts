@@ -9,6 +9,7 @@ const isPublicApiRoute = createRouteMatcher([
   "/api/clerk-js",
   "/clerk-js(.*)",
   "/api/support/public-chat",
+  "/api/market/public-ticker",
 ]);
 
 const isProtectedRoute = createRouteMatcher([

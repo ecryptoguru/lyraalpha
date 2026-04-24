@@ -12,6 +12,11 @@
 - [cost-calculator.ts](file://src/lib/ai/cost-calculator.ts)
 - [types.ts](file://src/lib/ai/types.ts)
 - [ai-responder.ts](file://src/lib/support/ai-responder.ts)
+- [guardrails.ts](file://src/lib/ai/guardrails.ts)
+- [output-validation.ts](file://src/lib/ai/output-validation.ts)
+- [fallback-chain.ts](file://src/lib/ai/streaming/fallback-chain.ts)
+- [cache-handler.ts](file://src/lib/ai/streaming/cache-handler.ts)
+- [utils.ts](file://src/lib/ai/streaming/utils.ts)
 - [route.ts](file://src/app/api/lyra/personal-briefing-ai/route.ts)
 - [route.ts](file://src/app/api/lyra/personal-briefing/route.ts)
 - [route.ts](file://src/app/api/cron/daily-briefing/route.ts)
@@ -125,20 +130,31 @@
 - [route.ts](file://src/app/api/admin/support/admin/revenue/route.ts)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Enhanced AI security and reliability with advanced guardrails including base64-encoded payload scanning and comprehensive prompt injection pattern detection
+- Added output validation system with semantic consistency checking for ELITE/COMPLEX tiers
+- Implemented streaming response caching, fallback chain management, and improved memory handling
+- Updated security validation pipeline with Unicode normalization and conversation length validation
+- Added semantic hallucination detection for high-value tiers
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+6. [Security and Reliability Enhancements](#security-and-reliability-enhancements)
+7. [Dependency Analysis](#dependency-analysis)
+8. [Performance Considerations](#performance-considerations)
+9. [Troubleshooting Guide](#troubleshooting-guide)
+10. [Conclusion](#conclusion)
+11. [Appendices](#appendices)
 
 ## Introduction
 This document explains the AI Services Integration for LyraAlpha, focusing on personal briefing AI, market analysis AI, support AI system, and Retrieval-Augmented Generation (RAG). It covers the AI provider abstraction, cost optimization strategies, fallback mechanisms, multi-model orchestration, RAG implementation for knowledge access and semantic search, contextual AI responses, configuration and provider switching, performance monitoring, interaction patterns, cost management, and AI-powered content generation workflows.
+
+**Updated** Enhanced with advanced security guardrails, output validation systems, streaming response caching, and improved reliability mechanisms.
 
 ## Project Structure
 The AI system is implemented primarily under src/lib/ai with orchestration entry points in src/app/api routes. Key areas:
@@ -149,6 +165,9 @@ The AI system is implemented primarily under src/lib/ai with orchestration entry
 - Context building and compression: src/lib/ai/context-builder.ts
 - User memory and long-term context: src/lib/ai/memory.ts
 - Cost estimation and billing: src/lib/ai/cost-calculator.ts
+- Security guardrails and input validation: src/lib/ai/guardrails.ts
+- Output validation and semantic consistency: src/lib/ai/output-validation.ts
+- Streaming utilities and fallback chains: src/lib/ai/streaming/
 - Support AI responder with RAG and BM25: src/lib/support/ai-responder.ts
 - API endpoints for personal briefing, market analysis, support, and admin controls: src/app/api/...
 
@@ -164,6 +183,15 @@ subgraph "AI Orchestration"
 SVC["service.ts<br/>generateLyraStream"]
 CFG["config.ts<br/>provider config"]
 ORCH["orchestration.ts<br/>model selection"]
+end
+subgraph "Security & Validation"
+GUARD["guardrails.ts<br/>input validation + guardrails"]
+OUTVAL["output-validation.ts<br/>semantic consistency + output checks"]
+end
+subgraph "Streaming & Caching"
+STREAM["streaming/utils.ts<br/>refundOnStreamError"]
+FALLBACK["streaming/fallback-chain.ts<br/>fallback chain management"]
+CACHE["streaming/cache-handler.ts<br/>streaming response caching"]
 end
 subgraph "RAG & Search"
 RAG["rag.ts<br/>vector store + fast-path"]
@@ -182,6 +210,11 @@ SUP --> SVC
 ADMIN --> SVC
 SVC --> CFG
 SVC --> ORCH
+SVC --> GUARD
+SVC --> OUTVAL
+SVC --> STREAM
+SVC --> FALLBACK
+SVC --> CACHE
 SVC --> RAG
 SVC --> SEARCH
 SVC --> CTX
@@ -193,6 +226,10 @@ SVC --> COST
 - [service.ts:383-700](file://src/lib/ai/service.ts#L383-L700)
 - [config.ts:124-389](file://src/lib/ai/config.ts#L124-L389)
 - [orchestration.ts:1-8](file://src/lib/ai/orchestration.ts#L1-L8)
+- [guardrails.ts:173-258](file://src/lib/ai/guardrails.ts#L173-L258)
+- [output-validation.ts:426-496](file://src/lib/ai/output-validation.ts#L426-L496)
+- [fallback-chain.ts:57-209](file://src/lib/ai/streaming/fallback-chain.ts#L57-L209)
+- [cache-handler.ts:38-86](file://src/lib/ai/streaming/cache-handler.ts#L38-L86)
 - [rag.ts:186-800](file://src/lib/ai/rag.ts#L186-L800)
 - [search.ts:167-337](file://src/lib/ai/search.ts#L167-L337)
 - [context-builder.ts:80-618](file://src/lib/ai/context-builder.ts#L80-L618)
@@ -207,6 +244,15 @@ SVC --> COST
 - AI Provider Abstraction and Multi-Model Orchestration
   - Centralized provider configuration and model selection via Azure OpenAI deployments with role-based routing.
   - Tiered routing controls token budgets, reasoning effort, and feature flags per plan tier.
+- Enhanced Security Guardrails
+  - Comprehensive input validation with Unicode normalization, conversation length limits, and base64-encoded payload scanning.
+  - Advanced prompt injection pattern detection with expanded regex patterns and intent-aware financial guardrails.
+- Output Validation and Semantic Consistency
+  - Post-stream output validation with tier-aware section requirements and follow-up question limits.
+  - Semantic consistency checking for ELITE/COMPLEX tiers with claim extraction and context verification.
+- Streaming Response Caching and Fallback Management
+  - Intelligent caching with cost tracking and conversation logging for cache hits.
+  - Multi-tier fallback chain management with progressive model degradation and timeout handling.
 - RAG and Semantic Search
   - Vector store with pgvector-backed chunked knowledge, tier-aware similarity thresholds, and fast-path caches.
   - Query-aware and asset-type caches reduce latency and cost.
@@ -221,6 +267,10 @@ SVC --> COST
 
 **Section sources**
 - [config.ts:124-389](file://src/lib/ai/config.ts#L124-L389)
+- [guardrails.ts:41-258](file://src/lib/ai/guardrails.ts#L41-L258)
+- [output-validation.ts:107-496](file://src/lib/ai/output-validation.ts#L107-L496)
+- [fallback-chain.ts:25-245](file://src/lib/ai/streaming/fallback-chain.ts#L25-L245)
+- [cache-handler.ts:19-86](file://src/lib/ai/streaming/cache-handler.ts#L19-L86)
 - [rag.ts:18-800](file://src/lib/ai/rag.ts#L18-L800)
 - [search.ts:167-337](file://src/lib/ai/search.ts#L167-L337)
 - [context-builder.ts:80-618](file://src/lib/ai/context-builder.ts#L80-L618)
@@ -230,9 +280,11 @@ SVC --> COST
 ## Architecture Overview
 The AI pipeline orchestrates multiple data sources and models to produce contextual, grounded, and cost-controlled responses. The flow integrates:
 - Input classification and plan-based tier selection
+- Security validation with comprehensive guardrails and input sanitization
 - Parallel retrieval: RAG, web search, asset enrichment, memory, cross-sector context
 - Structured context compression and optional behavioral coaching
-- Streaming generation with cost estimation and daily cap enforcement
+- Streaming generation with cost estimation, daily cap enforcement, and fallback management
+- Output validation and semantic consistency checking for high-value tiers
 - Optional fallbacks and graceful degradation
 
 ```mermaid
@@ -240,6 +292,11 @@ sequenceDiagram
 participant Client as "Client"
 participant API as "API Route"
 participant SVC as "service.ts"
+participant GUARD as "guardrails.ts"
+participant OUTVAL as "output-validation.ts"
+participant STREAM as "streaming/utils.ts"
+participant FALLBACK as "streaming/fallback-chain.ts"
+participant CACHE as "streaming/cache-handler.ts"
 participant CFG as "config.ts"
 participant ORCH as "orchestration.ts"
 participant RAG as "rag.ts"
@@ -249,6 +306,7 @@ participant MEM as "memory.ts"
 participant COST as "cost-calculator.ts"
 Client->>API : POST /api/lyra/personal-briefing-ai
 API->>SVC : generateLyraStream(messages, context, userId)
+SVC->>GUARD : validateInput(query) + validateConversationLength(messages)
 SVC->>CFG : getTierConfig(plan, tier)
 SVC->>ORCH : resolveGptDeployment(role)
 par Parallel Retrieval
@@ -259,12 +317,21 @@ SVC->>MEM : getSessionNotes(userId, source)
 end
 SVC->>CTX : buildCompressedContext(...)
 SVC->>COST : calculateLLMCost(...)
+SVC->>CACHE : handleLateCacheHit(cachedText, ctx)
+SVC->>STREAM : refundOnStreamError(textStream, userId, creditCost)
+SVC->>FALLBACK : executeFallbackChain(primaryError, ctx)
 SVC-->>API : streamText(...)
+OUTVAL->>OUTVAL : validateOutput(text, tier, plan, ...)
+OUTVAL->>OUTVAL : validateSemanticConsistency(text, context, tier, plan)
 API-->>Client : SSE stream
 ```
 
 **Diagram sources**
 - [service.ts:383-700](file://src/lib/ai/service.ts#L383-L700)
+- [guardrails.ts:232-258](file://src/lib/ai/guardrails.ts#L232-L258)
+- [output-validation.ts:426-496](file://src/lib/ai/output-validation.ts#L426-L496)
+- [fallback-chain.ts:57-209](file://src/lib/ai/streaming/fallback-chain.ts#L57-L209)
+- [cache-handler.ts:38-86](file://src/lib/ai/streaming/cache-handler.ts#L38-L86)
 - [config.ts:379-389](file://src/lib/ai/config.ts#L379-L389)
 - [orchestration.ts:1-8](file://src/lib/ai/orchestration.ts#L1-L8)
 - [rag.ts:1033-1049](file://src/lib/ai/rag.ts#L1033-L1049)
@@ -317,6 +384,109 @@ Orchestration --> Config : "uses"
 **Section sources**
 - [config.ts:124-389](file://src/lib/ai/config.ts#L124-L389)
 - [orchestration.ts:1-8](file://src/lib/ai/orchestration.ts#L1-L8)
+
+### Enhanced Security Guardrails and Input Validation
+- Comprehensive input validation pipeline
+  - Unicode normalization (NFKC) to defeat homoglyph evasion attacks across all guardrail checks.
+  - Conversation length validation preventing context-window exhaustion from extremely long messages.
+  - Base64-encoded payload scanning with Shannon entropy analysis to detect encoded injection attempts.
+- Advanced prompt injection detection
+  - Expanded regex patterns covering role hijacking, instruction override, and system prompt manipulation.
+  - Intent-aware financial guardrails blocking prohibited language and prediction requests.
+- Multi-layered protection strategy
+  - First-line regex pattern matching, second-line base64 scanning, third-line financial guardrails.
+  - Single normalization point ensures consistent pattern matching across all validation layers.
+
+```mermaid
+flowchart TD
+Start(["Input Validation Pipeline"]) --> Normalize["Unicode Normalization (NFKC)"]
+Normalize --> LengthCheck["Conversation Length Check (≤50k chars)"]
+LengthCheck --> RegexCheck["Regex Pattern Matching"]
+RegexCheck --> Base64Scan["Base64 Payload Scanning"]
+Base64Scan --> FinancialCheck["Financial Guardrails"]
+FinancialCheck --> Result{"Valid Input?"}
+Result --> |Yes| Pass["Allow Request"]
+Result --> |No| Block["SafetyViolationError"]
+```
+
+**Diagram sources**
+- [guardrails.ts:173-258](file://src/lib/ai/guardrails.ts#L173-L258)
+
+**Section sources**
+- [guardrails.ts:41-258](file://src/lib/ai/guardrails.ts#L41-L258)
+
+### Output Validation and Semantic Consistency
+- Post-stream output validation
+  - Tier-aware section requirement checking with plan-specific expectations.
+  - Follow-up question count validation ensuring exactly 3 questions per response.
+  - Crypto-specific banned phrase detection for hype language prevention.
+- Semantic consistency validation for high-value tiers
+  - Sample-based validation (~5% of ELITE/COMPLEX responses) to detect factual inconsistencies.
+  - Claim extraction using regex patterns for numbers, dates, and comparative statements.
+  - Context-based verification with confidence scoring and unverified claim reporting.
+- Non-blocking validation approach
+  - Validation never blocks user delivery, only logs warnings for monitoring and improvement.
+
+```mermaid
+flowchart TD
+Output["LLM Output"] --> StructuralCheck["Structural Validation"]
+StructuralCheck --> SectionCheck["Section Presence Check"]
+SectionCheck --> FollowUpCheck["Follow-up Count Validation"]
+FollowUpCheck --> CryptoCheck["Crypto Banned Phrase Check"]
+CryptoCheck --> SemanticSample{"ELITE/COMPLEX COMPLEX?"}
+SemanticSample --> |Yes| SemanticCheck["Semantic Consistency Check"]
+SemanticSample --> |No| Complete["Validation Complete"]
+SemanticCheck --> ClaimExtraction["Extract Claims"]
+ClaimExtraction --> ContextVerification["Verify Against Context"]
+ContextVerification --> Result["Validation Result"]
+Complete --> Result
+```
+
+**Diagram sources**
+- [output-validation.ts:107-496](file://src/lib/ai/output-validation.ts#L107-L496)
+
+**Section sources**
+- [output-validation.ts:107-496](file://src/lib/ai/output-validation.ts#L107-L496)
+
+### Streaming Response Caching and Fallback Management
+- Intelligent caching system
+  - Late cache hit processing with cost tracking and conversation logging.
+  - Deterministic cost calculation for cached responses with cached input token discounting.
+  - Single-chunk streaming for cache hits to minimize overhead.
+- Fallback chain management
+  - Progressive model degradation from full to mini to nano deployments.
+  - Configurable timeouts and token budgets for each fallback step.
+  - Error propagation with detailed logging for debugging and monitoring.
+- Stream error handling
+  - Automatic credit refunds for mid-stream failures to prevent billing for broken streams.
+  - Non-blocking refund process with retry logic and error logging.
+
+```mermaid
+sequenceDiagram
+participant SVC as "service.ts"
+participant CACHE as "cache-handler.ts"
+participant FALLBACK as "fallback-chain.ts"
+participant STREAM as "streaming/utils.ts"
+SVC->>CACHE : handleLateCacheHit(cachedText, ctx)
+CACHE->>STREAM : singleChunkStream(cachedText)
+STREAM-->>SVC : cached text stream
+SVC->>FALLBACK : executeFallbackChain(primaryError, ctx)
+FALLBACK->>FALLBACK : Step 1 : lyra-mini (higher timeout)
+FALLBACK->>FALLBACK : Step 2 : lyra-nano (shorter timeout)
+FALLBACK-->>SVC : fallback stream or error
+SVC->>STREAM : refundOnStreamError(textStream, userId, creditCost)
+STREAM-->>SVC : refunded stream
+```
+
+**Diagram sources**
+- [cache-handler.ts:38-86](file://src/lib/ai/streaming/cache-handler.ts#L38-L86)
+- [fallback-chain.ts:57-209](file://src/lib/ai/streaming/fallback-chain.ts#L57-L209)
+- [utils.ts:20-46](file://src/lib/ai/streaming/utils.ts#L20-L46)
+
+**Section sources**
+- [cache-handler.ts:19-86](file://src/lib/ai/streaming/cache-handler.ts#L19-L86)
+- [fallback-chain.ts:25-245](file://src/lib/ai/streaming/fallback-chain.ts#L25-L245)
+- [utils.ts:14-54](file://src/lib/ai/streaming/utils.ts#L14-L54)
 
 ### RAG Implementation and Semantic Search
 - Vector store and chunking
@@ -527,9 +697,44 @@ Vector --> Return
 - [route.ts](file://src/app/api/admin/analytics/route.ts)
 - [route.ts](file://src/app/api/admin/usage/route.ts)
 
+## Security and Reliability Enhancements
+
+### Advanced Input Validation Pipeline
+The system now implements a comprehensive multi-layered security validation pipeline designed to prevent various attack vectors:
+
+- **Unicode Normalization**: All input validation operates on NFKC-normalized text to defeat homoglyph evasion attacks that attempt to bypass regex patterns using visually similar characters.
+- **Conversation Length Limits**: Prevents context-window exhaustion with a 50,000 character cap on total conversation history.
+- **Base64 Payload Detection**: Scans for encoded injection attempts using Shannon entropy analysis with a 5.8-bit threshold and requires minimum suspicious runs (≥2) to trigger blocking.
+- **Expanded Prompt Injection Patterns**: Comprehensive regex coverage for role hijacking, instruction override, system prompt manipulation, and XML-style injection attempts.
+- **Intent-Aware Financial Guardrails**: Blocks prohibited language and prediction requests while allowing legitimate financial analysis queries.
+
+### Output Validation and Semantic Consistency
+Post-processing validation ensures response quality and factual accuracy:
+
+- **Tier-Aware Structural Validation**: Different section requirements based on plan tier (STARTER requires 3 sections, PRO requires 6, ELITE requires 6).
+- **Follow-up Question Compliance**: Ensures exactly 3 follow-up questions are provided in all responses.
+- **Semantic Consistency Checking**: For ELITE/COMPLEX tiers, validates factual claims against retrieved context with confidence scoring.
+- **Non-Blocking Validation**: Never prevents user delivery; only logs warnings for monitoring and improvement.
+
+### Streaming Response Caching and Fallback Management
+Enhanced reliability through intelligent caching and progressive fallback mechanisms:
+
+- **Late Cache Hit Processing**: Processes cache hits after context building with proper cost tracking and conversation logging.
+- **Progressive Fallback Chain**: From full to mini to nano deployments with configurable timeouts and token budgets.
+- **Automatic Credit Refunds**: Prevents billing for broken streams with automatic refund processing.
+- **Distributed Locking**: Prevents concurrent memory updates across instances.
+
+**Section sources**
+- [guardrails.ts:173-258](file://src/lib/ai/guardrails.ts#L173-L258)
+- [output-validation.ts:107-496](file://src/lib/ai/output-validation.ts#L107-L496)
+- [cache-handler.ts:38-86](file://src/lib/ai/streaming/cache-handler.ts#L38-L86)
+- [fallback-chain.ts:57-209](file://src/lib/ai/streaming/fallback-chain.ts#L57-L209)
+- [utils.ts:20-46](file://src/lib/ai/streaming/utils.ts#L20-L46)
+- [memory.ts:256-271](file://src/lib/ai/memory.ts#L256-L271)
+
 ## Dependency Analysis
 - Cohesion and coupling
-  - service.ts orchestrates tightly with config.ts, rag.ts, search.ts, context-builder.ts, memory.ts, and cost-calculator.ts.
+  - service.ts orchestrates tightly with config.ts, guardrails.ts, output-validation.ts, streaming utilities, rag.ts, search.ts, context-builder.ts, memory.ts, and cost-calculator.ts.
   - Low coupling via typed interfaces (e.g., LyraMessage, Source) and shared types (e.g., COMMON_WORDS, AssetEnrichment).
 - External dependencies
   - Azure OpenAI (AI SDK and embeddings), Tavily for web search, Prisma/pgvector for RAG, Redis for caching and coordination.
@@ -539,6 +744,11 @@ Vector --> Return
 ```mermaid
 graph LR
 SVC["service.ts"] --> CFG["config.ts"]
+SVC --> GUARD["guardrails.ts"]
+SVC --> OUTVAL["output-validation.ts"]
+SVC --> STREAM["streaming/utils.ts"]
+SVC --> FALLBACK["streaming/fallback-chain.ts"]
+SVC --> CACHE["streaming/cache-handler.ts"]
 SVC --> RAG["rag.ts"]
 SVC --> SEARCH["search.ts"]
 SVC --> CTX["context-builder.ts"]
@@ -551,6 +761,10 @@ CFG --> ORCH["orchestration.ts"]
 - [service.ts:1-50](file://src/lib/ai/service.ts#L1-L50)
 - [config.ts:1-25](file://src/lib/ai/config.ts#L1-L25)
 - [orchestration.ts:1-8](file://src/lib/ai/orchestration.ts#L1-L8)
+- [guardrails.ts:1-259](file://src/lib/ai/guardrails.ts#L1-L259)
+- [output-validation.ts:1-496](file://src/lib/ai/output-validation.ts#L1-L496)
+- [fallback-chain.ts:1-245](file://src/lib/ai/streaming/fallback-chain.ts#L1-L245)
+- [cache-handler.ts:1-88](file://src/lib/ai/streaming/cache-handler.ts#L1-L88)
 - [rag.ts:1-15](file://src/lib/ai/rag.ts#L1-L15)
 - [search.ts:1-10](file://src/lib/ai/search.ts#L1-L10)
 - [context-builder.ts:1-5](file://src/lib/ai/context-builder.ts#L1-L5)
@@ -564,12 +778,13 @@ CFG --> ORCH["orchestration.ts"]
 ## Performance Considerations
 - Latency optimization
   - Early model cache, educational cache, asset-type fast-path, and BM25 for support KB minimize API calls and latency.
+  - Streaming response caching reduces latency for repeated queries and trivial responses.
 - Throughput and cost control
   - Tiered routing, daily token caps, and credit checks prevent runaway usage.
+  - Progressive fallback chain ensures continued service during partial outages.
 - Resilience
   - Embedding retries, circuit-breaker for web search, and graceful degradation ensure availability under partial outages.
-
-[No sources needed since this section provides general guidance]
+  - Automatic credit refunds prevent billing for broken streams and maintain user trust.
 
 ## Troubleshooting Guide
 - Mid-stream LLM failures
@@ -580,27 +795,31 @@ CFG --> ORCH["orchestration.ts"]
   - Injection pattern filtering and quality scoring reduce risk; embedding failures degrade gracefully.
 - Daily token cap exceeded
   - UsageLimitError thrown with reset timestamp for midnight UTC.
+- Security violations
+  - SafetyViolationError thrown with specific reason for blocked input; see guardrails.ts for exact violation reasons.
+- Output validation warnings
+  - Non-blocking warnings logged for monitoring; responses still delivered to users.
 
 **Section sources**
 - [service.ts:63-89](file://src/lib/ai/service.ts#L63-L89)
 - [search.ts:306-337](file://src/lib/ai/search.ts#L306-L337)
 - [rag.ts:389-412](file://src/lib/ai/rag.ts#L389-L412)
 - [service.ts:656-676](file://src/lib/ai/service.ts#L656-L676)
+- [guardrails.ts:7-39](file://src/lib/ai/guardrails.ts#L7-L39)
+- [output-validation.ts:206-238](file://src/lib/ai/output-validation.ts#L206-L238)
 
 ## Conclusion
-The AI Services Integration provides a robust, cost-conscious, and resilient system for personal briefing, market analysis, and support. It leverages multi-model orchestration, RAG with fast-path caches, web search, structured context building, and long-term user memory to deliver contextual, grounded, and efficient AI responses. Built-in cost controls, fallbacks, and monitoring ensure reliability and sustainability at scale.
-
-[No sources needed since this section summarizes without analyzing specific files]
+The AI Services Integration provides a robust, cost-conscious, and resilient system for personal briefing, market analysis, and support. It leverages multi-model orchestration, RAG with fast-path caches, web search, structured context building, and long-term user memory to deliver contextual, grounded, and efficient AI responses. Built-in cost controls, fallbacks, monitoring, and comprehensive security guardrails ensure reliability and sustainability at scale. The enhanced security validation pipeline, output validation system, and streaming response caching provide additional layers of protection and performance optimization.
 
 ## Appendices
 
 ### AI Interaction Patterns
 - Personal briefing AI
   - Route: POST /api/lyra/personal-briefing-ai
-  - Pattern: Streamed response with RAG, web search, and asset enrichment; tiered cost control.
+  - Pattern: Streamed response with RAG, web search, and asset enrichment; tiered cost control; comprehensive security validation.
 - Market analysis AI
   - Routes: /api/discovery/*, /api/market/*, /api/intelligence/*
-  - Pattern: Contextual synthesis with cross-sector and portfolio data; mode-aware truncation.
+  - Pattern: Contextual synthesis with cross-sector and portfolio data; mode-aware truncation; output validation.
 - Support AI
   - Routes: /api/support/*
   - Pattern: BM25 for KB, RAG fallback, and injection guards; public chat and voice session variants.
@@ -636,13 +855,15 @@ The AI Services Integration provides a robust, cost-conscious, and resilient sys
 
 ### AI-Powered Content Generation Workflows
 - Personal briefing
-  - Classify query complexity, resolve plan tier, assemble context (RAG, web, memory, enrichment), stream response, log usage, and enforce cost caps.
+  - Classify query complexity, resolve plan tier, validate input security, assemble context (RAG, web, memory, enrichment), stream response, validate output, log usage, and enforce cost caps.
 - Market narrative tracker
-  - Combine institutional knowledge, cross-sector context, and portfolio signals for narrative synthesis.
+  - Combine institutional knowledge, cross-sector context, and portfolio signals for narrative synthesis with semantic consistency checking.
 - Support responder
-  - Detect trivial queries, BM25 search, RAG fallback, and injection guards before generating contextual answers.
+  - Detect trivial queries, BM25 search, RAG fallback, and injection guards before generating contextual answers with output validation.
 
 **Section sources**
 - [service.ts:455-700](file://src/lib/ai/service.ts#L455-L700)
+- [guardrails.ts:232-258](file://src/lib/ai/guardrails.ts#L232-L258)
+- [output-validation.ts:426-496](file://src/lib/ai/output-validation.ts#L426-L496)
 - [rag.ts:1033-1049](file://src/lib/ai/rag.ts#L1033-L1049)
 - [ai-responder.ts:222-277](file://src/lib/support/ai-responder.ts#L222-L277)

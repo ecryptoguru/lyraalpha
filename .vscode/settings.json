@@ -1,4 +1,5 @@
 {
     "prisma.pinToPrisma6": false,
-    "css.lint.unknownAtRules": "ignore"
+    "css.lint.unknownAtRules": "ignore",
+    "git.ignoreLimitWarning": true
 }

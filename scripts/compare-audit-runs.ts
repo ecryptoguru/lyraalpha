@@ -238,6 +238,7 @@ function compareRuns(baseline: AuditRun, current: AuditRun): {
     qualityDelta: number;
     costDelta: number;
     costDeltaPercent: number;
+    costPerTestDelta: number;
     avgDurationDelta: number;
     avgDurationDeltaPercent: number;
     p50LatencyDelta: number;
@@ -328,6 +329,8 @@ function compareRuns(baseline: AuditRun, current: AuditRun): {
       costDeltaPercent: (baselineSummary.totalCost ?? 0) > 0 
         ? (((currentSummary.totalCost ?? 0) - (baselineSummary.totalCost ?? 0)) / (baselineSummary.totalCost ?? 0)) * 100
         : 0,
+      costPerTestDelta: (currentSummary.totalCost ?? 0) / Math.max(1, currentSummary.successful ?? 0)
+        - (baselineSummary.totalCost ?? 0) / Math.max(1, baselineSummary.successful ?? 0),
       avgDurationDelta: (currentSummary.avgDuration ?? 0) - (baselineSummary.avgDuration ?? 0),
       avgDurationDeltaPercent: (baselineSummary.avgDuration ?? 0) > 0
         ? (((currentSummary.avgDuration ?? 0) - (baselineSummary.avgDuration ?? 0)) / (baselineSummary.avgDuration ?? 0)) * 100
@@ -599,6 +602,7 @@ function printComparison(comparison: ReturnType<typeof compareRuns>, baseline: A
   console.log(`   Current Success:  ${comparison.summary.currentSuccessful}/${comparison.summary.totalRuns}`);
   console.log(`   Quality Delta:    ${comparison.summary.qualityDelta >= 0 ? "+" : ""}${comparison.summary.qualityDelta.toFixed(1)} pts`);
   console.log(`   Cost Delta:       ${comparison.summary.costDelta >= 0 ? "+" : ""}$${comparison.summary.costDelta.toFixed(4)} (${comparison.summary.costDeltaPercent >= 0 ? "+" : ""}${comparison.summary.costDeltaPercent.toFixed(1)}%)`);
+  console.log(`   Cost/Test Δ:      ${comparison.summary.costPerTestDelta >= 0 ? "+" : ""}$${comparison.summary.costPerTestDelta.toFixed(4)}`);
   console.log(`   Avg Latency:      ${comparison.summary.avgDurationDelta >= 0 ? "+" : ""}${comparison.summary.avgDurationDelta.toFixed(0)}ms (${comparison.summary.avgDurationDeltaPercent >= 0 ? "+" : ""}${comparison.summary.avgDurationDeltaPercent.toFixed(1)}%)`);
   console.log(`   p50/p90 E2E:      ${comparison.summary.p50LatencyDelta >= 0 ? "+" : ""}${comparison.summary.p50LatencyDelta.toFixed(0)}ms / ${comparison.summary.p90LatencyDelta >= 0 ? "+" : ""}${comparison.summary.p90LatencyDelta.toFixed(0)}ms`);
   console.log(`   p50/p90 TTFT:     ${comparison.summary.p50TtftDelta >= 0 ? "+" : ""}${comparison.summary.p50TtftDelta.toFixed(0)}ms / ${comparison.summary.p90TtftDelta >= 0 ? "+" : ""}${comparison.summary.p90TtftDelta.toFixed(0)}ms`);
@@ -749,6 +753,7 @@ function generateMarkdownReport(
   report += `| p50 TTFT | ${(baseline.latencyPercentiles?.ttft?.p50 ?? 0).toFixed(0)}ms | ${(current.latencyPercentiles?.ttft?.p50 ?? 0).toFixed(0)}ms | ${comparison.summary.p50TtftDelta >= 0 ? "+" : ""}${comparison.summary.p50TtftDelta.toFixed(0)}ms |\n`;
   report += `| p90 TTFT | ${(baseline.latencyPercentiles?.ttft?.p90 ?? 0).toFixed(0)}ms | ${(current.latencyPercentiles?.ttft?.p90 ?? 0).toFixed(0)}ms | ${comparison.summary.p90TtftDelta >= 0 ? "+" : ""}${comparison.summary.p90TtftDelta.toFixed(0)}ms |\n`;
   report += `| Total Cost | $${(baselineSummary.totalCost ?? 0).toFixed(4)} | $${(currentSummary.totalCost ?? 0).toFixed(4)} | ${cSign}$${comparison.summary.costDelta.toFixed(4)} (${cPctSign}${comparison.summary.costDeltaPercent.toFixed(1)}%) |\n`;
+  report += `| Cost/Test | $${((baselineSummary.totalCost ?? 0) / Math.max(1, baselineSummary.successful ?? 0)).toFixed(4)} | $${((currentSummary.totalCost ?? 0) / Math.max(1, currentSummary.successful ?? 0)).toFixed(4)} | ${comparison.summary.costPerTestDelta >= 0 ? "+" : ""}$${comparison.summary.costPerTestDelta.toFixed(4)} |\n`;
   report += `| Truncated Outputs | ${baseline.results.filter((r) => r.likelyTruncated).length} | ${current.results.filter((r) => r.likelyTruncated).length} | ${comparison.summary.truncatedDelta >= 0 ? "+" : ""}${comparison.summary.truncatedDelta} |\n`;
   report += `| Word Budget PASS | ${baseline.results.filter((r) => r.wordBudget?.rating === "PASS").length} | ${current.results.filter((r) => r.wordBudget?.rating === "PASS").length} | ${comparison.summary.wordBudgetPassDelta >= 0 ? "+" : ""}${comparison.summary.wordBudgetPassDelta} |\n\n`;
 

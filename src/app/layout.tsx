@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Fira_Code, Space_Grotesk } from "next/font/google";
+import { Inter, Fira_Code, Space_Grotesk, Orbitron, Exo_2 } from "next/font/google";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster } from "sonner";
@@ -26,6 +26,20 @@ const spaceGrotesk = Space_Grotesk({
   variable: "--font-display",
   subsets: ["latin"],
   display: "swap",
+});
+
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const exo2 = Exo_2({
+  variable: "--font-exo2",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const viewport = {
@@ -159,7 +173,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${firaCode.variable} ${spaceGrotesk.variable} font-sans antialiased bg-background text-foreground`}
+        className={`${inter.variable} ${firaCode.variable} ${spaceGrotesk.variable} ${orbitron.variable} ${exo2.variable} font-sans antialiased bg-background text-foreground`}
         suppressHydrationWarning
       >
         <AuthProvider>

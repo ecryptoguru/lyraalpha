@@ -125,7 +125,9 @@ export function AssetCryptoDiagnosticsSection({
       (cgMeta.watchlistUsers && cgMeta.watchlistUsers > 0)
     )
   );
-  const hasSocialPulse = hasSentiment || hasCommunity || !!liquidity;
+  const fundingRate = analyticsComputed.fundingRate;
+  const holderGini = analyticsComputed.holderGini;
+  const hasSocialPulse = hasSentiment || hasCommunity || !!liquidity || fundingRate != null;
   const networkScore = network?.score != null ? Number(network.score) : null;
   const networkLabel =
     (network as { label?: string } | undefined)?.label ??
@@ -146,6 +148,7 @@ export function AssetCryptoDiagnosticsSection({
     ?? (liquidity as { poolConcentration?: number; poolDistributionScore?: number } | undefined)?.poolDistributionScore;
   const hasBuilderHealth = !!(
     network ||
+    holderGini != null ||
     (cgMeta?.developer && (
       cgMeta.developer.commitCount4Weeks ||
       cgMeta.developer.stars ||
@@ -229,6 +232,19 @@ export function AssetCryptoDiagnosticsSection({
                   <MetricStat label="Exchange" value={liquidityExchange != null ? `${Math.round(Number(liquidityExchange))}` : "—"} compact />
                   <MetricStat label="Pool Dist" value={liquidityPoolDist != null ? `${Math.round(Number(liquidityPoolDist))}` : "—"} compact />
                 </div>
+                {fundingRate != null && (
+                  <div className="pt-2 border-t border-border/30">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Funding Rate</span>
+                      <span className={cn(
+                        "text-xs font-bold",
+                        Math.abs(fundingRate) > 0.001 ? "text-danger" : Math.abs(fundingRate) > 0.0001 ? "text-warning" : "text-success"
+                      )}>
+                        {fundingRate >= 0 ? "+" : ""}{(fundingRate * 100).toFixed(3)}%
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : null}
           </div>
@@ -261,6 +277,19 @@ export function AssetCryptoDiagnosticsSection({
                 ) : null}
               </div>
             ) : null}
+            {holderGini != null && (
+              <div className="pt-2 border-t border-border/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Holder Concentration</span>
+                  <span className={cn(
+                    "text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                    holderGini >= 0.85 ? "text-danger border-danger/30 bg-danger/10" : holderGini >= 0.7 ? "text-warning border-warning/30 bg-warning/10" : "text-success border-success/30 bg-success/10"
+                  )}>
+                    Gini {holderGini.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         ) : null}
 

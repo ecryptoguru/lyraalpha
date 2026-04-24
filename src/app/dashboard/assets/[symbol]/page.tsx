@@ -61,6 +61,7 @@ import {
   AssetCryptoProfileSection,
 } from "./asset-page-render-sections";
 import { AssetPageSectionHeader } from "./asset-page-section-header";
+import { OnChainIntelligenceSection } from "@/components/analytics/on-chain-intelligence-section";
 
 /** Format rating labels like STRONG_BUY → "Strong Buy", BULLISH → "Bullish" for display */
 function formatRatingDisplay(rating: string | null | undefined): string {
@@ -352,6 +353,11 @@ export default function AssetPage({
     isUp,
     headerDayRange,
     cgMeta,
+    holderConcentrationLabel,
+    fundingRateLabel,
+    unlockRiskLevel,
+    cgMomentumContext,
+    cgHotBadge,
   } = derivedState;
 
   const dayRangePosition = useMemo(
@@ -476,7 +482,18 @@ export default function AssetPage({
                     {grouping.group}
                   </div>
                 )}
+                {cgHotBadge && (
+                  <div className="px-2 py-0.5 rounded-md bg-warning/10 border border-warning/20 text-[9px] font-bold text-warning uppercase tracking-widest animate-pulse">
+                    Trending
+                  </div>
+                )}
               </div>
+
+              {cgMomentumContext && (
+                <p className="text-xs text-muted-foreground/80 leading-relaxed max-w-2xl">
+                  <span className="text-primary font-bold">{cgMomentumContext}</span>
+                </p>
+              )}
 
               <p className="text-sm md:text-base text-muted-foreground leading-relaxed max-w-2xl">
                 Start with the clearest read on the setup, then pressure-test the drivers, risks and market backdrop before you spend time in the deeper analytics below.
@@ -1086,6 +1103,22 @@ export default function AssetPage({
             cgMeta={cgMeta}
             currencyRegion={currencyRegion}
           />
+
+          {analyticsComputed.type === "CRYPTO" && (
+            <OnChainIntelligenceSection
+              holderGini={analyticsComputed.holderGini}
+              top10HolderPercent={analyticsComputed.top10HolderPercent}
+              fundingRate={analyticsComputed.fundingRate}
+              exchangeFlows={analyticsComputed.exchangeFlows}
+              stakingYield={analyticsComputed.stakingYield}
+              emissionSchedule={analyticsComputed.emissionSchedule}
+              governanceData={analyticsComputed.governanceData}
+              unlockCalendar={analyticsComputed.unlockCalendar}
+              holderConcentrationLabel={holderConcentrationLabel}
+              fundingRateLabel={fundingRateLabel}
+              unlockRiskLevel={unlockRiskLevel}
+            />
+          )}
 
           {/* Institutional Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">

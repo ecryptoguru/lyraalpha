@@ -553,9 +553,16 @@ function estimateCost(outputTokens: number, plan: string, tier: string): number 
     (plan === "ELITE"      && tier === "COMPLEX") ||
     (plan === "ENTERPRISE" && tier === "COMPLEX");
 
+  // Tier-aware input/output ratios based on measured prompt composition:
+  //   SIMPLE:   ~8x  (short system prompt + minimal context)
+  //   MODERATE: ~10x (system prompt + RAG chunks + asset select)
+  //   COMPLEX:  ~12x (full system prompt + all RAG + web search + full asset data)
+  const inputRatio = tier === "COMPLEX" ? 12 : tier === "MODERATE" ? 10 : 8;
+  const estimatedInputTokens = Math.round(outputTokens * inputRatio);
+
   const outputRate = isFull ? 15.00 / 1_000_000 : isNano ? 1.25 / 1_000_000 : 4.50 / 1_000_000;
   const inputRate  = isFull ?  2.50 / 1_000_000 : isNano ? 0.20 / 1_000_000 : 0.75 / 1_000_000;
-  return outputTokens * outputRate + (outputTokens * 3) * inputRate;
+  return outputTokens * outputRate + estimatedInputTokens * inputRate;
 }
 
 // ─── DB helper ────────────────────────────────────────────────────────────────
@@ -595,7 +602,7 @@ async function findAuditLogRow(params: {
   query: string;
   startedAt: Date;
 }) {
-  for (let attempt = 0; attempt < 5; attempt++) {
+  for (let attempt = 0; attempt < 10; attempt++) {
     const row = await prisma.aIRequestLog.findFirst({
       where: {
         userId: params.userId,
@@ -606,7 +613,7 @@ async function findAuditLogRow(params: {
     }).catch(() => null);
 
     if (row) return row;
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
   return null;

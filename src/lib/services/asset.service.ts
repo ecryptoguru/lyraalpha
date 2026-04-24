@@ -45,6 +45,13 @@ export const cryptoAssetSelect = {
   scenarioData: true,
   industry: true,
   coingeckoId: true,
+  holderGini: true,
+  top10HolderPercent: true,
+  fundingRate: true,
+  exchangeFlows: true,
+  stakingYield: true,
+  emissionSchedule: true,
+  governanceData: true,
 } as const;
 
 export const analyticsAssetSelect = {
@@ -91,6 +98,13 @@ export const analyticsAssetSelect = {
   industry: true,
   coingeckoId: true,
   region: true,
+  holderGini: true,
+  top10HolderPercent: true,
+  fundingRate: true,
+  exchangeFlows: true,
+  stakingYield: true,
+  emissionSchedule: true,
+  governanceData: true,
 } as const;
 
 export type AnalyticsAsset = Prisma.AssetGetPayload<{

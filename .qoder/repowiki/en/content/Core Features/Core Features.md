@@ -140,7 +140,22 @@
 - [lyra.share.card.route.tsx](file://src/app/api/share/card/route.tsx)
 - [lyra.share.card.route.tsx](file://src/app/api/share/card/route.tsx)
 - [lyra......](file://src/app/api/share/card/route.tsx)
+- [crypto-intelligence.ts](file://src/lib/engines/crypto-intelligence.ts)
+- [portfolio-monte-carlo.ts](file://src/lib/engines/portfolio-monte-carlo.ts)
+- [admin.engines-regime.page.tsx](file://src/app/admin/engines-regime/page.tsx)
+- [portfolio.api.simulate.route.ts](file://src/app/api/portfolio/[id]/simulate/route.ts)
+- [ai.config.ts](file://src/lib/ai/config.ts)
+- [crypto-implementation-completion-report.md](file://docs/crypto-implementation-completion-report.md)
+- [crypto-priority-matrix-and-implementation-plan.md](file://docs/crypto-priority-matrix-and-implementation-plan.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Enhanced market intelligence engine with comprehensive crypto intelligence capabilities
+- Expanded portfolio management tools with advanced Monte Carlo simulations and stress testing
+- Improved AI services integration with advanced security features and runtime hardening
+- Added new crypto-specific risk scoring, structural risk assessment, and intelligence engines
+- Integrated advanced portfolio simulation modes with regime-aware modeling
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -155,7 +170,7 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains LyraAlpha’s core features and functionality as implemented in the codebase. It focuses on:
+This document explains LyraAlpha's core features and functionality as implemented in the codebase. It focuses on:
 - User management: authentication, profiles, and subscription tiers
 - Market intelligence engine: AI-powered briefings, market regime detection, discovery feed, and sector analysis
 - Portfolio management: health monitoring, risk assessment, stress testing, and performance analytics
@@ -164,6 +179,8 @@ This document explains LyraAlpha’s core features and functionality as implemen
 - Practical usage patterns and examples for each feature area
 
 The platform is a Next.js application with a streaming-first API, deterministic engine outputs, and a credit-based usage model. It integrates Clerk for authentication, Stripe and Razorpay for payments, Supabase for real-time, and Upstash for caching and scheduling.
+
+**Updated** Enhanced with comprehensive crypto intelligence capabilities, advanced Monte Carlo simulations, and improved AI security features.
 
 ## Project Structure
 High-level structure relevant to core features:
@@ -197,7 +214,7 @@ Stripe["Stripe/Razorpay"]
 Supabase["Supabase Realtime"]
 Upstash["Upstash Redis/QStash"]
 Prisma["PostgreSQL via Prisma"]
-end
+End
 Dashboard --> AuthAPI
 Dashboard --> PortfolioAPI
 Dashboard --> IntelligenceAPI
@@ -242,6 +259,8 @@ Dashboard --> Supabase
 - Payments: Stripe checkout and customer portal, plus Razorpay for India, with webhooks
 - Real-time: Supabase-based chat and notifications
 - Admin: Analytics, usage, billing, user diagnostics, and AI cost/limits management
+
+**Updated** Enhanced with comprehensive crypto intelligence engines, advanced Monte Carlo simulation capabilities, and improved AI security runtime hardening.
 
 **Section sources**
 - [auth.ts:32-88](file://src/lib/auth.ts#L32-L88)
@@ -350,6 +369,8 @@ Usage patterns:
 - Engines: DSE scores, ARCS, regime detection, stress scenarios, portfolio engines
 - Routes: personal briefings, discovery feed, sector analysis, intelligence calendars, analogs
 
+**Updated** Enhanced with comprehensive crypto intelligence capabilities including network activity scoring, holder stability assessment, liquidity risk evaluation, structural risk analysis, and enhanced trust modeling.
+
 ```mermaid
 sequenceDiagram
 participant Client as "Client"
@@ -397,7 +418,7 @@ Usage patterns:
 - [lyra.chat.route.ts](file://src/app/api/chat/route.ts)
 - [support.public.chat.route.ts](file://src/app/api/support/public-chat/route.ts)
 - [personal.briefing.route.ts:14-33](file://src/app/api/lyra/personal-briefing/route.ts#L14-L33)
-- [market.regime.multi.horizon.route.ts](file://src/app/api/market/regime-multi.horizon/route.ts)
+- [market.regime.multi.horizon.route.ts](file://src/app/api/market/regime-multi-horizon/route.ts)
 - [discovery.feed.route.ts](file://src/app/api/discovery/feed/route.ts)
 - [discovery.sectors.route.ts](file://src/app/api/discovery/sectors/route.ts)
 - [intelligence.calendars.route.ts](file://src/app/api/intelligence/calendars/route.ts)
@@ -410,6 +431,8 @@ Usage patterns:
 - Health and analytics: health snapshots, regime alignment, fragility, Monte Carlo, drawdown estimates
 - Stress testing: sector-level and cross-asset scenarios
 - UI components: health meter, fragility card, Monte Carlo card, decision memo, holdings table, and dialogs for import/connect
+
+**Updated** Enhanced with advanced Monte Carlo simulation capabilities featuring regime-aware modeling, stress injection scenarios, factor shock analysis, and crypto-specific volatility adjustments.
 
 ```mermaid
 flowchart TD
@@ -435,17 +458,26 @@ Key implementation references:
 - Portfolio list/create: [portfolio.route.ts:17-101](file://src/app/api/portfolio/route.ts#L17-L101)
 - Health snapshots and analytics: [portfolio.health.route.ts](file://src/app/api/cron/portfolio-health/route.ts)
 - Stress testing: [stocks.stress.test.route.ts](file://src/app/api/stocks/stress-test/route.ts)
+- Monte Carlo simulation: [portfolio.api.simulate.route.ts](file://src/app/api/portfolio/[id]/simulate/route.ts)
+- Monte Carlo engine: [portfolio-monte-carlo.ts](file://src/lib/engines/portfolio-monte-carlo.ts)
+- Crypto intelligence engine: [crypto-intelligence.ts](file://src/lib/engines/crypto-intelligence.ts)
+- Admin crypto intelligence dashboard: [admin.engines-regime.page.tsx](file://src/app/admin/engines-regime/page.tsx)
 - UI components: [portfolio.health.meter.tsx](file://src/components/portfolio/portfolio-health-meter.tsx), [portfolio.fragility.card.tsx](file://src/components/portfolio/portfolio-fragility-card.tsx), [portfolio.monte.carlo.card.tsx](file://src/components/portfolio/portfolio-monte-carlo-card.tsx), [portfolio.decision.memo.card.tsx](file://src/components/portfolio/portfolio-decision-memo-card.tsx), [portfolio.drawdown.estimate.tsx](file://src/components/portfolio/portfolio-drawdown-estimate.tsx), [portfolio.regime.alignment.bar.tsx](file://src/components/portfolio/portfolio-regime-alignment-bar.tsx), [portfolio.holdings.table.tsx](file://src/components/portfolio/portfolio-holdings-table.tsx), [portfolio.intelligence.hero.tsx](file://src/components/portfolio/portfolio-intelligence-hero.tsx), [portfolio.add.holding.dialog.tsx](file://src/components/portfolio/add-holding-dialog.tsx), [portfolio.create.portfolio.dialog.tsx](file://src/components/portfolio/create-portfolio-dialog.tsx), [portfolio.csv.import.dialog.tsx](file://src/components/portfolio/csv-import-dialog.tsx), [portfolio.pdf.import.dialog.tsx](file://src/components/portfolio/pdf-import-dialog.tsx), [portfolio.broker.connect.dialog.tsx](file://src/components/portfolio/broker-connect-dialog.tsx), [portfolio.broker.import.dialog.tsx](file://src/components/portfolio/broker-import-dialog.tsx), [portfolio.demo.portfolio.panel.tsx](file://src/components/portfolio/demo-portfolio-panel.tsx)
 
 Usage patterns:
 - Enforce plan limits on create
 - Use health snapshots for trend analysis
 - Combine regime alignment and fragility to assess risk
+- Leverage Monte Carlo simulations for stress testing and scenario analysis
 
 **Section sources**
 - [portfolio.route.ts:17-101](file://src/app/api/portfolio/route.ts#L17-L101)
 - [portfolio.health.route.ts](file://src/app/api/cron/portfolio-health/route.ts)
 - [stocks.stress.test.route.ts](file://src/app/api/stocks/stress-test/route.ts)
+- [portfolio.api.simulate.route.ts](file://src/app/api/portfolio/[id]/simulate/route.ts)
+- [portfolio-monte-carlo.ts](file://src/lib/engines/portfolio-monte-carlo.ts)
+- [crypto-intelligence.ts](file://src/lib/engines/crypto-intelligence.ts)
+- [admin.engines-regime.page.tsx](file://src/app/admin/engines-regime/page.tsx)
 - [Product.md:203-230](file://docs/Product.md#L203-L230)
 
 ### AI Services Integration
@@ -453,6 +485,8 @@ Usage patterns:
 - Myra: public and dashboard support, voice support (PRO+), caching
 - Personal briefings: ELITE/ENTERPRISE gated
 - Real-time chat and notifications
+
+**Updated** Enhanced with advanced AI security runtime hardening including full conversation injection scanning, user memory protection, multi-asset mode gating, and comprehensive observability systems.
 
 ```mermaid
 sequenceDiagram
@@ -484,11 +518,13 @@ Key implementation references:
 - Myra Voice: [support.voice.session.route.ts](file://src/app/api/support/voice-session/route.ts), [dashboard.myra.voice.button.tsx](file://src/app/dashboard/myra-voice-button.tsx)
 - Personal briefing: [personal.briefing.route.ts:14-33](file://src/app/api/lyra/personal-briefing/route.ts#L14-L33)
 - AI safety and caching: [TieredPlans.md:197-233](file://docs/docs2/TieredPlans.md#L197-L233)
+- AI configuration and runtime: [ai.config.ts](file://src/lib/ai/config.ts)
 
 Usage patterns:
 - Use public Myra for pre-auth support
 - Enable voice support for PRO+ users
 - Gate premium workflows behind plan checks
+- Leverage advanced security features for production safety
 
 **Section sources**
 - [support.public.chat.route.ts](file://src/app/api/support/public-chat/route.ts)
@@ -497,6 +533,7 @@ Usage patterns:
 - [dashboard.myra.voice.button.tsx](file://src/app/dashboard/myra-voice-button.tsx)
 - [personal.briefing.route.ts:14-33](file://src/app/api/lyra/personal-briefing/route.ts#L14-L33)
 - [TieredPlans.md:197-233](file://docs/docs2/TieredPlans.md#L197-L233)
+- [ai.config.ts](file://src/lib/ai/config.ts)
 
 ### Real-Time Features
 - Real-time chat and notifications via Supabase
@@ -559,6 +596,8 @@ Clerk-->>App : "Sync user + plan"
 - User diagnostics, waitlist management, credits management, and blog features
 - Charts and overview panels
 
+**Updated** Enhanced with comprehensive crypto intelligence dashboard showing coverage statistics, intelligence score averages, and signal weight distributions.
+
 ```mermaid
 graph TB
 AdminUI["Admin UI"] --> AdminAPI["/api/admin/*"]
@@ -574,6 +613,7 @@ AdminAPI --> Credits["Credits"]
 AdminAPI --> Infrastructure["Infrastructure"]
 AdminAPI --> Myra["Myra"]
 AdminAPI --> Engines["Engines/Regime"]
+AdminAPI --> CryptoIntel["Crypto Intelligence"]
 AdminAPI --> Blog["Blog Feature"]
 ```
 
@@ -638,6 +678,8 @@ External dependencies relevant to core features:
 - Prisma for database operations
 - AI SDK and Azure OpenAI for Lyra/Myra
 
+**Updated** Enhanced with crypto-specific data providers including DefiLlama, GeckoTerminal, and external APIs for comprehensive intelligence coverage.
+
 ```mermaid
 graph TB
 Auth["@clerk/nextjs"] --> App["Application"]
@@ -649,6 +691,9 @@ UpstashQStash["@upstash/qstash"] --> App
 Prisma["@prisma/client"] --> App
 OpenAI["openai/@ai-sdk/openai"] --> App
 Azure["Azure OpenAI (GPT-5.4)"] --> App
+DefiLlama["DefiLlama API"] --> App
+GeckoTerminal["GeckoTerminal API"] --> App
+CoinGecko["CoinGecko API"] --> App
 ```
 
 **Diagram sources**
@@ -666,7 +711,7 @@ Azure["Azure OpenAI (GPT-5.4)"] --> App
 - Daily token caps as a secondary cost backstop
 - Context compression and idempotent logging to reduce redundant calls
 
-[No sources needed since this section provides general guidance]
+**Updated** Enhanced with crypto intelligence caching, Monte Carlo simulation optimization, and advanced security runtime hardening for production safety.
 
 ## Troubleshooting Guide
 Common issues and where to look:
@@ -680,6 +725,10 @@ Common issues and where to look:
   - [Creditsystem.md:76-89](file://docs/docs2/Creditsystem.md#L76-L89)
 - AI safety alerts: review injection scans and fallback behavior
   - [TieredPlans.md:197-233](file://docs/docs2/TieredPlans.md#L197-L233)
+- Monte Carlo simulation errors: verify portfolio holdings and mode gating
+  - [portfolio.api.simulate.route.ts](file://src/app/api/portfolio/[id]/simulate/route.ts)
+- Crypto intelligence computation failures: check external API availability
+  - [crypto-intelligence.ts](file://src/lib/engines/crypto-intelligence.ts)
 
 **Section sources**
 - [auth.ts:38-86](file://src/lib/auth.ts#L38-L86)
@@ -687,6 +736,8 @@ Common issues and where to look:
 - [portfolio.route.ts:72-89](file://src/app/api/portfolio/route.ts#L72-L89)
 - [Creditsystem.md:76-89](file://docs/docs2/Creditsystem.md#L76-L89)
 - [TieredPlans.md:197-233](file://docs/docs2/TieredPlans.md#L197-L233)
+- [portfolio.api.simulate.route.ts](file://src/app/api/portfolio/[id]/simulate/route.ts)
+- [crypto-intelligence.ts](file://src/lib/engines/crypto-intelligence.ts)
 
 ## Conclusion
 LyraAlpha integrates deterministic market engines with AI agents to deliver trustworthy, plan-gated intelligence. Its architecture emphasizes:
@@ -695,12 +746,18 @@ LyraAlpha integrates deterministic market engines with AI agents to deliver trus
 - Real-time chat and notifications
 - Comprehensive admin tooling for observability and cost control
 - Portfolio analytics and stress testing integrated with regime-aware insights
+- Advanced crypto intelligence capabilities with comprehensive risk scoring
+- Enhanced AI security runtime hardening for production safety
 
-[No sources needed since this section summarizes without analyzing specific files]
+**Updated** The platform now features comprehensive crypto intelligence engines, advanced Monte Carlo simulation capabilities, and robust AI security measures that strengthen the product moat and ensure reliable operation in production environments.
 
 ## Appendices
 - Dashboard UI components and routes for personal signals, discovery feed, market regime, and portfolio analytics
-- AI safety and caching mechanisms
+- AI safety and caching mechanisms with advanced runtime hardening
 - Cron jobs for daily/weekly reports, blog digest, and credit resets
+- Crypto intelligence dashboard for monitoring coverage and signal weights
+- Monte Carlo simulation modes and stress testing capabilities
 
-[No sources needed since this section provides general guidance]
+**Section sources**
+- [crypto-implementation-completion-report.md](file://docs/crypto-implementation-completion-report.md)
+- [crypto-priority-matrix-and-implementation-plan.md](file://docs/crypto-priority-matrix-and-implementation-plan.md)

@@ -13,7 +13,19 @@
 - [rebaseline-reconcile.sql](file://prisma/manual/rebaseline-reconcile.sql)
 - [bonus_credits.sql](file://prisma/manual/bonus_credits.sql)
 - [cache.ts](file://src/lib/cache.ts)
+- [migrate-asset-metrics.ts](file://scripts/migrate-asset-metrics.ts)
+- [20260420230000_add_asset_metrics/migration.sql](file://prisma/migrations/20260420230000_add_asset_metrics/migration.sql)
+- [20260421210000_phase3_crypto_data/migration.sql](file://prisma/migrations/20260421210000_phase3_crypto_data/migration.sql)
+- [crypto-intelligence.ts](file://src/lib/engines/crypto-intelligence.ts)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added comprehensive AssetMetrics system documentation with dedicated normalized metrics storage
+- Documented new TokenUnlockEvent table for token unlock calendar tracking
+- Updated Asset model with 29-35 new crypto-specific intelligence columns
+- Added migration strategy for AssetMetrics backfilling
+- Enhanced crypto intelligence data modeling and indexing strategies
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -28,7 +40,9 @@
 10. [Appendices](#appendices)
 
 ## Introduction
-This document describes LyraAlpha’s database design and data architecture with a focus on the Prisma ORM implementation, schema definitions, entity relationships, migration and seeding strategies, indexing and query optimization, data integrity constraints, connection management, transaction handling, caching integration, and operational patterns for data lifecycle and schema evolution.
+This document describes LyraAlpha's database design and data architecture with a focus on the Prisma ORM implementation, schema definitions, entity relationships, migration and seeding strategies, indexing and query optimization, data integrity constraints, connection management, transaction handling, caching integration, and operational patterns for data lifecycle and schema evolution.
+
+**Updated** Added comprehensive AssetMetrics system with dedicated tables for normalized metrics storage, token unlock event tracking, and comprehensive crypto-specific intelligence data. The system now supports 29-35 new database columns across multiple models for enhanced crypto analytics and intelligence capabilities.
 
 ## Project Structure
 The database layer is centered around:
@@ -38,6 +52,7 @@ The database layer is centered around:
 - Migration orchestration for zero-downtime schema evolution
 - Manual SQL patches for targeted adjustments and performance tuning
 - Application-level caching integration for high-latency reads
+- **New**: AssetMetrics system for normalized crypto intelligence data storage
 
 ```mermaid
 graph TB
@@ -45,24 +60,31 @@ subgraph "Application"
 A["Next.js App"]
 B["Server Actions / API Routes"]
 C["Libraries<br/>prisma.ts, cache.ts"]
+D["Crypto Intelligence Engine"]
 end
 subgraph "Database"
-D["PostgreSQL (AWS RDS)"]
-E["pgvector, pg_trgm, btree_gin"]
+E["PostgreSQL (AWS RDS)"]
+F["pgvector, pg_trgm, btree_gin"]
+G["AssetMetrics Table"]
+H["TokenUnlockEvent Table"]
 end
 A --> B
 B --> C
-C --> |"Prisma Client"| D
-D --> |"Indexes & Extensions"| E
+C --> |"Prisma Client"| E
+D --> |"AssetMetrics Integration"| G
+E --> |"Indexes & Extensions"| F
+E --> |"Normalized Metrics"| G
+E --> |"Token Events"| H
 ```
 
 **Diagram sources**
 - [prisma.ts:1-69](file://src/lib/prisma.ts#L1-L69)
-- [schema.prisma:1-120](file://prisma/schema.prisma#L1-L120)
+- [schema.prisma:140-190](file://prisma/schema.prisma#L140-L190)
+- [crypto-intelligence.ts:134-200](file://src/lib/engines/crypto-intelligence.ts#L134-L200)
 
 **Section sources**
 - [prisma.ts:1-69](file://src/lib/prisma.ts#L1-L69)
-- [schema.prisma:1-120](file://prisma/schema.prisma#L1-L120)
+- [schema.prisma:140-190](file://prisma/schema.prisma#L140-L190)
 
 ## Core Components
 - Prisma schema defines entities (models), enums, relations, and indexes. It also declares vector embeddings and JSON fields for AI and analytics workloads.
@@ -76,18 +98,24 @@ D --> |"Indexes & Extensions"| E
   - pg_dump/pg_restore for bulk migration
   - Prisma migration deployment
   - Post-migration verification and extension setup
+  - **New**: AssetMetrics backfill migration for legacy data
 - Manual SQL scripts handle targeted schema adjustments and index creation.
 
+**Updated** Added AssetMetrics system with dedicated table for normalized metrics storage and TokenUnlockEvent table for token unlock calendar tracking.
+
 **Section sources**
-- [schema.prisma:1-120](file://prisma/schema.prisma#L1-L120)
+- [schema.prisma:140-190](file://prisma/schema.prisma#L140-L190)
 - [prisma.ts:1-69](file://src/lib/prisma.ts#L1-L69)
 - [seed.ts:1-392](file://prisma/seed.ts#L1-L392)
 - [seed-credits.ts:1-29](file://prisma/seed-credits.ts#L1-L29)
 - [seed-questions.ts:1-75](file://prisma/seed-questions.ts#L1-L75)
 - [migrate-database.ts:1-272](file://scripts/migrate-database.ts#L1-L272)
+- [migrate-asset-metrics.ts:1-117](file://scripts/migrate-asset-metrics.ts#L1-L117)
 
 ## Architecture Overview
 The system uses Prisma ORM to manage schema, relations, and migrations, with PostgreSQL as the primary datastore and optional vector embeddings for AI features. Connection pooling is tuned for serverless concurrency, and migrations are executed via a robust script that leverages native PostgreSQL tools.
+
+**Updated** Enhanced with AssetMetrics system for normalized crypto intelligence data storage and TokenUnlockEvent table for token unlock calendar tracking.
 
 ```mermaid
 sequenceDiagram
@@ -103,6 +131,7 @@ Script->>Supa : pg_dump (custom format)
 Script->>RDS : Enable extensions (vector, pg_trgm, btree_gin)
 Script->>RDS : pg_restore (parallel workers)
 Script->>RDS : DATABASE_URL=... prisma migrate deploy
+Script->>RDS : Run AssetMetrics backfill migration
 Script->>Supa : Count verification
 Script->>RDS : Count verification
 Script-->>Dev : Migration complete
@@ -110,6 +139,7 @@ Script-->>Dev : Migration complete
 
 **Diagram sources**
 - [migrate-database.ts:1-272](file://scripts/migrate-database.ts#L1-L272)
+- [migrate-asset-metrics.ts:11-104](file://scripts/migrate-asset-metrics.ts#L11-L104)
 
 **Section sources**
 - [migrate-database.ts:1-272](file://scripts/migrate-database.ts#L1-L272)
@@ -117,7 +147,7 @@ Script-->>Dev : Migration complete
 ## Detailed Component Analysis
 
 ### Prisma Schema and Entities
-Key entities include Users, Assets, Market Regimes, Discovery Feed Items, Gamification and XP systems, Portfolios, Watchlists, Payments, and Notifications. Relations are defined with foreign keys and referential actions (Cascade, SetNull). Enums define statuses and types consistently across models.
+Key entities include Users, Assets, Market Regimes, Discovery Feed Items, Gamification and XP systems, Portfolios, Watchlists, Payments, and Notifications. **Updated** with new AssetMetrics system and TokenUnlockEvent table for enhanced crypto intelligence capabilities.
 
 ```mermaid
 erDiagram
@@ -140,6 +170,36 @@ float changePercent
 timestamp lastPriceUpdate
 string region
 string coingeckoId
+}
+ASSET_METRICS {
+string id PK
+string assetId UK
+json factorData
+json correlationData
+json scoreDynamics
+json performanceData
+json signalStrength
+json correlationRegime
+json factorAlignment
+json eventAdjustedScores
+json cryptoIntelligence
+json scenarioData
+json exchangeFlows
+json stakingYield
+json emissionSchedule
+json governanceData
+timestamp updatedAt
+}
+TOKEN_UNLOCK_EVENT {
+string id PK
+string assetId FK
+datetime unlockDate
+float amount
+float percentOfSupply
+string category
+string description
+timestamp createdAt
+timestamp updatedAt
 }
 ASSET_SCORE {
 string id PK
@@ -440,6 +500,8 @@ date date
 json metadata
 }
 USER_PREFERENCE }|--|| USER : "has one"
+ASSET_METRICS }|--|| ASSET : "belongs to"
+TOKEN_UNLOCK_EVENT }|--|| ASSET : "belongs to"
 ASSET_SCORE }|--|| ASSET : "belongs to"
 MARKET_REGIME }|--|| ASSET : "belongs to"
 DISCOVERY_FEED_ITEM }|--|| ASSET : "belongs to"
@@ -471,16 +533,72 @@ INSTITUTIONAL_EVENT }|--|| ASSET : "belongs to"
 
 **Diagram sources**
 - [schema.prisma:23-794](file://prisma/schema.prisma#L23-L794)
+- [schema.prisma:140-190](file://prisma/schema.prisma#L140-L190)
 
 **Section sources**
 - [schema.prisma:23-794](file://prisma/schema.prisma#L23-L794)
+- [schema.prisma:140-190](file://prisma/schema.prisma#L140-L190)
+
+### AssetMetrics System and Enhanced Asset Model
+**New** The AssetMetrics system provides dedicated normalized storage for high-churn metrics data, improving query performance and data organization. The Asset model has been enhanced with 29-35 new crypto-specific intelligence columns.
+
+#### AssetMetrics Table
+- Dedicated normalized table for dynamic asset data
+- High-churn metrics stored separately from static asset information
+- Optimized for cache-friendly access patterns
+- Maintains updatedAt timestamp for efficient querying
+
+#### Enhanced Asset Model Columns
+- **Factor & Correlation Data**: factorData, correlationData, scoreDynamics
+- **Performance & Signal Data**: performanceData, signalStrength
+- **Regime & Alignment Data**: correlationRegime, factorAlignment, eventAdjustedScores
+- **Crypto Intelligence**: cryptoIntelligence, scenarioData
+- **On-chain Concentration**: holderGini, top10HolderPercent
+- **Leverage Data**: fundingRate
+- **Exchange Flows**: exchangeFlows
+- **Staking Yield**: stakingYield
+- **Emission Schedule**: emissionSchedule
+- **Governance Data**: governanceData
+
+```mermaid
+flowchart TD
+Asset["Asset Model"] --> Metrics["AssetMetrics Table"]
+Asset --> Legacy["Legacy JSON Fields"]
+Metrics --> Normalized["Normalized Storage"]
+Legacy --> Deprecated["Deprecated"]
+Metrics --> HighChurn["High-churn Data"]
+Asset --> Enhanced["Enhanced with 29-35 New Columns"]
+Enhanced --> CryptoIntelligence["Crypto Intelligence Features"]
+```
+
+**Diagram sources**
+- [schema.prisma:140-190](file://prisma/schema.prisma#L140-L190)
+- [schema.prisma:59-138](file://prisma/schema.prisma#L59-L138)
+
+**Section sources**
+- [schema.prisma:140-190](file://prisma/schema.prisma#L140-L190)
+- [schema.prisma:59-138](file://prisma/schema.prisma#L59-L138)
+
+### Token Unlock Event Tracking
+**New** TokenUnlockEvent table provides comprehensive tracking of token unlock calendar events for crypto assets, enabling sophisticated unlock pressure analysis and market impact forecasting.
+
+#### TokenUnlockEvent Features
+- Tracks unlock dates, amounts, and percentages of supply
+- Categorizes unlock types (team, seed, public, investor)
+- Supports unlock pressure analysis and market impact prediction
+- Enables automated alerts and monitoring for upcoming unlocks
+
+**Section sources**
+- [schema.prisma:176-190](file://prisma/schema.prisma#L176-L190)
+- [20260421210000_phase3_crypto_data/migration.sql:16-36](file://prisma/migrations/20260421210000_phase3_crypto_data/migration.sql#L16-L36)
 
 ### Indexing Strategy and Query Optimization
 Indexes are strategically placed to optimize frequent queries:
 - User-centric lookups: indexes on user identifiers and timestamps
 - Asset analytics: composite indexes on region/type/lastPriceUpdate and compatibility metrics
+- **Updated** AssetMetrics: indexes on assetId and updatedAt for efficient metrics querying
 - Discovery feed: multi-column indexes filtering by suppression, type, and computedAt
-- Scores and regimes: indexes ordered by date desc for “latest” queries
+- Scores and regimes: indexes ordered by date desc for "latest" queries
 - Embeddings: vector indexes for similarity search
 - JSON and arrays: GIN indexes for fast filtering and containment
 - Partial indexes: restrict to relevant subsets (e.g., unread notifications)
@@ -519,6 +637,7 @@ LyraAlpha employs a hybrid migration approach:
 - Extension provisioning (vector, pg_trgm, btree_gin) on target RDS
 - Prisma migration history deployment to align migration lock and schema state
 - Row-count verification across tables to ensure data integrity
+- **New** AssetMetrics backfill migration to transfer legacy JSON data to normalized structure
 - Dry-run mode for validation prior to execution
 
 ```mermaid
@@ -533,6 +652,7 @@ Script->>Supa : pg_dump (custom)
 Script->>RDS : Enable extensions
 Script->>RDS : pg_restore (parallel)
 Script->>RDS : prisma migrate deploy
+Script->>RDS : Run AssetMetrics backfill
 Script->>Supa : Verify counts
 Script->>RDS : Verify counts
 Script-->>Ops : Success
@@ -544,6 +664,7 @@ Script-->>Ops : Success
 **Section sources**
 - [migrate-database.ts:1-272](file://scripts/migrate-database.ts#L1-L272)
 - [migration_lock.toml:1-3](file://prisma/migrations/migration_lock.toml#L1-L3)
+- [migrate-asset-metrics.ts:11-104](file://scripts/migrate-asset-metrics.ts#L11-L104)
 
 ### Seeding Processes
 Seeding is performed via dedicated scripts:
@@ -580,6 +701,8 @@ Upsert --> Done(["Seeding Complete"])
 - Composite unique constraints for regime snapshots and asset-sector mappings
 - Not-null defaults for critical fields and enums
 - Foreign keys with cascading deletes for child records and set-null for optional relations
+- **Updated** AssetMetrics foreign key constraint linking to Asset table
+- **Updated** TokenUnlockEvent foreign key constraint linking to Asset table
 - Vector embedding columns with explicit dimensions for similarity search
 - JSON fields for flexible analytics and metadata storage
 
@@ -588,6 +711,8 @@ Upsert --> Done(["Seeding Complete"])
 - [schema.prisma:259-261](file://prisma/schema.prisma#L259-L261)
 - [schema.prisma:376-379](file://prisma/schema.prisma#L376-L379)
 - [schema.prisma:42-48](file://prisma/schema.prisma#L42-L48)
+- [20260420230000_add_asset_metrics/migration.sql:27-29](file://prisma/migrations/20260420230000_add_asset_metrics/migration.sql#L27-L29)
+- [20260421210000_phase3_crypto_data/migration.sql:34-36](file://prisma/migrations/20260421210000_phase3_crypto_data/migration.sql#L34-L36)
 
 ### Business Rule Enforcement
 - Credits and XP/points accounting with transaction logs and lot expiration
@@ -596,6 +721,8 @@ Upsert --> Done(["Seeding Complete"])
 - Portfolio holdings with cost basis and quantity tracking
 - Discovery feed suppression and eligibility controls
 - Embedding status tracking for AI request logs
+- **Updated** AssetMetrics data normalization for improved query performance
+- **Updated** Token unlock event tracking for crypto asset monitoring
 
 **Section sources**
 - [schema.prisma:568-602](file://prisma/schema.prisma#L568-L602)
@@ -647,17 +774,22 @@ Targeted schema changes and performance tuning are applied via manual SQL:
 - Adding materialized analytics columns to Asset and creating supporting indexes
 - Creating composite indexes for DiscoveryFeedItem and Portfolio
 - Backfilling nullable columns and enforcing NOT NULL constraints
+- **New** AssetMetrics table creation with foreign key constraints
+- **New** TokenUnlockEvent table creation with unlock calendar tracking
 
 **Section sources**
 - [v27.sql:1-31](file://prisma/manual/v27.sql#L1-L31)
 - [rebaseline-reconcile.sql:1-6](file://prisma/manual/rebaseline-reconcile.sql#L1-L6)
 - [bonus_credits.sql:1-42](file://prisma/manual/bonus_credits.sql#L1-L42)
+- [20260420230000_add_asset_metrics/migration.sql:1-30](file://prisma/migrations/20260420230000_add_asset_metrics/migration.sql#L1-L30)
+- [20260421210000_phase3_crypto_data/migration.sql:1-36](file://prisma/migrations/20260421210000_phase3_crypto_data/migration.sql#L1-L36)
 
 ## Dependency Analysis
 - Application code depends on Prisma-generated client types and runtime
 - Prisma client depends on PostgreSQL and configured adapters
 - Migration scripts depend on native PostgreSQL tools (pg_dump, pg_restore, psql)
 - Seeding scripts depend on Prisma direct client and static content sources
+- **New** AssetMetrics system depends on CryptoIntelligenceEngine for data computation
 
 ```mermaid
 graph LR
@@ -666,15 +798,19 @@ Prisma --> Adapter["PrismaPg Adapter"]
 Adapter --> DB["PostgreSQL"]
 Scripts["Migration/Seed Scripts"] --> Tools["pg_dump/pg_restore/psql"]
 Tools --> DB
+CryptoEngine["CryptoIntelligenceEngine"] --> AssetMetrics["AssetMetrics"]
+AssetMetrics --> DB
 ```
 
 **Diagram sources**
 - [prisma.ts:1-69](file://src/lib/prisma.ts#L1-L69)
 - [migrate-database.ts:1-272](file://scripts/migrate-database.ts#L1-L272)
+- [crypto-intelligence.ts:134-200](file://src/lib/engines/crypto-intelligence.ts#L134-L200)
 
 **Section sources**
 - [prisma.ts:1-69](file://src/lib/prisma.ts#L1-L69)
 - [migrate-database.ts:1-272](file://scripts/migrate-database.ts#L1-L272)
+- [crypto-intelligence.ts:134-200](file://src/lib/engines/crypto-intelligence.ts#L134-L200)
 
 ## Performance Considerations
 - Connection pooling tuned for serverless concurrency; adjust pool sizes based on observed usage
@@ -684,6 +820,8 @@ Tools --> DB
 - Leverage vector indexes for similarity search; maintain embedding status and retry logic
 - Cache expensive reads with TTL and tags; invalidate on data changes
 - Monitor slow queries and add missing indexes; use EXPLAIN/ANALYZE for tuning
+- **New** AssetMetrics system improves query performance for high-churn metrics data
+- **New** TokenUnlockEvent table enables efficient unlock calendar queries
 
 [No sources needed since this section provides general guidance]
 
@@ -693,6 +831,7 @@ Tools --> DB
   - Confirm PostgreSQL tools availability and permissions
   - Review pg_restore warnings and resolve conflicts
   - Re-run Prisma migration deployment if schema drift occurs
+  - **New** Check AssetMetrics backfill migration completion status
 - Connection issues:
   - Ensure SSL configuration matches Supabase requirements
   - Validate pool sizes and idle timeouts
@@ -700,17 +839,20 @@ Tools --> DB
 - Index performance:
   - Confirm index usage with EXPLAIN/ANALYZE
   - Recreate missing indexes or adjust composite ordering
+  - **New** Verify AssetMetrics indexes are properly created
 - Data integrity:
   - Use upsert patterns to avoid duplicates
   - Enforce NOT NULL defaults and unique constraints
   - Validate row counts post-migration
+  - **New** Check AssetMetrics foreign key relationships
 
 **Section sources**
 - [migrate-database.ts:232-272](file://scripts/migrate-database.ts#L232-L272)
 - [prisma.ts:23-27](file://src/lib/prisma.ts#L23-L27)
+- [migrate-asset-metrics.ts:11-104](file://scripts/migrate-asset-metrics.ts#L11-L104)
 
 ## Conclusion
-LyraAlpha’s database design leverages Prisma ORM for strong typing and migrations, PostgreSQL for reliability and vector extensions, and a robust migration pipeline using native PostgreSQL tools. Strategic indexing, connection pooling, and application-level caching deliver performance at scale. The combination of automated seeding and manual SQL adjustments enables precise control over schema evolution and data quality.
+LyraAlpha's database design leverages Prisma ORM for strong typing and migrations, PostgreSQL for reliability and vector extensions, and a robust migration pipeline using native PostgreSQL tools. Strategic indexing, connection pooling, and application-level caching deliver performance at scale. The addition of the AssetMetrics system with dedicated normalized storage for crypto intelligence data, along with TokenUnlockEvent tracking, significantly enhances the platform's analytical capabilities while maintaining optimal query performance. The combination of automated seeding and manual SQL adjustments enables precise control over schema evolution and data quality.
 
 [No sources needed since this section summarizes without analyzing specific files]
 
@@ -718,5 +860,7 @@ LyraAlpha’s database design leverages Prisma ORM for strong typing and migrati
 - Operational checklist for migrations and schema changes
 - Index naming conventions and maintenance procedures
 - Backup and disaster recovery procedures
+- **New** AssetMetrics backfill migration procedure
+- **New** TokenUnlockEvent table maintenance guidelines
 
 [No sources needed since this section provides general guidance]

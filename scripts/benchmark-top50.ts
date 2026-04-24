@@ -139,6 +139,16 @@ function estimateCostFallback(tokens: number, plan: PlanTier, tier: QueryComplex
   return estimateCostFromLog(inputTokens, tokens, 0, model);
 }
 
+function resolveCanonicalModelFromRole(role: string | undefined): string {
+  const roleToModel: Record<string, string> = {
+    'lyra-nano': 'gpt-5.4-nano',
+    'lyra-mini': 'gpt-5.4-mini',
+    'lyra-full': 'gpt-5.4',
+    'myra': 'gpt-5.4',
+  };
+  return roleToModel[role ?? ''] ?? 'gpt-5.4';
+}
+
 async function ensureBenchmarkUser(plan: PlanTier, runId: string): Promise<string> {
   const userId = `user_benchmark_${plan.toLowerCase()}_${runId}`;
   const now = new Date();
@@ -1137,8 +1147,11 @@ async function runBenchmark() {
     const cachedInputTokens = logRow?.cachedInputTokens ?? 0;
     const reasoningTokens = logRow?.reasoningTokens ?? 0;
     const model = logRow?.model ?? 'gpt-family';
+    // Use role-derived canonical model for cost recalculation to ensure accurate
+    // pricing regardless of Azure deployment naming conventions.
+    const costModel = resolveCanonicalModelFromRole(tierConfig.gpt54Role ?? undefined);
     const cost = logRow?.totalCost
-      ?? (logRow ? estimateCostFromLog(inputTokens, outputTokens, cachedInputTokens, model) : estimateCostFallback(outputTokens, plan, tier));
+      ?? (logRow ? estimateCostFromLog(inputTokens, outputTokens, cachedInputTokens, costModel) : estimateCostFallback(outputTokens, plan, tier));
 
     let isTruncated = false;
     let truncationSignal = '';
@@ -1347,6 +1360,7 @@ async function runBenchmark() {
     const previousSummary = previous.summary as {
       avgQuality?: number;
       avgLatency?: number;
+      avgTtft?: number;
       totalCost?: number;
       totalTokens?: number;
       truncatedCount?: number;
@@ -1354,15 +1368,68 @@ async function runBenchmark() {
       total?: number;
     };
 
-    console.log(`\n${'═'.repeat(75)}`);
-    console.log('                    📊 COMPARISON WITH PREVIOUS RUN');
-    console.log('═'.repeat(75));
-    console.log(`   Quality:    ${avgQuality.toFixed(1)} vs ${(previousSummary.avgQuality ?? 0).toFixed(1)} → ${(avgQuality - (previousSummary.avgQuality ?? 0)).toFixed(1)}`);
-    console.log(`   Latency:    ${(avgLatency / 1000).toFixed(1)}s vs ${((previousSummary.avgLatency ?? 0) / 1000).toFixed(1)}s → ${((avgLatency - (previousSummary.avgLatency ?? 0)) / 1000).toFixed(1)}s`);
-    console.log(`   Cost:       $${totalCost.toFixed(4)} vs $${(previousSummary.totalCost ?? 0).toFixed(4)} → $${(totalCost - (previousSummary.totalCost ?? 0)).toFixed(4)}`);
+    console.log(`\n${'═'.repeat(90)}`);
+    console.log('                         📊 COMPARISON WITH PREVIOUS RUN');
+    console.log('═'.repeat(90));
+
+    // Overall deltas
+    const qualityDelta = avgQuality - (previousSummary.avgQuality ?? 0);
+    const latencyDelta = avgLatency - (previousSummary.avgLatency ?? 0);
+    const costDelta = totalCost - (previousSummary.totalCost ?? 0);
+    const costDeltaPct = previousSummary.totalCost ? (costDelta / previousSummary.totalCost) * 100 : 0;
+    console.log('   OVERALL');
+    console.log(`   Quality:    ${avgQuality.toFixed(1)} vs ${(previousSummary.avgQuality ?? 0).toFixed(1)} → ${qualityDelta.toFixed(1)}`);
+    console.log(`   Latency:    ${(avgLatency / 1000).toFixed(1)}s vs ${((previousSummary.avgLatency ?? 0) / 1000).toFixed(1)}s → ${(latencyDelta / 1000).toFixed(1)}s`);
+    console.log(`   TTFT:       ${(avgTtft / 1000).toFixed(1)}s vs ${((previousSummary.avgTtft ?? 0) / 1000).toFixed(1)}s → ${((avgTtft - (previousSummary.avgTtft ?? 0)) / 1000).toFixed(1)}s`);
+    console.log(`   Cost:       $${totalCost.toFixed(4)} vs $${(previousSummary.totalCost ?? 0).toFixed(4)} → $${costDelta.toFixed(4)} (${costDeltaPct.toFixed(1)}%)`);
     console.log(`   Tokens:     ${totalTokens.toLocaleString()} vs ${(previousSummary.totalTokens ?? 0).toLocaleString()} → ${(totalTokens - (previousSummary.totalTokens ?? 0)).toLocaleString()}`);
     console.log(`   Truncated:  ${truncated.length} vs ${previousSummary.truncatedCount ?? 0}`);
     console.log(`   Success:    ${successful.length}/${results.length} vs ${previousSummary.successful ?? 0}/${previousSummary.total ?? 0}`);
+
+    // Per-plan detailed comparison
+    console.log(`\n   PER-PLAN DETAIL`);
+    console.log(`   ${'─'.repeat(86)}`);
+    console.log(`   Plan       | Quality Δ | Latency Δ | Cost/Q Δ | Total Cost Δ | Tokens/Q Δ`);
+    console.log(`   ${'─'.repeat(86)}`);
+    for (const plan of PLANS) {
+      const aggregate = byPlan[plan];
+      const prevAggregate = previous.byPlan?.[plan] as Aggregate | undefined;
+      if (!prevAggregate) {
+        console.log(`   ${plan.padEnd(10)} | N/A       | N/A       | N/A      | N/A          | N/A`);
+        continue;
+      }
+      const qDelta = average(aggregate.quality, aggregate.successCount) - average(prevAggregate.quality, prevAggregate.successCount);
+      const lDelta = average(aggregate.latency, aggregate.successCount) - average(prevAggregate.latency, prevAggregate.successCount);
+      const cDelta = average(aggregate.cost, aggregate.count) - average(prevAggregate.cost, prevAggregate.count);
+      const tDelta = average(aggregate.tokens, aggregate.count) - average(prevAggregate.tokens, prevAggregate.count);
+      console.log(
+        `   ${plan.padEnd(10)} | ${(qDelta >= 0 ? '+' : '').concat(qDelta.toFixed(1)).padEnd(9)} | ${((lDelta / 1000).toFixed(1).concat('s')).padEnd(9)} | ${formatUsd(cDelta).padEnd(8)} | ${formatUsd(aggregate.cost - prevAggregate.cost).padEnd(12)} | ${(tDelta.toFixed(0)).padEnd(10)}`,
+      );
+    }
+
+    // Per-tier detailed comparison
+    const prevByTier = (previous.byTier ?? {}) as Record<string, Aggregate>;
+    if (Object.keys(prevByTier).length > 0) {
+      console.log(`\n   PER-TIER DETAIL`);
+      console.log(`   ${'─'.repeat(86)}`);
+      console.log(`   Tier       | Quality Δ | Latency Δ | Cost/Q Δ | Total Cost Δ | Tokens/Q Δ`);
+      console.log(`   ${'─'.repeat(86)}`);
+      for (const tier of Object.keys(byTier) as QueryComplexity[]) {
+        const aggregate = byTier[tier];
+        const prevAggregate = prevByTier[tier];
+        if (!prevAggregate) {
+          console.log(`   ${tier.padEnd(10)} | N/A       | N/A       | N/A      | N/A          | N/A`);
+          continue;
+        }
+        const qDelta = average(aggregate.quality, aggregate.successCount) - average(prevAggregate.quality, prevAggregate.successCount);
+        const lDelta = average(aggregate.latency, aggregate.successCount) - average(prevAggregate.latency, prevAggregate.successCount);
+        const cDelta = average(aggregate.cost, aggregate.count) - average(prevAggregate.cost, prevAggregate.count);
+        const tDelta = average(aggregate.tokens, aggregate.count) - average(prevAggregate.tokens, prevAggregate.count);
+        console.log(
+          `   ${tier.padEnd(10)} | ${(qDelta >= 0 ? '+' : '').concat(qDelta.toFixed(1)).padEnd(9)} | ${((lDelta / 1000).toFixed(1).concat('s')).padEnd(9)} | ${formatUsd(cDelta).padEnd(8)} | ${formatUsd(aggregate.cost - prevAggregate.cost).padEnd(12)} | ${(tDelta.toFixed(0)).padEnd(10)}`,
+        );
+      }
+    }
   }
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');

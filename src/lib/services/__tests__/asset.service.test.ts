@@ -25,6 +25,8 @@ const mockAsset: AnalyticsAsset = {
   performanceData: null, correlationRegime: null, factorAlignment: null, eventAdjustedScores: null,
   signalStrength: null, scoreDynamics: null, description: null, cryptoIntelligence: null, scenarioData: null,
   industry: null, coingeckoId: "bitcoin", region: "US",
+  holderGini: null, top10HolderPercent: null, fundingRate: null,
+  exchangeFlows: null, stakingYield: null, emissionSchedule: null, governanceData: null,
 };
 
 describe("AssetService", () => {

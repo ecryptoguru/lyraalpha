@@ -24,6 +24,9 @@ vi.mock("@/lib/prisma", () => ({
     assetSector: {
       findFirst: vi.fn().mockResolvedValue(null),
     },
+    tokenUnlockEvent: {
+      findMany: vi.fn().mockResolvedValue([]),
+    },
   },
 }));
 

@@ -126,6 +126,7 @@ const WARNED_UNKNOWN_MODELS = new Set<string>();
 
 function normalizeModel(model: string): string {
   const normalized = model.trim().toLowerCase();
+  // GPT-5.4 family: exact and prefix matches
   if (normalized === "gpt-5.4-nano" || normalized.startsWith("gpt-5.4-nano")) {
     return "gpt-5.4-nano";
   }
@@ -133,6 +134,16 @@ function normalizeModel(model: string): string {
     return "gpt-5.4-mini";
   }
   if (normalized.startsWith("gpt-5.4")) {
+    return "gpt-5.4";
+  }
+  // Role / deployment aliases used in this codebase
+  if (normalized === "lyra-nano" || normalized.includes("lyra-nano")) {
+    return "gpt-5.4-nano";
+  }
+  if (normalized === "lyra-mini" || normalized.includes("lyra-mini")) {
+    return "gpt-5.4-mini";
+  }
+  if (normalized === "lyra-full" || normalized.includes("lyra-full") || normalized === "myra" || normalized.includes("myra")) {
     return "gpt-5.4";
   }
   if (process.env.NODE_ENV !== "test" && !WARNED_UNKNOWN_MODELS.has(normalized)) {

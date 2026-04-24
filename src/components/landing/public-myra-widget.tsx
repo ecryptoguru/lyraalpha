@@ -86,7 +86,6 @@ export function PublicMyraWidget() {
             <span className="absolute inset-1 rounded-full bg-[radial-gradient(circle,rgba(245,158,11,0.24),rgba(245,158,11,0.02)_68%,transparent)] blur-md transition-opacity duration-300 group-hover:opacity-100 dark:bg-[radial-gradient(circle,rgba(251,191,36,0.22),rgba(251,191,36,0.02)_68%,transparent)]" />
             <MessageCircle className="relative z-10 h-7 w-7" />
             <span className="absolute inset-0 rounded-full border border-warning/18" />
-            <span className="absolute inset-0 rounded-full bg-warning3634" style={{ animation: "ping 1s cubic-bezier(0,0,0.2,1) 7" }} />
           </button>
         )}
       </AnimatePresence>

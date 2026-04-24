@@ -163,6 +163,32 @@
     background: color-mix(in srgb, var(--foreground) 20%, transparent);
   }
 
+  /* Landing page scroll container — lightweight scrollbar, momentum scroll */
+  [data-scroll-root="landing"] {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--foreground) 10%, transparent) transparent;
+  }
+
+  [data-scroll-root="landing"]::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  [data-scroll-root="landing"]::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  [data-scroll-root="landing"]::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--foreground) 8%, transparent);
+    border-radius: 999px;
+  }
+
+  [data-scroll-root="landing"]::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--foreground) 16%, transparent);
+  }
+
   /* Respect user's motion preferences */
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -176,10 +202,48 @@
   }
 }
 
+/* ── Glassmorphism / Neumorphism utilities ──────────────────────────────── */
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .glass-strong {
+    background: rgba(4, 8, 22, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+  .neuro-card {
+    box-shadow: 8px 8px 24px rgba(0,0,0,0.45), -4px -4px 16px rgba(255,255,255,0.03);
+  }
+  .neuro-inset {
+    box-shadow: inset 4px 4px 12px rgba(0,0,0,0.35), inset -2px -2px 8px rgba(255,255,255,0.02);
+  }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes hud-scan {
+  0%, 100% { opacity: 0.15; transform: scaleX(0.4); }
+  50% { opacity: 0.7; transform: scaleX(1); }
+}
+
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-display: var(--font-display), "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-fira-code), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-orbitron: var(--font-orbitron), "Orbitron", ui-sans-serif, system-ui, sans-serif;
+  --font-exo2: var(--font-exo2), "Exo 2", ui-sans-serif, system-ui, sans-serif;
 
   /* ── Type scale tokens ─────────────────────────────────────────────── */
   --text-xs: 0.75rem;
@@ -894,4 +958,36 @@
   .landing-shimmer::after {
     animation: none !important;
   }
+}
+
+/* ── Glassmorphism utilities ──────────────────────────────────────────────── */
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .glass-strong {
+    background: rgba(4, 8, 22, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+  .neuro-card {
+    box-shadow: 8px 8px 24px rgba(0,0,0,0.45), -4px -4px 16px rgba(255,255,255,0.03);
+  }
+  .neuro-inset {
+    box-shadow: inset 4px 4px 12px rgba(0,0,0,0.35), inset -2px -2px 8px rgba(255,255,255,0.02);
+  }
+}
+
+/* ── Marquee keyframes ───────────────────────────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marquee-reverse {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
 }

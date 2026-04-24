@@ -41,8 +41,7 @@ production state requires explicit confirmation — no silent writes.
 - **`reingest-knowledge.ts`** — rebuilds the knowledge index.
 
 ### DB maintenance
-- **`db-cleanup.ts`** + **`db-cleanup-safe.sql`** / **`execute-safe-cleanup.ts`**
-- **`cleanup-old-price-history.sql`**
+- **`db-cleanup.ts`** + **`db-cleanup-safe.sql`**
 - **`reset-db.ts`** — ⚠️ destructive; dev databases only.
 - **`vacuum-database.ts`**
 
@@ -54,14 +53,11 @@ production state requires explicit confirmation — no silent writes.
 - **`update-user-plan.ts`** — changes a user's plan tier.
 
 ### Cache & infra
-- **`flush-gemini-cache.ts`** — flushes the Gemini response cache.
 - **`bootstrap.ts`** — project bootstrap helper.
 
 ### Assets & design
 - **`generate-brand-assets.mjs`** — regenerates brand assets.
 - **`generate-pwa-icons.ts`** — regenerates PWA icon set.
-- **`responsive-audit.mjs`** + **`responsive-audit-results.json`**
-  — responsive-UI audit via Playwright.
 
 ### Demo recording
 - **`demo-capture.mjs`** — `npm run demo:capture`.

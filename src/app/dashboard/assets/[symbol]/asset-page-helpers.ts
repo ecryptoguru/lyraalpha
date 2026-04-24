@@ -122,6 +122,20 @@ export interface AssetAnalytics {
   description?: string | null;
   sector?: string | null;
   cryptoIntelligence?: Record<string, unknown> | null;
+  holderGini?: number | null;
+  top10HolderPercent?: number | null;
+  fundingRate?: number | null;
+  exchangeFlows?: Record<string, unknown> | null;
+  stakingYield?: Record<string, unknown> | null;
+  emissionSchedule?: Record<string, unknown> | null;
+  governanceData?: Record<string, unknown> | null;
+  unlockCalendar?: Array<{
+    date: string | null;
+    amount: number | null;
+    percentOfSupply: number | null;
+    category: string | null;
+    description: string | null;
+  }>;
   type: string;
   name: string;
   symbol?: string | null;
@@ -437,6 +451,53 @@ export function buildAssetPageDerivedState({
     };
   })();
 
+  // Phase 3: On-chain derived labels
+  const holderConcentrationLabel = (() => {
+    const gini = analyticsComputed.holderGini;
+    if (gini == null) return null;
+    if (gini >= 0.85) return "Whale-heavy";
+    if (gini >= 0.7) return "Moderately concentrated";
+    return "Well-distributed";
+  })();
+
+  const fundingRateLabel = (() => {
+    const rate = analyticsComputed.fundingRate;
+    if (rate == null) return null;
+    if (Math.abs(rate) < 0.0001) return "Neutral";
+    if (rate > 0.001) return "Long-heavy";
+    if (rate < -0.001) return "Short-heavy";
+    return rate > 0 ? "Slightly long" : "Slightly short";
+  })();
+
+  const unlockRiskLevel = (() => {
+    const calendar = analyticsComputed.unlockCalendar ?? [];
+    if (calendar.length === 0) return null;
+    const totalPct = calendar.reduce((sum, e) => sum + (e.percentOfSupply ?? 0), 0);
+    if (totalPct > 10) return "High";
+    if (totalPct > 3) return "Moderate";
+    return "Low";
+  })();
+
+  // CoinGecko context enrichment (derived from existing cgMeta)
+  const cgMomentumContext = (() => {
+    const p7d = cgMeta?.priceChangePercentage7d;
+    const p30d = cgMeta?.priceChangePercentage30d;
+    if (p7d == null || p30d == null) return null;
+    if (p7d > 15 && p30d > 30) return "Heating up — outperforming most tokens";
+    if (p7d > 10 && p30d > 0) return "Building positive momentum";
+    if (p7d < -10 && p30d < -20) return "Cooling off — underperforming broader market";
+    if (p7d < -5 && p30d < 0) return "Losing short-term traction";
+    if (Math.abs(p7d) < 5) return "Consolidating — waiting for direction";
+    return null;
+  })();
+
+  const cgHotBadge = (() => {
+    const p7d = cgMeta?.priceChangePercentage7d;
+    const p30d = cgMeta?.priceChangePercentage30d;
+    if (p7d == null || p30d == null) return false;
+    return p7d > 10 && p30d > 20;
+  })();
+
   return {
     compatibilityScore,
     signalLabel,
@@ -458,6 +519,11 @@ export function buildAssetPageDerivedState({
     isUp: priceCalculations.isUp,
     headerDayRange,
     cgMeta,
+    holderConcentrationLabel,
+    fundingRateLabel,
+    unlockRiskLevel,
+    cgMomentumContext,
+    cgHotBadge,
   };
 }
 

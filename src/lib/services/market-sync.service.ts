@@ -1087,6 +1087,7 @@ export class MarketSyncService {
 
         return {
           symbol,
+          assetId: asset.id,
           data: {
             factorData: asPrismaJsonValue(factorProfile),
             correlationData: asPrismaJsonValue(correlations),
@@ -1154,13 +1155,46 @@ export class MarketSyncService {
         }
       }
 
-      // Execute Transaction Batch
-      await prisma.$transaction(
-        updateData.map(u => prisma.asset.update({
-          where: { symbol: u.symbol },
-          data: u.data
-        }))
-      );
+      // Execute Transaction Batch — Asset + AssetMetrics
+      const assetUpdates = updateData.map(u => prisma.asset.update({
+        where: { symbol: u.symbol },
+        data: u.data
+      }));
+      const assetMetricsUpserts = updateData.map(u => {
+        const ud = u.data as Record<string, unknown>;
+        return prisma.assetMetrics.upsert({
+          where: { assetId: u.assetId! },
+          create: {
+            assetId: u.assetId!,
+            factorData: (ud.factorData as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            correlationData: (ud.correlationData as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            performanceData: (ud.performanceData as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            signalStrength: (ud.signalStrength as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            correlationRegime: (ud.correlationRegime as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            factorAlignment: (ud.factorAlignment as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            eventAdjustedScores: (ud.eventAdjustedScores as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            cryptoIntelligence: (ud.cryptoIntelligence as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            scenarioData: (ud.scenarioData as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            exchangeFlows: Prisma.JsonNull,
+            stakingYield: Prisma.JsonNull,
+            emissionSchedule: Prisma.JsonNull,
+            governanceData: Prisma.JsonNull,
+          },
+          update: {
+            factorData: (ud.factorData as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            correlationData: (ud.correlationData as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            performanceData: (ud.performanceData as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            signalStrength: (ud.signalStrength as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            correlationRegime: (ud.correlationRegime as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            factorAlignment: (ud.factorAlignment as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            eventAdjustedScores: (ud.eventAdjustedScores as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            cryptoIntelligence: (ud.cryptoIntelligence as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            scenarioData: (ud.scenarioData as Prisma.InputJsonValue) ?? Prisma.JsonNull,
+            updatedAt: new Date(),
+          },
+        });
+      });
+      await prisma.$transaction([...assetUpdates, ...assetMetricsUpserts]);
 
       // Trigger events
       await Promise.all(updateData.map(u => u.events()));

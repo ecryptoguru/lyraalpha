@@ -87,7 +87,7 @@ export async function GET(
     //    regimes + the sector mapping in the same Promise.all eliminates the
     //    last two sequential Prisma round-trips from the critical path — the
     //    dynamics-cache-miss branch no longer needs any DB hops beyond this block.
-    const [assetWithRegion, latestRegimeUS, latestRegimeIN, events, sectorMapping] = await Promise.all([
+    const [assetWithRegion, latestRegimeUS, latestRegimeIN, events, sectorMapping, tokenUnlockEvents] = await Promise.all([
       prisma.asset.findUnique({
         where: { symbol: upperSymbol },
         select: analyticsAssetSelect,
@@ -113,6 +113,15 @@ export async function GET(
       prisma.assetSector.findFirst({
         where: { asset: { symbol: upperSymbol }, isActive: true },
         select: { sectorId: true },
+      }),
+      prisma.tokenUnlockEvent.findMany({
+        where: {
+          asset: { symbol: upperSymbol },
+          unlockDate: { gte: new Date() },
+        },
+        orderBy: { unlockDate: "asc" },
+        take: 20,
+        select: { unlockDate: true, amount: true, percentOfSupply: true, category: true, description: true },
       }),
     ]);
 
@@ -339,6 +348,20 @@ export async function GET(
       industry: currentAsset.industry || null,
       sector: currentAsset.sector || null,
       cryptoIntelligence: currentAsset.cryptoIntelligence as Record<string, unknown> || null,
+      holderGini: currentAsset.holderGini,
+      top10HolderPercent: currentAsset.top10HolderPercent,
+      fundingRate: currentAsset.fundingRate,
+      exchangeFlows: currentAsset.exchangeFlows as Record<string, unknown> | null,
+      stakingYield: currentAsset.stakingYield as Record<string, unknown> | null,
+      emissionSchedule: currentAsset.emissionSchedule as Record<string, unknown> | null,
+      governanceData: currentAsset.governanceData as Record<string, unknown> | null,
+      unlockCalendar: tokenUnlockEvents.map(e => ({
+        date: e.unlockDate?.toISOString() ?? null,
+        amount: e.amount,
+        percentOfSupply: e.percentOfSupply,
+        category: e.category,
+        description: e.description,
+      })),
     };
 
     if (!fresh) {
