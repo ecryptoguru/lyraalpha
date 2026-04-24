@@ -44,8 +44,8 @@ export async function GET(request: NextRequest) {
 
   try {
     // Attempt to build from DB if available via lazy import (no top-level prisma init)
-    const { directPrisma } = await import("@/lib/prisma");
-    const assets = await directPrisma.asset.findMany({
+    const { prisma } = await import("@/lib/prisma");
+    const assets = await prisma.asset.findMany({
       where: { type: "CRYPTO" },
       select: {
         symbol: true,

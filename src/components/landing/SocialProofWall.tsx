@@ -31,7 +31,7 @@ export function SocialProofWall() {
       <div ref={ref} className="relative z-10">
         <motion.div className="mx-auto mb-12 max-w-3xl px-4 text-center sm:px-6" variants={kineticVariants.fadeUp} initial="hidden" animate={inView ? "visible" : "hidden"}>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-warning/70">Trusted by analysts worldwide</p>
-          <h2 className="mt-4 text-3xl font-light tracking-[-0.04em] text-white sm:text-5xl">Join <span className="text-warning">50,000+</span> investors.</h2>
+          <h2 className="mt-4 text-3xl font-light tracking-[-0.04em] text-white sm:text-5xl">Join <span className="text-warning">the smartest</span> investors.</h2>
         </motion.div>
         <div className="space-y-4">
           <MarqueeRow items={testimonials.slice(0, 3)} />

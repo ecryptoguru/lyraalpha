@@ -6,10 +6,10 @@ export interface Testimonial {
 }
 
 export const testimonials: Testimonial[] = [
-  { name: "Sarah K.", role: "Portfolio Manager", text: "The deterministic scores give me confidence. I can verify every signal before acting on it." },
-  { name: "Marcus T.", role: "Crypto Analyst", text: "Finally, an AI that doesn't make up metrics. Lyra's framework is exactly what crypto research needed." },
-  { name: "Priya R.", role: "DeFi Investor", text: "Cross-asset intelligence that actually spans crypto AND equities. The coverage is unmatched." },
-  { name: "James L.", role: "Quant Trader", text: "On-chain metrics + macro context + AI interpretation. Three tools in one platform." },
-  { name: "Elena V.", role: "Risk Officer", text: "The auditability is key. Every score comes with provenance. My compliance team loves it." },
-  { name: "David C.", role: "Asset Manager", text: "Portfolio health checks and shock simulation — these are institutional-grade features at retail accessibility." },
+  { name: "LYRA THESIS — PROBLEM", role: "", text: "Investors drown in prices, charts, and headlines. The edge is not more data — it is the analytical layer that turns noise into conviction." },
+  { name: "LYRA THESIS — ARCHITECTURE", role: "", text: "Six engines score trend, momentum, volatility, liquidity, sentiment, and trust before any AI speaks. Computed structure, never hallucinated." },
+  { name: "LYRA THESIS — DIFFERENTIATION", role: "", text: "Generic AI invents metrics that collapse under scrutiny. Every LyraAlpha score carries provenance — verify the conviction before you act." },
+  { name: "LYRA THESIS — WORKFLOWS", role: "", text: "One regime lens across crypto and equities. DeFi positions and Indian equities now share a single volatility context and conviction read." },
+  { name: "LYRA THESIS — MARKET", role: "", text: "Institutional stress simulation for retail portfolios. Replay 2022 drawdowns and Fed shocks against your holdings — then rebalance with intent." },
+  { name: "LYRA THESIS — CORE THESIS", role: "", text: "The best investors do not predict. They synthesize. LyraAlpha is the judgment layer between market noise and the decision that grows capital." },
 ];

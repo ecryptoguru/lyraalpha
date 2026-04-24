@@ -6,20 +6,20 @@ import { useInViewOnce, kineticVariants } from "./motion/useKineticReveal";
 const theses = [
   {
     num: "01",
-    title: "The Data Glut",
-    body: "400M+ crypto holders, same fragmented streams: prices, charts, on-chain data, news — zero synthesis.",
+    title: "The Synthesis Gap",
+    body: "Markets produce infinite signals — prices, flows, sentiment, on-chain activity — but investors still decide in isolation. The bottleneck is never data volume. It is the analytical layer that transforms raw inputs into a coherent conviction framework.",
     accent: "default" as const,
   },
   {
     num: "02",
-    title: "The AI Illusion",
-    body: "Generic AI finance tools hallucinate metrics. They invent structure that should have been computed. No auditability, no trust.",
+    title: "Engine-First Architecture",
+    body: "LyraAlpha runs proprietary computation engines before any language model speaks. Trend, momentum, volatility, liquidity, sentiment, and trust are scored deterministically. The AI interprets what the engines already computed — it never invents analytical structure.",
     accent: "gold" as const,
   },
   {
     num: "03",
-    title: "The Missing Framework",
-    body: "No framework exists to turn on-chain signals and regime context into a decision. The problem isn't data access — it's synthesis.",
+    title: "Auditable Conviction",
+    body: "Every score carries provenance. Every signal traces back to its source data, its engine logic, and its confidence band. Generic AI tools sound confident because they are programmed to. LyraAlpha sounds confident because the math underneath is inspectable.",
     accent: "cyan" as const,
   },
 ];
@@ -39,10 +39,10 @@ export function ThesisSection() {
           animate={inView ? "visible" : "hidden"}
         >
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-warning/70">
-            The problem we solve
+            Platform Thesis
           </p>
           <h2 className="mt-4 text-3xl font-light tracking-[-0.04em] text-white sm:text-5xl">
-            You have the data. <span className="text-warning">You lack the judgment layer.</span>
+            Built on conviction. <span className="text-warning">Not copy.</span>
           </h2>
         </motion.div>
 
@@ -84,11 +84,10 @@ export function ThesisSection() {
         >
           <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-warning/6 to-transparent" />
           <p className="relative font-mono text-sm leading-7 text-white/60 italic">
-            &ldquo;The gap is not between investors and data. It is between data and the analytical
-            layer that turns signals into a decision. That layer is what LyraAlpha builds.&rdquo;
+            &ldquo;The problem is not access to information. It is the inability to synthesize it into a decision under uncertainty. Every design choice in LyraAlpha traces back to that single constraint.&rdquo;
           </p>
           <p className="mt-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-warning/60">
-            LyraAlpha AI · Core Thesis
+            LyraAlpha · Core Thesis
           </p>
         </motion.div>
       </div>
