@@ -3,8 +3,8 @@ import { Home, Search } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="max-w-lg w-full text-center space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+      <div className="max-w-lg w-full text-center space-y-8 relative">
         {/* Background decorative element */}
         <div className="absolute -top-20 left-1/2 -translate-x-1/2 text-[20vw] font-bold text-primary/5 select-none pointer-events-none tracking-tighter hidden lg:block">
           404

@@ -29,14 +29,30 @@ export default function Home() {
         >
           <CryptoHero />
           <LivePriceTicker />
-          <ThesisSection />
-          <KineticScrollStory />
-          <HowItWorksV2 />
-          <SixSignalsShowcase />
-          <LyraCapabilitiesBento />
-          <SocialProofWall />
-          <PricingTeaser />
-          <FinalKineticCTA />
+          <Suspense fallback={null}>
+            <ThesisSection />
+          </Suspense>
+          <Suspense fallback={null}>
+            <KineticScrollStory />
+          </Suspense>
+          <Suspense fallback={null}>
+            <HowItWorksV2 />
+          </Suspense>
+          <Suspense fallback={null}>
+            <SixSignalsShowcase />
+          </Suspense>
+          <Suspense fallback={null}>
+            <LyraCapabilitiesBento />
+          </Suspense>
+          <Suspense fallback={null}>
+            <SocialProofWall />
+          </Suspense>
+          <Suspense fallback={null}>
+            <PricingTeaser />
+          </Suspense>
+          <Suspense fallback={null}>
+            <FinalKineticCTA />
+          </Suspense>
           <Suspense fallback={null}>
             <BlogPreview />
           </Suspense>

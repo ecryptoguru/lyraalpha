@@ -69,30 +69,32 @@ export interface PortfolioDetail extends PortfolioSummary {
 
 export function usePortfolios(region?: Region) {
   const url = region ? `/api/portfolio?region=${region}` : "/api/portfolio";
-  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: { portfolios: PortfolioSummary[] } }>(
+  const { data, error, isLoading, mutate, isValidating } = useSWR<{ success: boolean; data: { portfolios: PortfolioSummary[] } }>(
     url,
     fetcher,
-    { dedupingInterval: 60000, revalidateOnFocus: false },
+    { dedupingInterval: 60000, revalidateOnFocus: false, keepPreviousData: true },
   );
 
   return {
     portfolios: data?.data?.portfolios ?? [],
     isLoading,
+    isValidating,
     error,
     mutate,
   };
 }
 
 export function usePortfolio(portfolioId: string | null) {
-  const { data, error, isLoading, mutate } = useSWR<{ success: boolean; data: { portfolio: PortfolioDetail } }>(
+  const { data, error, isLoading, mutate, isValidating } = useSWR<{ success: boolean; data: { portfolio: PortfolioDetail } }>(
     portfolioId ? `/api/portfolio/${portfolioId}` : null,
     fetcher,
-    { dedupingInterval: 30000, revalidateOnFocus: false },
+    { dedupingInterval: 30000, revalidateOnFocus: false, keepPreviousData: true },
   );
 
   return {
     portfolio: data?.data?.portfolio ?? null,
     isLoading,
+    isValidating,
     error,
     mutate,
   };

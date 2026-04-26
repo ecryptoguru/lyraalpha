@@ -1,6 +1,8 @@
 export function DashboardHomeContentSkeleton() {
   return (
-    <>
+    <div role="status" aria-busy="true" aria-label="Loading dashboard content">
+      <span className="sr-only">Loading market briefing, portfolio feeds, and intelligence insights…</span>
+
       {/* Brief skeleton */}
       <div className="relative z-10 animate-slide-up-fade animation-delay-100">
         <div className="grid grid-cols-1 xl:grid-cols-[1.35fr_0.65fr] gap-4">
@@ -29,6 +31,6 @@ export function DashboardHomeContentSkeleton() {
           ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }

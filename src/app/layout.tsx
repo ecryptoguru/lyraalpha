@@ -162,11 +162,14 @@ export default function RootLayout({
                   }
                 }
                 stripAll();
-                new MutationObserver(function(mutations) {
+                var observer = new MutationObserver(function(mutations) {
                   for (var i = 0; i < mutations.length; i++) {
                     if (mutations[i].type === 'attributes') strip(mutations[i].target);
                   }
-                }).observe(document.documentElement, { attributes: true, attributeFilter: attrs, subtree: true });
+                });
+                observer.observe(document.documentElement, { attributes: true, attributeFilter: attrs, subtree: true });
+                // Disconnect after 10s — extension injection happens during initial load
+                setTimeout(function() { observer.disconnect(); }, 10000);
               })();
             `,
           }}

@@ -1,6 +1,6 @@
 "use client";
 
-import { type CSSProperties, useEffect, useMemo, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useState, memo } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { MotionConfig } from "framer-motion";
@@ -60,7 +60,7 @@ const WhatsChangedCard = dynamic(
 );
 
 // ─── Density badge — compact toggle in navbar ──────────────────────────────────
-function DensityBadge() {
+const DensityBadge = memo(function DensityBadge() {
   const { density, toggleDensity } = useDensity();
   return (
     <button
@@ -74,11 +74,19 @@ function DensityBadge() {
       <span className="font-mono">{density}</span>
     </button>
   );
-}
+});
 
 // ─── Inner layout — reads LIVE plan from PlanProvider context ────────────────
 // Must be a child of PlanProvider so usePlanContext() reflects real-time plan.
 
+/**
+ * UX: Defers loading of non-critical overlay components until the browser is idle
+ * or a timeout passes. This keeps initial page load fast and prevents layout shift
+ * from command palette, keyboard shortcuts, and tour components.
+ *
+ * Removed interaction listeners (pointerdown/keyboard) that were bypassing the delay
+ * and causing all deferred features to load immediately on first click.
+ */
 function useDeferredFeature(delay: number) {
   const [enabled, setEnabled] = useState(false);
 
@@ -86,30 +94,56 @@ function useDeferredFeature(delay: number) {
     if (enabled || typeof window === "undefined") return;
 
     const enable = () => setEnabled(true);
-    const onFirstInteraction = () => enable();
-
-    window.addEventListener("pointerdown", onFirstInteraction, { once: true, passive: true });
-    window.addEventListener("keydown", onFirstInteraction, { once: true });
 
     if ("requestIdleCallback" in window) {
       const idleId = window.requestIdleCallback(enable, { timeout: delay });
       return () => {
-        window.removeEventListener("pointerdown", onFirstInteraction);
-        window.removeEventListener("keydown", onFirstInteraction);
         window.cancelIdleCallback(idleId);
       };
     }
 
     const timeoutId = setTimeout(enable, delay);
     return () => {
-      window.removeEventListener("pointerdown", onFirstInteraction);
-      window.removeEventListener("keydown", onFirstInteraction);
       clearTimeout(timeoutId);
     };
   }, [delay, enabled]);
 
   return enabled;
 }
+
+interface BreadcrumbSegment {
+  href: string;
+  label: string;
+}
+
+const BreadcrumbSegments = memo(function BreadcrumbSegments({ segments }: { segments: BreadcrumbSegment[] }) {
+  return (
+    <>
+      {segments.map((segment, index) => {
+        const isLast = index === segments.length - 1;
+        return (
+          <div key={segment.href} className="flex items-center" suppressHydrationWarning>
+            <BreadcrumbSeparator className="hidden md:block text-muted-foreground/50" />
+            <BreadcrumbItem>
+              {isLast ? (
+                <BreadcrumbPage className="text-foreground font-medium">
+                  {segment.label}
+                </BreadcrumbPage>
+              ) : (
+                <BreadcrumbLink
+                  href={segment.href}
+                  className="text-muted-foreground hover:text-cyan-400 transition-colors py-2 px-1 min-h-[38px] flex items-center"
+                >
+                  {segment.label}
+                </BreadcrumbLink>
+              )}
+            </BreadcrumbItem>
+          </div>
+        );
+      })}
+    </>
+  );
+});
 
 function DashboardLayoutInner({
   children,
@@ -164,28 +198,7 @@ function DashboardLayoutInner({
                     </BreadcrumbLink>
                   </BreadcrumbItem>
 
-                  {breadcrumbSegments.map((segment, index) => {
-                    const isLast = index === breadcrumbSegments.length - 1;
-                    return (
-                      <div key={segment.href} className="flex items-center" suppressHydrationWarning>
-                        <BreadcrumbSeparator className="hidden md:block text-muted-foreground/50" />
-                        <BreadcrumbItem>
-                          {isLast ? (
-                            <BreadcrumbPage className="text-foreground font-medium">
-                              {segment.label}
-                            </BreadcrumbPage>
-                          ) : (
-                            <BreadcrumbLink
-                              href={segment.href}
-                              className="text-muted-foreground hover:text-cyan-400 transition-colors py-2 px-1 min-h-[38px] flex items-center"
-                            >
-                              {segment.label}
-                            </BreadcrumbLink>
-                          )}
-                        </BreadcrumbItem>
-                      </div>
-                    );
-                  })}
+                  <BreadcrumbSegments segments={breadcrumbSegments} />
                 </BreadcrumbList>
               </Breadcrumb>
               {/* Mobile Page Title */}

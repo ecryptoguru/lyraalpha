@@ -33,7 +33,14 @@ export async function GET(req: NextRequest) {
 
     const portfolios = await prisma.portfolio.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        currency: true,
+        region: true,
+        createdAt: true,
+        updatedAt: true,
         _count: { select: { holdings: true } },
         healthSnapshots: {
           orderBy: { date: "desc" },

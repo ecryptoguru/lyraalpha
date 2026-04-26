@@ -12,8 +12,19 @@ export interface FetchError extends Error {
   info: unknown;
 }
 
-export const fetcher = async <T = unknown>(url: string): Promise<T> => {
-  const res = await fetch(url);
+/**
+ * Shared SWR fetcher with proper HTTP error surfacing and request cancellation.
+ *
+ * The common `fetch(url).then(r => r.json())` pattern silently treats 4xx/5xx
+ * bodies as valid data, leaving SWR's `error` state permanently empty and
+ * making failures invisible to the UI. This fetcher throws on non-2xx so
+ * SWR surfaces the error and components can render a retry state.
+ *
+ * Accepts an optional signal for request cancellation via SWR's built-in
+ * AbortSignal support (passed as the second argument by SWR v2+).
+ */
+export const fetcher = async <T = unknown>(url: string, { signal }: { signal?: AbortSignal } = {}): Promise<T> => {
+  const res = await fetch(url, { signal });
 
   if (!res.ok) {
     const err = new Error(`Request failed: ${res.status}`) as FetchError;
