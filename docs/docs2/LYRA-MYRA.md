@@ -382,4 +382,6 @@ None of that is replicable by swapping models or copying prompts.
 ---
 
 *LyraAlpha AI — Financial Intelligence, Not Financial Noise*
-*Version 2.3 · April 2026*
+*Version 2.4 · April 2026*
+
+> **Latest updates:** Streaming context-length blocker fixed (`validateInput` checks last message only). Token-by-token streaming restored via `toTextStreamResponse()` with `baseStream` tee drain to prevent backpressure stalls. Landing page thesis content updated. Prisma pooled connection fix for `public-ticker` route.

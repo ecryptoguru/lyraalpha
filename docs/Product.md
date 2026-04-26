@@ -80,82 +80,73 @@ US-only, narrow coverage, no premium workflow depth, no portfolio layer. LyraAlp
 
 ---
 
-## What makes LyraAlpha AI different
+## Unique Selling Propositions (USPs)
 
-### Grounded intelligence, not generated analysis
+### 1. Engine-grounded intelligence — not generated guesswork
+Every Lyra response is anchored to deterministic engine outputs (DSE Scores, ARCS, regime framing, stress scenarios) computed **before** the model is invoked. The model interprets structure. It cannot hallucinate a Trend score because that score was already computed. This reduces hallucination surface, improves consistency, and makes every piece of reasoning auditable.
 
-Every Lyra response is anchored to deterministic engine outputs computed before model invocation. The model interprets structure. It does not create it. This reduces hallucination surface, improves output consistency, and makes the product's reasoning auditable.
+### 2. Dual-agent architecture with hard domain boundaries
+- **Lyra** — crypto market intelligence: score explanation, regime-aware analysis, cross-asset synthesis, portfolio interpretation.
+- **Myra** — platform support: product guidance, plan/credit help, onboarding, voice support.
 
-### Two agents, one clear separation
+The separation improves output quality on both sides, lowers inference cost, and simplifies governance. Myra now spans the full user journey from an **unauthenticated public support entry point** (no sign-in required) through every authenticated dashboard interaction.
 
-Lyra handles market intelligence. Myra handles platform support. Hard architectural boundary. The result is better output quality on both sides, lower inference cost, and simpler governance.
+### 3. Workflow products, not just a chat interface
+Compare Assets, Shock Simulator, and Portfolio Intelligence are repeatable analytical routines built on structured computation — not longer chat sessions. This creates habits and retention that one-off Q&A never will.
 
-Myra now covers the full user journey from the first public support touchpoint (unauthenticated public chat) through every authenticated support interaction inside the dashboard.
+### 4. Built natively for India and the US simultaneously
+- Separate EOD sync pipelines for both markets
+- INR and USD pricing, formatting, and market context
+- India-aware stress scenarios and RBI policy framing
+- Indian broker connectivity (Zerodha-style) and US aggregator paths
 
-### Workflow products, not just a chat interface
+India has 90M+ registered equity investors growing at 15–20% annually, with accelerating crypto adoption. Almost no premium analytical product is built natively for that market.
 
-Compare Assets, Shock Simulator, and Portfolio Intelligence are built on structured computation. Users run repeatable analytical routines. That creates habits and retention that a one-off chat session never will.
+### 5. Value-scaled credit economics
+Flat unlimited subscriptions commoditize AI. LyraAlpha ties price to analytical depth:
+- Quick score question: 1 credit
+- Multi-factor analysis: 3 credits
+- Deep synthesis / premium workflow: 5 credits + 3 per additional asset
 
-### Built for India and the US simultaneously
+Margin improves as engagement deepens — the opposite of the usual SaaS cost cliff.
 
-Not adapted. Built natively for both from the start.
+### 6. Three-layer cost control architecture
+1. **Query classification** — routes to nano, mini, or full tier; full-model inference only runs when justified.
+2. **Credit ledger** — atomic monthly usage envelope per plan.
+3. **Per-user daily token caps** — Redis-based secondary backstop, hot-patchable from `/admin/ai-limits` without a deploy.
 
-- Separate EOD sync pipelines for crypto markets in both regions
-- INR and USD pricing, number formatting, and crypto market context throughout
-- India-aware crypto stress scenarios in Shock Simulator
-- Broker connectivity for Indian brokers (Zerodha-style) and US aggregator paths for crypto portfolios
-- RBI policy context and India-specific crypto macro regime framing
+These are architecture, not settings.
 
-India has 90M+ registered equity investors growing at 15-20% annually, with crypto adoption accelerating. Almost no premium crypto analytical product is built natively for that market. LyraAlpha AI is.
+### 7. Production AI safety — shipped, not planned
+- Full-conversation prompt-injection scanning (every message, not just the last)
+- RAG chunk injection scanning before Lyra sees any retrieved knowledge
+- User memory chunk injection scanning before context assembly
+- Multi-asset mode plan-gated to prevent silent cost escalation
+- Automatic nano fallback on primary model failure — users never see the error
+- Five alerting channels: daily cost, fallback rate, RAG zero-result rate, output validation failures, web search availability
+- Conversation log idempotency via a 10-second Redis dedup window
+- Myra response caching (normalized query hash, 4h dashboard / 8h public TTL)
 
-### Credit economics that scale with analytical value
+In financial AI, trust is the product.
 
-Flat unlimited subscriptions commoditize AI. LyraAlpha's credit model ties price to the depth of analysis:
+### 8. Myra Voice — hands-free, real-time support
+Powered by OpenAI Realtime API (`gpt-realtime-mini`, voice `marin`, PCM 24kHz). Supports English, Hinglish, and Hindi. Includes client-side injection detection, PII redaction, virtual-device filtering, and silence auto-stop. Available to PRO+ users from the dashboard Myra widget.
 
-- A quick score question costs 1 credit
-- A full multi-factor analysis costs 3 credits
-- A deep synthesis or premium workflow costs 5 credits, plus 3 per additional asset
+### 9. AMI 2.0 content pipeline — agent-automated distribution
+- Public blog at `/blog` with category pages, RSS 2.0, OG hero images, reading progress, ISR, and contextual CTAs
+- HMAC-SHA256 verified webhook bridge (`/api/webhooks/ami`) for agent publishing
+- Weekly digest: QStash-scheduled every Monday at 10:00 UTC, zero incremental editorial cost
+- Enforced email boundary: LyraAlpha owns transactional/lifecycle emails; AMI 2.0 owns outbound marketing with its own Brevo API key
 
-Users who go deeper pay more. Margin improves as engagement deepens. That is the opposite of the usual SaaS cost cliff.
+Content distribution is infrastructure, not an afterthought.
 
-### Three independent cost controls built into the infrastructure
+### 10. AI stack fully consolidated on GPT-5.4
+All Gemini, OpenRouter, and Groq branches removed. The entire stack — Lyra (nano / mini / full) and Myra (nano) — runs exclusively on GPT-5.4 via Azure OpenAI. Simpler governance, zero provider-parity drift, smaller operational surface area.
 
-1. Query classification routes each request to the right model tier — nano, mini, or full — so full-model inference only runs when the analytical complexity justifies it
-2. The credit system enforces a monthly usage envelope per plan, with atomic deduction
-3. Per-user daily token caps in Redis act as a secondary backstop against runaway API spend — hot-patchable by admins without a code deploy
+### 11. Real-time crypto news intelligence
+NewsData.io integration delivers trending crypto news, per-asset news feeds, and sentiment extraction — synced every 12 hours via the `news-sync` cron. Replaces CryptoPanic with a broader, more reliable data source.
 
-These are not settings. They are architecture.
-
-### Production AI safety — already shipped
-
-- **All messages in a conversation** are scanned for prompt-injection patterns, not just the last message
-- Every RAG knowledge-base chunk is scanned for prompt-injection patterns before Lyra sees it
-- **User memory chunks** are also scanned for injection patterns before being added to context
-- **Multi-asset mode is gated** behind plan checks to prevent silent cost escalation on lower-tier plans
-- Primary model failure degrades automatically to nano before any error reaches users
-- Five alerting channels watch daily cost, fallback rate, RAG zero-result rate, output validation failures, and web search availability
-- Daily token caps and alert thresholds are editable live from the admin panel
-- Myra responses are cached (normalized query hash, 4h/8h TTL) to reduce redundant LLM calls on repetitive support questions
-- **Conversation log idempotency**: duplicate log entries are prevented via a 10-second Redis dedup window on store operations
-
-In financial AI, trust is the product. Most competitors have none of this in production.
-
-### AMI 2.0 content pipeline — agent-automated distribution
-
-LyraAlpha AI ships a public blog powered by an external AMI 2.0 marketing agent system.
-
-- **Blog system** at `/blog`: category pages, RSS 2.0 feed, OG hero images, reading progress bar, share cards via the IntelligenceShare system, and contextual CTAs (waitlist for logged-out, Ask Lyra for logged-in)
-- **HMAC-verified webhook bridge** (`/api/webhooks/ami`): AMI 2.0 publishes, updates, and archives posts via a shared-secret HMAC-SHA256 endpoint. Posts are Zod-validated, upserted into the `BlogPost` Prisma model, ISR-revalidated across all affected routes, and subscriber notifications fire asynchronously via Brevo
-- **Weekly blog digest**: QStash-scheduled every Monday at 10:00 UTC. Batched delivery to `blogSubscribed: true` users. Zero incremental editorial cost once the pipeline is running
-- **Enforced email boundary**: LyraAlpha owns transactional and lifecycle emails — welcome, notifications, digest, re-engagement, weekly reports, billing. AMI 2.0 owns outbound marketing — cold/warm outreach, nurture sequences, campaign copy — using its own Brevo API key. The boundary is a system-level contract, not a convention
-
-Most products treat content distribution as an afterthought. LyraAlpha AI ships it as infrastructure.
-
-### AI stack fully consolidated on GPT-5.4
-
-All Gemini, OpenRouter, and Groq branches have been removed from the codebase. The entire AI stack — Lyra (nano / mini / full) and Myra (nano) — runs exclusively on GPT-5.4 via Azure OpenAI. This simplifies governance, eliminates provider-parity drift, and reduces operational surface area.
-
-### A clear upgrade ladder from free to Enterprise
+### 12. Clear upgrade ladder with natural triggers
 
 ```
 STARTER (free) → PRO ($14.99 / ₹1,499) → ELITE ($39.99 / ₹3,999) → ENTERPRISE (custom)
@@ -165,6 +156,24 @@ Each tier has a natural upgrade trigger built into the product experience:
 - Starter to Pro: credit exhaustion
 - Pro to Elite: premium workflow access gate
 - Elite to Enterprise: volume, team signals, or custom deployment needs
+
+### 13. Cross-session conversation memory (PRO+)
+Lyra remembers past analytical context, prior questions, and portfolio context across sessions. Users build analytical continuity instead of re-explaining their situation every time.
+
+### 14. Live research augmentation (Elite+)
+On recency-sensitive queries, Lyra pulls live web research to complement RAG knowledge — protocol metrics, macro shifts, and policy signals woven into the response, not appended as a footnote.
+
+### 15. Regime-aware multi-asset synthesis (Elite+)
+Compare up to 4 crypto assets simultaneously across sectors: divergence, correlation, relative regime alignment, and opportunity framing in a single response. Regime context makes the same momentum score mean different things in risk-off vs. risk-on environments.
+
+### 16. System-level portfolio intelligence
+Portfolio is analyzed as a system, not a list of positions:
+- Regime alignment across the whole book
+- Fragility and concentration risk identification
+- Benchmark comparison and drawdown context
+- Monte Carlo scenario framing
+- Holdings P&L with regime-aware score overlays
+- Score velocity signals on individual positions
 
 ---
 
@@ -373,4 +382,6 @@ For engineers: The model interprets what deterministic engines already computed.
 ---
 
 *LyraAlpha AI — Crypto Intelligence, Not Crypto Noise*
-*Version 2.3 · April 2026*
+*Version 2.4 · April 2026*
+
+> **Latest updates:** Streaming fixes — context-length blocker resolved, token-by-token streaming via `toTextStreamResponse()` with tee drain. Landing page thesis cards rewritten (PROBLEM, ARCHITECTURE, DIFFERENTIATION, WORKFLOWS, MARKET, CORE THESIS) replacing fake testimonials. ThesisSection: "Built on conviction. Not copy." Prisma pooled connection fix for `public-ticker` route.

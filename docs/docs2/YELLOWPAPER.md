@@ -3,9 +3,9 @@
 
 > **Fork note:** This document reflects the current LyraAlpha repository and should be read alongside `CODEBASE.md` and `docs/ENV_SETUP.md`.
 
-**Version 3.3 — Audited Against Current Code (April 2026)**
+**Version 3.4 — Audited Against Current Code (April 2026)**
 
-> **Latest updates:** Beta branding deployed, new static pages added, crypto-focused blog content, search placeholder refined.
+> **Latest updates:** Streaming context-length blocker fixed (`validateInput` checks last message only). Token-by-token streaming restored via `toTextStreamResponse()` with `baseStream` tee drain. Landing page thesis cards rewritten replacing fake testimonials. ThesisSection: "Built on conviction. Not copy." Prisma pooled connection fix for `public-ticker` route. Beta branding, new static pages, crypto-focused blog content, search placeholder refined.
 
 ---
 

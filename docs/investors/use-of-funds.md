@@ -1,10 +1,14 @@
 # LyraAlpha AI — Use of Funds
 
+**Version:** 2.4 · April 2026
+
 ## Purpose
 
 This raise is not about inventing the product from scratch. The core product is live. Premium workflows are shipped. The objective now is to **accelerate distribution, deepen premium differentiation, and harden the operating system** around a live financial intelligence platform.
 
 Capital should compound execution, not fund reinvention.
+
+> **Latest (24h):** Streaming context-length blocker fixed, token-by-token streaming restored. Landing page thesis content rewritten. Prisma pooled connection fix for serverless API routes.
 
 ---
 

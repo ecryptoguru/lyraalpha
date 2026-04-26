@@ -4,8 +4,8 @@
 
 **LyraAlpha AI** is building the structured financial intelligence layer that retail investors in India and the US have never had — not more data, not another chatbot, but a system that turns fragmented market signals into consistent, institutional-quality reasoning at consumer scale.
 
-- **Version:** 2.3 · April 2026
-- **Latest (24h):** Beta branding deployed, new static pages (pricing, methodology, about, careers, legal), crypto-focused blog content, trimmed landing copy
+- **Version:** 2.4 · April 2026
+- **Latest (24h):** Streaming context-length blocker fixed (token-by-token streaming restored). Landing page thesis cards rewritten replacing fake testimonials — "Built on conviction. Not copy." Prisma pooled connection fix for serverless API routes. Beta branding, new static pages, crypto-focused blog content, trimmed landing copy.
 - **Category:** Financial intelligence / AI-native investing software
 - **Markets:** US + India — crypto assets
 - **Model:** Freemium SaaS with credit-governed usage, premium workflow upsell, and Enterprise packaging

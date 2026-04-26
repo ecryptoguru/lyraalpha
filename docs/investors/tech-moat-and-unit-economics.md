@@ -1,7 +1,10 @@
 # LyraAlpha AI — Technical Moat & Unit Economics Memo
 
+**Version:** 2.4 · April 2026
 **Prepared for:** Early-stage and angel investors
 **Subject:** Why LyraAlpha AI is more defensible, more trustworthy, and more economically disciplined than a generic finance chatbot — and how that translates to durable margin
+
+> **Latest updates:** Streaming fixes — context-length blocker resolved, token-by-token streaming restored via `toTextStreamResponse()` with tee drain. Landing page thesis content rewritten (PROBLEM, ARCHITECTURE, DIFFERENTIATION, WORKFLOWS, MARKET, CORE THESIS). Prisma pooled connection fix for serverless routes.
 
 ---
 

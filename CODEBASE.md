@@ -2,6 +2,9 @@
 ## Version 2.3 · April 2026
 
 ### Recent Changes (Last 24 Hours)
+- **Streaming fixes** — Context length blocker resolved: `validateInput` now checks only the last user message for the 5,000-char limit (not entire conversation history). `checkPromptInjection` still scans all messages. Live responses stream token-by-token via `toTextStreamResponse()` with `baseStream` tee drain to prevent backpressure stalls. Cached responses use `singleChunkStream` (10-char chunks, 20ms delay) for simulated streaming.
+- **Landing page thesis** — SocialProofWall rewritten with platform thesis cards (PROBLEM, ARCHITECTURE, DIFFERENTIATION, WORKFLOWS, MARKET, CORE THESIS) replacing fake testimonial personas. Quotes are USP-focused and under 140 chars. ThesisSection heading updated to "Built on conviction. Not copy." with "Platform Thesis" eyebrow.
+- **Prisma connection fix** — `public-ticker` API route switched from `directPrisma` (port 5432 direct) to `prisma` (Supavisor pooler port 6543) to avoid "Can't reach database server" timeouts in serverless contexts.
 - **Blog hero images** — All 103 posts now have WebP hero images (1200×800, 85% quality, ~90KB avg). Total blog image size reduced from 233 MB to 9.1 MB (96% reduction). heroImageUrl updated from .jpg to .webp across all blog data files.
 - **Beta branding** — Replaced "Elite Edition" with "Beta" badge across sidebar and landing navbar
 - **New static pages** — Added pricing, methodology, about, careers, legal pages with Footer integration

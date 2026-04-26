@@ -1,10 +1,14 @@
 # LyraAlpha AI — 12-Month Revenue Model
 
+**Version:** 2.4 · April 2026
+
 ## Purpose
 
 This document provides a directional 12-month revenue framework for LyraAlpha AI based on the current product ladder, live runtime behavior, and the company's premium-workflow strategy.
 
 It is designed to communicate how the business can scale **credibly**, not to manufacture false precision. Every assumption is grounded in live product behavior, not hopeful projections.
+
+> **Latest (24h):** Streaming fixes — context-length blocker resolved, token-by-token streaming restored. Landing page thesis cards rewritten. Prisma pooled connection fix for serverless API routes.
 
 ---
 

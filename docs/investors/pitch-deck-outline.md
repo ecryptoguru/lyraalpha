@@ -1,8 +1,11 @@
 # LyraAlpha AI — Pitch Deck Outline
 
+**Version:** 2.4 · April 2026
 **Objective:** Position LyraAlpha AI as a live, category-defining financial intelligence product with real product depth, credible AI economics, a clear growth model, and a compelling path from consumer SaaS to high-value workflow monetization in India and the US.
 
 **Tone:** Confident, specific, evidence-led. No vague AI hype. Every claim grounded in shipped product behavior or verified market data.
+
+> **Latest updates:** Streaming context-length blocker fixed. Landing page thesis cards rewritten replacing fake testimonials. Prisma pooled connection fix for serverless API routes.
 
 ---
 
