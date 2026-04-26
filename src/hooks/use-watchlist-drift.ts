@@ -15,6 +15,7 @@ export function useWatchlistDrift() {
     {
       revalidateOnFocus: false,
       dedupingInterval: 300_000,
+      keepPreviousData: true,
     },
   );
 

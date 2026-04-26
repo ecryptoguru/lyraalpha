@@ -44,7 +44,7 @@ export function usePortfolioHealth(portfolioId: string | null) {
   }>(
     portfolioId ? `/api/portfolio/${portfolioId}/health` : null,
     fetcher,
-    { dedupingInterval: 60000, revalidateOnFocus: false },
+    { dedupingInterval: 60000, revalidateOnFocus: false, keepPreviousData: true },
   );
 
   const snapshot = data?.snapshot ?? null;
@@ -68,7 +68,7 @@ export function usePortfolioAnalytics(portfolioId: string | null) {
   }>(
     portfolioId ? `/api/portfolio/${portfolioId}/analytics` : null,
     fetcher,
-    { dedupingInterval: 120000, revalidateOnFocus: false },
+    { dedupingInterval: 120000, revalidateOnFocus: false, keepPreviousData: true },
   );
 
   return {

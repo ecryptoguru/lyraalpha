@@ -11,6 +11,7 @@ const ADMIN_SWR_CONFIG = {
   revalidateOnFocus: false,
   refreshInterval: 60_000,
   dedupingInterval: 30_000,
+  keepPreviousData: true,
 };
 
 export function useAdminOverview() {
@@ -79,6 +80,7 @@ const ADMIN_OPS_SWR_CONFIG = {
   revalidateOnFocus: false,
   refreshInterval: 15_000,
   dedupingInterval: 5_000,
+  keepPreviousData: true,
 };
 
 export function useAdminAIOps() {
