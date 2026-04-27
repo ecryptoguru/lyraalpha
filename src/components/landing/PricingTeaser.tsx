@@ -17,7 +17,7 @@ export function PricingTeaser() {
       <div ref={ref} className="container relative z-10 mx-auto max-w-7xl px-0">
         <motion.div className="mx-auto mb-12 max-w-3xl text-center" variants={kineticVariants.fadeUp} initial="hidden" animate={inView ? "visible" : "hidden"}>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-warning/70">Pricing</p>
-          <h2 className="mt-4 text-3xl font-light tracking-[-0.04em] text-white sm:text-5xl">Invest in <span className="text-warning">intelligence.</span></h2>
+          <h2 className="mt-4 text-3xl font-light tracking-[-0.04em] text-white sm:text-5xl">Invest in your portfolio. <span className="text-warning">Not in expensive tools.</span></h2>
           <div className="mt-6 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/3 p-1 backdrop-blur-sm">
             <button onClick={() => setAnnual(true)} className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all ${annual ? "bg-warning text-foreground" : "text-white/50 hover:text-white"}`}>Annual</button>
             <button onClick={() => setAnnual(false)} className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all ${!annual ? "bg-warning text-foreground" : "text-white/50 hover:text-white"}`}>Monthly</button>

@@ -15,11 +15,11 @@ export function FinalKineticCTA() {
         <motion.div variants={kineticVariants.fadeUp} initial="hidden" animate={inView ? "visible" : "hidden"}>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-warning/70">Ready to decode the market?</p>
           <h2 className="mt-6 text-4xl font-extralight leading-tight tracking-[-0.04em] text-white sm:text-6xl lg:text-7xl">
-            Stop guessing.<br />
-            <span className="text-warning">Start knowing.</span>
+            Stop researching.<br />
+            <span className="text-warning">Start executing.</span>
           </h2>
           <p className="mx-auto mt-5 max-w-xl font-mono text-sm leading-7 text-white/45">
-            Join 50,000+ investors who replaced noise with deterministic intelligence. Free to start. No credit card required.
+            Free Beta access. ELITE plan. 300 credits. No card required.
           </p>
         </motion.div>
 

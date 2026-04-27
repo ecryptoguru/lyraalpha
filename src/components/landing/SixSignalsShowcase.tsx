@@ -5,12 +5,12 @@ import { useInViewOnce, kineticVariants } from "./motion/useKineticReveal";
 import { TrendingUp, Activity, Shield, Zap, Brain, BarChart3 } from "lucide-react";
 
 const signals = [
-  { label: "Trend Score", value: 78, max: 100, color: "info", icon: TrendingUp, desc: "Strong directional momentum across correlated timeframes" },
-  { label: "Volatility Score", value: 42, max: 100, color: "warning", icon: Activity, desc: "Low regime risk. Quiet accumulation environment." },
-  { label: "Liquidity Score", value: 65, max: 100, color: "info", icon: Zap, desc: "Healthy order book depth. No squeeze risk detected." },
-  { label: "Sentiment Score", value: 71, max: 100, color: "warning", icon: Brain, desc: "On-chain activity and social metrics in bullish zone." },
-  { label: "Momentum Score", value: 68, max: 100, color: "info", icon: BarChart3, desc: "RSI and MACD converging on bullish cross." },
-  { label: "Trust Score", value: 82, max: 100, color: "success", icon: Shield, desc: "Network health and holder concentration: optimal." },
+  { label: "Trend", value: 78, max: 100, color: "info", icon: TrendingUp, desc: "Directional strength" },
+  { label: "Volatility", value: 42, max: 100, color: "warning", icon: Activity, desc: "Regime risk" },
+  { label: "Liquidity", value: 65, max: 100, color: "info", icon: Zap, desc: "Order book depth" },
+  { label: "Sentiment", value: 71, max: 100, color: "warning", icon: Brain, desc: "On-chain & social" },
+  { label: "Momentum", value: 68, max: 100, color: "info", icon: BarChart3, desc: "RSI · MACD cross" },
+  { label: "Trust", value: 82, max: 100, color: "success", icon: Shield, desc: "Network health" },
 ];
 
 function RadialGauge({ value, max, color, label, icon: Icon, desc }: typeof signals[0] & { inView: boolean }) {
@@ -58,9 +58,9 @@ export function SixSignalsShowcase() {
     <section className="relative bg-[#040816] px-4 py-24 sm:px-6 sm:py-28">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_40%_at_50%_60%,rgba(245,158,11,0.04),transparent_65%)]" />
       <div ref={ref} className="container relative z-10 mx-auto max-w-7xl px-0">
-        <motion.div className="mx-auto mb-16 max-w-3xl text-center" variants={kineticVariants.fadeUp} initial="hidden" animate={inView ? "visible" : "hidden"}>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-warning/70">Core capabilities</p>
-          <h2 className="mt-4 text-3xl font-light tracking-[-0.04em] text-white sm:text-5xl">Six signals, <span className="text-warning">one framework.</span></h2>
+        <motion.div className="mx-auto mb-14 max-w-3xl text-center" variants={kineticVariants.fadeUp} initial="hidden" animate={inView ? "visible" : "hidden"}>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.38em] text-warning/70">Six engines · One framework</p>
+          <h2 className="mt-4 text-3xl font-light tracking-[-0.04em] text-white sm:text-5xl">Your AI <span className="text-warning">edge in crypto markets.</span></h2>
         </motion.div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {signals.map((s) => (

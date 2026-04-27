@@ -7,16 +7,21 @@ import { CryptoHero } from "@/components/landing/CryptoHero";
 import { LivePriceTicker } from "@/components/landing/LivePriceTicker";
 import { PublicMyraWidget } from "@/components/landing/public-myra-widget";
 
-// Lazy-load heavy below-fold sections to improve LCP and TTI
-const ThesisSection = dynamic(() => import("@/components/landing/ThesisSection").then((m) => m.ThesisSection));
-const KineticScrollStory = dynamic(() => import("@/components/landing/KineticScrollStory").then((m) => m.KineticScrollStory));
-const HowItWorksV2 = dynamic(() => import("@/components/landing/HowItWorksV2").then((m) => m.HowItWorksV2));
+// Narrative-driven flow built on 6 marketing pillars:
+// 1. Hero — Institutional Crypto Intelligence. Retail Pricing.
+// 2. NoiseToAlpha — Turn Crypto Noise into Actionable Alpha.
+// 3. InstitutionalEdge — Think Like a Fund. Trade Like an Insider.
+// 4. SixSignalsShowcase — Your AI Edge in Crypto Markets.
+// 5. WorkflowsShowcase — Stop Researching. Start Executing.
+// 6. PricingTeaser — Invest in Your Portfolio. Not in Expensive Tools.
+const NoiseToAlpha = dynamic(() => import("@/components/landing/NoiseToAlpha").then((m) => m.NoiseToAlpha));
+const InstitutionalEdge = dynamic(() => import("@/components/landing/InstitutionalEdge").then((m) => m.InstitutionalEdge));
 const SixSignalsShowcase = dynamic(() => import("@/components/landing/SixSignalsShowcase").then((m) => m.SixSignalsShowcase));
 const LyraCapabilitiesBento = dynamic(() => import("@/components/landing/LyraCapabilitiesBento").then((m) => m.LyraCapabilitiesBento));
+const WorkflowsShowcase = dynamic(() => import("@/components/landing/WorkflowsShowcase").then((m) => m.WorkflowsShowcase));
 const PricingTeaser = dynamic(() => import("@/components/landing/PricingTeaser").then((m) => m.PricingTeaser));
 const EmailCapture = dynamic(() => import("@/components/landing/EmailCapture").then((m) => m.EmailCapture));
 const FinalKineticCTA = dynamic(() => import("@/components/landing/FinalKineticCTA").then((m) => m.FinalKineticCTA));
-const BlogPreview = dynamic(() => import("@/components/landing/BlogPreview").then((m) => m.BlogPreview));
 
 export default function Home() {
   return (
@@ -30,19 +35,19 @@ export default function Home() {
           <CryptoHero />
           <LivePriceTicker />
           <Suspense fallback={null}>
-            <ThesisSection />
+            <NoiseToAlpha />
           </Suspense>
           <Suspense fallback={null}>
-            <KineticScrollStory />
-          </Suspense>
-          <Suspense fallback={null}>
-            <HowItWorksV2 />
+            <InstitutionalEdge />
           </Suspense>
           <Suspense fallback={null}>
             <SixSignalsShowcase />
           </Suspense>
           <Suspense fallback={null}>
             <LyraCapabilitiesBento />
+          </Suspense>
+          <Suspense fallback={null}>
+            <WorkflowsShowcase />
           </Suspense>
           <Suspense fallback={null}>
             <PricingTeaser />
@@ -52,9 +57,6 @@ export default function Home() {
           </Suspense>
           <Suspense fallback={null}>
             <FinalKineticCTA />
-          </Suspense>
-          <Suspense fallback={null}>
-            <BlogPreview />
           </Suspense>
           <PublicMyraWidget />
           <Footer />
