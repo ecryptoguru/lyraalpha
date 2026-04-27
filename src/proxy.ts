@@ -165,7 +165,7 @@ export const proxy = clerkMiddleware(async (auth, req: NextRequest) => {
       }
       // Page routes: redirect to sign-in
       const signInUrl = new URL(
-        process.env.CLERK_SIGN_IN_URL || "/sign-in",
+        process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL || "/sign-in",
         req.url,
       );
       signInUrl.searchParams.set("redirect_url", req.url);

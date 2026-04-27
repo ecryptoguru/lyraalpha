@@ -18,9 +18,9 @@ const databaseSchema = z.object({
  */
 const authSchema = z.object({
   CLERK_SECRET_KEY: z.string().min(1, "CLERK_SECRET_KEY is required"),
-  CLERK_PUBLISHABLE_KEY: z.string().min(1, "CLERK_PUBLISHABLE_KEY is required"),
-  CLERK_SIGN_IN_URL: z.string().min(1, "CLERK_SIGN_IN_URL is required"),
-  CLERK_SIGN_UP_URL: z.string().min(1, "CLERK_SIGN_UP_URL is required"),
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1, "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is required"),
+  NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().min(1, "NEXT_PUBLIC_CLERK_SIGN_IN_URL is required"),
+  NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().min(1, "NEXT_PUBLIC_CLERK_SIGN_UP_URL is required"),
   CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: z.string().default("/dashboard/lyra"),
   CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: z.string().default("/dashboard/lyra"),
   ADMIN_EMAIL_ALLOWLIST: z.string().optional(),
@@ -73,7 +73,7 @@ const stripeSchema = z.object({
   STRIPE_PRO_PRICE_ID_US: z.string().optional(),
   STRIPE_ELITE_PRICE_ID: z.string().optional(),
   STRIPE_ELITE_PRICE_ID_US: z.string().optional(),
-  STRIPE_PUBLISHABLE_KEY: z.string().min(1, "STRIPE_PUBLISHABLE_KEY is required"),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().min(1, "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is required"),
 });
 
 /**
@@ -220,9 +220,9 @@ export const env = {
   get auth() {
     return {
       clerkSecretKey: getEnv().CLERK_SECRET_KEY,
-      clerkPublishableKey: getEnv().CLERK_PUBLISHABLE_KEY,
-      signInUrl: getEnv().CLERK_SIGN_IN_URL,
-      signUpUrl: getEnv().CLERK_SIGN_UP_URL,
+      clerkPublishableKey: getEnv().NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+      signInUrl: getEnv().NEXT_PUBLIC_CLERK_SIGN_IN_URL,
+      signUpUrl: getEnv().NEXT_PUBLIC_CLERK_SIGN_UP_URL,
       adminEmailAllowlist: getEnv().ADMIN_EMAIL_ALLOWLIST,
     };
   },
@@ -267,7 +267,7 @@ export const env = {
       webhookSecret: getEnv().STRIPE_WEBHOOK_SECRET,
       proPriceId: getEnv().STRIPE_PRO_PRICE_ID_US || getEnv().STRIPE_PRO_PRICE_ID || undefined,
       elitePriceId: getEnv().STRIPE_ELITE_PRICE_ID_US || getEnv().STRIPE_ELITE_PRICE_ID || undefined,
-      publishableKey: getEnv().STRIPE_PUBLISHABLE_KEY,
+      publishableKey: getEnv().NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     };
   },
 

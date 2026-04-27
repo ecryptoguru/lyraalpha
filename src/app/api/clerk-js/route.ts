@@ -6,7 +6,7 @@ const logger = createLogger({ service: "clerk-js-proxy" });
 const CLERK_JS_VERSION = process.env.CLERK_JS_VERSION || "5";
 
 function getFrontendApi(): string | null {
-  const publishableKey = process.env.CLERK_PUBLISHABLE_KEY;
+  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   if (!publishableKey) return null;
 
   return parsePublishableKey(publishableKey)?.frontendApi ?? null;
@@ -15,7 +15,7 @@ function getFrontendApi(): string | null {
 export async function GET() {
   const frontendApi = getFrontendApi();
   if (!frontendApi) {
-    logger.error("Missing CLERK_PUBLISHABLE_KEY");
+    logger.error("Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY");
     return NextResponse.json({ error: "Missing Clerk publishable key" }, { status: 500 });
   }
 
