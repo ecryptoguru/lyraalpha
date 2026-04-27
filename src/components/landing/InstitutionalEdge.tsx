@@ -55,8 +55,8 @@ export function InstitutionalEdge() {
         </motion.div>
 
         <div className="overflow-hidden rounded-[2.4rem] border border-white/8 bg-white/2.5 backdrop-blur-sm">
-          {/* Header row */}
-          <div className="grid grid-cols-[1.4fr_1fr_1.4fr] border-b border-white/8 px-4 py-4 sm:px-8">
+          {/* Header row — hidden on mobile, shown on sm+ */}
+          <div className="hidden grid-cols-[1.4fr_1fr_1.4fr] border-b border-white/8 px-4 py-4 sm:grid sm:px-8">
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">
               Capability
             </p>
@@ -77,20 +77,33 @@ export function InstitutionalEdge() {
                 initial="hidden"
                 animate={inView ? "visible" : "hidden"}
                 transition={{ delay: 0.15 + i * 0.1 }}
-                className="grid grid-cols-[1.4fr_1fr_1.4fr] items-center border-b border-white/5 px-4 py-5 last:border-b-0 sm:px-8 sm:py-7"
+                className="border-b border-white/5 px-5 py-5 last:border-b-0 sm:grid sm:grid-cols-[1.4fr_1fr_1.4fr] sm:items-center sm:px-8 sm:py-7"
               >
+                {/* Capability + icon */}
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-warning/20 bg-warning/8 text-warning">
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-4 w-4" aria-hidden="true" />
                   </div>
                   <p className="text-sm font-semibold text-white sm:text-base">{row.capability}</p>
                 </div>
-                <p className="text-center font-mono text-[11px] text-white/30 sm:text-xs">
-                  {row.retail}
-                </p>
-                <p className="text-right text-sm font-semibold text-warning sm:text-base">
-                  {row.lyra}
-                </p>
+
+                {/* Mobile: labelled rows. Desktop: align center/right within grid. */}
+                <div className="mt-4 flex items-baseline justify-between gap-3 sm:mt-0 sm:contents">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/30 sm:hidden">
+                    Retail
+                  </p>
+                  <p className="font-mono text-[12px] text-white/45 sm:text-center sm:text-xs sm:text-white/30">
+                    {row.retail}
+                  </p>
+                </div>
+                <div className="mt-2 flex items-baseline justify-between gap-3 sm:mt-0 sm:contents">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-warning/60 sm:hidden">
+                    LyraAlpha
+                  </p>
+                  <p className="text-sm font-semibold text-warning sm:text-right sm:text-base">
+                    {row.lyra}
+                  </p>
+                </div>
               </motion.div>
             );
           })}

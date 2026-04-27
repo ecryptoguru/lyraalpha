@@ -203,11 +203,6 @@ export default function RootLayout({
                     "price": "0",
                     "priceCurrency": "USD",
                   },
-                  "aggregateRating": {
-                    "@type": "AggregateRating",
-                    "ratingValue": "4.8",
-                    "ratingCount": "1",
-                  },
                   "url": process.env.APP_URL || "https://lyraalpha.xyz",
                 },
               ],

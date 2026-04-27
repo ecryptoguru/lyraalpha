@@ -15,38 +15,41 @@ import { ArrowRight } from "lucide-react";
  * Minimal copy. Visual carries the narrative.
  */
 
-function NoisePanel() {
-  const dots = Array.from({ length: 80 }, (_, i) => ({
-    x: (i * 37) % 100,
-    y: (i * 53) % 100,
-    delay: (i % 12) * 0.15,
-  }));
+// Reduced from 80→40 dots; cheap modular pattern for deterministic placement
+const NOISE_DOTS = Array.from({ length: 40 }, (_, i) => ({
+  x: (i * 37) % 100,
+  y: (i * 53) % 100,
+  delay: (i % 12) * 0.15,
+}));
+
+function NoisePanel({ inView }: { inView: boolean }) {
   return (
     <div className="relative aspect-square w-full overflow-hidden rounded-3xl border border-danger/15 bg-danger/4 p-4">
       <p className="absolute left-4 top-4 z-10 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-danger/70">
         Raw Market Noise
       </p>
-      {/* Chaotic dots */}
-      <div className="relative h-full w-full">
-        {dots.map((d, i) => (
+      {/* Chaotic dots — only animate when in view to save CPU */}
+      <div className="relative h-full w-full" aria-hidden="true">
+        {NOISE_DOTS.map((d, i) => (
           <motion.span
             key={i}
             className="absolute h-1 w-1 rounded-full bg-danger/50"
             style={{ left: `${d.x}%`, top: `${d.y}%` }}
-            animate={{
-              opacity: [0.3, 0.8, 0.3],
-              scale: [1, 1.4, 1],
-            }}
+            animate={
+              inView
+                ? { opacity: [0.3, 0.8, 0.3], scale: [1, 1.4, 1] }
+                : { opacity: 0.3, scale: 1 }
+            }
             transition={{
               duration: 1.5,
               delay: d.delay,
-              repeat: Infinity,
+              repeat: inView ? Infinity : 0,
               ease: "easeInOut",
             }}
           />
         ))}
         {/* Chaotic lines */}
-        <svg className="absolute inset-0 h-full w-full opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <svg className="absolute inset-0 h-full w-full opacity-30" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
           <path
             d="M0,50 Q15,20 25,60 T50,40 T75,70 T100,30"
             stroke="rgb(244, 63, 94)"
@@ -68,7 +71,7 @@ function NoisePanel() {
   );
 }
 
-function AlphaPanel() {
+function AlphaPanel({ inView }: { inView: boolean }) {
   return (
     <div className="relative aspect-square w-full overflow-hidden rounded-3xl border border-success/20 bg-success/5 p-4">
       <p className="absolute left-4 top-4 z-10 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-success/80">
@@ -76,7 +79,7 @@ function AlphaPanel() {
       </p>
       {/* Clean ascending signal */}
       <div className="relative flex h-full w-full items-center justify-center">
-        <svg className="h-3/4 w-full" viewBox="0 0 100 60" preserveAspectRatio="none">
+        <svg className="h-3/4 w-full" viewBox="0 0 100 60" preserveAspectRatio="none" aria-hidden="true">
           {/* Grid lines */}
           {[10, 20, 30, 40, 50].map((y) => (
             <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="rgba(255,255,255,0.04)" strokeWidth="0.2" />
@@ -86,7 +89,7 @@ function AlphaPanel() {
             d="M0,55 L10,50 L20,45 L30,38 L40,42 L50,30 L60,28 L70,20 L80,18 L90,12 L100,8 L100,60 L0,60 Z"
             fill="url(#signalGrad)"
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.4 }}
+            animate={{ opacity: inView ? 0.4 : 0 }}
             transition={{ duration: 1.2 }}
           />
           {/* Signal line */}
@@ -97,7 +100,7 @@ function AlphaPanel() {
             fill="none"
             strokeLinecap="round"
             initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
+            animate={{ pathLength: inView ? 1 : 0 }}
             transition={{ duration: 2, ease: "easeInOut" }}
           />
           {/* Signal dots */}
@@ -111,7 +114,7 @@ function AlphaPanel() {
                 r="1.4"
                 fill="rgb(34, 197, 94)"
                 initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
+                animate={{ scale: inView ? 1 : 0 }}
                 transition={{ delay: 0.3 + i * 0.2, duration: 0.4 }}
               />
             );
@@ -160,16 +163,18 @@ export function NoiseToAlpha() {
           animate={inView ? "visible" : "hidden"}
           transition={{ delay: 0.2 }}
         >
-          <NoisePanel />
-          <div className="flex items-center justify-center md:flex-col md:gap-4">
+          <NoisePanel inView={inView} />
+          <div className="flex items-center justify-center gap-3 md:flex-col md:gap-2">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-warning/30 bg-warning/10">
-              <ArrowRight className="h-5 w-5 text-warning md:rotate-0" />
+              {/* Mobile: panels stack vertically → arrow points down. Desktop: side-by-side → arrow points right. */}
+              <ArrowRight className="h-5 w-5 rotate-90 text-warning md:hidden" aria-hidden="true" />
+              <ArrowRight className="hidden h-5 w-5 text-warning md:block" aria-hidden="true" />
             </div>
-            <p className="ml-3 font-mono text-[10px] uppercase tracking-[0.3em] text-warning/70 md:ml-0 md:mt-2 md:text-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-warning/70 md:text-center">
               6 Engines
             </p>
           </div>
-          <AlphaPanel />
+          <AlphaPanel inView={inView} />
         </motion.div>
       </div>
     </section>

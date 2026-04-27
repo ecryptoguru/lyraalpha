@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, ArrowRight, Check, Loader2 } from "lucide-react";
+import { Mail, ArrowRight, Check, Loader2, AlertCircle } from "lucide-react";
 import { useInViewOnce, kineticVariants } from "./motion/useKineticReveal";
 
 export function EmailCapture() {
@@ -53,35 +53,65 @@ export function EmailCapture() {
             </p>
 
             {status === "success" ? (
-              <div className="mt-8 flex items-center gap-2 rounded-full border border-success/20 bg-success/8 px-6 py-3 text-sm text-success">
-                <Check className="h-4 w-4" />
+              <div
+                role="status"
+                aria-live="polite"
+                className="mt-8 flex items-center gap-2 rounded-full border border-success/20 bg-success/8 px-6 py-3 text-sm text-success"
+              >
+                <Check className="h-4 w-4" aria-hidden="true" />
                 Subscribed — check your inbox for confirmation
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row">
-                <input
-                  type="email"
-                  required
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-white placeholder:text-white/30 outline-none ring-info/0 transition-all focus:border-info/30 focus:ring-2 focus:ring-info/20"
-                />
-                <button
-                  type="submit"
-                  disabled={status === "loading"}
-                  className="inline-flex items-center justify-center gap-2 rounded-full border border-info/30 bg-info/15 px-6 py-3 text-sm font-semibold text-info transition-all hover:bg-info/25 disabled:opacity-50"
+              <>
+                <form
+                  onSubmit={handleSubmit}
+                  className="mt-8 flex w-full max-w-md flex-col gap-3 sm:flex-row"
+                  aria-busy={status === "loading"}
                 >
-                  {status === "loading" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      Get Free Report
-                      <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
-                </button>
-              </form>
+                  <label htmlFor="newsletter-email" className="sr-only">
+                    Email address
+                  </label>
+                  <input
+                    id="newsletter-email"
+                    type="email"
+                    required
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (status === "error") setStatus("idle");
+                    }}
+                    aria-invalid={status === "error"}
+                    aria-describedby={status === "error" ? "newsletter-error" : undefined}
+                    className="flex-1 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-white placeholder:text-white/30 outline-none transition-all focus:border-info/30 focus:ring-2 focus:ring-info/20 aria-invalid:border-danger/40"
+                  />
+                  <button
+                    type="submit"
+                    disabled={status === "loading"}
+                    className="inline-flex items-center justify-center gap-2 rounded-full border border-info/30 bg-info/15 px-6 py-3 text-sm font-semibold text-info transition-all hover:bg-info/25 disabled:opacity-50"
+                  >
+                    {status === "loading" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <>
+                        Get Free Report
+                        <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                      </>
+                    )}
+                  </button>
+                </form>
+
+                {status === "error" && (
+                  <div
+                    id="newsletter-error"
+                    role="alert"
+                    className="mt-4 flex items-center gap-2 rounded-full border border-danger/20 bg-danger/8 px-5 py-2.5 text-xs text-danger"
+                  >
+                    <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                    Could not subscribe right now. Please try again in a moment.
+                  </div>
+                )}
+              </>
             )}
 
             <p className="mt-4 font-mono text-[10px] text-white/30">

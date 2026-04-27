@@ -9,10 +9,8 @@ import { Check } from "lucide-react";
 const plans = [
   {
     name: "Starter",
-    price: "Free",
     monthlyPrice: 0,
     annualPrice: 0,
-    period: "/month",
     description: "For individuals exploring AI-powered crypto intelligence.",
     features: ["5 Lyra queries/day", "Basic crypto analytics", "Market regime signals", "1 watchlist"],
     cta: "Get Started Free",
@@ -21,10 +19,8 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$29",
     monthlyPrice: 29,
     annualPrice: 24,
-    period: "/month",
     description: "For serious crypto investors who want deeper signals and more queries.",
     features: ["100 Lyra queries/day", "Full crypto analytics", "Portfolio Intel", "Sector Pulse", "5 watchlists", "Priority support"],
     cta: "Start Pro Trial",
@@ -33,10 +29,8 @@ const plans = [
   },
   {
     name: "Elite",
-    price: "$79",
     monthlyPrice: 79,
     annualPrice: 63,
-    period: "/month",
     description: "For professional crypto investors who need the full analytical stack.",
     features: ["Unlimited Lyra queries", "All Pro features", "Multibagger Radar", "Elite commands", "Compare Assets", "API access (coming soon)", "Dedicated support"],
     cta: "Go Elite",
