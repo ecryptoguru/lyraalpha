@@ -7,11 +7,11 @@ export const metadata: Metadata = {
   title: "Terms of Service | LyraAlpha AI",
   description:
     "LyraAlpha AI terms of service — governing use of our financial intelligence platform, AI features, and all associated services.",
-  alternates: { canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/terms` },
+  alternates: { canonical: `${process.env.APP_URL || "https://lyraalpha.xyz"}/terms` },
   openGraph: {
     title: "Terms of Service | LyraAlpha AI",
     description: "Terms governing use of LyraAlpha AI’s financial intelligence platform and services.",
-    url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/terms`,
+    url: `${process.env.APP_URL || "https://lyraalpha.xyz"}/terms`,
   },
   robots: { index: false },
 };

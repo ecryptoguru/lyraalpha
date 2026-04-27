@@ -49,7 +49,7 @@ export const viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.APP_URL || "http://localhost:3000"),
   title: "LyraAlpha AI | Institutional-Grade Crypto Intelligence",
   description: "Decode crypto market signals with AI that understands context. Real-time analysis for Bitcoin, Ethereum, and altcoins with institutional-grade retail clarity.",
   manifest: "/manifest.webmanifest",
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "LyraAlpha AI | Institutional-Grade Crypto Intelligence",
     description: "Institutional-grade crypto intelligence for every investor.",
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz",
+    url: process.env.APP_URL || "https://lyraalpha.xyz",
     siteName: "LyraAlpha AI",
     images: [
       {
@@ -90,7 +90,7 @@ export const metadata: Metadata = {
   alternates: {
     types: {
       "application/rss+xml": [
-        { url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/blog/feed.xml`, title: "LyraAlpha AI Blog" },
+        { url: `${process.env.APP_URL || "https://lyraalpha.xyz"}/blog/feed.xml`, title: "LyraAlpha AI Blog" },
       ],
     },
   },

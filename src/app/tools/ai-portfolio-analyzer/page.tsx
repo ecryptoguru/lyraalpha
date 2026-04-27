@@ -6,12 +6,12 @@ export const metadata: Metadata = {
   title: "AI Portfolio Analyzer | LyraAlpha AI — Health Score, Fragility & Rebalance Signals",
   description:
     "AI portfolio analyzer that surfaces concentration risk, hidden overlap, and fragility before you rebalance. Powered by deterministic portfolio health engines and Lyra AI. US and India markets. Connect your holdings and get a scored diagnostic in seconds.",
-  alternates: { canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools/ai-portfolio-analyzer` },
+  alternates: { canonical: `${process.env.APP_URL || "https://lyraalpha.xyz"}/tools/ai-portfolio-analyzer` },
   openGraph: {
     title: "AI Portfolio Analyzer | LyraAlpha AI",
     description:
       "Find the one portfolio issue that actually matters before you rebalance — concentration, hidden overlap, or fragility. Health score, Monte Carlo simulation, and AI-generated rebalance signals.",
-    url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools/ai-portfolio-analyzer`,
+    url: `${process.env.APP_URL || "https://lyraalpha.xyz"}/tools/ai-portfolio-analyzer`,
     images: ["/og-image.png"],
   },
   twitter: {

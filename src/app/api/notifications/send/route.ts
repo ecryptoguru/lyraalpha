@@ -13,7 +13,7 @@ async function getWebPush() {
   const webpush = (await import("web-push")).default;
   if (!_webpushReady) {
     const email = process.env.VAPID_EMAIL;
-    const pubKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    const pubKey = process.env.VAPID_PUBLIC_KEY;
     const privKey = process.env.VAPID_PRIVATE_KEY;
     if (!email || !pubKey || !privKey) {
       throw new Error("VAPID environment variables are not configured");

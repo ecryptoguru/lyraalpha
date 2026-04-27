@@ -2,7 +2,7 @@ interface WelcomeEmailInput {
   firstName?: string | null;
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const APP_URL = process.env.APP_URL || "http://localhost:3000";
 
 export function buildWelcomeEmail({ firstName }: WelcomeEmailInput) {
   const safeName = firstName?.trim() || "there";

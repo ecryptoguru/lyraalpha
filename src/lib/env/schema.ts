@@ -19,10 +19,10 @@ const databaseSchema = z.object({
 const authSchema = z.object({
   CLERK_SECRET_KEY: z.string().min(1, "CLERK_SECRET_KEY is required"),
   CLERK_PUBLISHABLE_KEY: z.string().min(1, "CLERK_PUBLISHABLE_KEY is required"),
-  NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().min(1, "NEXT_PUBLIC_CLERK_SIGN_IN_URL is required"),
-  NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().min(1, "NEXT_PUBLIC_CLERK_SIGN_UP_URL is required"),
-  NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: z.string().default("/dashboard/lyra"),
-  NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: z.string().default("/dashboard/lyra"),
+  CLERK_SIGN_IN_URL: z.string().min(1, "CLERK_SIGN_IN_URL is required"),
+  CLERK_SIGN_UP_URL: z.string().min(1, "CLERK_SIGN_UP_URL is required"),
+  CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: z.string().default("/dashboard/lyra"),
+  CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: z.string().default("/dashboard/lyra"),
   ADMIN_EMAIL_ALLOWLIST: z.string().optional(),
 });
 
@@ -99,8 +99,8 @@ const newsSchema = z.object({
  */
 const appSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  NEXT_PUBLIC_APP_URL: z.string().url("NEXT_PUBLIC_APP_URL must be a valid URL"),
-  NEXT_PUBLIC_APP_NAME: z.string().min(1, "NEXT_PUBLIC_APP_NAME is required"),
+  APP_URL: z.string().url("APP_URL must be a valid URL"),
+  APP_NAME: z.string().min(1, "APP_NAME is required"),
   PORT: z.string().regex(/^\d+$/, "PORT must be a number").optional().default("3000"),
 });
 
@@ -221,8 +221,8 @@ export const env = {
     return {
       clerkSecretKey: getEnv().CLERK_SECRET_KEY,
       clerkPublishableKey: getEnv().CLERK_PUBLISHABLE_KEY,
-      signInUrl: getEnv().NEXT_PUBLIC_CLERK_SIGN_IN_URL,
-      signUpUrl: getEnv().NEXT_PUBLIC_CLERK_SIGN_UP_URL,
+      signInUrl: getEnv().CLERK_SIGN_IN_URL,
+      signUpUrl: getEnv().CLERK_SIGN_UP_URL,
       adminEmailAllowlist: getEnv().ADMIN_EMAIL_ALLOWLIST,
     };
   },
@@ -290,8 +290,8 @@ export const env = {
   get app() {
     return {
       nodeEnv: getEnv().NODE_ENV,
-      appUrl: getEnv().NEXT_PUBLIC_APP_URL,
-      appName: getEnv().NEXT_PUBLIC_APP_NAME,
+      appUrl: getEnv().APP_URL,
+      appName: getEnv().APP_NAME,
       port: parseInt(getEnv().PORT, 10),
     };
   },

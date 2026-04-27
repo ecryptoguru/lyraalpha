@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: true, sent: 0, reason: "no_new_posts" });
     }
 
-    const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz";
+    const BASE_URL = process.env.APP_URL || "https://lyraalpha.xyz";
     const postItems = recentPosts
       .map(
         (p) => `

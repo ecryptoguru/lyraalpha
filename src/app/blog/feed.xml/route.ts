@@ -23,7 +23,7 @@ function imageEnclosureMime(url: string): string {
 
 export async function GET() {
   const posts = await getAllPosts();
-  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz";
+  const BASE_URL = process.env.APP_URL || "https://lyraalpha.xyz";
 
   const items = posts
     .map((post) => {

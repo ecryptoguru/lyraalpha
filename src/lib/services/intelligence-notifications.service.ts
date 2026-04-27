@@ -103,7 +103,7 @@ async function reserveDedupe(userId: string, event: IntelligenceNotificationEven
 async function getWebPush() {
   const webpush = (await import("web-push")).default;
   const email = process.env.VAPID_EMAIL;
-  const pubKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const pubKey = process.env.VAPID_PUBLIC_KEY;
   const privKey = process.env.VAPID_PRIVATE_KEY;
   if (!email || !pubKey || !privKey) {
     throw new Error("VAPID environment variables are not configured");
@@ -113,7 +113,7 @@ async function getWebPush() {
 }
 
 function buildEmailHtml(event: IntelligenceNotificationEvent) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const appUrl = process.env.APP_URL || "http://localhost:3000";
   const href = /^https?:\/\//.test(event.href) ? event.href : `${appUrl}${event.href}`;
   return {
     subject: event.emailSubject ?? event.title,

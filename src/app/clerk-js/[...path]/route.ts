@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger({ service: "clerk-js-proxy" });
-const CLERK_JS_VERSION = process.env.NEXT_PUBLIC_CLERK_JS_VERSION || "5";
+const CLERK_JS_VERSION = process.env.CLERK_JS_VERSION || "5";
 
 function validateClerkJsPath(path: string[]): boolean {
   const filePath = path.join("/");
@@ -15,7 +15,7 @@ function validateClerkJsPath(path: string[]): boolean {
 }
 
 function getFrontendApi(): string | null {
-  const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  const publishableKey = process.env.CLERK_PUBLISHABLE_KEY;
   if (!publishableKey) return null;
 
   return parsePublishableKey(publishableKey)?.frontendApi ?? null;
@@ -24,7 +24,7 @@ function getFrontendApi(): string | null {
 function buildSourceUrl(path: string[]): string {
   const frontendApi = getFrontendApi();
   if (!frontendApi) {
-    throw new Error("Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY");
+    throw new Error("Missing CLERK_PUBLISHABLE_KEY");
   }
 
   const filePath = path.join("/");

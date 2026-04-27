@@ -458,7 +458,7 @@ function AllocationDonut({
                 ))}
               </Pie>
               <RechartsTooltip 
-                formatter={(value: number | string | undefined, name: string | undefined, props: { payload?: { percent?: number } }) => [`${props.payload?.percent?.toFixed(1) ?? '0.0'}%`, name]}
+                formatter={(value: unknown, name: unknown, props: { payload?: { percent?: number } }) => [`${props.payload?.percent?.toFixed(1) ?? '0.0'}%`, String(name)]}
                 contentStyle={{ backgroundColor: 'rgb(24 24 27 / 0.9)', border: '1px solid rgb(255 255 255 / 0.1)', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}
                 itemStyle={{ color: '#fff' }}
               />

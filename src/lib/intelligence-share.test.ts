@@ -2,15 +2,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { buildShareCardUrl, createShareObject } from "./intelligence-share";
 
 describe("intelligence-share", () => {
-  const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const originalAppUrl = process.env.APP_URL;
 
   beforeEach(() => {
-    process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
+    process.env.APP_URL = "http://localhost:3000";
     vi.resetModules();
   });
 
   afterEach(() => {
-    process.env.NEXT_PUBLIC_APP_URL = originalAppUrl;
+    process.env.APP_URL = originalAppUrl;
   });
 
   it("builds a public share-card artifact url", () => {

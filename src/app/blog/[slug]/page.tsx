@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = await getPostBySlugAsync(slug);
   if (!post) return {};
 
-  const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz";
+  const APP_URL = process.env.APP_URL || "https://lyraalpha.xyz";
   const url = `${APP_URL}/blog/${post.slug}`;
   const ogImages = post.heroImageUrl
     ? [{ url: post.heroImageUrl, width: 1200, height: 630, alt: post.title }]

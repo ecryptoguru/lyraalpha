@@ -6,12 +6,12 @@ export const metadata: Metadata = {
   title: "AI Investment Research | LyraAlpha AI — Ask Lyra, Get Grounded Analysis",
   description:
     "AI investment research powered by Lyra — LyraAlpha's regime-aware AI agent. Ask cross-asset questions, get scenario maps and second-order effects, then move into the right analytical surface. US and India markets. No hallucinated metrics.",
-  alternates: { canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools/ai-investment-research` },
+  alternates: { canonical: `${process.env.APP_URL || "https://lyraalpha.xyz"}/tools/ai-investment-research` },
   openGraph: {
     title: "AI Investment Research | LyraAlpha AI",
     description:
       "Ask Lyra a hard market question. She maps it into scenarios, identifies second-order effects, and routes you into portfolio, narratives, or asset analysis — no generic chatbot responses.",
-    url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/tools/ai-investment-research`,
+    url: `${process.env.APP_URL || "https://lyraalpha.xyz"}/tools/ai-investment-research`,
     images: ["/og-image.png"],
   },
   twitter: {

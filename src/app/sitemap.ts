@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts, getAllCategories } from "@/lib/blog/posts";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz";
+const BASE_URL = process.env.APP_URL || "https://lyraalpha.xyz";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [posts, categories] = await Promise.all([getAllPosts(), getAllCategories()]);

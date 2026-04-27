@@ -7,11 +7,11 @@ export const metadata: Metadata = {
   title: "Privacy Policy | LyraAlpha AI",
   description:
     "LyraAlpha AI privacy policy — how we collect, use, and protect your data across our financial intelligence platform.",
-  alternates: { canonical: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/privacy` },
+  alternates: { canonical: `${process.env.APP_URL || "https://lyraalpha.xyz"}/privacy` },
   openGraph: {
     title: "Privacy Policy | LyraAlpha AI",
     description: "How LyraAlpha AI collects, uses, and protects your data.",
-    url: `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/privacy`,
+    url: `${process.env.APP_URL || "https://lyraalpha.xyz"}/privacy`,
   },
   robots: { index: false },
 };

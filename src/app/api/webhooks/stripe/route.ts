@@ -38,7 +38,7 @@ const StripeEventSchema = z.object({
 let _stripe: Stripe | null = null;
 function getStripe(): Stripe {
   if (!_stripe) {
-    _stripe = new Stripe(requireEnv("STRIPE_SECRET_KEY"), { apiVersion: "2026-01-28.clover" });
+    _stripe = new Stripe(requireEnv("STRIPE_SECRET_KEY"), { apiVersion: "2026-02-25.clover" });
   }
   return _stripe;
 }

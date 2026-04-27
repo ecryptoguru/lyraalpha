@@ -13,7 +13,7 @@ const logger = createLogger({ service: "stripe-credits-checkout" });
 let stripe: Stripe | null = null;
 function getStripe(): Stripe {
   if (!stripe) {
-    stripe = new Stripe(requireEnv("STRIPE_SECRET_KEY"), { apiVersion: "2026-01-28.clover" });
+    stripe = new Stripe(requireEnv("STRIPE_SECRET_KEY"), { apiVersion: "2026-02-25.clover" });
   }
   return stripe;
 }

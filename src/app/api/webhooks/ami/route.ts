@@ -63,7 +63,7 @@ async function* streamSubscriberEmails(): AsyncGenerator<string[]> {
 
 async function notifyBlogSubscribers(title: string, description: string, slug: string) {
   try {
-    const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz";
+    const APP_URL = process.env.APP_URL || "https://lyraalpha.xyz";
     const url = `${APP_URL}/blog/${slug}`;
     const safeTitle = escHtml(title);
     const safeDesc = escHtml(description);

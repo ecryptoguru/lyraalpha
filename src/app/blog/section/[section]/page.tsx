@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const sectionData = getSectionBySlug(section);
   if (!sectionData) return {};
 
-  const url = `${process.env.NEXT_PUBLIC_APP_URL || "https://lyraalpha.xyz"}/blog/section/${section}`;
+  const url = `${process.env.APP_URL || "https://lyraalpha.xyz"}/blog/section/${section}`;
 
   return {
     title: `${sectionData.name} | LyraAlpha AI Blog`,
