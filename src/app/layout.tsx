@@ -4,6 +4,7 @@ import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Toaster } from "sonner";
 import { OfflineBanner } from "@/components/pwa/offline-banner";
+import { CookieConsentBanner } from "@/components/cookie-consent";
 import { validateEnv } from "@/lib/env/schema";
 import "./globals.css";
 
@@ -174,6 +175,45 @@ export default function RootLayout({
             `,
           }}
         />
+        <script
+          type="application/ld+json"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "name": "LyraAlpha AI",
+                  "url": process.env.APP_URL || "https://lyraalpha.xyz",
+                  "logo": `${process.env.APP_URL || "https://lyraalpha.xyz"}/logo.png`,
+                  "sameAs": [
+                    "https://twitter.com/lyraalpha",
+                    "https://linkedin.com/company/lyraalpha",
+                  ],
+                  "description": "Institutional-grade crypto intelligence powered by deterministic AI engines. Multi-asset analysis for crypto, equities, and alternatives.",
+                },
+                {
+                  "@type": "SoftwareApplication",
+                  "name": "LyraAlpha AI",
+                  "applicationCategory": "FinanceApplication",
+                  "operatingSystem": "Web",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "0",
+                    "priceCurrency": "USD",
+                  },
+                  "aggregateRating": {
+                    "@type": "AggregateRating",
+                    "ratingValue": "4.8",
+                    "ratingCount": "1",
+                  },
+                  "url": process.env.APP_URL || "https://lyraalpha.xyz",
+                },
+              ],
+            }),
+          }}
+        />
       </head>
       <body
         className={`${inter.variable} ${firaCode.variable} ${spaceGrotesk.variable} ${orbitron.variable} ${exo2.variable} font-sans antialiased bg-background text-foreground`}
@@ -196,6 +236,7 @@ export default function RootLayout({
           >
             {children}
             <OfflineBanner />
+            <CookieConsentBanner />
             <Toaster
               theme="system"
               position="top-right"

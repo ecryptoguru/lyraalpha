@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -7,6 +10,9 @@ const plans = [
   {
     name: "Starter",
     price: "Free",
+    monthlyPrice: 0,
+    annualPrice: 0,
+    period: "/month",
     description: "For individuals exploring AI-powered crypto intelligence.",
     features: ["5 Lyra queries/day", "Basic crypto analytics", "Market regime signals", "1 watchlist"],
     cta: "Get Started Free",
@@ -16,26 +22,31 @@ const plans = [
   {
     name: "Pro",
     price: "$29",
+    monthlyPrice: 29,
+    annualPrice: 24,
     period: "/month",
     description: "For serious crypto investors who want deeper signals and more queries.",
     features: ["100 Lyra queries/day", "Full crypto analytics", "Portfolio Intel", "Sector Pulse", "5 watchlists", "Priority support"],
     cta: "Start Pro Trial",
-    href: "/sign-up",
+    href: "/sign-up?plan=pro",
     highlight: true,
   },
   {
     name: "Elite",
     price: "$79",
+    monthlyPrice: 79,
+    annualPrice: 63,
     period: "/month",
     description: "For professional crypto investors who need the full analytical stack.",
     features: ["Unlimited Lyra queries", "All Pro features", "Multibagger Radar", "Elite commands", "Compare Assets", "API access (coming soon)", "Dedicated support"],
     cta: "Go Elite",
-    href: "/sign-up",
+    href: "/sign-up?plan=elite",
     highlight: false,
   },
 ];
 
 export default function PricingPage() {
+  const [annual, setAnnual] = useState(true);
   return (
     <div className="min-h-screen flex flex-col bg-[#040816]">
       <Navbar />
@@ -50,6 +61,11 @@ export default function PricingPage() {
             <p className="mt-5 text-base text-white/55 max-w-2xl mx-auto">
               Every plan includes AI-powered crypto intelligence, deterministic engine signals, and no hallucinated metrics.
             </p>
+            <div className="mt-6 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/3 p-1 backdrop-blur-sm">
+              <button onClick={() => setAnnual(true)} className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all ${annual ? "bg-warning text-foreground" : "text-white/50 hover:text-white"}`}>Annual</button>
+              <button onClick={() => setAnnual(false)} className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-all ${!annual ? "bg-warning text-foreground" : "text-white/50 hover:text-white"}`}>Monthly</button>
+            </div>
+            {annual && <p className="mt-2 font-mono text-[10px] text-warning/60">Save up to 20% with annual billing</p>}
           </div>
 
           <div className="mx-auto mt-16 max-w-5xl grid gap-6 sm:grid-cols-3">
@@ -69,9 +85,12 @@ export default function PricingPage() {
                 )}
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">{plan.name}</p>
                 <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-white">{plan.price}</span>
-                  {plan.period && <span className="text-sm text-white/40">{plan.period}</span>}
+                  <span className="text-4xl font-black text-white">{plan.monthlyPrice === 0 ? "Free" : `$${annual ? plan.annualPrice : plan.monthlyPrice}`}</span>
+                  {plan.monthlyPrice > 0 && <span className="text-sm text-white/40">/mo</span>}
                 </div>
+                {annual && plan.monthlyPrice > 0 && (
+                  <p className="font-mono text-[10px] text-white/25 line-through">${plan.monthlyPrice}/mo monthly</p>
+                )}
                 <p className="mt-3 text-sm text-white/50 leading-6">{plan.description}</p>
                 <ul className="mt-6 flex-1 space-y-3">
                   {plan.features.map((f) => (

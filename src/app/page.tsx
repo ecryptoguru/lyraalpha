@@ -13,8 +13,8 @@ const KineticScrollStory = dynamic(() => import("@/components/landing/KineticScr
 const HowItWorksV2 = dynamic(() => import("@/components/landing/HowItWorksV2").then((m) => m.HowItWorksV2));
 const SixSignalsShowcase = dynamic(() => import("@/components/landing/SixSignalsShowcase").then((m) => m.SixSignalsShowcase));
 const LyraCapabilitiesBento = dynamic(() => import("@/components/landing/LyraCapabilitiesBento").then((m) => m.LyraCapabilitiesBento));
-const SocialProofWall = dynamic(() => import("@/components/landing/SocialProofWall").then((m) => m.SocialProofWall));
 const PricingTeaser = dynamic(() => import("@/components/landing/PricingTeaser").then((m) => m.PricingTeaser));
+const EmailCapture = dynamic(() => import("@/components/landing/EmailCapture").then((m) => m.EmailCapture));
 const FinalKineticCTA = dynamic(() => import("@/components/landing/FinalKineticCTA").then((m) => m.FinalKineticCTA));
 const BlogPreview = dynamic(() => import("@/components/landing/BlogPreview").then((m) => m.BlogPreview));
 
@@ -45,10 +45,10 @@ export default function Home() {
             <LyraCapabilitiesBento />
           </Suspense>
           <Suspense fallback={null}>
-            <SocialProofWall />
+            <PricingTeaser />
           </Suspense>
           <Suspense fallback={null}>
-            <PricingTeaser />
+            <EmailCapture />
           </Suspense>
           <Suspense fallback={null}>
             <FinalKineticCTA />
