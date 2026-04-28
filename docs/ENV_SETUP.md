@@ -29,6 +29,7 @@ Used for checkout, subscriptions, pricing, and billing webhooks.
 
 Required env vars:
 - `STRIPE_SECRET_KEY`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRO_PRICE_ID`
 - `STRIPE_ELITE_PRICE_ID`

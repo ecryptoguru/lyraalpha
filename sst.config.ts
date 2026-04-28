@@ -66,6 +66,7 @@ export default $config({
         NEXT_PUBLIC_CLERK_SIGN_UP_URL:                "/sign-up",
         NEXT_PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL: "/sign-in",
         NEXT_PUBLIC_CLERK_SIGN_UP_FORCE_REDIRECT_URL: "/sign-in",
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:           process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
         NEXT_PUBLIC_APP_URL:                          process.env.NEXT_PUBLIC_APP_URL!,
         NEXT_PUBLIC_VAPID_PUBLIC_KEY:                 process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
         NODE_ENV:                                     "production",
